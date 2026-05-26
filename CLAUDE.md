@@ -1,36 +1,46 @@
-You are a senior full-stack engineer.
-
-Goal: Build a production-ready Oshap system (QR menu → order → WhatsApp). Follow the PRD.md, API_spec.md, Data_model.md, and Tech_stack.md in the project root.
+You are a senior frontend engineer. This is the Oshap frontend handoff repo — the backend (FastAPI + PostgreSQL) lives elsewhere and is built against `docs/openapi.yaml`.
 
 Style:
-
 - Opinionated but clean
 - Sensible defaults
 - Production-ready
 
-Tech Stack:
+Stack:
 
-- Next.js (App Router) with TypeScript
-- Vanilla CSS with CSS Custom Properties (design tokens in `src/app/tokens.css`)
-- Supabase (PostgreSQL database + storage)
-- WhatsApp Cloud API (deferred)
+- Vite 6 + React 19 + TypeScript (two apps: `apps/customer`, `apps/admin`)
+- React Router v7
+- Tailwind CSS v4 (CSS-first `@theme` block — no `tailwind.config.ts`)
+- TanStack Query v5 over typed `fetch` wrappers in `packages/shared`
+- FCM web push (admin only)
+- npm workspaces (Node 20+)
 
-File Layout:
+File layout:
 
-- `src/app/` — Next.js App Router pages and API routes
-- `src/components/` — Reusable UI components
-- `src/context/` — React Context providers
-- `src/lib/` — Utility libraries (Supabase client, helpers)
-- `scripts/` — Utility scripts (token conversion, etc.)
-- `tokens/` — Source JSON design tokens
+- `apps/customer/src/{routes,components,context}/` — public SPA (menu, checkout, pay, orders)
+- `apps/admin/src/{routes,components}/` — merchant SPA (dashboard, kitchen, history, menu)
+- `packages/shared/src/`
+  - `api/` — `client.ts` (fetch + admin PIN) and per-resource modules
+  - `hooks/` — TanStack Query hooks
+  - `types/` — domain types mirroring `docs/openapi.yaml`
+  - `tokens/tokens.css` — Tailwind v4 `@theme` block
+  - `utils/` — `getDeviceToken`, `formatCurrency`
+- `docs/` — OpenAPI spec, data model, DDL, FCM migration notes
+- `tokens/` — source JSON design tokens (Figma export)
 
-Design System:
+Design system:
 
-- All styling uses CSS Custom Properties from `tokens.css`
-- Color variables: `--color-primary`, `--color-surface`, etc.
-- Spacing variables: `--spacing-xs` through `--spacing-11xl`
-- Typography variables: `--h1-font-size`, `--p-typeface`, etc.
-- Radius variables: `--radius-xs` through `--radius-4xl`
-- Light/dark mode via `[data-theme="dark"]` attribute
+- All styling is Tailwind utilities. Do not write CSS Modules or `style={...}` unless there's no utility for it.
+- Semantic color utilities (`bg-primary`, `text-on-surface-variant`, etc.) auto-swap on dark mode via `[data-theme="dark"]`. No `dark:` prefix needed.
+- Color ramp also exposed (`bg-primary-50`, `text-secondary-30`).
+- Spacing scale: `xs`, `s`, `md`, `l`, `xl`, `2xl`, `3xl`, `4xl`, `5xl`, `7xl`, `8xl`, `9xl`, `10xl`, `11xl`.
+- Radius scale: `xs`, `s`, `md`, `l`, `xl`, `2xl`, `3xl`, `4xl`.
+- Typography: `text-h1` through `text-h6`, `text-p`, `text-caption-md/sm/xs`, plus Figma aliases `text-p1/p2/p3`, `text-label-l1` through `l5`, `text-display-h1` through `h4`, `text-emphasized-lg/md/sm`.
+- Font families: `font-sans` (Inter), `font-display` (Poppins), `font-emphasized` (Space Grotesk).
+
+Data layer rules:
+
+- Never call `fetch` directly from a route or component. Always go through `@oshap/shared`'s hooks or the per-resource api modules.
+- Adding an endpoint = update `packages/shared/src/types/`, add to the matching `api/*.ts`, add a TanStack hook, then update `docs/openapi.yaml`.
+- Use `formatCurrency()` and `getDeviceToken()` from `@oshap/shared` — don't reimplement.
 
 @AGENTS.md

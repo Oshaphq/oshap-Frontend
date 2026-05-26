@@ -1,0 +1,2458 @@
+{
+    "version": "1.0.0",
+    "source": {
+        "fileName": "Oshap",
+        "selection": [
+            "2009:2"
+        ],
+        "extractedAt": "2026-05-26T02:52:53.652Z"
+    },
+    "tokens": {
+        "colors": {
+            "surfacecolors-surface": "#F2F2F2",
+            "surfacecolors-surface-container-low": "#FFFFFF",
+            "textcolors-primary-text": "#343234",
+            "primarycolors-primary-container": "#FFE1CC",
+            "primarycolors-on-primary-container": "#993F00",
+            "surfacecolors-surface-container": "#F0EFF0",
+            "surfacecolors-on-surface-variant": "#1A181B",
+            "outlinecolors-outline-variant": "#CCC9CF",
+            "primarycolors-primary": "#F56500",
+            "primarycolors-on-primary": "#FFFFFF",
+            "textcolors-secondary-text": "#827D82"
+        },
+        "typography": {
+            "display-h1-poppins-bold-700": {
+                "fontWeight": 700,
+                "fontSize": 24,
+                "lineHeight": 28,
+                "letterSpacing": -2
+            },
+            "label-l5-inter-semi-bold-700": {
+                "fontWeight": 600,
+                "fontSize": 12,
+                "lineHeight": 14,
+                "letterSpacing": 0.5
+            },
+            "label-l4-inter-med-500": {
+                "fontWeight": 500,
+                "fontSize": 14,
+                "lineHeight": 16,
+                "letterSpacing": 0
+            },
+            "display-h2-poppins-semi-bold-600": {
+                "fontWeight": 600,
+                "fontSize": 20,
+                "lineHeight": 24,
+                "letterSpacing": -2
+            },
+            "h1-regular": {
+                "fontWeight": 400,
+                "fontSize": 32,
+                "letterSpacing": 0
+            },
+            "label-l3-inter-semi-bold-700": {
+                "fontWeight": 600,
+                "fontSize": 16,
+                "lineHeight": 20,
+                "letterSpacing": -2
+            },
+            "paragraph-p2-inter-reg-400": {
+                "fontWeight": 400,
+                "fontSize": 14,
+                "lineHeight": 20,
+                "letterSpacing": -2
+            },
+            "label-l4-poppins-semi-bold-600": {
+                "fontWeight": 600,
+                "fontSize": 14,
+                "lineHeight": 16,
+                "letterSpacing": 0
+            },
+            "caption-c1-inter-med-500": {
+                "fontWeight": 500,
+                "fontSize": 12,
+                "lineHeight": 14,
+                "letterSpacing": 0
+            }
+        },
+        "spacing": {
+            "m": 16,
+            "s": 8,
+            "xs": 4,
+            "spacing-2xs": 2
+        },
+        "radius": {
+            "s": 8,
+            "radius-100": 100,
+            "radius-xl": 16
+        },
+        "shadows": {}
+    },
+    "components": [
+        {
+            "name": "Tab",
+            "variants": [
+                "Property 1=Active",
+                "Property 1=Inactive"
+            ],
+            "instances": 5
+        },
+        {
+            "name": "Image",
+            "variants": [],
+            "instances": 4
+        },
+        {
+            "name": "Footer",
+            "variants": [],
+            "instances": 4
+        },
+        {
+            "name": "AddButton",
+            "variants": [],
+            "instances": 4
+        },
+        {
+            "name": "NavItem",
+            "variants": [],
+            "instances": 2
+        },
+        {
+            "name": "MenuCustomer(aji'sKitchen)",
+            "variants": [],
+            "instances": 1
+        },
+        {
+            "name": "Header",
+            "variants": [],
+            "instances": 1
+        },
+        {
+            "name": "HeaderLeft",
+            "variants": [],
+            "instances": 1
+        },
+        {
+            "name": "TableBadge",
+            "variants": [],
+            "instances": 1
+        },
+        {
+            "name": "IconSearchRegular",
+            "variants": [],
+            "instances": 1
+        },
+        {
+            "name": "CategoryTabs",
+            "variants": [],
+            "instances": 1
+        },
+        {
+            "name": "MenuSection",
+            "variants": [],
+            "instances": 1
+        },
+        {
+            "name": "SectionTitle",
+            "variants": [],
+            "instances": 1
+        },
+        {
+            "name": "ItemsList",
+            "variants": [],
+            "instances": 1
+        },
+        {
+            "name": "MenuCardChickenShawarma",
+            "variants": [],
+            "instances": 1
+        },
+        {
+            "name": "MenuCardBeefShawarma",
+            "variants": [],
+            "instances": 1
+        },
+        {
+            "name": "MenuCardJollofRice&Chicken",
+            "variants": [],
+            "instances": 1
+        },
+        {
+            "name": "MenuCardFriedRice&Turkey",
+            "variants": [],
+            "instances": 1
+        },
+        {
+            "name": "BottomNav",
+            "variants": [
+                "ActiveTab=menu"
+            ],
+            "instances": 1
+        },
+        {
+            "name": "IconBook",
+            "variants": [],
+            "instances": 1
+        },
+        {
+            "name": "Menu",
+            "variants": [],
+            "instances": 1
+        },
+        {
+            "name": "NavItemActive",
+            "variants": [],
+            "instances": 1
+        },
+        {
+            "name": "IconUsers",
+            "variants": [],
+            "instances": 1
+        },
+        {
+            "name": "IconCard",
+            "variants": [],
+            "instances": 1
+        }
+    ],
+    "root": {
+        "id": "2009:2",
+        "kind": "screen",
+        "name": "MenuCustomer(aji'sKitchen)",
+        "width": 393,
+        "height": 852,
+        "component": "MenuCustomer(aji'sKitchen)",
+        "position": "relational",
+        "layout": {
+            "direction": "vertical"
+        },
+        "style": {
+            "background": "surfacecolors-surface"
+        },
+        "children": [
+            {
+                "id": "2009:3",
+                "kind": "container",
+                "name": "Header",
+                "width": 393,
+                "height": 72,
+                "component": "Header",
+                "position": "relational",
+                "layout": {
+                    "direction": "horizontal",
+                    "padding": "m",
+                    "justifyContent": "space-between",
+                    "alignItems": "center"
+                },
+                "responsive": {
+                    "width": "hug"
+                },
+                "style": {
+                    "background": "surfacecolors-surface-container-low",
+                    "borderWidth": {
+                        "bottom": 1
+                    }
+                },
+                "children": [
+                    {
+                        "id": "2009:4",
+                        "kind": "container",
+                        "name": "HeaderLeft",
+                        "width": 223,
+                        "height": 30,
+                        "component": "HeaderLeft",
+                        "position": "relational",
+                        "layout": {
+                            "direction": "horizontal",
+                            "gap": "s",
+                            "alignItems": "center"
+                        },
+                        "responsive": {
+                            "width": "hug",
+                            "height": "hug"
+                        },
+                        "children": [
+                            {
+                                "id": "2009:5",
+                                "kind": "text",
+                                "name": "Restaurant name/Logo",
+                                "width": 146,
+                                "height": 28,
+                                "position": "relational",
+                                "text": {
+                                    "content": "Aji's Kitchen",
+                                    "typography": "display-h1-poppins-bold-700",
+                                    "color": "textcolors-primary-text",
+                                    "textAlign": "left"
+                                },
+                                "semanticRole": "semantic",
+                                "signals": {
+                                    "nonInteractive": true
+                                },
+                                "context": {
+                                    "zIndex": -1,
+                                    "hierarchyDepth": 3
+                                }
+                            },
+                            {
+                                "id": "2035:46",
+                                "kind": "component",
+                                "name": "TableBadge",
+                                "width": 69,
+                                "height": 30,
+                                "component": "TableBadge",
+                                "position": "relational",
+                                "layout": {
+                                    "direction": "horizontal",
+                                    "padding": "s",
+                                    "alignItems": "center"
+                                },
+                                "responsive": {
+                                    "width": "hug",
+                                    "height": "hug"
+                                },
+                                "style": {
+                                    "background": "primarycolors-primary-container",
+                                    "borderRadius": "s"
+                                },
+                                "children": [
+                                    {
+                                        "id": "I2035:46;2035:43",
+                                        "kind": "text",
+                                        "name": "Table: T1",
+                                        "width": 53,
+                                        "height": 14,
+                                        "position": "relational",
+                                        "text": {
+                                            "content": "Table: T1",
+                                            "typography": "label-l5-inter-semi-bold-700",
+                                            "color": "primarycolors-on-primary-container",
+                                            "textAlign": "left"
+                                        },
+                                        "semanticRole": "semantic",
+                                        "signals": {
+                                            "nonInteractive": true
+                                        },
+                                        "context": {
+                                            "zIndex": -1,
+                                            "insideComponent": true,
+                                            "hierarchyDepth": 4
+                                        },
+                                        "interaction": {
+                                            "insideInteractiveComponent": true
+                                        }
+                                    }
+                                ],
+                                "semanticRole": "interactive",
+                                "signals": {
+                                    "interactive": true
+                                },
+                                "context": {
+                                    "zIndex": -1,
+                                    "insideComponent": true,
+                                    "interactive": true,
+                                    "hierarchyDepth": 3
+                                },
+                                "interaction": {
+                                    "interactive": true,
+                                    "insideInteractiveComponent": true
+                                }
+                            }
+                        ],
+                        "semanticRole": "structural",
+                        "signals": {
+                            "nonInteractive": true
+                        },
+                        "context": {
+                            "zIndex": -1,
+                            "hierarchyDepth": 2
+                        }
+                    },
+                    {
+                        "id": "2009:8",
+                        "kind": "icon",
+                        "name": "SearchButton",
+                        "width": 40,
+                        "height": 40,
+                        "position": "relational",
+                        "layout": {
+                            "direction": "horizontal",
+                            "justifyContent": "center",
+                            "alignItems": "center"
+                        },
+                        "style": {
+                            "background": "surfacecolors-surface-container",
+                            "borderRadius": "radius-100"
+                        },
+                        "semanticRole": "semantic",
+                        "signals": {
+                            "nonInteractive": true
+                        },
+                        "context": {
+                            "zIndex": -1,
+                            "hierarchyDepth": 2
+                        }
+                    }
+                ],
+                "semanticRole": "structural",
+                "signals": {
+                    "nonInteractive": true
+                },
+                "context": {
+                    "zIndex": -1,
+                    "hierarchyDepth": 1
+                }
+            },
+            {
+                "id": "2009:19",
+                "kind": "container",
+                "name": "CategoriesWrapper",
+                "width": 393,
+                "height": 64,
+                "position": "relational",
+                "layout": {
+                    "direction": "horizontal",
+                    "padding": {
+                        "top": 0,
+                        "right": 16,
+                        "bottom": 0,
+                        "left": 16
+                    }
+                },
+                "responsive": {
+                    "width": "hug"
+                },
+                "style": {
+                    "background": "surfacecolors-surface-container-low",
+                    "borderColor": "outlinecolors-outline-variant",
+                    "borderWidth": {
+                        "bottom": 1
+                    }
+                },
+                "children": [
+                    {
+                        "id": "2009:20",
+                        "kind": "container",
+                        "name": "CategoryTabs",
+                        "width": 363,
+                        "height": 64,
+                        "component": "CategoryTabs",
+                        "position": "relational",
+                        "layout": {
+                            "direction": "horizontal",
+                            "padding": {
+                                "top": 16,
+                                "right": 0,
+                                "bottom": 16,
+                                "left": 0
+                            },
+                            "justifyContent": "space-between"
+                        },
+                        "responsive": {
+                            "height": "hug"
+                        },
+                        "children": [
+                            {
+                                "id": "2035:69",
+                                "kind": "component",
+                                "name": "Tab",
+                                "width": 49,
+                                "height": 32,
+                                "component": "Tab",
+                                "variant": {
+                                    "Property 1": "Active"
+                                },
+                                "position": "relational",
+                                "layout": {
+                                    "direction": "horizontal",
+                                    "padding": {
+                                        "top": 8,
+                                        "right": 16,
+                                        "bottom": 8,
+                                        "left": 16
+                                    },
+                                    "justifyContent": "center",
+                                    "alignItems": "center"
+                                },
+                                "responsive": {
+                                    "width": "hug",
+                                    "height": "hug"
+                                },
+                                "style": {
+                                    "background": "primarycolors-primary",
+                                    "borderColor": "primarycolors-primary",
+                                    "borderWidth": 2,
+                                    "borderRadius": "radius-100"
+                                },
+                                "children": [
+                                    {
+                                        "id": "I2035:69;2035:63",
+                                        "kind": "text",
+                                        "name": "All",
+                                        "width": 17,
+                                        "height": 16,
+                                        "position": "relational",
+                                        "text": {
+                                            "content": "All",
+                                            "typography": "label-l4-inter-med-500",
+                                            "color": "primarycolors-on-primary",
+                                            "textAlign": "left"
+                                        },
+                                        "semanticRole": "semantic",
+                                        "signals": {
+                                            "nonInteractive": true
+                                        },
+                                        "context": {
+                                            "zIndex": -1,
+                                            "insideComponent": true,
+                                            "hierarchyDepth": 4
+                                        },
+                                        "interaction": {
+                                            "insideInteractiveComponent": true
+                                        }
+                                    }
+                                ],
+                                "semanticRole": "interactive",
+                                "signals": {
+                                    "interactive": true
+                                },
+                                "context": {
+                                    "zIndex": -1,
+                                    "insideComponent": true,
+                                    "interactive": true,
+                                    "hierarchyDepth": 3
+                                },
+                                "interaction": {
+                                    "interactive": true,
+                                    "insideInteractiveComponent": true
+                                }
+                            },
+                            {
+                                "id": "2035:72",
+                                "kind": "component",
+                                "name": "Tab",
+                                "width": 72,
+                                "height": 32,
+                                "component": "Tab",
+                                "variant": {
+                                    "Property 1": "Inactive"
+                                },
+                                "position": "relational",
+                                "layout": {
+                                    "direction": "horizontal",
+                                    "padding": {
+                                        "top": 8,
+                                        "right": 16,
+                                        "bottom": 8,
+                                        "left": 16
+                                    },
+                                    "justifyContent": "center",
+                                    "alignItems": "center"
+                                },
+                                "responsive": {
+                                    "width": "hug",
+                                    "height": "hug"
+                                },
+                                "style": {
+                                    "background": "surfacecolors-surface-container",
+                                    "borderColor": "surfacecolors-surface-container",
+                                    "borderWidth": 2,
+                                    "borderRadius": "radius-100"
+                                },
+                                "children": [
+                                    {
+                                        "id": "I2035:72;2035:68",
+                                        "kind": "text",
+                                        "name": "All",
+                                        "width": 40,
+                                        "height": 16,
+                                        "position": "relational",
+                                        "text": {
+                                            "content": "Meals",
+                                            "typography": "label-l4-inter-med-500",
+                                            "color": "surfacecolors-on-surface-variant",
+                                            "textAlign": "left"
+                                        },
+                                        "semanticRole": "semantic",
+                                        "signals": {
+                                            "nonInteractive": true
+                                        },
+                                        "context": {
+                                            "zIndex": -1,
+                                            "insideComponent": true,
+                                            "hierarchyDepth": 4
+                                        },
+                                        "interaction": {
+                                            "insideInteractiveComponent": true
+                                        }
+                                    }
+                                ],
+                                "semanticRole": "interactive",
+                                "signals": {
+                                    "interactive": true
+                                },
+                                "context": {
+                                    "zIndex": -1,
+                                    "insideComponent": true,
+                                    "interactive": true,
+                                    "hierarchyDepth": 3
+                                },
+                                "interaction": {
+                                    "interactive": true,
+                                    "insideInteractiveComponent": true
+                                }
+                            },
+                            {
+                                "id": "2035:75",
+                                "kind": "component",
+                                "name": "Tab",
+                                "width": 66,
+                                "height": 32,
+                                "component": "Tab",
+                                "variant": {
+                                    "Property 1": "Inactive"
+                                },
+                                "position": "relational",
+                                "layout": {
+                                    "direction": "horizontal",
+                                    "padding": {
+                                        "top": 8,
+                                        "right": 16,
+                                        "bottom": 8,
+                                        "left": 16
+                                    },
+                                    "justifyContent": "center",
+                                    "alignItems": "center"
+                                },
+                                "responsive": {
+                                    "width": "hug",
+                                    "height": "hug"
+                                },
+                                "style": {
+                                    "background": "surfacecolors-surface-container",
+                                    "borderColor": "surfacecolors-surface-container",
+                                    "borderWidth": 2,
+                                    "borderRadius": "radius-100"
+                                },
+                                "children": [
+                                    {
+                                        "id": "I2035:75;2035:68",
+                                        "kind": "text",
+                                        "name": "All",
+                                        "width": 34,
+                                        "height": 16,
+                                        "position": "relational",
+                                        "text": {
+                                            "content": "Grills",
+                                            "typography": "label-l4-inter-med-500",
+                                            "color": "surfacecolors-on-surface-variant",
+                                            "textAlign": "left"
+                                        },
+                                        "semanticRole": "semantic",
+                                        "signals": {
+                                            "nonInteractive": true
+                                        },
+                                        "context": {
+                                            "zIndex": -1,
+                                            "insideComponent": true,
+                                            "hierarchyDepth": 4
+                                        },
+                                        "interaction": {
+                                            "insideInteractiveComponent": true
+                                        }
+                                    }
+                                ],
+                                "semanticRole": "interactive",
+                                "signals": {
+                                    "interactive": true
+                                },
+                                "context": {
+                                    "zIndex": -1,
+                                    "insideComponent": true,
+                                    "interactive": true,
+                                    "hierarchyDepth": 3
+                                },
+                                "interaction": {
+                                    "interactive": true,
+                                    "insideInteractiveComponent": true
+                                }
+                            },
+                            {
+                                "id": "2035:77",
+                                "kind": "component",
+                                "name": "Tab",
+                                "width": 75,
+                                "height": 32,
+                                "component": "Tab",
+                                "variant": {
+                                    "Property 1": "Inactive"
+                                },
+                                "position": "relational",
+                                "layout": {
+                                    "direction": "horizontal",
+                                    "padding": {
+                                        "top": 8,
+                                        "right": 16,
+                                        "bottom": 8,
+                                        "left": 16
+                                    },
+                                    "justifyContent": "center",
+                                    "alignItems": "center"
+                                },
+                                "responsive": {
+                                    "width": "hug",
+                                    "height": "hug"
+                                },
+                                "style": {
+                                    "background": "surfacecolors-surface-container",
+                                    "borderColor": "surfacecolors-surface-container",
+                                    "borderWidth": 2,
+                                    "borderRadius": "radius-100"
+                                },
+                                "children": [
+                                    {
+                                        "id": "I2035:77;2035:68",
+                                        "kind": "text",
+                                        "name": "All",
+                                        "width": 43,
+                                        "height": 16,
+                                        "position": "relational",
+                                        "text": {
+                                            "content": "Drinks",
+                                            "typography": "label-l4-inter-med-500",
+                                            "color": "surfacecolors-on-surface-variant",
+                                            "textAlign": "left"
+                                        },
+                                        "semanticRole": "semantic",
+                                        "signals": {
+                                            "nonInteractive": true
+                                        },
+                                        "context": {
+                                            "zIndex": -1,
+                                            "insideComponent": true,
+                                            "hierarchyDepth": 4
+                                        },
+                                        "interaction": {
+                                            "insideInteractiveComponent": true
+                                        }
+                                    }
+                                ],
+                                "semanticRole": "interactive",
+                                "signals": {
+                                    "interactive": true
+                                },
+                                "context": {
+                                    "zIndex": -1,
+                                    "insideComponent": true,
+                                    "interactive": true,
+                                    "hierarchyDepth": 3
+                                },
+                                "interaction": {
+                                    "interactive": true,
+                                    "insideInteractiveComponent": true
+                                }
+                            },
+                            {
+                                "id": "2035:79",
+                                "kind": "component",
+                                "name": "Tab",
+                                "width": 69,
+                                "height": 32,
+                                "component": "Tab",
+                                "variant": {
+                                    "Property 1": "Inactive"
+                                },
+                                "position": "relational",
+                                "layout": {
+                                    "direction": "horizontal",
+                                    "padding": {
+                                        "top": 8,
+                                        "right": 16,
+                                        "bottom": 8,
+                                        "left": 16
+                                    },
+                                    "justifyContent": "center",
+                                    "alignItems": "center"
+                                },
+                                "responsive": {
+                                    "width": "hug",
+                                    "height": "hug"
+                                },
+                                "style": {
+                                    "background": "surfacecolors-surface-container",
+                                    "borderColor": "surfacecolors-surface-container",
+                                    "borderWidth": 2,
+                                    "borderRadius": "radius-100"
+                                },
+                                "children": [
+                                    {
+                                        "id": "I2035:79;2035:68",
+                                        "kind": "text",
+                                        "name": "All",
+                                        "width": 37,
+                                        "height": 16,
+                                        "position": "relational",
+                                        "text": {
+                                            "content": "Sides",
+                                            "typography": "label-l4-inter-med-500",
+                                            "color": "surfacecolors-on-surface-variant",
+                                            "textAlign": "left"
+                                        },
+                                        "semanticRole": "semantic",
+                                        "signals": {
+                                            "nonInteractive": true
+                                        },
+                                        "context": {
+                                            "zIndex": -1,
+                                            "insideComponent": true,
+                                            "hierarchyDepth": 4
+                                        },
+                                        "interaction": {
+                                            "insideInteractiveComponent": true
+                                        }
+                                    }
+                                ],
+                                "semanticRole": "interactive",
+                                "signals": {
+                                    "interactive": true
+                                },
+                                "context": {
+                                    "zIndex": -1,
+                                    "insideComponent": true,
+                                    "interactive": true,
+                                    "hierarchyDepth": 3
+                                },
+                                "interaction": {
+                                    "interactive": true,
+                                    "insideInteractiveComponent": true
+                                }
+                            }
+                        ],
+                        "semanticRole": "structural",
+                        "signals": {
+                            "nonInteractive": true
+                        },
+                        "context": {
+                            "zIndex": -1,
+                            "hierarchyDepth": 2
+                        }
+                    }
+                ],
+                "semanticRole": "structural",
+                "signals": {
+                    "nonInteractive": true
+                },
+                "context": {
+                    "zIndex": -1,
+                    "hierarchyDepth": 1
+                }
+            },
+            {
+                "id": "2009:31",
+                "kind": "container",
+                "name": "MenuSection",
+                "width": 393,
+                "height": 640,
+                "component": "MenuSection",
+                "position": "relational",
+                "layout": {
+                    "direction": "vertical",
+                    "gap": "m",
+                    "padding": "m"
+                },
+                "responsive": {
+                    "height": "hug"
+                },
+                "children": [
+                    {
+                        "id": "2009:32",
+                        "kind": "text",
+                        "name": "SectionTitle",
+                        "width": 94,
+                        "height": 24,
+                        "component": "SectionTitle",
+                        "position": "relational",
+                        "text": {
+                            "content": "Full Menu",
+                            "typography": "display-h2-poppins-semi-bold-600",
+                            "color": "textcolors-primary-text",
+                            "textAlign": "left"
+                        },
+                        "semanticRole": "semantic",
+                        "signals": {
+                            "nonInteractive": true
+                        },
+                        "context": {
+                            "zIndex": -1,
+                            "hierarchyDepth": 2
+                        }
+                    },
+                    {
+                        "id": "2009:33",
+                        "kind": "container",
+                        "name": "ItemsList",
+                        "width": 361,
+                        "height": 568,
+                        "component": "ItemsList",
+                        "position": "relational",
+                        "layout": {
+                            "direction": "vertical",
+                            "gap": "s"
+                        },
+                        "responsive": {
+                            "height": "hug"
+                        },
+                        "children": [
+                            {
+                                "id": "2009:34",
+                                "kind": "container",
+                                "name": "MenuCardChickenShawarma",
+                                "width": 361,
+                                "height": 136,
+                                "component": "MenuCardChickenShawarma",
+                                "position": "relational",
+                                "layout": {
+                                    "direction": "horizontal",
+                                    "gap": "m",
+                                    "padding": "m"
+                                },
+                                "responsive": {
+                                    "width": "hug"
+                                },
+                                "style": {
+                                    "background": "surfacecolors-surface-container-low",
+                                    "borderWidth": {
+                                        "bottom": 1
+                                    },
+                                    "borderRadius": "radius-xl"
+                                },
+                                "children": [
+                                    {
+                                        "id": "2009:35",
+                                        "kind": "container",
+                                        "name": "Image",
+                                        "width": 96,
+                                        "height": 96,
+                                        "component": "Image",
+                                        "position": "relational",
+                                        "layout": {
+                                            "direction": "horizontal",
+                                            "justifyContent": "center",
+                                            "alignItems": "center"
+                                        },
+                                        "style": {
+                                            "background": "primarycolors-primary-container",
+                                            "borderRadius": "s"
+                                        },
+                                        "children": [
+                                            {
+                                                "id": "2009:36",
+                                                "kind": "text",
+                                                "name": "◧",
+                                                "width": 23,
+                                                "height": 39,
+                                                "position": "relational",
+                                                "text": {
+                                                    "content": "◧",
+                                                    "typography": "h1-regular",
+                                                    "color": "primarycolors-on-primary-container",
+                                                    "textAlign": "left"
+                                                },
+                                                "semanticRole": "semantic",
+                                                "signals": {
+                                                    "nonInteractive": true
+                                                },
+                                                "context": {
+                                                    "zIndex": -1,
+                                                    "hierarchyDepth": 5
+                                                }
+                                            }
+                                        ],
+                                        "semanticRole": "structural",
+                                        "signals": {
+                                            "nonInteractive": true
+                                        },
+                                        "context": {
+                                            "zIndex": -1,
+                                            "hierarchyDepth": 4
+                                        }
+                                    },
+                                    {
+                                        "id": "2009:37",
+                                        "kind": "container",
+                                        "name": "Details",
+                                        "width": 217,
+                                        "height": 104,
+                                        "position": "relational",
+                                        "layout": {
+                                            "direction": "vertical",
+                                            "gap": "s"
+                                        },
+                                        "responsive": {
+                                            "width": "hug"
+                                        },
+                                        "children": [
+                                            {
+                                                "id": "2009:38",
+                                                "kind": "container",
+                                                "name": "Top",
+                                                "width": 217,
+                                                "height": 64,
+                                                "position": "relational",
+                                                "layout": {
+                                                    "direction": "vertical",
+                                                    "gap": "xs"
+                                                },
+                                                "responsive": {
+                                                    "height": "hug"
+                                                },
+                                                "children": [
+                                                    {
+                                                        "id": "2009:39",
+                                                        "kind": "text",
+                                                        "name": "Name",
+                                                        "width": 145,
+                                                        "height": 20,
+                                                        "position": "relational",
+                                                        "text": {
+                                                            "content": "Chicken Shawarma",
+                                                            "typography": "label-l3-inter-semi-bold-700",
+                                                            "color": "textcolors-primary-text",
+                                                            "textAlign": "left"
+                                                        },
+                                                        "semanticRole": "semantic",
+                                                        "signals": {
+                                                            "nonInteractive": true
+                                                        },
+                                                        "context": {
+                                                            "zIndex": -1,
+                                                            "hierarchyDepth": 6
+                                                        }
+                                                    },
+                                                    {
+                                                        "id": "2009:40",
+                                                        "kind": "text",
+                                                        "name": "Description",
+                                                        "width": 217,
+                                                        "height": 40,
+                                                        "position": "relational",
+                                                        "text": {
+                                                            "content": "Grilled chicken wrap with garlic sauce, pickles and fries",
+                                                            "typography": "paragraph-p2-inter-reg-400",
+                                                            "color": "textcolors-secondary-text",
+                                                            "textAlign": "left"
+                                                        },
+                                                        "semanticRole": "semantic",
+                                                        "signals": {
+                                                            "nonInteractive": true
+                                                        },
+                                                        "context": {
+                                                            "zIndex": -1,
+                                                            "hierarchyDepth": 6
+                                                        }
+                                                    }
+                                                ],
+                                                "semanticRole": "structural",
+                                                "signals": {
+                                                    "nonInteractive": true
+                                                },
+                                                "context": {
+                                                    "zIndex": -1,
+                                                    "hierarchyDepth": 5
+                                                }
+                                            },
+                                            {
+                                                "id": "2009:41",
+                                                "kind": "container",
+                                                "name": "Footer",
+                                                "width": 217,
+                                                "height": 32,
+                                                "component": "Footer",
+                                                "position": "relational",
+                                                "layout": {
+                                                    "direction": "horizontal",
+                                                    "justifyContent": "space-between",
+                                                    "alignItems": "center"
+                                                },
+                                                "responsive": {
+                                                    "width": "hug"
+                                                },
+                                                "children": [
+                                                    {
+                                                        "id": "2009:42",
+                                                        "kind": "text",
+                                                        "name": "Price",
+                                                        "width": 53,
+                                                        "height": 20,
+                                                        "position": "relational",
+                                                        "text": {
+                                                            "content": "₦2500",
+                                                            "typography": "label-l3-inter-semi-bold-700",
+                                                            "color": "textcolors-primary-text",
+                                                            "textAlign": "left"
+                                                        },
+                                                        "semanticRole": "semantic",
+                                                        "signals": {
+                                                            "nonInteractive": true
+                                                        },
+                                                        "context": {
+                                                            "zIndex": -1,
+                                                            "hierarchyDepth": 6
+                                                        }
+                                                    },
+                                                    {
+                                                        "id": "2035:6",
+                                                        "kind": "component",
+                                                        "name": "AddButton",
+                                                        "width": 79,
+                                                        "height": 32,
+                                                        "component": "AddButton",
+                                                        "position": "relational",
+                                                        "layout": {
+                                                            "direction": "horizontal",
+                                                            "padding": {
+                                                                "top": 8,
+                                                                "right": 24,
+                                                                "bottom": 8,
+                                                                "left": 24
+                                                            },
+                                                            "justifyContent": "center",
+                                                            "alignItems": "center"
+                                                        },
+                                                        "responsive": {
+                                                            "width": "hug",
+                                                            "height": "hug"
+                                                        },
+                                                        "style": {
+                                                            "borderColor": "primarycolors-primary",
+                                                            "borderWidth": 2,
+                                                            "borderRadius": "s"
+                                                        },
+                                                        "children": [
+                                                            {
+                                                                "id": "I2035:6;2035:3",
+                                                                "kind": "text",
+                                                                "name": "ADD",
+                                                                "width": 31,
+                                                                "height": 16,
+                                                                "position": "relational",
+                                                                "text": {
+                                                                    "content": "ADD",
+                                                                    "typography": "label-l4-poppins-semi-bold-600",
+                                                                    "color": "primarycolors-primary",
+                                                                    "textAlign": "left"
+                                                                },
+                                                                "semanticRole": "semantic",
+                                                                "signals": {
+                                                                    "nonInteractive": true
+                                                                },
+                                                                "context": {
+                                                                    "zIndex": -1,
+                                                                    "insideComponent": true,
+                                                                    "hierarchyDepth": 7
+                                                                },
+                                                                "interaction": {
+                                                                    "insideInteractiveComponent": true
+                                                                }
+                                                            }
+                                                        ],
+                                                        "semanticRole": "interactive",
+                                                        "signals": {
+                                                            "interactive": true
+                                                        },
+                                                        "context": {
+                                                            "zIndex": -1,
+                                                            "insideComponent": true,
+                                                            "interactive": true,
+                                                            "hierarchyDepth": 6
+                                                        },
+                                                        "interaction": {
+                                                            "interactive": true,
+                                                            "insideInteractiveComponent": true
+                                                        }
+                                                    }
+                                                ],
+                                                "semanticRole": "structural",
+                                                "signals": {
+                                                    "nonInteractive": true
+                                                },
+                                                "context": {
+                                                    "zIndex": -1,
+                                                    "hierarchyDepth": 5
+                                                }
+                                            }
+                                        ],
+                                        "semanticRole": "structural",
+                                        "signals": {
+                                            "nonInteractive": true
+                                        },
+                                        "context": {
+                                            "zIndex": -1,
+                                            "hierarchyDepth": 4
+                                        }
+                                    }
+                                ],
+                                "semanticRole": "structural",
+                                "signals": {
+                                    "nonInteractive": true
+                                },
+                                "context": {
+                                    "zIndex": -1,
+                                    "hierarchyDepth": 3
+                                }
+                            },
+                            {
+                                "id": "2009:45",
+                                "kind": "container",
+                                "name": "MenuCardBeefShawarma",
+                                "width": 361,
+                                "height": 136,
+                                "component": "MenuCardBeefShawarma",
+                                "position": "relational",
+                                "layout": {
+                                    "direction": "horizontal",
+                                    "gap": "m",
+                                    "padding": "m"
+                                },
+                                "responsive": {
+                                    "width": "hug"
+                                },
+                                "style": {
+                                    "background": "surfacecolors-surface-container-low",
+                                    "borderWidth": {
+                                        "bottom": 1
+                                    },
+                                    "borderRadius": "radius-xl"
+                                },
+                                "children": [
+                                    {
+                                        "id": "2009:46",
+                                        "kind": "container",
+                                        "name": "Image",
+                                        "width": 96,
+                                        "height": 96,
+                                        "component": "Image",
+                                        "position": "relational",
+                                        "layout": {
+                                            "direction": "horizontal",
+                                            "justifyContent": "center",
+                                            "alignItems": "center"
+                                        },
+                                        "style": {
+                                            "background": "primarycolors-primary-container",
+                                            "borderRadius": "s"
+                                        },
+                                        "children": [
+                                            {
+                                                "id": "2009:47",
+                                                "kind": "text",
+                                                "name": "◧",
+                                                "width": 23,
+                                                "height": 39,
+                                                "position": "relational",
+                                                "text": {
+                                                    "content": "◧",
+                                                    "typography": "h1-regular",
+                                                    "color": "primarycolors-on-primary-container",
+                                                    "textAlign": "left"
+                                                },
+                                                "semanticRole": "semantic",
+                                                "signals": {
+                                                    "nonInteractive": true
+                                                },
+                                                "context": {
+                                                    "zIndex": -1,
+                                                    "hierarchyDepth": 5
+                                                }
+                                            }
+                                        ],
+                                        "semanticRole": "structural",
+                                        "signals": {
+                                            "nonInteractive": true
+                                        },
+                                        "context": {
+                                            "zIndex": -1,
+                                            "hierarchyDepth": 4
+                                        }
+                                    },
+                                    {
+                                        "id": "2009:48",
+                                        "kind": "container",
+                                        "name": "Details",
+                                        "width": 217,
+                                        "height": 104,
+                                        "position": "relational",
+                                        "layout": {
+                                            "direction": "vertical",
+                                            "gap": "s"
+                                        },
+                                        "responsive": {
+                                            "width": "hug"
+                                        },
+                                        "children": [
+                                            {
+                                                "id": "2009:49",
+                                                "kind": "container",
+                                                "name": "Top",
+                                                "width": 217,
+                                                "height": 64,
+                                                "position": "relational",
+                                                "layout": {
+                                                    "direction": "vertical",
+                                                    "gap": "xs"
+                                                },
+                                                "responsive": {
+                                                    "height": "hug"
+                                                },
+                                                "children": [
+                                                    {
+                                                        "id": "2009:50",
+                                                        "kind": "text",
+                                                        "name": "Name",
+                                                        "width": 118,
+                                                        "height": 20,
+                                                        "position": "relational",
+                                                        "text": {
+                                                            "content": "Beef Shawarma",
+                                                            "typography": "label-l3-inter-semi-bold-700",
+                                                            "color": "textcolors-primary-text",
+                                                            "textAlign": "left"
+                                                        },
+                                                        "semanticRole": "semantic",
+                                                        "signals": {
+                                                            "nonInteractive": true
+                                                        },
+                                                        "context": {
+                                                            "zIndex": -1,
+                                                            "hierarchyDepth": 6
+                                                        }
+                                                    },
+                                                    {
+                                                        "id": "2009:51",
+                                                        "kind": "text",
+                                                        "name": "Description",
+                                                        "width": 217,
+                                                        "height": 40,
+                                                        "position": "relational",
+                                                        "text": {
+                                                            "content": "Tender beef strips with tahini sauce and fresh vegetables",
+                                                            "typography": "paragraph-p2-inter-reg-400",
+                                                            "color": "textcolors-secondary-text",
+                                                            "textAlign": "left"
+                                                        },
+                                                        "semanticRole": "semantic",
+                                                        "signals": {
+                                                            "nonInteractive": true
+                                                        },
+                                                        "context": {
+                                                            "zIndex": -1,
+                                                            "hierarchyDepth": 6
+                                                        }
+                                                    }
+                                                ],
+                                                "semanticRole": "structural",
+                                                "signals": {
+                                                    "nonInteractive": true
+                                                },
+                                                "context": {
+                                                    "zIndex": -1,
+                                                    "hierarchyDepth": 5
+                                                }
+                                            },
+                                            {
+                                                "id": "2009:52",
+                                                "kind": "container",
+                                                "name": "Footer",
+                                                "width": 217,
+                                                "height": 32,
+                                                "component": "Footer",
+                                                "position": "relational",
+                                                "layout": {
+                                                    "direction": "horizontal",
+                                                    "justifyContent": "space-between",
+                                                    "alignItems": "center"
+                                                },
+                                                "responsive": {
+                                                    "width": "hug"
+                                                },
+                                                "children": [
+                                                    {
+                                                        "id": "2009:53",
+                                                        "kind": "text",
+                                                        "name": "Price",
+                                                        "width": 54,
+                                                        "height": 20,
+                                                        "position": "relational",
+                                                        "text": {
+                                                            "content": "₦3000",
+                                                            "typography": "label-l3-inter-semi-bold-700",
+                                                            "color": "textcolors-primary-text",
+                                                            "textAlign": "left"
+                                                        },
+                                                        "semanticRole": "semantic",
+                                                        "signals": {
+                                                            "nonInteractive": true
+                                                        },
+                                                        "context": {
+                                                            "zIndex": -1,
+                                                            "hierarchyDepth": 6
+                                                        }
+                                                    },
+                                                    {
+                                                        "id": "2035:9",
+                                                        "kind": "component",
+                                                        "name": "AddButton",
+                                                        "width": 79,
+                                                        "height": 32,
+                                                        "component": "AddButton",
+                                                        "position": "relational",
+                                                        "layout": {
+                                                            "direction": "horizontal",
+                                                            "padding": {
+                                                                "top": 8,
+                                                                "right": 24,
+                                                                "bottom": 8,
+                                                                "left": 24
+                                                            },
+                                                            "justifyContent": "center",
+                                                            "alignItems": "center"
+                                                        },
+                                                        "responsive": {
+                                                            "width": "hug",
+                                                            "height": "hug"
+                                                        },
+                                                        "style": {
+                                                            "borderColor": "primarycolors-primary",
+                                                            "borderWidth": 1.5,
+                                                            "borderRadius": "s"
+                                                        },
+                                                        "children": [
+                                                            {
+                                                                "id": "I2035:9;2035:3",
+                                                                "kind": "text",
+                                                                "name": "ADD",
+                                                                "width": 31,
+                                                                "height": 16,
+                                                                "position": "relational",
+                                                                "text": {
+                                                                    "content": "ADD",
+                                                                    "typography": "label-l4-poppins-semi-bold-600",
+                                                                    "color": "primarycolors-primary",
+                                                                    "textAlign": "left"
+                                                                },
+                                                                "semanticRole": "semantic",
+                                                                "signals": {
+                                                                    "nonInteractive": true
+                                                                },
+                                                                "context": {
+                                                                    "zIndex": -1,
+                                                                    "insideComponent": true,
+                                                                    "hierarchyDepth": 7
+                                                                },
+                                                                "interaction": {
+                                                                    "insideInteractiveComponent": true
+                                                                }
+                                                            }
+                                                        ],
+                                                        "semanticRole": "interactive",
+                                                        "signals": {
+                                                            "interactive": true
+                                                        },
+                                                        "context": {
+                                                            "zIndex": -1,
+                                                            "insideComponent": true,
+                                                            "interactive": true,
+                                                            "hierarchyDepth": 6
+                                                        },
+                                                        "interaction": {
+                                                            "interactive": true,
+                                                            "insideInteractiveComponent": true
+                                                        }
+                                                    }
+                                                ],
+                                                "semanticRole": "structural",
+                                                "signals": {
+                                                    "nonInteractive": true
+                                                },
+                                                "context": {
+                                                    "zIndex": -1,
+                                                    "hierarchyDepth": 5
+                                                }
+                                            }
+                                        ],
+                                        "semanticRole": "structural",
+                                        "signals": {
+                                            "nonInteractive": true
+                                        },
+                                        "context": {
+                                            "zIndex": -1,
+                                            "hierarchyDepth": 4
+                                        }
+                                    }
+                                ],
+                                "semanticRole": "structural",
+                                "signals": {
+                                    "nonInteractive": true
+                                },
+                                "context": {
+                                    "zIndex": -1,
+                                    "hierarchyDepth": 3
+                                }
+                            },
+                            {
+                                "id": "2009:56",
+                                "kind": "container",
+                                "name": "MenuCardJollofRice&Chicken",
+                                "width": 361,
+                                "height": 136,
+                                "component": "MenuCardJollofRice&Chicken",
+                                "position": "relational",
+                                "layout": {
+                                    "direction": "horizontal",
+                                    "gap": "m",
+                                    "padding": "m"
+                                },
+                                "responsive": {
+                                    "width": "hug"
+                                },
+                                "style": {
+                                    "background": "surfacecolors-surface-container-low",
+                                    "borderWidth": {
+                                        "bottom": 1
+                                    },
+                                    "borderRadius": "radius-xl"
+                                },
+                                "children": [
+                                    {
+                                        "id": "2009:57",
+                                        "kind": "container",
+                                        "name": "Image",
+                                        "width": 96,
+                                        "height": 96,
+                                        "component": "Image",
+                                        "position": "relational",
+                                        "layout": {
+                                            "direction": "horizontal",
+                                            "justifyContent": "center",
+                                            "alignItems": "center"
+                                        },
+                                        "style": {
+                                            "background": "primarycolors-primary-container",
+                                            "borderRadius": "s"
+                                        },
+                                        "children": [
+                                            {
+                                                "id": "2009:58",
+                                                "kind": "text",
+                                                "name": "◧",
+                                                "width": 23,
+                                                "height": 39,
+                                                "position": "relational",
+                                                "text": {
+                                                    "content": "◧",
+                                                    "typography": "h1-regular",
+                                                    "color": "primarycolors-on-primary-container",
+                                                    "textAlign": "left"
+                                                },
+                                                "semanticRole": "semantic",
+                                                "signals": {
+                                                    "nonInteractive": true
+                                                },
+                                                "context": {
+                                                    "zIndex": -1,
+                                                    "hierarchyDepth": 5
+                                                }
+                                            }
+                                        ],
+                                        "semanticRole": "structural",
+                                        "signals": {
+                                            "nonInteractive": true
+                                        },
+                                        "context": {
+                                            "zIndex": -1,
+                                            "hierarchyDepth": 4
+                                        }
+                                    },
+                                    {
+                                        "id": "2009:59",
+                                        "kind": "container",
+                                        "name": "Details",
+                                        "width": 217,
+                                        "height": 104,
+                                        "position": "relational",
+                                        "layout": {
+                                            "direction": "vertical",
+                                            "gap": "s"
+                                        },
+                                        "responsive": {
+                                            "width": "hug"
+                                        },
+                                        "children": [
+                                            {
+                                                "id": "2009:60",
+                                                "kind": "container",
+                                                "name": "Top",
+                                                "width": 217,
+                                                "height": 64,
+                                                "position": "relational",
+                                                "layout": {
+                                                    "direction": "vertical",
+                                                    "gap": "xs"
+                                                },
+                                                "responsive": {
+                                                    "height": "hug"
+                                                },
+                                                "children": [
+                                                    {
+                                                        "id": "2009:61",
+                                                        "kind": "text",
+                                                        "name": "Name",
+                                                        "width": 156,
+                                                        "height": 20,
+                                                        "position": "relational",
+                                                        "text": {
+                                                            "content": "Jollof Rice & Chicken",
+                                                            "typography": "label-l3-inter-semi-bold-700",
+                                                            "color": "textcolors-primary-text",
+                                                            "textAlign": "left"
+                                                        },
+                                                        "semanticRole": "semantic",
+                                                        "signals": {
+                                                            "nonInteractive": true
+                                                        },
+                                                        "context": {
+                                                            "zIndex": -1,
+                                                            "hierarchyDepth": 6
+                                                        }
+                                                    },
+                                                    {
+                                                        "id": "2009:62",
+                                                        "kind": "text",
+                                                        "name": "Description",
+                                                        "width": 217,
+                                                        "height": 40,
+                                                        "position": "relational",
+                                                        "text": {
+                                                            "content": "Party-style jollof rice with a perfectly grilled chicken thigh",
+                                                            "typography": "paragraph-p2-inter-reg-400",
+                                                            "color": "textcolors-secondary-text",
+                                                            "textAlign": "left"
+                                                        },
+                                                        "semanticRole": "semantic",
+                                                        "signals": {
+                                                            "nonInteractive": true
+                                                        },
+                                                        "context": {
+                                                            "zIndex": -1,
+                                                            "hierarchyDepth": 6
+                                                        }
+                                                    }
+                                                ],
+                                                "semanticRole": "structural",
+                                                "signals": {
+                                                    "nonInteractive": true
+                                                },
+                                                "context": {
+                                                    "zIndex": -1,
+                                                    "hierarchyDepth": 5
+                                                }
+                                            },
+                                            {
+                                                "id": "2009:63",
+                                                "kind": "container",
+                                                "name": "Footer",
+                                                "width": 217,
+                                                "height": 32,
+                                                "component": "Footer",
+                                                "position": "relational",
+                                                "layout": {
+                                                    "direction": "horizontal",
+                                                    "justifyContent": "space-between",
+                                                    "alignItems": "center"
+                                                },
+                                                "responsive": {
+                                                    "width": "hug"
+                                                },
+                                                "children": [
+                                                    {
+                                                        "id": "2009:64",
+                                                        "kind": "text",
+                                                        "name": "Price",
+                                                        "width": 53,
+                                                        "height": 20,
+                                                        "position": "relational",
+                                                        "text": {
+                                                            "content": "₦3500",
+                                                            "typography": "label-l3-inter-semi-bold-700",
+                                                            "color": "textcolors-primary-text",
+                                                            "textAlign": "left"
+                                                        },
+                                                        "semanticRole": "semantic",
+                                                        "signals": {
+                                                            "nonInteractive": true
+                                                        },
+                                                        "context": {
+                                                            "zIndex": -1,
+                                                            "hierarchyDepth": 6
+                                                        }
+                                                    },
+                                                    {
+                                                        "id": "2035:12",
+                                                        "kind": "component",
+                                                        "name": "AddButton",
+                                                        "width": 79,
+                                                        "height": 32,
+                                                        "component": "AddButton",
+                                                        "position": "relational",
+                                                        "layout": {
+                                                            "direction": "horizontal",
+                                                            "padding": {
+                                                                "top": 8,
+                                                                "right": 24,
+                                                                "bottom": 8,
+                                                                "left": 24
+                                                            },
+                                                            "justifyContent": "center",
+                                                            "alignItems": "center"
+                                                        },
+                                                        "responsive": {
+                                                            "width": "hug",
+                                                            "height": "hug"
+                                                        },
+                                                        "style": {
+                                                            "borderColor": "primarycolors-primary",
+                                                            "borderWidth": 1.5,
+                                                            "borderRadius": "s"
+                                                        },
+                                                        "children": [
+                                                            {
+                                                                "id": "I2035:12;2035:3",
+                                                                "kind": "text",
+                                                                "name": "ADD",
+                                                                "width": 31,
+                                                                "height": 16,
+                                                                "position": "relational",
+                                                                "text": {
+                                                                    "content": "ADD",
+                                                                    "typography": "label-l4-poppins-semi-bold-600",
+                                                                    "color": "primarycolors-primary",
+                                                                    "textAlign": "left"
+                                                                },
+                                                                "semanticRole": "semantic",
+                                                                "signals": {
+                                                                    "nonInteractive": true
+                                                                },
+                                                                "context": {
+                                                                    "zIndex": -1,
+                                                                    "insideComponent": true,
+                                                                    "hierarchyDepth": 7
+                                                                },
+                                                                "interaction": {
+                                                                    "insideInteractiveComponent": true
+                                                                }
+                                                            }
+                                                        ],
+                                                        "semanticRole": "interactive",
+                                                        "signals": {
+                                                            "interactive": true
+                                                        },
+                                                        "context": {
+                                                            "zIndex": -1,
+                                                            "insideComponent": true,
+                                                            "interactive": true,
+                                                            "hierarchyDepth": 6
+                                                        },
+                                                        "interaction": {
+                                                            "interactive": true,
+                                                            "insideInteractiveComponent": true
+                                                        }
+                                                    }
+                                                ],
+                                                "semanticRole": "structural",
+                                                "signals": {
+                                                    "nonInteractive": true
+                                                },
+                                                "context": {
+                                                    "zIndex": -1,
+                                                    "hierarchyDepth": 5
+                                                }
+                                            }
+                                        ],
+                                        "semanticRole": "structural",
+                                        "signals": {
+                                            "nonInteractive": true
+                                        },
+                                        "context": {
+                                            "zIndex": -1,
+                                            "hierarchyDepth": 4
+                                        }
+                                    }
+                                ],
+                                "semanticRole": "structural",
+                                "signals": {
+                                    "nonInteractive": true
+                                },
+                                "context": {
+                                    "zIndex": -1,
+                                    "hierarchyDepth": 3
+                                }
+                            },
+                            {
+                                "id": "2009:67",
+                                "kind": "container",
+                                "name": "MenuCardFriedRice&Turkey",
+                                "width": 361,
+                                "height": 136,
+                                "component": "MenuCardFriedRice&Turkey",
+                                "position": "relational",
+                                "layout": {
+                                    "direction": "horizontal",
+                                    "gap": "m",
+                                    "padding": "m"
+                                },
+                                "responsive": {
+                                    "width": "hug"
+                                },
+                                "style": {
+                                    "background": "surfacecolors-surface-container-low",
+                                    "borderWidth": {
+                                        "bottom": 1
+                                    },
+                                    "borderRadius": "radius-xl"
+                                },
+                                "children": [
+                                    {
+                                        "id": "2009:68",
+                                        "kind": "container",
+                                        "name": "Image",
+                                        "width": 96,
+                                        "height": 96,
+                                        "component": "Image",
+                                        "position": "relational",
+                                        "layout": {
+                                            "direction": "horizontal",
+                                            "justifyContent": "center",
+                                            "alignItems": "center"
+                                        },
+                                        "style": {
+                                            "background": "primarycolors-primary-container",
+                                            "borderRadius": "s"
+                                        },
+                                        "children": [
+                                            {
+                                                "id": "2009:69",
+                                                "kind": "text",
+                                                "name": "◧",
+                                                "width": 23,
+                                                "height": 39,
+                                                "position": "relational",
+                                                "text": {
+                                                    "content": "◧",
+                                                    "typography": "h1-regular",
+                                                    "color": "primarycolors-on-primary-container",
+                                                    "textAlign": "left"
+                                                },
+                                                "semanticRole": "semantic",
+                                                "signals": {
+                                                    "nonInteractive": true
+                                                },
+                                                "context": {
+                                                    "zIndex": -1,
+                                                    "hierarchyDepth": 5
+                                                }
+                                            }
+                                        ],
+                                        "semanticRole": "structural",
+                                        "signals": {
+                                            "nonInteractive": true
+                                        },
+                                        "context": {
+                                            "zIndex": -1,
+                                            "hierarchyDepth": 4
+                                        }
+                                    },
+                                    {
+                                        "id": "2009:70",
+                                        "kind": "container",
+                                        "name": "Details",
+                                        "width": 217,
+                                        "height": 104,
+                                        "position": "relational",
+                                        "layout": {
+                                            "direction": "vertical",
+                                            "gap": "s"
+                                        },
+                                        "responsive": {
+                                            "width": "hug"
+                                        },
+                                        "children": [
+                                            {
+                                                "id": "2009:71",
+                                                "kind": "container",
+                                                "name": "Top",
+                                                "width": 217,
+                                                "height": 64,
+                                                "position": "relational",
+                                                "layout": {
+                                                    "direction": "vertical",
+                                                    "gap": "xs"
+                                                },
+                                                "responsive": {
+                                                    "height": "hug"
+                                                },
+                                                "children": [
+                                                    {
+                                                        "id": "2009:72",
+                                                        "kind": "text",
+                                                        "name": "Name",
+                                                        "width": 143,
+                                                        "height": 20,
+                                                        "position": "relational",
+                                                        "text": {
+                                                            "content": "Fried Rice & Turkey",
+                                                            "typography": "label-l3-inter-semi-bold-700",
+                                                            "color": "textcolors-primary-text",
+                                                            "textAlign": "left"
+                                                        },
+                                                        "semanticRole": "semantic",
+                                                        "signals": {
+                                                            "nonInteractive": true
+                                                        },
+                                                        "context": {
+                                                            "zIndex": -1,
+                                                            "hierarchyDepth": 6
+                                                        }
+                                                    },
+                                                    {
+                                                        "id": "2009:73",
+                                                        "kind": "text",
+                                                        "name": "Description",
+                                                        "width": 217,
+                                                        "height": 40,
+                                                        "position": "relational",
+                                                        "text": {
+                                                            "content": "Vegetable fried rice served with peppered turkey",
+                                                            "typography": "paragraph-p2-inter-reg-400",
+                                                            "color": "textcolors-secondary-text",
+                                                            "textAlign": "left"
+                                                        },
+                                                        "semanticRole": "semantic",
+                                                        "signals": {
+                                                            "nonInteractive": true
+                                                        },
+                                                        "context": {
+                                                            "zIndex": -1,
+                                                            "hierarchyDepth": 6
+                                                        }
+                                                    }
+                                                ],
+                                                "semanticRole": "structural",
+                                                "signals": {
+                                                    "nonInteractive": true
+                                                },
+                                                "context": {
+                                                    "zIndex": -1,
+                                                    "hierarchyDepth": 5
+                                                }
+                                            },
+                                            {
+                                                "id": "2009:74",
+                                                "kind": "container",
+                                                "name": "Footer",
+                                                "width": 217,
+                                                "height": 32,
+                                                "component": "Footer",
+                                                "position": "relational",
+                                                "layout": {
+                                                    "direction": "horizontal",
+                                                    "justifyContent": "space-between",
+                                                    "alignItems": "center"
+                                                },
+                                                "responsive": {
+                                                    "width": "hug"
+                                                },
+                                                "children": [
+                                                    {
+                                                        "id": "2009:75",
+                                                        "kind": "text",
+                                                        "name": "Price",
+                                                        "width": 54,
+                                                        "height": 20,
+                                                        "position": "relational",
+                                                        "text": {
+                                                            "content": "₦4000",
+                                                            "typography": "label-l3-inter-semi-bold-700",
+                                                            "color": "textcolors-primary-text",
+                                                            "textAlign": "left"
+                                                        },
+                                                        "semanticRole": "semantic",
+                                                        "signals": {
+                                                            "nonInteractive": true
+                                                        },
+                                                        "context": {
+                                                            "zIndex": -1,
+                                                            "hierarchyDepth": 6
+                                                        }
+                                                    },
+                                                    {
+                                                        "id": "2035:15",
+                                                        "kind": "component",
+                                                        "name": "AddButton",
+                                                        "width": 79,
+                                                        "height": 32,
+                                                        "component": "AddButton",
+                                                        "position": "relational",
+                                                        "layout": {
+                                                            "direction": "horizontal",
+                                                            "padding": {
+                                                                "top": 8,
+                                                                "right": 24,
+                                                                "bottom": 8,
+                                                                "left": 24
+                                                            },
+                                                            "justifyContent": "center",
+                                                            "alignItems": "center"
+                                                        },
+                                                        "responsive": {
+                                                            "width": "hug",
+                                                            "height": "hug"
+                                                        },
+                                                        "style": {
+                                                            "borderColor": "primarycolors-primary",
+                                                            "borderWidth": 1.5,
+                                                            "borderRadius": "s"
+                                                        },
+                                                        "children": [
+                                                            {
+                                                                "id": "I2035:15;2035:3",
+                                                                "kind": "text",
+                                                                "name": "ADD",
+                                                                "width": 31,
+                                                                "height": 16,
+                                                                "position": "relational",
+                                                                "text": {
+                                                                    "content": "ADD",
+                                                                    "typography": "label-l4-poppins-semi-bold-600",
+                                                                    "color": "primarycolors-primary",
+                                                                    "textAlign": "left"
+                                                                },
+                                                                "semanticRole": "semantic",
+                                                                "signals": {
+                                                                    "nonInteractive": true
+                                                                },
+                                                                "context": {
+                                                                    "zIndex": -1,
+                                                                    "insideComponent": true,
+                                                                    "hierarchyDepth": 7
+                                                                },
+                                                                "interaction": {
+                                                                    "insideInteractiveComponent": true
+                                                                }
+                                                            }
+                                                        ],
+                                                        "semanticRole": "interactive",
+                                                        "signals": {
+                                                            "interactive": true
+                                                        },
+                                                        "context": {
+                                                            "zIndex": -1,
+                                                            "insideComponent": true,
+                                                            "interactive": true,
+                                                            "hierarchyDepth": 6
+                                                        },
+                                                        "interaction": {
+                                                            "interactive": true,
+                                                            "insideInteractiveComponent": true
+                                                        }
+                                                    }
+                                                ],
+                                                "semanticRole": "structural",
+                                                "signals": {
+                                                    "nonInteractive": true
+                                                },
+                                                "context": {
+                                                    "zIndex": -1,
+                                                    "hierarchyDepth": 5
+                                                }
+                                            }
+                                        ],
+                                        "semanticRole": "structural",
+                                        "signals": {
+                                            "nonInteractive": true
+                                        },
+                                        "context": {
+                                            "zIndex": -1,
+                                            "hierarchyDepth": 4
+                                        }
+                                    }
+                                ],
+                                "semanticRole": "structural",
+                                "signals": {
+                                    "nonInteractive": true
+                                },
+                                "context": {
+                                    "zIndex": -1,
+                                    "hierarchyDepth": 3
+                                }
+                            }
+                        ],
+                        "semanticRole": "structural",
+                        "signals": {
+                            "nonInteractive": true
+                        },
+                        "context": {
+                            "zIndex": -1,
+                            "hierarchyDepth": 2
+                        }
+                    }
+                ],
+                "semanticRole": "structural",
+                "signals": {
+                    "nonInteractive": true
+                },
+                "context": {
+                    "zIndex": -1,
+                    "hierarchyDepth": 1
+                }
+            },
+            {
+                "id": "2035:167",
+                "kind": "component",
+                "name": "BottomNav",
+                "width": 393,
+                "height": 64,
+                "component": "BottomNav",
+                "variant": {
+                    "ActiveTab": "menu"
+                },
+                "position": "absolute",
+                "layout": {
+                    "direction": "horizontal",
+                    "padding": {
+                        "top": 0,
+                        "right": 24,
+                        "bottom": 0,
+                        "left": 24
+                    },
+                    "justifyContent": "space-between",
+                    "alignItems": "center"
+                },
+                "responsive": {
+                    "width": "fill"
+                },
+                "style": {
+                    "background": "surfacecolors-surface-container-low",
+                    "borderColor": "outlinecolors-outline-variant",
+                    "borderWidth": {
+                        "top": 1
+                    }
+                },
+                "absolute": {
+                    "top": 788,
+                    "left": 0,
+                    "right": 0,
+                    "bottom": 0
+                },
+                "constraints": {
+                    "horizontal": "stretch",
+                    "vertical": "bottom"
+                },
+                "children": [
+                    {
+                        "id": "I2035:167;2035:114",
+                        "kind": "container",
+                        "name": "NavItem",
+                        "width": 65,
+                        "height": 46,
+                        "component": "NavItem",
+                        "position": "relational",
+                        "layout": {
+                            "direction": "vertical",
+                            "gap": "spacing-2xs",
+                            "padding": {
+                                "top": 4,
+                                "right": 16,
+                                "bottom": 4,
+                                "left": 16
+                            },
+                            "justifyContent": "center",
+                            "alignItems": "center"
+                        },
+                        "responsive": {
+                            "width": "hug",
+                            "height": "hug"
+                        },
+                        "children": [
+                            {
+                                "id": "I2035:167;2035:115",
+                                "kind": "icon",
+                                "name": "IconBook",
+                                "width": 22,
+                                "height": 22,
+                                "component": "IconBook",
+                                "position": "relational",
+                                "semanticRole": "semantic",
+                                "signals": {
+                                    "nonInteractive": true
+                                },
+                                "context": {
+                                    "zIndex": -1,
+                                    "insideComponent": true,
+                                    "hierarchyDepth": 3
+                                },
+                                "interaction": {
+                                    "insideInteractiveComponent": true
+                                }
+                            },
+                            {
+                                "id": "I2035:167;2035:117",
+                                "kind": "text",
+                                "name": "Menu",
+                                "width": 33,
+                                "height": 14,
+                                "component": "Menu",
+                                "position": "relational",
+                                "text": {
+                                    "content": "Menu",
+                                    "typography": "caption-c1-inter-med-500",
+                                    "color": "primarycolors-primary",
+                                    "textAlign": "left"
+                                },
+                                "semanticRole": "semantic",
+                                "signals": {
+                                    "nonInteractive": true
+                                },
+                                "context": {
+                                    "zIndex": -1,
+                                    "insideComponent": true,
+                                    "hierarchyDepth": 3
+                                },
+                                "interaction": {
+                                    "insideInteractiveComponent": true
+                                }
+                            }
+                        ],
+                        "semanticRole": "structural",
+                        "signals": {
+                            "nonInteractive": true
+                        },
+                        "context": {
+                            "zIndex": -1,
+                            "insideComponent": true,
+                            "hierarchyDepth": 2
+                        },
+                        "interaction": {
+                            "insideInteractiveComponent": true
+                        }
+                    },
+                    {
+                        "id": "I2035:167;2035:118",
+                        "kind": "container",
+                        "name": "NavItemActive",
+                        "width": 92,
+                        "height": 46,
+                        "component": "NavItemActive",
+                        "position": "relational",
+                        "layout": {
+                            "direction": "vertical",
+                            "gap": "spacing-2xs",
+                            "padding": {
+                                "top": 4,
+                                "right": 16,
+                                "bottom": 4,
+                                "left": 16
+                            },
+                            "justifyContent": "center",
+                            "alignItems": "center"
+                        },
+                        "responsive": {
+                            "width": "hug",
+                            "height": "hug"
+                        },
+                        "children": [
+                            {
+                                "id": "I2035:167;2035:119",
+                                "kind": "icon",
+                                "name": "IconUsers",
+                                "width": 22,
+                                "height": 22,
+                                "component": "IconUsers",
+                                "position": "relational",
+                                "layout": {
+                                    "direction": "stack"
+                                },
+                                "semanticRole": "semantic",
+                                "signals": {
+                                    "nonInteractive": true
+                                },
+                                "context": {
+                                    "zIndex": -1,
+                                    "insideComponent": true,
+                                    "hierarchyDepth": 3
+                                },
+                                "interaction": {
+                                    "insideInteractiveComponent": true
+                                }
+                            },
+                            {
+                                "id": "I2035:167;2035:124",
+                                "kind": "text",
+                                "name": "My Orders",
+                                "width": 60,
+                                "height": 14,
+                                "position": "relational",
+                                "text": {
+                                    "content": "My Orders",
+                                    "typography": "caption-c1-inter-med-500",
+                                    "color": "surfacecolors-on-surface-variant",
+                                    "textAlign": "left"
+                                },
+                                "semanticRole": "semantic",
+                                "signals": {
+                                    "nonInteractive": true
+                                },
+                                "context": {
+                                    "zIndex": -1,
+                                    "insideComponent": true,
+                                    "hierarchyDepth": 3
+                                },
+                                "interaction": {
+                                    "insideInteractiveComponent": true
+                                }
+                            }
+                        ],
+                        "semanticRole": "structural",
+                        "signals": {
+                            "nonInteractive": true
+                        },
+                        "context": {
+                            "zIndex": -1,
+                            "insideComponent": true,
+                            "hierarchyDepth": 2
+                        },
+                        "interaction": {
+                            "insideInteractiveComponent": true
+                        }
+                    },
+                    {
+                        "id": "I2035:167;2035:125",
+                        "kind": "container",
+                        "name": "NavItem",
+                        "width": 74,
+                        "height": 46,
+                        "component": "NavItem",
+                        "position": "relational",
+                        "layout": {
+                            "direction": "vertical",
+                            "gap": "spacing-2xs",
+                            "padding": {
+                                "top": 4,
+                                "right": 16,
+                                "bottom": 4,
+                                "left": 16
+                            },
+                            "justifyContent": "center",
+                            "alignItems": "center"
+                        },
+                        "responsive": {
+                            "width": "hug",
+                            "height": "hug"
+                        },
+                        "children": [
+                            {
+                                "id": "I2035:167;2035:126",
+                                "kind": "icon",
+                                "name": "IconCard",
+                                "width": 22,
+                                "height": 22,
+                                "component": "IconCard",
+                                "position": "relational",
+                                "layout": {
+                                    "direction": "stack"
+                                },
+                                "semanticRole": "semantic",
+                                "signals": {
+                                    "nonInteractive": true
+                                },
+                                "context": {
+                                    "zIndex": -1,
+                                    "insideComponent": true,
+                                    "hierarchyDepth": 3
+                                },
+                                "interaction": {
+                                    "insideInteractiveComponent": true
+                                }
+                            },
+                            {
+                                "id": "I2035:167;2035:129",
+                                "kind": "text",
+                                "name": "Pay Bill",
+                                "width": 42,
+                                "height": 14,
+                                "position": "relational",
+                                "text": {
+                                    "content": "Pay Bill",
+                                    "typography": "caption-c1-inter-med-500",
+                                    "color": "surfacecolors-on-surface-variant",
+                                    "textAlign": "left"
+                                },
+                                "semanticRole": "semantic",
+                                "signals": {
+                                    "nonInteractive": true
+                                },
+                                "context": {
+                                    "zIndex": -1,
+                                    "insideComponent": true,
+                                    "hierarchyDepth": 3
+                                },
+                                "interaction": {
+                                    "insideInteractiveComponent": true
+                                }
+                            }
+                        ],
+                        "semanticRole": "structural",
+                        "signals": {
+                            "nonInteractive": true
+                        },
+                        "context": {
+                            "zIndex": -1,
+                            "insideComponent": true,
+                            "hierarchyDepth": 2
+                        },
+                        "interaction": {
+                            "insideInteractiveComponent": true
+                        }
+                    }
+                ],
+                "semanticRole": "interactive",
+                "signals": {
+                    "interactive": true,
+                    "foregroundLayer": true,
+                    "edgeAttached": true
+                },
+                "context": {
+                    "position": "bottom-edge",
+                    "zIndex": -1,
+                    "insideComponent": true,
+                    "interactive": true,
+                    "hierarchyDepth": 1
+                },
+                "layoutRelationship": {
+                    "edgeAttached": true
+                },
+                "interaction": {
+                    "interactive": true,
+                    "insideInteractiveComponent": true
+                }
+            }
+        ],
+        "semanticRole": "structural",
+        "signals": {
+            "nonInteractive": true
+        },
+        "context": {
+            "zIndex": -1
+        }
+    }
+}

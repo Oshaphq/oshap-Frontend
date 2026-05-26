@@ -1,0 +1,935 @@
+openapi: "3.1.0"
+info:
+  title: Oshap API
+  version: "1.0.0"
+  description: >
+    QR-based table ordering and payment API for restaurants.
+    All admin endpoints require an `x-admin-pin` header (set via `ADMIN_PIN`
+    environment variable, default `"0000"`).
+    Customer endpoints are public (no auth).
+
+servers:
+  - url: http://localhost:8000/api
+    description: Local FastAPI dev server
+
+tags:
+  - name: Menu
+    description: Public menu browsing
+  - name: Tables
+    description: Table lookup by QR code
+  - name: Orders
+    description: Order creation and retrieval
+  - name: Sessions
+    description: Group ordering sessions
+  - name: Payments
+    description: Payment claims and confirmation
+  - name: Admin
+    description: Merchant dashboard (kitchen, history, menu mgmt, table mgmt)
+  - name: Devices
+    description: FCM push notification registration
+
+# =========================================================================
+# Security
+# =========================================================================
+security: []   # public by default; admin endpoints add adminPin per-operation
+
+components:
+  securitySchemes:
+    adminPin:
+      type: apiKey
+      in: header
+      name: x-admin-pin
+      description: Admin PIN for merchant operations.
+
+  # -----------------------------------------------------------------------
+  # Schemas
+  # -----------------------------------------------------------------------
+  schemas:
+    Restaurant:
+      type: object
+      properties:
+        id: { type: string, format: uuid }
+        name: { type: string }
+        bank_name: { type: string, nullable: true }
+        account_number: { type: string, nullable: true }
+        account_name: { type: string, nullable: true }
+        whatsapp_number: { type: string, nullable: true }
+      required: [id, name]
+
+    MenuItem:
+      type: object
+      properties:
+        id: { type: string, format: uuid }
+        restaurant_id: { type: string, format: uuid }
+        name: { type: string }
+        price: { type: integer, description: Price in Naira }
+        category: { type: string }
+        description: { type: string, nullable: true }
+        image_url: { type: string, nullable: true }
+        available: { type: boolean }
+        sort_order: { type: integer }
+      required: [id, restaurant_id, name, price, category, available, sort_order]
+
+    OrderItem:
+      type: object
+      properties:
+        id: { type: string, format: uuid }
+        name: { type: string }
+        quantity: { type: integer }
+        price: { type: integer }
+      required: [id, name, quantity, price]
+
+    Order:
+      type: object
+      properties:
+        id: { type: string, format: uuid }
+        table_id: { type: string }
+        restaurant_id: { type: string, format: uuid }
+        status:
+          $ref: "#/components/schemas/OrderStatus"
+        total: { type: integer }
+        reference: { type: string }
+        session_id: { type: string, format: uuid, nullable: true }
+        customer_name: { type: string, nullable: true }
+        device_token: { type: string, nullable: true }
+        created_at: { type: string, format: date-time }
+      required: [id, table_id, restaurant_id, status, total, reference, created_at]
+
+    OrderWithItems:
+      allOf:
+        - $ref: "#/components/schemas/Order"
+        - type: object
+          properties:
+            order_items:
+              type: array
+              items:
+                $ref: "#/components/schemas/OrderItem"
+
+    Payment:
+      type: object
+      properties:
+        id: { type: string, format: uuid }
+        order_id: { type: string, format: uuid }
+        amount: { type: integer }
+        status:
+          $ref: "#/components/schemas/PaymentStatus"
+        proof_url: { type: string, nullable: true }
+        created_at: { type: string, format: date-time }
+      required: [id, order_id, amount, status, created_at]
+
+    TableSession:
+      type: object
+      properties:
+        id: { type: string, format: uuid }
+        table_id: { type: string }
+        pin: { type: string }
+        status:
+          $ref: "#/components/schemas/SessionStatus"
+        created_at: { type: string, format: date-time }
+      required: [id, table_id, pin, status, created_at]
+
+    ActiveOrderBundle:
+      allOf:
+        - $ref: "#/components/schemas/Order"
+        - type: object
+          properties:
+            combined_order_ids:
+              type: array
+              items: { type: string, format: uuid }
+
+    TableInfo:
+      type: object
+      properties:
+        table_id: { type: string }
+        status:
+          $ref: "#/components/schemas/TableStatus"
+        restaurant:
+          $ref: "#/components/schemas/Restaurant"
+        unpaid_order:
+          oneOf:
+            - $ref: "#/components/schemas/ActiveOrderBundle"
+            - type: "null"
+        pending_payments:
+          oneOf:
+            - $ref: "#/components/schemas/ActiveOrderBundle"
+            - type: "null"
+      required: [table_id, status, restaurant]
+
+    OrderDetail:
+      type: object
+      properties:
+        id: { type: string, format: uuid }
+        table: { type: string }
+        items:
+          type: array
+          items: { $ref: "#/components/schemas/OrderItem" }
+        total: { type: integer }
+        status: { $ref: "#/components/schemas/OrderStatus" }
+        reference: { type: string }
+        payment:
+          oneOf:
+            - $ref: "#/components/schemas/Payment"
+            - type: "null"
+        created_at: { type: string, format: date-time }
+      required: [id, table, items, total, status, reference, created_at]
+
+    AdminTableStatus:
+      type: object
+      properties:
+        id: { type: string }
+        status: { $ref: "#/components/schemas/TableStatus" }
+        unpaidTotal: { type: integer }
+        pendingTotal: { type: integer }
+        hasPending: { type: boolean }
+        hasUnpaid: { type: boolean }
+      required: [id, status, unpaidTotal, pendingTotal, hasPending, hasUnpaid]
+
+    AdminHistoryOrder:
+      allOf:
+        - $ref: "#/components/schemas/Order"
+        - type: object
+          properties:
+            order_items:
+              type: array
+              items: { $ref: "#/components/schemas/OrderItem" }
+            payments:
+              type: array
+              items: { $ref: "#/components/schemas/Payment" }
+
+    # ---- Enums ----
+    OrderStatus:
+      type: string
+      enum:
+        [CREATED, PREPARING, READY, PAYMENT_PENDING, CONFIRMED, CANCELLED]
+
+    PaymentStatus:
+      type: string
+      enum: [NOT_PAID, CLAIMED, CONFIRMED, VERIFIED]
+
+    TableStatus:
+      type: string
+      enum: [OPEN, CLOSED]
+
+    SessionStatus:
+      type: string
+      enum: [ACTIVE, CLOSED]
+
+    CloseReason:
+      type: string
+      enum: [paid, abandoned]
+
+    # ---- Request / Response payloads ----
+    CreateOrderRequest:
+      type: object
+      properties:
+        table: { type: string }
+        restaurant_id: { type: string, format: uuid }
+        items:
+          type: array
+          items:
+            type: object
+            properties:
+              name: { type: string }
+              qty: { type: integer }
+              price: { type: integer }
+            required: [name, qty, price]
+        session_id: { type: string, format: uuid }
+        customer_name: { type: string }
+        device_token: { type: string }
+      required: [table, restaurant_id, items]
+
+    CreateOrderResponse:
+      type: object
+      properties:
+        success: { type: boolean, enum: [true] }
+        order_id: { type: string, format: uuid }
+        reference: { type: string }
+        total: { type: integer }
+
+    ClaimPaymentRequest:
+      type: object
+      properties:
+        order_id: { type: string, format: uuid }
+        combined_order_ids:
+          type: array
+          items: { type: string, format: uuid }
+        proof_url: { type: string }
+      # at least one of order_id or combined_order_ids required
+
+    ClaimPaymentResponse:
+      type: object
+      properties:
+        success: { type: boolean, enum: [true] }
+        processed: { type: integer }
+
+    ConfirmOrdersRequest:
+      type: object
+      properties:
+        order_ids:
+          type: array
+          items: { type: string, format: uuid }
+      required: [order_ids]
+
+    ConfirmOrdersResponse:
+      type: object
+      properties:
+        success: { type: boolean, enum: [true] }
+        confirmed: { type: integer }
+
+    SessionStartRequest:
+      type: object
+      properties:
+        tableId: { type: string }
+        action: { type: string, enum: [START] }
+        customer_name: { type: string }
+        unclaimed_order_ids:
+          type: array
+          items: { type: string, format: uuid }
+      required: [tableId, action]
+
+    SessionJoinRequest:
+      type: object
+      properties:
+        tableId: { type: string }
+        action: { type: string, enum: [JOIN] }
+        pin: { type: string }
+        customer_name: { type: string }
+        unclaimed_order_ids:
+          type: array
+          items: { type: string, format: uuid }
+      required: [tableId, action, pin]
+
+    SessionResponse:
+      type: object
+      properties:
+        success: { type: boolean, enum: [true] }
+        session:
+          $ref: "#/components/schemas/TableSession"
+
+    SessionOrdersResponse:
+      type: object
+      properties:
+        success: { type: boolean, enum: [true] }
+        orders:
+          type: array
+          items: { $ref: "#/components/schemas/OrderWithItems" }
+
+    CreateMenuItemRequest:
+      type: object
+      properties:
+        name: { type: string }
+        price: { type: integer }
+        category: { type: string }
+        description: { type: string }
+        image_url: { type: string }
+      required: [name, price, category]
+
+    UpdateMenuItemRequest:
+      type: object
+      properties:
+        name: { type: string }
+        price: { type: integer }
+        category: { type: string }
+        description: { type: string }
+        image_url: { type: string }
+        sort_order: { type: integer }
+
+    KitchenUpdateRequest:
+      type: object
+      properties:
+        order_id: { type: string, format: uuid }
+        status: { type: string, enum: [PREPARING, READY] }
+      required: [order_id, status]
+
+    AdminVerifyRequest:
+      type: object
+      properties:
+        table_id: { type: string }
+      required: [table_id]
+
+    AdminVerifyResponse:
+      type: object
+      properties:
+        success: { type: boolean, enum: [true] }
+        verified_count: { type: integer }
+        auto_closed: { type: boolean }
+
+    AdminCloseRequest:
+      type: object
+      properties:
+        table_id: { type: string }
+        reason: { $ref: "#/components/schemas/CloseReason" }
+      required: [table_id, reason]
+
+    AdminCloseResponse:
+      type: object
+      properties:
+        success: { type: boolean, enum: [true] }
+        table_id: { type: string }
+        reason: { $ref: "#/components/schemas/CloseReason" }
+
+    AdminTablesResponse:
+      type: object
+      properties:
+        tables:
+          type: array
+          items: { $ref: "#/components/schemas/AdminTableStatus" }
+
+    AdminHistoryPagination:
+      type: object
+      properties:
+        page: { type: integer }
+        per_page: { type: integer }
+        total: { type: integer }
+        total_pages: { type: integer }
+
+    AdminHistorySummary:
+      type: object
+      properties:
+        confirmed_count: { type: integer }
+        cancelled_count: { type: integer }
+        page_revenue: { type: integer }
+
+    AdminHistoryResponse:
+      type: object
+      properties:
+        orders:
+          type: array
+          items: { $ref: "#/components/schemas/AdminHistoryOrder" }
+        pagination:
+          $ref: "#/components/schemas/AdminHistoryPagination"
+        summary:
+          $ref: "#/components/schemas/AdminHistorySummary"
+
+    UploadResponse:
+      type: object
+      properties:
+        url: { type: string }
+
+    RegisterDeviceRequest:
+      type: object
+      properties:
+        fcm_token: { type: string }
+        restaurant_id: { type: string, format: uuid }
+        device_label: { type: string }
+      required: [fcm_token, restaurant_id]
+
+    RegisterDeviceResponse:
+      type: object
+      properties:
+        success: { type: boolean, enum: [true] }
+
+    Error:
+      type: object
+      properties:
+        error: { type: string }
+
+# =========================================================================
+# Paths
+# =========================================================================
+paths:
+  # -----------------------------------------------------------------------
+  # CUSTOMER — Menu
+  # -----------------------------------------------------------------------
+  /menu:
+    get:
+      tags: [Menu]
+      summary: List available menu items
+      parameters:
+        - name: restaurant_id
+          in: query
+          schema: { type: string, format: uuid }
+          description: Filter by restaurant (optional; returns all if omitted).
+      responses:
+        "200":
+          description: Menu items
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/MenuItem" }
+
+  # -----------------------------------------------------------------------
+  # CUSTOMER — Tables
+  # -----------------------------------------------------------------------
+  /table/{id}:
+    get:
+      tags: [Tables]
+      summary: Get table info with active orders scoped to device/session
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string }
+        - name: device_token
+          in: query
+          schema: { type: string }
+          description: Anonymous device UUID (sessionStorage per tab).
+        - name: session_id
+          in: query
+          schema: { type: string, format: uuid }
+          description: Group session ID if joined.
+      responses:
+        "200":
+          description: Table info
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/TableInfo" }
+        "404":
+          description: Table not found
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+
+  # -----------------------------------------------------------------------
+  # CUSTOMER — Orders
+  # -----------------------------------------------------------------------
+  /order:
+    post:
+      tags: [Orders]
+      summary: Place a new order
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/CreateOrderRequest" }
+      responses:
+        "200":
+          description: Order created
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/CreateOrderResponse" }
+        "400":
+          description: Missing required fields
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+        "403":
+          description: Table is closed
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+
+  /orders/{id}:
+    get:
+      tags: [Orders]
+      summary: Get single order detail (with items + payment)
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+      responses:
+        "200":
+          description: Order detail
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/OrderDetail" }
+        "404":
+          description: Order not found
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+
+  /orders/confirm:
+    post:
+      tags: [Orders]
+      summary: Confirm orders after payment is processed
+      description: >
+        Marks PAYMENT_PENDING orders as CONFIRMED and updates their payments
+        to CONFIRMED. Used client-side after the customer sees the payment
+        success screen.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/ConfirmOrdersRequest" }
+      responses:
+        "200":
+          description: Orders confirmed
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ConfirmOrdersResponse" }
+        "400":
+          description: No confirmable orders
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+
+  # -----------------------------------------------------------------------
+  # CUSTOMER — Sessions
+  # -----------------------------------------------------------------------
+  /session:
+    post:
+      tags: [Sessions]
+      summary: Start or join a group ordering session
+      description: >
+        Use `action=START` to create a new session (generates 4-digit PIN).
+        Use `action=JOIN` with a PIN to join an existing active session.
+        Optionally pass `unclaimed_order_ids` to migrate pre-session orders
+        into the session.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              oneOf:
+                - $ref: "#/components/schemas/SessionStartRequest"
+                - $ref: "#/components/schemas/SessionJoinRequest"
+      responses:
+        "200":
+          description: Session started or joined
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/SessionResponse" }
+        "400":
+          description: Missing fields or invalid action
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+        "404":
+          description: Invalid PIN or session not found
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+
+  /session/orders:
+    get:
+      tags: [Sessions]
+      summary: List active orders for a session or table
+      parameters:
+        - name: session_id
+          in: query
+          schema: { type: string, format: uuid }
+        - name: table_id
+          in: query
+          schema: { type: string }
+        - name: device_token
+          in: query
+          schema: { type: string }
+      responses:
+        "200":
+          description: Active orders
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/SessionOrdersResponse" }
+
+  # -----------------------------------------------------------------------
+  # CUSTOMER — Payments
+  # -----------------------------------------------------------------------
+  /payment/confirm:
+    post:
+      tags: [Payments]
+      summary: Claim payment for one or more orders
+      description: >
+        Creates/updates payment records to CLAIMED and sets orders to
+        PAYMENT_PENDING. This triggers the waiter to verify.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/ClaimPaymentRequest" }
+      responses:
+        "200":
+          description: Payment claimed
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ClaimPaymentResponse" }
+        "400":
+          description: Missing order_id or combined_order_ids
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+
+  # =========================================================================
+  # ADMIN — Tables
+  # =========================================================================
+  /admin/tables:
+    get:
+      tags: [Admin]
+      summary: List all tables with active order summaries
+      security: [{ adminPin: [] }]
+      responses:
+        "200":
+          description: Table status list
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/AdminTablesResponse" }
+        "401":
+          description: Invalid PIN
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+
+  # -----------------------------------------------------------------------
+  # ADMIN — Kitchen
+  # -----------------------------------------------------------------------
+  /admin/kitchen:
+    get:
+      tags: [Admin]
+      summary: List active kitchen orders (CREATED + PREPARING)
+      security: [{ adminPin: [] }]
+      responses:
+        "200":
+          description: Kitchen orders
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/OrderWithItems" }
+    patch:
+      tags: [Admin]
+      summary: Update order status to PREPARING or READY
+      security: [{ adminPin: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/KitchenUpdateRequest" }
+      responses:
+        "200":
+          description: Updated order
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Order" }
+        "400":
+          description: Invalid status
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+
+  # -----------------------------------------------------------------------
+  # ADMIN — History
+  # -----------------------------------------------------------------------
+  /admin/history:
+    get:
+      tags: [Admin]
+      summary: Transaction history with pagination and filters
+      security: [{ adminPin: [] }]
+      parameters:
+        - name: page
+          in: query
+          schema: { type: integer, default: 1 }
+        - name: per_page
+          in: query
+          schema: { type: integer, default: 20 }
+        - name: table
+          in: query
+          schema: { type: string }
+          description: Filter by table ID (e.g. "T1").
+        - name: date
+          in: query
+          schema: { type: string, format: date }
+          description: Filter by date (YYYY-MM-DD).
+      responses:
+        "200":
+          description: Paginated history
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/AdminHistoryResponse" }
+
+  # -----------------------------------------------------------------------
+  # ADMIN — Menu Management
+  # -----------------------------------------------------------------------
+  /admin/menu:
+    get:
+      tags: [Admin]
+      summary: List all menu items (including unavailable)
+      security: [{ adminPin: [] }]
+      responses:
+        "200":
+          description: Menu items
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/MenuItem" }
+    post:
+      tags: [Admin]
+      summary: Create a new menu item
+      security: [{ adminPin: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/CreateMenuItemRequest" }
+      responses:
+        "201":
+          description: Created item
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/MenuItem" }
+        "400":
+          description: Missing required fields
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+
+  /admin/menu/{id}:
+    put:
+      tags: [Admin]
+      summary: Update a menu item (full update)
+      security: [{ adminPin: [] }]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/UpdateMenuItemRequest" }
+      responses:
+        "200":
+          description: Updated item
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/MenuItem" }
+    patch:
+      tags: [Admin]
+      summary: Toggle menu item availability
+      security: [{ adminPin: [] }]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                available: { type: boolean }
+              required: [available]
+      responses:
+        "200":
+          description: Updated item
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/MenuItem" }
+    delete:
+      tags: [Admin]
+      summary: Delete a menu item
+      security: [{ adminPin: [] }]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+      responses:
+        "200":
+          description: Deleted
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success: { type: boolean, enum: [true] }
+
+  /admin/menu/upload:
+    post:
+      tags: [Admin]
+      summary: Upload a menu item image
+      security: [{ adminPin: [] }]
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                file:
+                  type: string
+                  format: binary
+                  description: JPEG, PNG, WebP, or GIF — max 5 MB.
+              required: [file]
+      responses:
+        "200":
+          description: Public URL of uploaded image
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/UploadResponse" }
+        "400":
+          description: Invalid file type or size
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+
+  # -----------------------------------------------------------------------
+  # ADMIN — Verify / Close
+  # -----------------------------------------------------------------------
+  /admin/verify:
+    post:
+      tags: [Admin]
+      summary: Verify pending payments for a table
+      description: >
+        Confirms all PAYMENT_PENDING orders, marks payments as VERIFIED.
+        If no unpaid orders remain, sessions are deleted and the table is
+        auto-cleaned (auto_closed=true).
+      security: [{ adminPin: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/AdminVerifyRequest" }
+      responses:
+        "200":
+          description: Verification result
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/AdminVerifyResponse" }
+        "404":
+          description: No pending payments found
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+
+  /admin/close:
+    post:
+      tags: [Admin]
+      summary: Close a table (paid or abandoned)
+      description: >
+        - `paid`: confirms all active orders as revenue, creates VERIFIED payments.
+        - `abandoned`: cancels all active orders, resets payments to NOT_PAID.
+        In both cases, sessions are deleted.
+      security: [{ adminPin: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/AdminCloseRequest" }
+      responses:
+        "200":
+          description: Table closed
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/AdminCloseResponse" }
+        "400":
+          description: Missing or invalid reason
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+
+  # =========================================================================
+  # FCM — Device registration
+  # =========================================================================
+  /devices/register:
+    post:
+      tags: [Devices]
+      summary: Register an FCM device token for push notifications
+      description: Used by the admin app after Firebase token retrieval.
+      security: [{ adminPin: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/RegisterDeviceRequest" }
+      responses:
+        "200":
+          description: Token registered
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/RegisterDeviceResponse" }

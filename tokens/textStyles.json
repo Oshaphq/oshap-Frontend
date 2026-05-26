@@ -1,0 +1,302 @@
+{
+  "fileName": "Oshap",
+  "textStyles": [
+    {
+      "name": "Paragraph/P1-Inter-Reg-400",
+      "fontFamily": "Inter",
+      "fontWeight": "Regular",
+      "fontSize": 16,
+      "letterSpacing": {
+        "unit": "PERCENT",
+        "value": -2
+      },
+      "textCase": "ORIGINAL"
+    },
+    {
+      "name": "Paragraph/P2-Inter-Reg-400",
+      "fontFamily": "Inter",
+      "fontWeight": "Regular",
+      "fontSize": 14,
+      "letterSpacing": {
+        "unit": "PERCENT",
+        "value": -2
+      },
+      "textCase": "ORIGINAL"
+    },
+    {
+      "name": "Paragraph/P2-Inter-S-Bold-400",
+      "fontFamily": "Inter",
+      "fontWeight": "Semi Bold",
+      "fontSize": 14,
+      "letterSpacing": {
+        "unit": "PERCENT",
+        "value": -2
+      },
+      "textCase": "ORIGINAL"
+    },
+    {
+      "name": "Paragraph/P3-Inter-Reg-400",
+      "fontFamily": "Inter",
+      "fontWeight": "Regular",
+      "fontSize": 12,
+      "letterSpacing": {
+        "unit": "PERCENT",
+        "value": -2
+      },
+      "textCase": "ORIGINAL"
+    },
+    {
+      "name": "Label/L5-Inter-Reg-400",
+      "fontFamily": "Inter",
+      "fontWeight": "Regular",
+      "fontSize": 12,
+      "letterSpacing": {
+        "unit": "PERCENT",
+        "value": -2
+      },
+      "textCase": "ORIGINAL"
+    },
+    {
+      "name": "Label/L5-Inter-Semi-Bold-700",
+      "fontFamily": "Inter",
+      "fontWeight": "Semi Bold",
+      "fontSize": 12,
+      "letterSpacing": {
+        "unit": "PERCENT",
+        "value": 0.5
+      },
+      "textCase": "ORIGINAL"
+    },
+    {
+      "name": "Label/L4-Inter-Reg-400",
+      "fontFamily": "Inter",
+      "fontWeight": "Regular",
+      "fontSize": 14,
+      "letterSpacing": {
+        "unit": "PERCENT",
+        "value": -2
+      },
+      "textCase": "ORIGINAL"
+    },
+    {
+      "name": "Label/L4-Inter-Semi-Bold-700",
+      "fontFamily": "Inter",
+      "fontWeight": "Semi Bold",
+      "fontSize": 14,
+      "letterSpacing": {
+        "unit": "PERCENT",
+        "value": -2
+      },
+      "textCase": "ORIGINAL"
+    },
+    {
+      "name": "Label/L4-Inter-Med-500",
+      "fontFamily": "Inter",
+      "fontWeight": "Medium",
+      "fontSize": 14,
+      "letterSpacing": {
+        "unit": "PERCENT",
+        "value": 0
+      },
+      "textCase": "ORIGINAL"
+    },
+    {
+      "name": "Label/L4-Poppins-Semi-Bold-600",
+      "fontFamily": "Poppins",
+      "fontWeight": "SemiBold",
+      "fontSize": 14,
+      "letterSpacing": {
+        "unit": "PERCENT",
+        "value": 0
+      },
+      "textCase": "ORIGINAL"
+    },
+    {
+      "name": "Label/L3-Inter-Reg-400",
+      "fontFamily": "Inter",
+      "fontWeight": "Regular",
+      "fontSize": 16,
+      "letterSpacing": {
+        "unit": "PERCENT",
+        "value": -2
+      },
+      "textCase": "ORIGINAL"
+    },
+    {
+      "name": "Label/L3-Inter-Semi-Bold-700",
+      "fontFamily": "Inter",
+      "fontWeight": "Semi Bold",
+      "fontSize": 16,
+      "letterSpacing": {
+        "unit": "PERCENT",
+        "value": -2
+      },
+      "textCase": "ORIGINAL"
+    },
+    {
+      "name": "Label/L2-Inter-Reg-400",
+      "fontFamily": "Inter",
+      "fontWeight": "Regular",
+      "fontSize": 20,
+      "letterSpacing": {
+        "unit": "PERCENT",
+        "value": -2
+      },
+      "textCase": "ORIGINAL"
+    },
+    {
+      "name": "Label/L2-Inter-Semi-Bold-700",
+      "fontFamily": "Inter",
+      "fontWeight": "Semi Bold",
+      "fontSize": 20,
+      "letterSpacing": {
+        "unit": "PERCENT",
+        "value": -2
+      },
+      "textCase": "ORIGINAL"
+    },
+    {
+      "name": "Label/L1-Inter-Reg-400",
+      "fontFamily": "Inter",
+      "fontWeight": "Regular",
+      "fontSize": 24,
+      "letterSpacing": {
+        "unit": "PERCENT",
+        "value": -2
+      },
+      "textCase": "ORIGINAL"
+    },
+    {
+      "name": "Label/L1-Inter-Semi-Bold-700",
+      "fontFamily": "Inter",
+      "fontWeight": "Semi Bold",
+      "fontSize": 24,
+      "letterSpacing": {
+        "unit": "PERCENT",
+        "value": -2
+      },
+      "textCase": "ORIGINAL"
+    },
+    {
+      "name": "Display/H1-Poppins-Bold-700",
+      "fontFamily": "Poppins",
+      "fontWeight": "Bold",
+      "fontSize": 24,
+      "letterSpacing": {
+        "unit": "PERCENT",
+        "value": -2
+      },
+      "textCase": "ORIGINAL"
+    },
+    {
+      "name": "Display/H2-Poppins-Semi-Bold-600",
+      "fontFamily": "Poppins",
+      "fontWeight": "SemiBold",
+      "fontSize": 20,
+      "letterSpacing": {
+        "unit": "PERCENT",
+        "value": -2
+      },
+      "textCase": "ORIGINAL"
+    },
+    {
+      "name": "Display/H1-Poppins-Semi-Bold-700",
+      "fontFamily": "Poppins",
+      "fontWeight": "SemiBold",
+      "fontSize": 24,
+      "letterSpacing": {
+        "unit": "PERCENT",
+        "value": -2
+      },
+      "textCase": "ORIGINAL"
+    },
+    {
+      "name": "Display/H2-Poppins-Bold-600",
+      "fontFamily": "Poppins",
+      "fontWeight": "Bold",
+      "fontSize": 20,
+      "letterSpacing": {
+        "unit": "PERCENT",
+        "value": -2
+      },
+      "textCase": "ORIGINAL"
+    },
+    {
+      "name": "Display/H3-Poppins-Semi-Bold-600",
+      "fontFamily": "Poppins",
+      "fontWeight": "SemiBold",
+      "fontSize": 18,
+      "letterSpacing": {
+        "unit": "PERCENT",
+        "value": -1
+      },
+      "textCase": "ORIGINAL"
+    },
+    {
+      "name": "Display/H4-Poppins-Semi-Bold-600",
+      "fontFamily": "Poppins",
+      "fontWeight": "SemiBold",
+      "fontSize": 16,
+      "letterSpacing": {
+        "unit": "PERCENT",
+        "value": -1
+      },
+      "textCase": "ORIGINAL"
+    },
+    {
+      "name": "Caption/C2-Inter-Med-500",
+      "fontFamily": "Inter",
+      "fontWeight": "Medium",
+      "fontSize": 10,
+      "letterSpacing": {
+        "unit": "PERCENT",
+        "value": -2
+      },
+      "textCase": "ORIGINAL"
+    },
+    {
+      "name": "Caption/C1-Inter-Reg-400",
+      "fontFamily": "Inter",
+      "fontWeight": "Regular",
+      "fontSize": 12,
+      "letterSpacing": {
+        "unit": "PERCENT",
+        "value": 0
+      },
+      "textCase": "ORIGINAL"
+    },
+    {
+      "name": "emphasized/display/large",
+      "fontFamily": "Space Grotesk",
+      "fontWeight": "Medium",
+      "fontSize": 56,
+      "letterSpacing": {
+        "unit": "PIXELS",
+        "value": -1.75
+      },
+      "textCase": "ORIGINAL"
+    },
+    {
+      "name": "emphasized/display/medium",
+      "fontFamily": "Space Grotesk",
+      "fontWeight": "Medium",
+      "fontSize": 44,
+      "letterSpacing": {
+        "unit": "PIXELS",
+        "value": -1.5
+      },
+      "textCase": "ORIGINAL"
+    },
+    {
+      "name": "emphasized/display/small",
+      "fontFamily": "Space Grotesk",
+      "fontWeight": "Medium",
+      "fontSize": 36,
+      "letterSpacing": {
+        "unit": "PIXELS",
+        "value": -1.25
+      },
+      "textCase": "ORIGINAL"
+    }
+  ]
+}

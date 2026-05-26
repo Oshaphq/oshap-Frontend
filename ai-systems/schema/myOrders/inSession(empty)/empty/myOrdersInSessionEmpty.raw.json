@@ -1,0 +1,1196 @@
+{
+    "version": "1.0.0",
+    "source": {
+        "fileName": "Oshap",
+        "selection": [
+            "2020:56"
+        ],
+        "extractedAt": "2026-05-26T03:58:45.167Z"
+    },
+    "tokens": {
+        "colors": {
+            "surfacecolors-surface-container-low": "#FFFFFF",
+            "textcolors-primary-text": "#343234",
+            "textcolors-secondary-text": "#827D82",
+            "primarycolors-primary": "#F56500",
+            "surfacecolors-surface-container": "#F0EFF0",
+            "successcolors-success": "#009966",
+            "outlinecolors-outline-variant": "#CCC9CF",
+            "primarycolors-on-primary": "#FFFFFF",
+            "surfacecolors-on-surface-variant": "#1A181B"
+        },
+        "typography": {
+            "display-h2-poppins-semi-bold-600": {
+                "fontWeight": 600,
+                "fontSize": 20,
+                "lineHeight": 24,
+                "letterSpacing": -2
+            },
+            "label-l5-inter-reg-400": {
+                "fontWeight": 400,
+                "fontSize": 12,
+                "lineHeight": 14,
+                "letterSpacing": -2
+            },
+            "label-l5-inter-semi-bold-700": {
+                "fontWeight": 600,
+                "fontSize": 12,
+                "lineHeight": 14,
+                "letterSpacing": 0.5
+            },
+            "display-h3-poppins-semi-bold-600": {
+                "fontWeight": 600,
+                "fontSize": 18,
+                "lineHeight": 22,
+                "letterSpacing": -1
+            },
+            "paragraph-p2-inter-reg-400": {
+                "fontWeight": 400,
+                "fontSize": 14,
+                "lineHeight": 20,
+                "letterSpacing": -2
+            },
+            "label-l3-inter-semi-bold-700": {
+                "fontWeight": 600,
+                "fontSize": 16,
+                "lineHeight": 20,
+                "letterSpacing": -2
+            },
+            "display-h4-poppins-semi-bold-600": {
+                "fontWeight": 600,
+                "fontSize": 16,
+                "lineHeight": 20,
+                "letterSpacing": -1
+            },
+            "label-l4-poppins-semi-bold-600": {
+                "fontWeight": 600,
+                "fontSize": 14,
+                "lineHeight": 16,
+                "letterSpacing": 0
+            },
+            "caption-c1-inter-med-500": {
+                "fontWeight": 500,
+                "fontSize": 12,
+                "lineHeight": 14,
+                "letterSpacing": 0
+            }
+        },
+        "spacing": {
+            "s": 8,
+            "spacing-2xs": 2
+        },
+        "radius": {
+            "radius-100": 100,
+            "s": 8
+        },
+        "shadows": {}
+    },
+    "components": [
+        {
+            "name": "NavItem",
+            "variants": [],
+            "instances": 2
+        },
+        {
+            "name": "Header",
+            "variants": [],
+            "instances": 1
+        },
+        {
+            "name": "HeaderLeft",
+            "variants": [],
+            "instances": 1
+        },
+        {
+            "name": "IconArrowLeft",
+            "variants": [],
+            "instances": 1
+        },
+        {
+            "name": "HeaderInfo",
+            "variants": [],
+            "instances": 1
+        },
+        {
+            "name": "TableBadge",
+            "variants": [],
+            "instances": 1
+        },
+        {
+            "name": "PinChip",
+            "variants": [],
+            "instances": 1
+        },
+        {
+            "name": "MyOrderSection(empty)",
+            "variants": [],
+            "instances": 1
+        },
+        {
+            "name": "Divider",
+            "variants": [],
+            "instances": 1
+        },
+        {
+            "name": "IconShoppingBag",
+            "variants": [],
+            "instances": 1
+        },
+        {
+            "name": "AddItemsFromTheMenuToPlaceYourOrder",
+            "variants": [],
+            "instances": 1
+        },
+        {
+            "name": "BrowseMenuButton",
+            "variants": [
+                "Property 1=Primary"
+            ],
+            "instances": 1
+        },
+        {
+            "name": "BrowseMenu",
+            "variants": [],
+            "instances": 1
+        },
+        {
+            "name": "BottomNav",
+            "variants": [
+                "ActiveTab=myOrders"
+            ],
+            "instances": 1
+        },
+        {
+            "name": "IconBook",
+            "variants": [],
+            "instances": 1
+        },
+        {
+            "name": "Menu",
+            "variants": [],
+            "instances": 1
+        },
+        {
+            "name": "NavItemActive",
+            "variants": [],
+            "instances": 1
+        },
+        {
+            "name": "IconUsers",
+            "variants": [],
+            "instances": 1
+        },
+        {
+            "name": "IconCard",
+            "variants": [],
+            "instances": 1
+        }
+    ],
+    "root": {
+        "id": "2020:56",
+        "kind": "screen",
+        "name": "MyOrdersInSession(empty)",
+        "width": 393,
+        "height": 852,
+        "position": "relational",
+        "layout": {
+            "direction": "vertical"
+        },
+        "style": {
+            "background": "surfacecolors-surface-container-low"
+        },
+        "children": [
+            {
+                "id": "2020:57",
+                "kind": "container",
+                "name": "Header",
+                "width": 393,
+                "height": 64,
+                "component": "Header",
+                "position": "relational",
+                "layout": {
+                    "direction": "horizontal",
+                    "padding": {
+                        "top": 16,
+                        "right": 16,
+                        "bottom": 8,
+                        "left": 16
+                    },
+                    "justifyContent": "space-between",
+                    "alignItems": "center"
+                },
+                "responsive": {
+                    "width": "hug"
+                },
+                "style": {
+                    "background": "surfacecolors-surface-container-low"
+                },
+                "children": [
+                    {
+                        "id": "2020:58",
+                        "kind": "container",
+                        "name": "HeaderLeft",
+                        "width": 155,
+                        "height": 40,
+                        "component": "HeaderLeft",
+                        "position": "relational",
+                        "layout": {
+                            "direction": "horizontal",
+                            "gap": "s",
+                            "alignItems": "center"
+                        },
+                        "responsive": {
+                            "width": "hug",
+                            "height": "hug"
+                        },
+                        "children": [
+                            {
+                                "id": "2020:59",
+                                "kind": "icon",
+                                "name": "BackButton",
+                                "width": 36,
+                                "height": 36,
+                                "position": "relational",
+                                "layout": {
+                                    "direction": "horizontal",
+                                    "justifyContent": "center",
+                                    "alignItems": "center"
+                                },
+                                "style": {
+                                    "borderRadius": "radius-100"
+                                },
+                                "semanticRole": "semantic",
+                                "signals": {
+                                    "nonInteractive": true
+                                },
+                                "context": {
+                                    "zIndex": -1,
+                                    "hierarchyDepth": 3
+                                }
+                            },
+                            {
+                                "id": "2020:63",
+                                "kind": "container",
+                                "name": "HeaderInfo",
+                                "width": 111,
+                                "height": 40,
+                                "component": "HeaderInfo",
+                                "position": "relational",
+                                "layout": {
+                                    "direction": "vertical",
+                                    "gap": "spacing-2xs"
+                                },
+                                "responsive": {
+                                    "width": "hug",
+                                    "height": "hug"
+                                },
+                                "children": [
+                                    {
+                                        "id": "2020:64",
+                                        "kind": "text",
+                                        "name": "My Orders",
+                                        "width": 101,
+                                        "height": 24,
+                                        "position": "relational",
+                                        "text": {
+                                            "content": "My Orders",
+                                            "typography": "display-h2-poppins-semi-bold-600",
+                                            "color": "textcolors-primary-text",
+                                            "textAlign": "left"
+                                        },
+                                        "semanticRole": "semantic",
+                                        "signals": {
+                                            "nonInteractive": true
+                                        },
+                                        "context": {
+                                            "zIndex": -1,
+                                            "hierarchyDepth": 4
+                                        }
+                                    },
+                                    {
+                                        "id": "2020:65",
+                                        "kind": "text",
+                                        "name": "Order id: 1234-5678",
+                                        "width": 111,
+                                        "height": 14,
+                                        "position": "relational",
+                                        "text": {
+                                            "content": "Order id: 1234-5678",
+                                            "typography": "label-l5-inter-reg-400",
+                                            "color": "textcolors-secondary-text",
+                                            "textAlign": "left"
+                                        },
+                                        "semanticRole": "semantic",
+                                        "signals": {
+                                            "nonInteractive": true
+                                        },
+                                        "context": {
+                                            "zIndex": -1,
+                                            "hierarchyDepth": 4
+                                        }
+                                    }
+                                ],
+                                "semanticRole": "structural",
+                                "signals": {
+                                    "nonInteractive": true
+                                },
+                                "context": {
+                                    "zIndex": -1,
+                                    "hierarchyDepth": 3
+                                }
+                            }
+                        ],
+                        "semanticRole": "structural",
+                        "signals": {
+                            "nonInteractive": true
+                        },
+                        "context": {
+                            "zIndex": -1,
+                            "hierarchyDepth": 2
+                        }
+                    },
+                    {
+                        "id": "2035:56",
+                        "kind": "component",
+                        "name": "TableBadge",
+                        "width": 85,
+                        "height": 38,
+                        "component": "TableBadge",
+                        "position": "relational",
+                        "layout": {
+                            "direction": "horizontal",
+                            "padding": {
+                                "top": 12,
+                                "right": 16,
+                                "bottom": 12,
+                                "left": 16
+                            },
+                            "alignItems": "center"
+                        },
+                        "responsive": {
+                            "width": "hug",
+                            "height": "hug"
+                        },
+                        "style": {
+                            "borderColor": "primarycolors-primary",
+                            "borderWidth": 1.2,
+                            "borderRadius": "radius-100"
+                        },
+                        "children": [
+                            {
+                                "id": "I2035:56;2035:50",
+                                "kind": "text",
+                                "name": "Table: T1",
+                                "width": 53,
+                                "height": 14,
+                                "position": "relational",
+                                "text": {
+                                    "content": "Table: T1",
+                                    "typography": "label-l5-inter-semi-bold-700",
+                                    "color": "primarycolors-primary",
+                                    "textAlign": "left"
+                                },
+                                "semanticRole": "semantic",
+                                "signals": {
+                                    "nonInteractive": true
+                                },
+                                "context": {
+                                    "zIndex": -1,
+                                    "insideComponent": true,
+                                    "hierarchyDepth": 3
+                                },
+                                "interaction": {
+                                    "insideInteractiveComponent": true
+                                }
+                            }
+                        ],
+                        "semanticRole": "interactive",
+                        "signals": {
+                            "interactive": true
+                        },
+                        "context": {
+                            "zIndex": -1,
+                            "insideComponent": true,
+                            "interactive": true,
+                            "hierarchyDepth": 2
+                        },
+                        "interaction": {
+                            "interactive": true,
+                            "insideInteractiveComponent": true
+                        }
+                    }
+                ],
+                "semanticRole": "structural",
+                "signals": {
+                    "nonInteractive": true
+                },
+                "context": {
+                    "zIndex": -1,
+                    "hierarchyDepth": 1
+                }
+            },
+            {
+                "id": "2020:68",
+                "kind": "container",
+                "name": "OrderTogether(session)",
+                "width": 393,
+                "height": 162,
+                "position": "relational",
+                "layout": {
+                    "direction": "horizontal",
+                    "padding": {
+                        "top": 24,
+                        "right": 16,
+                        "bottom": 24,
+                        "left": 16
+                    }
+                },
+                "responsive": {
+                    "width": "hug"
+                },
+                "style": {
+                    "background": "surfacecolors-surface-container-low",
+                    "borderColor": "surfacecolors-surface-container",
+                    "borderWidth": {
+                        "bottom": 6
+                    }
+                },
+                "children": [
+                    {
+                        "id": "2020:69",
+                        "kind": "container",
+                        "name": "Content",
+                        "width": 361,
+                        "height": 114,
+                        "position": "relational",
+                        "layout": {
+                            "direction": "vertical",
+                            "gap": "s"
+                        },
+                        "responsive": {
+                            "width": "hug"
+                        },
+                        "children": [
+                            {
+                                "id": "2020:70",
+                                "kind": "text",
+                                "name": "Order together",
+                                "width": 133,
+                                "height": 22,
+                                "position": "relational",
+                                "text": {
+                                    "content": "Order together",
+                                    "typography": "display-h3-poppins-semi-bold-600",
+                                    "color": "textcolors-primary-text",
+                                    "textAlign": "left"
+                                },
+                                "semanticRole": "semantic",
+                                "signals": {
+                                    "nonInteractive": true
+                                },
+                                "context": {
+                                    "zIndex": -1,
+                                    "hierarchyDepth": 3
+                                }
+                            },
+                            {
+                                "id": "2020:71",
+                                "kind": "text",
+                                "name": "Share PIN with your companions at table & order together.",
+                                "width": 361,
+                                "height": 40,
+                                "position": "relational",
+                                "text": {
+                                    "content": "Share PIN with your companions at table & order together.",
+                                    "typography": "paragraph-p2-inter-reg-400",
+                                    "color": "textcolors-secondary-text",
+                                    "textAlign": "left"
+                                },
+                                "semanticRole": "semantic",
+                                "signals": {
+                                    "nonInteractive": true
+                                },
+                                "context": {
+                                    "zIndex": -1,
+                                    "hierarchyDepth": 3
+                                }
+                            },
+                            {
+                                "id": "2035:85",
+                                "kind": "component",
+                                "name": "PinChip",
+                                "width": 152,
+                                "height": 36,
+                                "component": "PinChip",
+                                "position": "relational",
+                                "layout": {
+                                    "direction": "horizontal",
+                                    "padding": {
+                                        "top": 8,
+                                        "right": 16,
+                                        "bottom": 8,
+                                        "left": 16
+                                    },
+                                    "alignItems": "center"
+                                },
+                                "responsive": {
+                                    "width": "hug",
+                                    "height": "hug"
+                                },
+                                "style": {
+                                    "borderColor": "successcolors-success",
+                                    "borderWidth": 1.2,
+                                    "borderRadius": "s"
+                                },
+                                "children": [
+                                    {
+                                        "id": "I2035:85;2035:82",
+                                        "kind": "text",
+                                        "name": "Table PIN : 4821",
+                                        "width": 120,
+                                        "height": 20,
+                                        "position": "relational",
+                                        "text": {
+                                            "content": "Table PIN : 4821",
+                                            "typography": "label-l3-inter-semi-bold-700",
+                                            "color": "successcolors-success",
+                                            "textAlign": "left"
+                                        },
+                                        "semanticRole": "semantic",
+                                        "signals": {
+                                            "nonInteractive": true
+                                        },
+                                        "context": {
+                                            "zIndex": -1,
+                                            "insideComponent": true,
+                                            "hierarchyDepth": 4
+                                        },
+                                        "interaction": {
+                                            "insideInteractiveComponent": true
+                                        }
+                                    }
+                                ],
+                                "semanticRole": "interactive",
+                                "signals": {
+                                    "interactive": true
+                                },
+                                "context": {
+                                    "zIndex": -1,
+                                    "insideComponent": true,
+                                    "interactive": true,
+                                    "hierarchyDepth": 3
+                                },
+                                "interaction": {
+                                    "interactive": true,
+                                    "insideInteractiveComponent": true
+                                }
+                            }
+                        ],
+                        "semanticRole": "structural",
+                        "signals": {
+                            "nonInteractive": true
+                        },
+                        "context": {
+                            "zIndex": -1,
+                            "hierarchyDepth": 2
+                        }
+                    }
+                ],
+                "semanticRole": "structural",
+                "signals": {
+                    "nonInteractive": true
+                },
+                "context": {
+                    "zIndex": -1,
+                    "hierarchyDepth": 1
+                }
+            },
+            {
+                "id": "2020:82",
+                "kind": "container",
+                "name": "MyOrderSection(empty)",
+                "width": 393,
+                "height": 311,
+                "component": "MyOrderSection(empty)",
+                "position": "relational",
+                "layout": {
+                    "direction": "vertical",
+                    "gap": "s",
+                    "padding": {
+                        "top": 24,
+                        "right": 16,
+                        "bottom": 16,
+                        "left": 16
+                    }
+                },
+                "responsive": {
+                    "height": "hug"
+                },
+                "style": {
+                    "background": "surfacecolors-surface-container-low"
+                },
+                "children": [
+                    {
+                        "id": "2020:83",
+                        "kind": "text",
+                        "name": "Your Order",
+                        "width": 97,
+                        "height": 22,
+                        "position": "relational",
+                        "text": {
+                            "content": "Your Order",
+                            "typography": "display-h3-poppins-semi-bold-600",
+                            "color": "textcolors-primary-text",
+                            "textAlign": "left"
+                        },
+                        "semanticRole": "semantic",
+                        "signals": {
+                            "nonInteractive": true
+                        },
+                        "context": {
+                            "zIndex": -1,
+                            "hierarchyDepth": 2
+                        }
+                    },
+                    {
+                        "id": "2020:84",
+                        "kind": "rectangle",
+                        "name": "Divider",
+                        "width": 361,
+                        "height": 1,
+                        "component": "Divider",
+                        "position": "relational",
+                        "style": {
+                            "background": "outlinecolors-outline-variant"
+                        },
+                        "semanticRole": "structural",
+                        "signals": {
+                            "nonInteractive": true
+                        },
+                        "context": {
+                            "zIndex": -1,
+                            "hierarchyDepth": 2
+                        }
+                    },
+                    {
+                        "id": "2020:85",
+                        "kind": "container",
+                        "name": "EmptyState",
+                        "width": 361,
+                        "height": 232,
+                        "position": "relational",
+                        "layout": {
+                            "direction": "vertical",
+                            "gap": "s",
+                            "padding": {
+                                "top": 40,
+                                "right": 16,
+                                "bottom": 40,
+                                "left": 16
+                            },
+                            "justifyContent": "center",
+                            "alignItems": "center"
+                        },
+                        "responsive": {
+                            "height": "hug"
+                        },
+                        "children": [
+                            {
+                                "id": "2020:86",
+                                "kind": "icon",
+                                "name": "IconShoppingBag",
+                                "width": 48,
+                                "height": 48,
+                                "component": "IconShoppingBag",
+                                "position": "relational",
+                                "layout": {
+                                    "direction": "stack"
+                                },
+                                "semanticRole": "semantic",
+                                "signals": {
+                                    "nonInteractive": true
+                                },
+                                "context": {
+                                    "zIndex": -1,
+                                    "hierarchyDepth": 3
+                                }
+                            },
+                            {
+                                "id": "2020:90",
+                                "kind": "text",
+                                "name": "No orders yet",
+                                "width": 107,
+                                "height": 20,
+                                "position": "relational",
+                                "text": {
+                                    "content": "No orders yet",
+                                    "typography": "display-h4-poppins-semi-bold-600",
+                                    "color": "textcolors-primary-text",
+                                    "textAlign": "left"
+                                },
+                                "semanticRole": "semantic",
+                                "signals": {
+                                    "nonInteractive": true
+                                },
+                                "context": {
+                                    "zIndex": -1,
+                                    "hierarchyDepth": 3
+                                }
+                            },
+                            {
+                                "id": "2020:91",
+                                "kind": "text",
+                                "name": "AddItemsFromTheMenuToPlaceYourOrder",
+                                "width": 288,
+                                "height": 20,
+                                "component": "AddItemsFromTheMenuToPlaceYourOrder",
+                                "position": "relational",
+                                "text": {
+                                    "content": "Add items from the menu to place your order.",
+                                    "typography": "paragraph-p2-inter-reg-400",
+                                    "color": "textcolors-secondary-text",
+                                    "textAlign": "center"
+                                },
+                                "semanticRole": "semantic",
+                                "signals": {
+                                    "nonInteractive": true
+                                },
+                                "context": {
+                                    "zIndex": -1,
+                                    "hierarchyDepth": 3
+                                }
+                            },
+                            {
+                                "id": "2035:39",
+                                "kind": "component",
+                                "name": "BrowseMenuButton",
+                                "width": 143,
+                                "height": 40,
+                                "component": "BrowseMenuButton",
+                                "variant": {
+                                    "Property 1": "Primary"
+                                },
+                                "position": "relational",
+                                "layout": {
+                                    "direction": "horizontal",
+                                    "padding": {
+                                        "top": 12,
+                                        "right": 24,
+                                        "bottom": 12,
+                                        "left": 24
+                                    },
+                                    "justifyContent": "center",
+                                    "alignItems": "center"
+                                },
+                                "responsive": {
+                                    "width": "hug",
+                                    "height": "hug"
+                                },
+                                "style": {
+                                    "background": "primarycolors-primary",
+                                    "borderRadius": "s"
+                                },
+                                "children": [
+                                    {
+                                        "id": "I2035:39;2035:20",
+                                        "kind": "text",
+                                        "name": "BrowseMenu",
+                                        "width": 95,
+                                        "height": 16,
+                                        "component": "BrowseMenu",
+                                        "position": "relational",
+                                        "text": {
+                                            "content": "Browse Menu",
+                                            "typography": "label-l4-poppins-semi-bold-600",
+                                            "color": "primarycolors-on-primary",
+                                            "textAlign": "left"
+                                        },
+                                        "semanticRole": "semantic",
+                                        "signals": {
+                                            "nonInteractive": true
+                                        },
+                                        "context": {
+                                            "zIndex": -1,
+                                            "insideComponent": true,
+                                            "hierarchyDepth": 4
+                                        },
+                                        "interaction": {
+                                            "insideInteractiveComponent": true
+                                        }
+                                    }
+                                ],
+                                "semanticRole": "interactive",
+                                "signals": {
+                                    "interactive": true
+                                },
+                                "context": {
+                                    "zIndex": -1,
+                                    "insideComponent": true,
+                                    "interactive": true,
+                                    "hierarchyDepth": 3
+                                },
+                                "interaction": {
+                                    "interactive": true,
+                                    "insideInteractiveComponent": true
+                                }
+                            }
+                        ],
+                        "semanticRole": "structural",
+                        "signals": {
+                            "nonInteractive": true
+                        },
+                        "context": {
+                            "zIndex": -1,
+                            "hierarchyDepth": 2
+                        }
+                    }
+                ],
+                "semanticRole": "structural",
+                "signals": {
+                    "nonInteractive": true
+                },
+                "context": {
+                    "zIndex": -1,
+                    "hierarchyDepth": 1
+                }
+            },
+            {
+                "id": "2035:219",
+                "kind": "component",
+                "name": "BottomNav",
+                "width": 393,
+                "height": 64,
+                "component": "BottomNav",
+                "variant": {
+                    "ActiveTab": "myOrders"
+                },
+                "position": "absolute",
+                "layout": {
+                    "direction": "horizontal",
+                    "padding": {
+                        "top": 0,
+                        "right": 24,
+                        "bottom": 0,
+                        "left": 24
+                    },
+                    "justifyContent": "space-between",
+                    "alignItems": "center"
+                },
+                "responsive": {
+                    "width": "fill"
+                },
+                "style": {
+                    "background": "surfacecolors-surface-container-low",
+                    "borderColor": "outlinecolors-outline-variant",
+                    "borderWidth": {
+                        "top": 1
+                    }
+                },
+                "absolute": {
+                    "top": 788,
+                    "left": 0,
+                    "right": 0,
+                    "bottom": 0
+                },
+                "constraints": {
+                    "horizontal": "stretch",
+                    "vertical": "bottom"
+                },
+                "children": [
+                    {
+                        "id": "I2035:219;2035:134",
+                        "kind": "container",
+                        "name": "NavItem",
+                        "width": 65,
+                        "height": 46,
+                        "component": "NavItem",
+                        "position": "relational",
+                        "layout": {
+                            "direction": "vertical",
+                            "gap": "spacing-2xs",
+                            "padding": {
+                                "top": 4,
+                                "right": 16,
+                                "bottom": 4,
+                                "left": 16
+                            },
+                            "justifyContent": "center",
+                            "alignItems": "center"
+                        },
+                        "responsive": {
+                            "width": "hug",
+                            "height": "hug"
+                        },
+                        "children": [
+                            {
+                                "id": "I2035:219;2035:135",
+                                "kind": "icon",
+                                "name": "IconBook",
+                                "width": 22,
+                                "height": 22,
+                                "component": "IconBook",
+                                "position": "relational",
+                                "semanticRole": "semantic",
+                                "signals": {
+                                    "nonInteractive": true
+                                },
+                                "context": {
+                                    "zIndex": -1,
+                                    "insideComponent": true,
+                                    "hierarchyDepth": 3
+                                },
+                                "interaction": {
+                                    "insideInteractiveComponent": true
+                                }
+                            },
+                            {
+                                "id": "I2035:219;2035:137",
+                                "kind": "text",
+                                "name": "Menu",
+                                "width": 33,
+                                "height": 14,
+                                "component": "Menu",
+                                "position": "relational",
+                                "text": {
+                                    "content": "Menu",
+                                    "typography": "caption-c1-inter-med-500",
+                                    "color": "surfacecolors-on-surface-variant",
+                                    "textAlign": "left"
+                                },
+                                "semanticRole": "semantic",
+                                "signals": {
+                                    "nonInteractive": true
+                                },
+                                "context": {
+                                    "zIndex": -1,
+                                    "insideComponent": true,
+                                    "hierarchyDepth": 3
+                                },
+                                "interaction": {
+                                    "insideInteractiveComponent": true
+                                }
+                            }
+                        ],
+                        "semanticRole": "structural",
+                        "signals": {
+                            "nonInteractive": true
+                        },
+                        "context": {
+                            "zIndex": -1,
+                            "insideComponent": true,
+                            "hierarchyDepth": 2
+                        },
+                        "interaction": {
+                            "insideInteractiveComponent": true
+                        }
+                    },
+                    {
+                        "id": "I2035:219;2035:138",
+                        "kind": "container",
+                        "name": "NavItemActive",
+                        "width": 92,
+                        "height": 46,
+                        "component": "NavItemActive",
+                        "position": "relational",
+                        "layout": {
+                            "direction": "vertical",
+                            "gap": "spacing-2xs",
+                            "padding": {
+                                "top": 4,
+                                "right": 16,
+                                "bottom": 4,
+                                "left": 16
+                            },
+                            "justifyContent": "center",
+                            "alignItems": "center"
+                        },
+                        "responsive": {
+                            "width": "hug",
+                            "height": "hug"
+                        },
+                        "children": [
+                            {
+                                "id": "I2035:219;2035:139",
+                                "kind": "icon",
+                                "name": "IconUsers",
+                                "width": 22,
+                                "height": 22,
+                                "component": "IconUsers",
+                                "position": "relational",
+                                "layout": {
+                                    "direction": "stack"
+                                },
+                                "semanticRole": "semantic",
+                                "signals": {
+                                    "nonInteractive": true
+                                },
+                                "context": {
+                                    "zIndex": -1,
+                                    "insideComponent": true,
+                                    "hierarchyDepth": 3
+                                },
+                                "interaction": {
+                                    "insideInteractiveComponent": true
+                                }
+                            },
+                            {
+                                "id": "I2035:219;2035:144",
+                                "kind": "text",
+                                "name": "My Orders",
+                                "width": 60,
+                                "height": 14,
+                                "position": "relational",
+                                "text": {
+                                    "content": "My Orders",
+                                    "typography": "caption-c1-inter-med-500",
+                                    "color": "primarycolors-primary",
+                                    "textAlign": "left"
+                                },
+                                "semanticRole": "semantic",
+                                "signals": {
+                                    "nonInteractive": true
+                                },
+                                "context": {
+                                    "zIndex": -1,
+                                    "insideComponent": true,
+                                    "hierarchyDepth": 3
+                                },
+                                "interaction": {
+                                    "insideInteractiveComponent": true
+                                }
+                            }
+                        ],
+                        "semanticRole": "structural",
+                        "signals": {
+                            "nonInteractive": true
+                        },
+                        "context": {
+                            "zIndex": -1,
+                            "insideComponent": true,
+                            "hierarchyDepth": 2
+                        },
+                        "interaction": {
+                            "insideInteractiveComponent": true
+                        }
+                    },
+                    {
+                        "id": "I2035:219;2035:145",
+                        "kind": "container",
+                        "name": "NavItem",
+                        "width": 74,
+                        "height": 46,
+                        "component": "NavItem",
+                        "position": "relational",
+                        "layout": {
+                            "direction": "vertical",
+                            "gap": "spacing-2xs",
+                            "padding": {
+                                "top": 4,
+                                "right": 16,
+                                "bottom": 4,
+                                "left": 16
+                            },
+                            "justifyContent": "center",
+                            "alignItems": "center"
+                        },
+                        "responsive": {
+                            "width": "hug",
+                            "height": "hug"
+                        },
+                        "children": [
+                            {
+                                "id": "I2035:219;2035:146",
+                                "kind": "icon",
+                                "name": "IconCard",
+                                "width": 22,
+                                "height": 22,
+                                "component": "IconCard",
+                                "position": "relational",
+                                "layout": {
+                                    "direction": "stack"
+                                },
+                                "semanticRole": "semantic",
+                                "signals": {
+                                    "nonInteractive": true
+                                },
+                                "context": {
+                                    "zIndex": -1,
+                                    "insideComponent": true,
+                                    "hierarchyDepth": 3
+                                },
+                                "interaction": {
+                                    "insideInteractiveComponent": true
+                                }
+                            },
+                            {
+                                "id": "I2035:219;2035:149",
+                                "kind": "text",
+                                "name": "Pay Bill",
+                                "width": 42,
+                                "height": 14,
+                                "position": "relational",
+                                "text": {
+                                    "content": "Pay Bill",
+                                    "typography": "caption-c1-inter-med-500",
+                                    "color": "surfacecolors-on-surface-variant",
+                                    "textAlign": "left"
+                                },
+                                "semanticRole": "semantic",
+                                "signals": {
+                                    "nonInteractive": true
+                                },
+                                "context": {
+                                    "zIndex": -1,
+                                    "insideComponent": true,
+                                    "hierarchyDepth": 3
+                                },
+                                "interaction": {
+                                    "insideInteractiveComponent": true
+                                }
+                            }
+                        ],
+                        "semanticRole": "structural",
+                        "signals": {
+                            "nonInteractive": true
+                        },
+                        "context": {
+                            "zIndex": -1,
+                            "insideComponent": true,
+                            "hierarchyDepth": 2
+                        },
+                        "interaction": {
+                            "insideInteractiveComponent": true
+                        }
+                    }
+                ],
+                "semanticRole": "interactive",
+                "signals": {
+                    "interactive": true,
+                    "foregroundLayer": true,
+                    "edgeAttached": true
+                },
+                "context": {
+                    "position": "bottom-edge",
+                    "zIndex": -1,
+                    "insideComponent": true,
+                    "interactive": true,
+                    "hierarchyDepth": 1
+                },
+                "layoutRelationship": {
+                    "edgeAttached": true
+                },
+                "interaction": {
+                    "interactive": true,
+                    "insideInteractiveComponent": true
+                }
+            }
+        ],
+        "semanticRole": "structural",
+        "signals": {
+            "nonInteractive": true
+        },
+        "context": {
+            "zIndex": -1
+        }
+    }
+}

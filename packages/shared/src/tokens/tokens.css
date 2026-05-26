@@ -1,0 +1,586 @@
+/*
+ * Oshap design tokens — ported from /tokens/*.json into Tailwind v4 @theme.
+ *
+ * Token tiers:
+ *   1. Color roles (raw scales: primary-50, secondary-30, etc.)
+ *   2. Semantic colors (primary, on-primary, surface, etc.) — swap on dark mode
+ *   3. Spacing, radius, typography (responsive)
+ *
+ * Dark mode strategy: every semantic color is `@theme inline` referencing a
+ * `--ds-*` variable that swaps based on [data-theme="dark"] on <html>. This
+ * means `bg-primary`, `text-on-surface`, etc. just work — no `dark:` prefix
+ * needed in markup.
+ *
+ * Mobile typography: the `--ds-h*` size/line-height vars swap inside a
+ * (max-width: 768px) media query so `text-h1` resolves smaller on phones.
+ */
+
+@custom-variant dark (&:where([data-theme="dark"], [data-theme="dark"] *));
+
+/* ===========================================================================
+ * Tier 1 + 2: Tailwind theme tokens (utility classes)
+ * ========================================================================= */
+@theme inline {
+  /* ---------- Font families ---------- */
+  --font-sans: "Inter", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-display: "Poppins", system-ui, sans-serif;
+  --font-emphasized: "Space Grotesk", system-ui, sans-serif;
+
+  /* ---------- Color roles (raw scales) ---------- */
+  --color-primary-0: #000000;
+  --color-primary-1: #050200;
+  --color-primary-10: #331500;
+  --color-primary-20: #662a00;
+  --color-primary-30: #993f00;
+  --color-primary-40: #cc5400;
+  --color-primary-50: #f56500;
+  --color-primary-60: #ff8733;
+  --color-primary-70: #ffa566;
+  --color-primary-80: #ffc399;
+  --color-primary-90: #ffe1cc;
+  --color-primary-95: #fff3eb;
+  --color-primary-98: #fff9f5;
+  --color-primary-99: #fffcfa;
+  --color-primary-100: #ffffff;
+
+  --color-secondary-0: #000000;
+  --color-secondary-10: #231610;
+  --color-secondary-20: #462c20;
+  --color-secondary-30: #6a422f;
+  --color-secondary-40: #8d583f;
+  --color-secondary-50: #b06e4f;
+  --color-secondary-60: #bc846a;
+  --color-secondary-70: #d0a895;
+  --color-secondary-80: #dfc5b9;
+  --color-secondary-90: #efe2dc;
+  --color-secondary-95: #f7f0ed;
+  --color-secondary-98: #fcf9f8;
+  --color-secondary-99: #fdfcfb;
+  --color-secondary-100: #ffffff;
+
+  --color-tertiary-0: #000000;
+  --color-tertiary-10: #25230e;
+  --color-tertiary-15: #383414;
+  --color-tertiary-20: #4b451b;
+  --color-tertiary-30: #706829;
+  --color-tertiary-40: #9e9239;
+  --color-tertiary-50: #bbad44;
+  --color-tertiary-60: #c9be69;
+  --color-tertiary-70: #d6ce8f;
+  --color-tertiary-80: #e4deb4;
+  --color-tertiary-90: #f1efda;
+  --color-tertiary-95: #f8f7ec;
+  --color-tertiary-98: #fcfcf8;
+  --color-tertiary-99: #fefdfb;
+  --color-tertiary-100: #ffffff;
+
+  --color-error-0: #000000;
+  --color-error-10: #2f0407;
+  --color-error-20: #5f070d;
+  --color-error-30: #8e0b14;
+  --color-error-40: #bd0f1b;
+  --color-error-50: #ec1322;
+  --color-error-60: #f0424e;
+  --color-error-70: #f4717a;
+  --color-error-80: #f8a0a6;
+  --color-error-90: #fbd0d3;
+  --color-error-95: #fde7e9;
+  --color-error-98: #fef6f6;
+  --color-error-99: #fffafb;
+  --color-error-100: #ffffff;
+
+  --color-success-0: #000000;
+  --color-success-10: #003322;
+  --color-success-20: #006644;
+  --color-success-30: #009966;
+  --color-success-40: #00cc88;
+  --color-success-50: #00ffaa;
+  --color-success-60: #33ffbb;
+  --color-success-70: #66ffcc;
+  --color-success-80: #99ffdd;
+  --color-success-90: #ccffee;
+  --color-success-95: #e5fff6;
+  --color-success-98: #f5fffc;
+  --color-success-99: #fafffd;
+  --color-success-100: #ffffff;
+
+  --color-warning-0: #000000;
+  --color-warning-10: #654301;
+  --color-warning-20: #654301;
+  --color-warning-30: #8e5d01;
+  --color-warning-40: #a36b01;
+  --color-warning-50: #fda602;
+  --color-warning-60: #feb834;
+  --color-warning-70: #feca67;
+  --color-warning-80: #fedc9a;
+  --color-warning-90: #ffedcc;
+  --color-warning-95: #fff6e6;
+  --color-warning-98: #fffbf5;
+  --color-warning-99: #fffdfa;
+  --color-warning-100: #ffffff;
+
+  --color-neutral-0: #000000;
+  --color-neutral-10: #1a191a;
+  --color-neutral-20: #343234;
+  --color-neutral-30: #4e4b4e;
+  --color-neutral-40: #615d61;
+  --color-neutral-50: #827d82;
+  --color-neutral-60: #9b979b;
+  --color-neutral-70: #b4b1b4;
+  --color-neutral-80: #cdcbcd;
+  --color-neutral-90: #e6e5e6;
+  --color-neutral-95: #f2f2f2;
+  --color-neutral-98: #fafafa;
+  --color-neutral-99: #fcfcfc;
+  --color-neutral-100: #ffffff;
+
+  --color-neutral-variant-0: #000000;
+  --color-neutral-variant-10: #1a181b;
+  --color-neutral-variant-20: #343036;
+  --color-neutral-variant-30: #4d4950;
+  --color-neutral-variant-40: #625c66;
+  --color-neutral-variant-50: #817986;
+  --color-neutral-variant-60: #9a949e;
+  --color-neutral-variant-70: #b3aeb6;
+  --color-neutral-variant-80: #ccc9cf;
+  --color-neutral-variant-90: #e6e4e7;
+  --color-neutral-variant-95: #f2f2f3;
+  --color-neutral-variant-98: #fafafa;
+  --color-neutral-variant-99: #fcfcfd;
+  --color-neutral-variant-100: #ffffff;
+
+  --color-accent-0: #000000;
+  --color-accent-10: #332900;
+  --color-accent-20: #665200;
+  --color-accent-30: #997b00;
+  --color-accent-40: #cca400;
+  --color-accent-50: #ffcd00;
+  --color-accent-60: #ffd733;
+  --color-accent-70: #ffe166;
+  --color-accent-80: #ffeb99;
+  --color-accent-90: #fff5cc;
+  --color-accent-95: #fffae5;
+  --color-accent-98: #fffdf5;
+  --color-accent-99: #fffefa;
+  --color-accent-100: #ffffff;
+
+  --color-accent-2-0: #000000;
+  --color-accent-2-10: #190a29;
+  --color-accent-2-20: #311353;
+  --color-accent-2-30: #4a1d7c;
+  --color-accent-2-40: #5f259f;
+  --color-accent-2-50: #7c30cf;
+  --color-accent-2-60: #965ad8;
+  --color-accent-2-70: #b083e2;
+  --color-accent-2-80: #caacec;
+  --color-accent-2-90: #e5d6f5;
+  --color-accent-2-95: #f2eafa;
+  --color-accent-2-98: #faf7fd;
+  --color-accent-2-99: #fcfbfe;
+  --color-accent-2-100: #ffffff;
+
+  /* ---------- Semantic colors (light/dark via --ds-* indirection) ---------- */
+  --color-primary: var(--ds-primary);
+  --color-primary-10a: var(--ds-primary-10a);
+  --color-on-primary: var(--ds-on-primary);
+  --color-on-primary-10a: var(--ds-on-primary-10a);
+  --color-on-primary-20a: var(--ds-on-primary-20a);
+  --color-primary-container: var(--ds-primary-container);
+  --color-on-primary-container: var(--ds-on-primary-container);
+  --color-inverse-primary: var(--ds-inverse-primary);
+  --color-primary-fixed: var(--ds-primary-fixed);
+  --color-on-primary-fixed: var(--ds-on-primary-fixed);
+  --color-primary-fixed-dim: var(--ds-primary-fixed-dim);
+  --color-on-primary-fixed-variant: var(--ds-on-primary-fixed-variant);
+
+  --color-secondary: var(--ds-secondary);
+  --color-on-secondary: var(--ds-on-secondary);
+  --color-secondary-container: var(--ds-secondary-container);
+  --color-on-secondary-container: var(--ds-on-secondary-container);
+  --color-on-secondary-container-10a: var(--ds-on-secondary-container-10a);
+  --color-secondary-fixed: var(--ds-secondary-fixed);
+  --color-on-secondary-fixed: var(--ds-on-secondary-fixed);
+  --color-secondary-fixed-dim: var(--ds-secondary-fixed-dim);
+  --color-on-secondary-fixed-variant: var(--ds-on-secondary-fixed-variant);
+
+  --color-tertiary: var(--ds-tertiary);
+  --color-on-tertiary: var(--ds-on-tertiary);
+  --color-tertiary-container: var(--ds-tertiary-container);
+  --color-on-tertiary-container: var(--ds-on-tertiary-container);
+  --color-tertiary-fixed: var(--ds-tertiary-fixed);
+  --color-on-tertiary-fixed: var(--ds-on-tertiary-fixed);
+  --color-tertiary-dim-lowest: var(--ds-tertiary-dim-lowest);
+  --color-tertiary-dim-low: var(--ds-tertiary-dim-low);
+  --color-tertiary-fixed-dim: var(--ds-tertiary-fixed-dim);
+  --color-tertiary-fixed-dim-10a: var(--ds-tertiary-fixed-dim-10a);
+  --color-tertiary-fixed-dim-20a: var(--ds-tertiary-fixed-dim-20a);
+  --color-on-tertiary-fixed-variant: var(--ds-on-tertiary-fixed-variant);
+
+  --color-error: var(--ds-error);
+  --color-on-error: var(--ds-on-error);
+  --color-error-container: var(--ds-error-container);
+  --color-on-error-container: var(--ds-on-error-container);
+
+  --color-success: var(--ds-success);
+  --color-on-success: var(--ds-on-success);
+  --color-success-container: var(--ds-success-container);
+  --color-on-success-container: var(--ds-on-success-container);
+
+  --color-warning: var(--ds-warning);
+  --color-on-warning: var(--ds-on-warning);
+  --color-warning-container: var(--ds-warning-container);
+  --color-on-warning-container: var(--ds-on-warning-container);
+
+  --color-surface-tint: var(--ds-surface-tint);
+  --color-surface: var(--ds-surface);
+  --color-on-surface: var(--ds-on-surface);
+  --color-primary-text: var(--ds-primary-text);
+  --color-secondary-text: var(--ds-secondary-text);
+  --color-on-surface-disabled: var(--ds-on-surface-disabled);
+  --color-on-surface-label-disabled: var(--ds-on-surface-label-disabled);
+  --color-surface-variant: var(--ds-surface-variant);
+  --color-on-surface-variant: var(--ds-on-surface-variant);
+  --color-on-surface-variant-10a: var(--ds-on-surface-variant-10a);
+  --color-inverse-surface: var(--ds-inverse-surface);
+  --color-inverse-on-surface: var(--ds-inverse-on-surface);
+  --color-surface-dim: var(--ds-surface-dim);
+  --color-surface-bright: var(--ds-surface-bright);
+  --color-surface-container-lowest: var(--ds-surface-container-lowest);
+  --color-surface-container-low: var(--ds-surface-container-low);
+  --color-surface-container: var(--ds-surface-container);
+  --color-surface-container-high: var(--ds-surface-container-high);
+  --color-surface-container-highest: var(--ds-surface-container-highest);
+
+  --color-outline: var(--ds-outline);
+  --color-outline-variant: var(--ds-outline-variant);
+  --color-shadow: var(--ds-shadow);
+  --color-scrim: var(--ds-scrim);
+
+  /* ---------- Spacing (responsive via --ds-spacing-* swap) ---------- */
+  --spacing-xs: var(--ds-spacing-xs);
+  --spacing-s: var(--ds-spacing-s);
+  --spacing-md: var(--ds-spacing-md);
+  --spacing-l: var(--ds-spacing-l);
+  --spacing-xl: var(--ds-spacing-xl);
+  --spacing-2xl: var(--ds-spacing-2xl);
+  --spacing-3xl: var(--ds-spacing-3xl);
+  --spacing-4xl: var(--ds-spacing-4xl);
+  --spacing-5xl: var(--ds-spacing-5xl);
+  --spacing-7xl: var(--ds-spacing-7xl);
+  --spacing-8xl: var(--ds-spacing-8xl);
+  --spacing-9xl: var(--ds-spacing-9xl);
+  --spacing-10xl: var(--ds-spacing-10xl);
+  --spacing-11xl: var(--ds-spacing-11xl);
+
+  /* ---------- Radius ---------- */
+  --radius-xs: 4px;
+  --radius-s: 8px;
+  --radius-md: 16px;
+  --radius-l: 24px;
+  --radius-xl: 32px;
+  --radius-2xl: 40px;
+  --radius-3xl: 48px;
+  --radius-4xl: 100px;
+  /*
+   * Tailwind v4 reserves single-letter suffixes (s, e, l, r, t, b) for
+   * directional utilities. `rounded-s` / `rounded-l` get shadowed by
+   * `border-start-start-radius` / `border-left-radius` and only round one
+   * side. Workarounds:
+   *   8px  → use `rounded-sm` (overridden below) or `rounded-lg` (Tailwind default)
+   *   24px → use `rounded-[24px]` arbitrary value (no safe Tailwind name maps to 24px;
+   *          `rounded-lg` keeps its 8px default so existing chip/pill styles stay intact)
+   * Directional+size forms like `rounded-t-l` still work — the size segment
+   * is parsed after the direction prefix.
+   */
+  --radius-sm: 8px;
+
+  /* ---------- Typography (font sizes — responsive via --ds-* swap) ---------- */
+  --text-h1: var(--ds-h1-size);
+  --text-h1--line-height: var(--ds-h1-line-height);
+  --text-h1--letter-spacing: -1.75px;
+  --text-h2: var(--ds-h2-size);
+  --text-h2--line-height: var(--ds-h2-line-height);
+  --text-h2--letter-spacing: -1.75px;
+  --text-h3: var(--ds-h3-size);
+  --text-h3--line-height: var(--ds-h3-line-height);
+  --text-h3--letter-spacing: -1.5px;
+  --text-h4: var(--ds-h4-size);
+  --text-h4--line-height: var(--ds-h4-line-height);
+  --text-h4--letter-spacing: -1px;
+  --text-h5: 24px;
+  --text-h5--line-height: 28px;
+  --text-h5--letter-spacing: -0.75px;
+  --text-h6: 20px;
+  --text-h6--line-height: 24px;
+  --text-h6--letter-spacing: -0.5px;
+  --text-p: 16px;
+  --text-p--line-height: 20px;
+  --text-p--letter-spacing: -0.5px;
+  --text-caption-md: 14px;
+  --text-caption-md--line-height: 16px;
+  --text-caption-md--letter-spacing: -0.5px;
+  --text-caption-sm: 12px;
+  --text-caption-sm--line-height: 14px;
+  --text-caption-sm--letter-spacing: -0.25px;
+  --text-caption-xs: 10px;
+  --text-caption-xs--line-height: 12px;
+  --text-caption-xs--letter-spacing: -0.25px;
+
+  /* Text style aliases from textStyles.json (Figma) */
+  --text-p1: 16px;
+  --text-p1--line-height: 20px;
+  --text-p1--letter-spacing: -0.02em;
+  --text-p2: 14px;
+  --text-p2--line-height: 18px;
+  --text-p2--letter-spacing: -0.02em;
+  --text-p3: 12px;
+  --text-p3--line-height: 16px;
+  --text-p3--letter-spacing: -0.02em;
+  --text-label-l1: 24px;
+  --text-label-l1--line-height: 28px;
+  --text-label-l1--letter-spacing: -0.02em;
+  --text-label-l2: 20px;
+  --text-label-l2--line-height: 24px;
+  --text-label-l2--letter-spacing: -0.02em;
+  --text-label-l3: 16px;
+  --text-label-l3--line-height: 20px;
+  --text-label-l3--letter-spacing: -0.02em;
+  --text-label-l4: 14px;
+  --text-label-l4--line-height: 18px;
+  --text-label-l4--letter-spacing: -0.02em;
+  --text-label-l4-medium: 14px;
+  --text-label-l4-medium--line-height: 16px;
+  --text-label-l4-medium--font-weight: 500;
+  --text-label-l4-medium--letter-spacing: 0;
+  --text-label-l5: 12px;
+  --text-label-l5--line-height: 16px;
+  --text-label-l5--letter-spacing: -0.02em;
+  --text-display-h1: 24px;
+  --text-display-h1--line-height: 28px;
+  --text-display-h1--letter-spacing: -0.02em;
+  --text-display-h2: 20px;
+  --text-display-h2--line-height: 24px;
+  --text-display-h2--letter-spacing: -0.02em;
+  --text-display-h3: 18px;
+  --text-display-h3--line-height: 22px;
+  --text-display-h3--letter-spacing: -0.01em;
+  --text-display-h4: 16px;
+  --text-display-h4--line-height: 20px;
+  --text-display-h4--letter-spacing: -0.01em;
+  --text-caption-c1: 12px;
+  --text-caption-c1--line-height: 16px;
+  --text-caption-c1-medium: 12px;
+  --text-caption-c1-medium--line-height: 16px;
+  --text-caption-c1-medium--font-weight: 500;
+  --text-caption-c2: 10px;
+  --text-caption-c2--line-height: 12px;
+  --text-emphasized-lg: 56px;
+  --text-emphasized-lg--line-height: 64px;
+  --text-emphasized-lg--letter-spacing: -1.75px;
+  --text-emphasized-md: 44px;
+  --text-emphasized-md--line-height: 52px;
+  --text-emphasized-md--letter-spacing: -1.5px;
+  --text-emphasized-sm: 36px;
+  --text-emphasized-sm--line-height: 44px;
+  --text-emphasized-sm--letter-spacing: -1.25px;
+}
+
+/* ===========================================================================
+ * --ds-* indirection layer — light defaults + dark override + mobile swap
+ * ========================================================================= */
+:root {
+  /* Semantic colors — light mode */
+  --ds-primary: #f56500;
+  --ds-primary-10a: #ff69001a;
+  --ds-on-primary: #ffffff;
+  --ds-on-primary-10a: #ffffff1a;
+  --ds-on-primary-20a: #ffffff33;
+  --ds-primary-container: #ffe1cc;
+  --ds-on-primary-container: #993f00;
+  --ds-inverse-primary: #ffc399;
+  --ds-primary-fixed: #ffe1cc;
+  --ds-on-primary-fixed: #331500;
+  --ds-primary-fixed-dim: #ffc399;
+  --ds-on-primary-fixed-variant: #993f00;
+
+  --ds-secondary: #b06e4f;
+  --ds-on-secondary: #ffffff;
+  --ds-secondary-container: #efe2dc;
+  --ds-on-secondary-container: #6a422f;
+  --ds-on-secondary-container-10a: #6a422f1a;
+  --ds-secondary-fixed: #efe2dc;
+  --ds-on-secondary-fixed: #231610;
+  --ds-secondary-fixed-dim: #dfc5b9;
+  --ds-on-secondary-fixed-variant: #6a422f;
+
+  --ds-tertiary: #9e9239;
+  --ds-on-tertiary: #ffffff;
+  --ds-tertiary-container: #f1efda;
+  --ds-on-tertiary-container: #706829;
+  --ds-tertiary-fixed: #f1efda;
+  --ds-on-tertiary-fixed: #25230e;
+  --ds-tertiary-dim-lowest: #25230e;
+  --ds-tertiary-dim-low: #383414;
+  --ds-tertiary-fixed-dim: #e4deb4;
+  --ds-tertiary-fixed-dim-10a: #e4deb41a;
+  --ds-tertiary-fixed-dim-20a: #e4deb433;
+  --ds-on-tertiary-fixed-variant: #706829;
+
+  --ds-error: #ec1322;
+  --ds-on-error: #ffffff;
+  --ds-error-container: #fbd0d3;
+  --ds-on-error-container: #8e0b14;
+
+  --ds-success: #009966;
+  --ds-on-success: #ffffff;
+  --ds-success-container: #ccffee;
+  --ds-on-success-container: #009966;
+
+  --ds-warning: #a36b01;
+  --ds-on-warning: #ffffff;
+  --ds-warning-container: #ffedcc;
+  --ds-on-warning-container: #8e5d01;
+
+  --ds-surface-tint: #f56500;
+  --ds-surface: #f2f2f2;
+  --ds-on-surface: #343234;
+  --ds-primary-text: #343234;
+  --ds-secondary-text: #827d82;
+  --ds-on-surface-disabled: #3432341a;
+  --ds-on-surface-label-disabled: #34323461;
+  --ds-surface-variant: #e6e4e7;
+  --ds-on-surface-variant: #1a181b;
+  --ds-on-surface-variant-10a: #1a181b1a;
+  --ds-inverse-surface: #343234;
+  --ds-inverse-on-surface: #f2f2f2;
+  --ds-surface-dim: #e6e5e6;
+  --ds-surface-bright: #fafafa;
+  --ds-surface-container-lowest: #ffffff;
+  --ds-surface-container-low: #ffffff;
+  --ds-surface-container: #f0eff0;
+  --ds-surface-container-high: #ebeaeb;
+  --ds-surface-container-highest: #e6e5e6;
+
+  --ds-outline: #817986;
+  --ds-outline-variant: #ccc9cf;
+  --ds-shadow: #00000052;
+  --ds-scrim: #00000052;
+
+  /* Spacing — desktop defaults (also valid on mobile since values match) */
+  --ds-spacing-xs: 4px;
+  --ds-spacing-s: 8px;
+  --ds-spacing-md: 16px;
+  --ds-spacing-l: 24px;
+  --ds-spacing-xl: 32px;
+  --ds-spacing-2xl: 40px;
+  --ds-spacing-3xl: 48px;
+  --ds-spacing-4xl: 56px;
+  --ds-spacing-5xl: 64px;
+  --ds-spacing-7xl: 72px;
+  --ds-spacing-8xl: 80px;
+  --ds-spacing-9xl: 88px;
+  --ds-spacing-10xl: 96px;
+  --ds-spacing-11xl: 128px;
+
+  /* Headings — desktop sizes */
+  --ds-h1-size: 60px;
+  --ds-h1-line-height: 72px;
+  --ds-h2-size: 48px;
+  --ds-h2-line-height: 56px;
+  --ds-h3-size: 40px;
+  --ds-h3-line-height: 48px;
+  --ds-h4-size: 32px;
+  --ds-h4-line-height: 38px;
+}
+
+[data-theme="dark"] {
+  --ds-primary: #f56500;
+  --ds-primary-10a: #ffc3991a;
+  --ds-on-primary: #ffffff;
+  --ds-on-primary-10a: #ffffff1a;
+  --ds-on-primary-20a: #ffffff33;
+  --ds-primary-container: #331500;
+  --ds-on-primary-container: #ffe1cc;
+  --ds-inverse-primary: #ffc399;
+  --ds-primary-fixed: #ffe1cc;
+  --ds-on-primary-fixed: #331500;
+  --ds-primary-fixed-dim: #ffc399;
+  --ds-on-primary-fixed-variant: #993f00;
+
+  --ds-secondary: #dfc5b9;
+  --ds-on-secondary: #462c20;
+  --ds-secondary-container: #6a422f;
+  --ds-on-secondary-container: #efe2dc;
+  --ds-on-secondary-container-10a: #efe2dc1a;
+  --ds-secondary-fixed: #efe2dc;
+  --ds-on-secondary-fixed: #231610;
+  --ds-secondary-fixed-dim: #dfc5b9;
+  --ds-on-secondary-fixed-variant: #6a422f;
+
+  --ds-tertiary: #e4deb4;
+  --ds-on-tertiary: #4b451b;
+  --ds-tertiary-container: #706829;
+  --ds-on-tertiary-container: #f1efda;
+  --ds-tertiary-fixed: #f1efda;
+  --ds-on-tertiary-fixed: #25230e;
+  --ds-tertiary-dim-lowest: #f1efda;
+  --ds-tertiary-dim-low: #383414;
+  --ds-tertiary-fixed-dim: #e4deb4;
+  --ds-tertiary-fixed-dim-10a: #e4deb41a;
+  --ds-tertiary-fixed-dim-20a: #e4deb433;
+  --ds-on-tertiary-fixed-variant: #706829;
+
+  --ds-error: #f8a0a6;
+  --ds-on-error: #5f070d;
+  --ds-error-container: #8e0b14;
+  --ds-on-error-container: #fbd0d3;
+
+  --ds-success: #99ffdd;
+  --ds-on-success: #006644;
+  --ds-success-container: #009966;
+  --ds-on-success-container: #ccffee;
+
+  --ds-warning: #fedc9a;
+  --ds-on-warning: #654301;
+  --ds-warning-container: #8e5d01;
+  --ds-on-warning-container: #ffedcc;
+
+  --ds-surface-tint: #ffc399;
+  --ds-surface: #050200;
+  --ds-on-surface: #e6e5e6;
+  --ds-primary-text: #f2f2f2;
+  --ds-secondary-text: #cdcbcd;
+  --ds-on-surface-disabled: #e6e5e61a;
+  --ds-on-surface-label-disabled: #e6e5e661;
+  --ds-surface-variant: #4d4950;
+  --ds-on-surface-variant: #ccc9cf;
+  --ds-on-surface-variant-10a: #ccc9cf1a;
+  --ds-inverse-surface: #e6e5e6;
+  --ds-inverse-on-surface: #343234;
+  --ds-surface-dim: #1a191a;
+  --ds-surface-bright: #4e4b4e;
+  --ds-surface-container-lowest: #0a0a0a;
+  --ds-surface-container-low: #1a191a;
+  --ds-surface-container: #1f1e1f;
+  --ds-surface-container-high: #2c2b2c;
+  --ds-surface-container-highest: #393739;
+
+  --ds-outline: #9a949e;
+  --ds-outline-variant: #4d4950;
+  --ds-shadow: #00000052;
+  --ds-scrim: #00000052;
+}
+
+/* Mobile heading sizes — spacing already matches desktop in source JSON. */
+@media (max-width: 768px) {
+  :root {
+    --ds-h1-size: 48px;
+    --ds-h1-line-height: 56px;
+    --ds-h2-size: 40px;
+    --ds-h2-line-height: 48px;
+    --ds-h3-size: 32px;
+    --ds-h3-line-height: 38px;
+    --ds-h4-size: 28px;
+    --ds-h4-line-height: 34px;
+  }
+}

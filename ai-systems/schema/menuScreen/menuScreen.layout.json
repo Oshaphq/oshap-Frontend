@@ -1,0 +1,480 @@
+{
+  "screen": "menuScreen",
+  "width": 393,
+  "height": 852,
+  "direction": "vertical",
+  "background": "var(--color-surface)",
+  "layout": [
+    {
+      "name": "Header",
+      "kind": "container",
+      "direction": "horizontal",
+      "justifyContent": "space-between",
+      "alignItems": "center",
+      "padding": {
+        "token": "m",
+        "value": 16
+      },
+      "background": "var(--color-surface-container-low)",
+      "border": {
+        "bottom": {
+          "width": 1,
+          "color": "var(--color-outline-variant)"
+        }
+      },
+      "sticky": true,
+      "children": [
+        {
+          "name": "HeaderLeft",
+          "kind": "container",
+          "direction": "horizontal",
+          "gap": {
+            "token": "s",
+            "value": 8
+          },
+          "alignItems": "center",
+          "children": [
+            {
+              "name": "RestaurantName",
+              "kind": "text",
+              "content": "Aji's Kitchen",
+              "typography": "display-h1-poppins-bold-700",
+              "color": "var(--color-primary-text)",
+              "signals": [
+                "nonInteractive"
+              ]
+            },
+            {
+              "name": "TableBadge",
+              "kind": "component",
+              "component": "Badge",
+              "direction": "horizontal",
+              "padding": {
+                "token": "s",
+                "value": 8
+              },
+              "alignItems": "center",
+              "background": "var(--color-primary-container)",
+              "borderRadius": {
+                "token": "s",
+                "value": 8
+              },
+              "content": {
+                "kind": "text",
+                "content": "Table: T1",
+                "typography": "label-l5-inter-semi-bold-700",
+                "color": "var(--color-on-primary-container)"
+              },
+              "signals": [
+                "interactive"
+              ]
+            }
+          ]
+        },
+        {
+          "name": "SearchButton",
+          "kind": "button",
+          "size": 40,
+          "background": "var(--color-surface-container)",
+          "borderRadius": {
+            "token": "radius-100",
+            "value": 100
+          },
+          "content": {
+            "kind": "icon",
+            "icon": "search",
+            "size": 20,
+            "color": "var(--color-on-surface-variant)"
+          },
+          "signals": [
+            "interactive"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "CategoriesWrapper",
+      "kind": "container",
+      "direction": "horizontal",
+      "padding": {
+        "top": 0,
+        "right": 16,
+        "bottom": 0,
+        "left": 16
+      },
+      "background": "var(--color-surface-container-low)",
+      "border": {
+        "bottom": {
+          "width": 1,
+          "color": "var(--color-outline-variant)"
+        }
+      },
+      "children": [
+        {
+          "name": "CategoryTabs",
+          "kind": "container",
+          "direction": "horizontal",
+          "padding": {
+            "top": 16,
+            "right": 0,
+            "bottom": 16,
+            "left": 0
+          },
+          "justifyContent": "space-between",
+          "gap": 0,
+          "children": [
+            {
+              "name": "Tab",
+              "variant": "active",
+              "label": "All",
+              "typography": "label-l4-inter-med-500",
+              "background": "var(--color-primary)",
+              "color": "var(--color-on-primary)",
+              "borderRadius": {
+                "token": "radius-100",
+                "value": 100
+              },
+              "padding": {
+                "top": 8,
+                "right": 16,
+                "bottom": 8,
+                "left": 16
+              },
+              "signals": [
+                "interactive"
+              ]
+            },
+            {
+              "name": "Tab",
+              "variant": "inactive",
+              "label": "Meals",
+              "typography": "label-l4-inter-med-500",
+              "background": "var(--color-surface-container)",
+              "color": "var(--color-on-surface-variant)",
+              "borderRadius": {
+                "token": "radius-100",
+                "value": 100
+              },
+              "padding": {
+                "top": 8,
+                "right": 16,
+                "bottom": 8,
+                "left": 16
+              },
+              "signals": [
+                "interactive"
+              ]
+            },
+            {
+              "name": "Tab",
+              "variant": "inactive",
+              "label": "Grills",
+              "typography": "label-l4-inter-med-500",
+              "background": "var(--color-surface-container)",
+              "color": "var(--color-on-surface-variant)",
+              "borderRadius": {
+                "token": "radius-100",
+                "value": 100
+              },
+              "padding": {
+                "top": 8,
+                "right": 16,
+                "bottom": 8,
+                "left": 16
+              },
+              "signals": [
+                "interactive"
+              ]
+            },
+            {
+              "name": "Tab",
+              "variant": "inactive",
+              "label": "Drinks",
+              "typography": "label-l4-inter-med-500",
+              "background": "var(--color-surface-container)",
+              "color": "var(--color-on-surface-variant)",
+              "borderRadius": {
+                "token": "radius-100",
+                "value": 100
+              },
+              "padding": {
+                "top": 8,
+                "right": 16,
+                "bottom": 8,
+                "left": 16
+              },
+              "signals": [
+                "interactive"
+              ]
+            },
+            {
+              "name": "Tab",
+              "variant": "inactive",
+              "label": "Sides",
+              "typography": "label-l4-inter-med-500",
+              "background": "var(--color-surface-container)",
+              "color": "var(--color-on-surface-variant)",
+              "borderRadius": {
+                "token": "radius-100",
+                "value": 100
+              },
+              "padding": {
+                "top": 8,
+                "right": 16,
+                "bottom": 8,
+                "left": 16
+              },
+              "signals": [
+                "interactive"
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "MenuSection",
+      "kind": "container",
+      "direction": "vertical",
+      "gap": {
+        "token": "m",
+        "value": 16
+      },
+      "padding": {
+        "token": "m",
+        "value": 16
+      },
+      "children": [
+        {
+          "name": "SectionTitle",
+          "kind": "text",
+          "content": "Full Menu",
+          "typography": "display-h2-poppins-semi-bold-600",
+          "color": "var(--color-primary-text)",
+          "signals": [
+            "nonInteractive"
+          ]
+        },
+        {
+          "name": "ItemsList",
+          "kind": "container",
+          "direction": "vertical",
+          "gap": {
+            "token": "s",
+            "value": 8
+          },
+          "template": {
+            "component": "MenuCard",
+            "repeat": true,
+            "shape": {
+              "direction": "horizontal",
+              "gap": {
+                "token": "m",
+                "value": 16
+              },
+              "padding": {
+                "token": "m",
+                "value": 16
+              },
+              "background": "var(--color-surface-container-low)",
+              "borderRadius": {
+                "token": "radius-xl",
+                "value": 16
+              },
+              "border": {
+                "bottom": {
+                  "width": 1,
+                  "color": "var(--color-outline-variant)/30"
+                }
+              },
+              "children": {
+                "Image": {
+                  "kind": "image",
+                  "width": 96,
+                  "height": 96,
+                  "background": "var(--color-primary-container)",
+                  "borderRadius": {
+                    "token": "s",
+                    "value": 8
+                  },
+                  "placeholder": true
+                },
+                "Details": {
+                  "direction": "vertical",
+                  "gap": {
+                    "token": "s",
+                    "value": 8
+                  },
+                  "children": {
+                    "Top": {
+                      "direction": "vertical",
+                      "gap": {
+                        "token": "xs",
+                        "value": 4
+                      },
+                      "children": {
+                        "Name": {
+                          "kind": "text",
+                          "typography": "label-l3-inter-semi-bold-700",
+                          "color": "var(--color-primary-text)"
+                        },
+                        "Description": {
+                          "kind": "text",
+                          "typography": "paragraph-p2-inter-reg-400",
+                          "color": "var(--color-secondary-text)",
+                          "maxLines": 2
+                        }
+                      }
+                    },
+                    "Footer": {
+                      "direction": "horizontal",
+                      "justifyContent": "space-between",
+                      "alignItems": "center",
+                      "children": {
+                        "Price": {
+                          "kind": "text",
+                          "typography": "label-l3-inter-semi-bold-700",
+                          "color": "var(--color-primary-text)"
+                        },
+                        "AddButton": {
+                          "kind": "button",
+                          "label": "ADD",
+                          "typography": "label-l4-poppins-semi-bold-600",
+                          "color": "var(--color-primary)",
+                          "borderColor": "var(--color-primary)",
+                          "borderWidth": 2,
+                          "borderRadius": {
+                            "token": "s",
+                            "value": 8
+                          },
+                          "padding": {
+                            "top": 8,
+                            "right": 24,
+                            "bottom": 8,
+                            "left": 24
+                          },
+                          "signals": [
+                            "interactive"
+                          ]
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "BottomNav",
+      "kind": "component",
+      "component": "BottomNav",
+      "direction": "horizontal",
+      "justifyContent": "space-between",
+      "alignItems": "center",
+      "padding": {
+        "top": 0,
+        "right": 24,
+        "bottom": 0,
+        "left": 24
+      },
+      "height": 64,
+      "background": "var(--color-surface-container-low)",
+      "border": {
+        "top": {
+          "width": 1,
+          "color": "var(--color-outline-variant)"
+        }
+      },
+      "position": "fixed",
+      "attachedTo": "bottom",
+      "signals": [
+        "edgeAttached",
+        "foregroundLayer",
+        "interactive"
+      ],
+      "children": [
+        {
+          "name": "NavMenu",
+          "variant": "active",
+          "label": "Menu",
+          "icon": "book",
+          "iconColor": "var(--color-primary)",
+          "labelColor": "var(--color-primary)",
+          "layout": {
+            "direction": "vertical",
+            "gap": {
+              "token": "spacing-2xs",
+              "value": 2
+            },
+            "padding": {
+              "top": 4,
+              "right": 16,
+              "bottom": 4,
+              "left": 16
+            },
+            "alignItems": "center",
+            "justifyContent": "center"
+          },
+          "signals": [
+            "interactive"
+          ]
+        },
+        {
+          "name": "NavOrders",
+          "variant": "inactive",
+          "label": "My Orders",
+          "icon": "users",
+          "iconColor": "var(--color-on-surface-variant)",
+          "labelColor": "var(--color-on-surface-variant)",
+          "layout": {
+            "direction": "vertical",
+            "gap": {
+              "token": "spacing-2xs",
+              "value": 2
+            },
+            "padding": {
+              "top": 4,
+              "right": 16,
+              "bottom": 4,
+              "left": 16
+            },
+            "alignItems": "center",
+            "justifyContent": "center"
+          },
+          "signals": [
+            "interactive"
+          ]
+        },
+        {
+          "name": "NavPay",
+          "variant": "inactive",
+          "label": "Pay Bill",
+          "icon": "card",
+          "iconColor": "var(--color-on-surface-variant)",
+          "labelColor": "var(--color-on-surface-variant)",
+          "layout": {
+            "direction": "vertical",
+            "gap": {
+              "token": "spacing-2xs",
+              "value": 2
+            },
+            "padding": {
+              "top": 4,
+              "right": 16,
+              "bottom": 4,
+              "left": 16
+            },
+            "alignItems": "center",
+            "justifyContent": "center"
+          },
+          "signals": [
+            "interactive"
+          ]
+        }
+      ]
+    }
+  ]
+}

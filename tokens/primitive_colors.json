@@ -1,0 +1,969 @@
+{
+  "Key colors": {
+    "Primary": {
+      "value": "#f56500",
+      "type": "color",
+      "prefix": "primitive_colors"
+    },
+    "Secondary": {
+      "value": "#b06e4f",
+      "type": "color",
+      "prefix": "primitive_colors"
+    },
+    "Tertiary": {
+      "value": "#bbad44",
+      "type": "color",
+      "prefix": "primitive_colors"
+    },
+    "Neutral": {
+      "value": "#615d61",
+      "type": "color",
+      "prefix": "primitive_colors"
+    },
+    "Neutral Variant": {
+      "value": "#625c66",
+      "type": "color",
+      "prefix": "primitive_colors"
+    },
+    "Success": {
+      "value": "#00875a",
+      "type": "color",
+      "prefix": "primitive_colors"
+    },
+    "Warning": {
+      "value": "#a36b01",
+      "type": "color",
+      "prefix": "primitive_colors"
+    },
+    "Error": {
+      "value": "#ef3340",
+      "type": "color",
+      "prefix": "primitive_colors"
+    },
+    "Accent": {
+      "value": "#ffcd00",
+      "type": "color",
+      "prefix": "primitive_colors"
+    },
+    "Accent 2": {
+      "value": "#5f259f",
+      "type": "color",
+      "prefix": "primitive_colors"
+    }
+  },
+  "primary": {
+    "Primary0": {
+      "value": "#000000",
+      "type": "color",
+      "prefix": "primitive_colors"
+    },
+    "Primary1": {
+      "value": "#050200",
+      "type": "color",
+      "prefix": "primitive_colors"
+    },
+    "Primary10": {
+      "value": "#331500",
+      "type": "color",
+      "prefix": "primitive_colors"
+    },
+    "Primary20": {
+      "value": "#662a00",
+      "type": "color",
+      "prefix": "primitive_colors"
+    },
+    "Primary30": {
+      "value": "#993f00",
+      "type": "color",
+      "prefix": "primitive_colors"
+    },
+    "Primary40": {
+      "value": "#cc5400",
+      "type": "color",
+      "prefix": "primitive_colors"
+    },
+    "Primary50": {
+      "value": "#f56500",
+      "type": "color",
+      "prefix": "primitive_colors"
+    },
+    "Primary60": {
+      "value": "#ff8733",
+      "type": "color",
+      "prefix": "primitive_colors"
+    },
+    "Primary70": {
+      "value": "#ffa566",
+      "type": "color",
+      "prefix": "primitive_colors"
+    },
+    "Primary80": {
+      "value": "#ffc399",
+      "type": "color",
+      "prefix": "primitive_colors"
+    },
+    "Primary90": {
+      "value": "#ffe1cc",
+      "type": "color",
+      "prefix": "primitive_colors"
+    },
+    "Primary95": {
+      "value": "#fff3eb",
+      "type": "color",
+      "prefix": "primitive_colors"
+    },
+    "Primary98": {
+      "value": "#fff9f5",
+      "type": "color",
+      "prefix": "primitive_colors"
+    },
+    "Primary99": {
+      "value": "#fffcfa",
+      "type": "color",
+      "prefix": "primitive_colors"
+    },
+    "Primary100": {
+      "value": "#ffffff",
+      "type": "color",
+      "prefix": "primitive_colors"
+    },
+    "Primary40(20%)": {
+      "value": "#ff690033",
+      "type": "color",
+      "prefix": "primitive_colors"
+    },
+    "Primary40(10%)": {
+      "value": "#ff69001a",
+      "type": "color",
+      "prefix": "primitive_colors"
+    },
+    "Primary80(20%)": {
+      "value": "#ffc39933",
+      "type": "color",
+      "prefix": "primitive_colors"
+    },
+    "Primary80(10%)": {
+      "value": "#ffc3991a",
+      "type": "color",
+      "prefix": "primitive_colors"
+    }
+  },
+  "secondary": {
+    "Secondary0": {
+      "value": "#000000",
+      "type": "color",
+      "prefix": "primitive_colors"
+    },
+    "Secondary10": {
+      "value": "#231610",
+      "type": "color",
+      "prefix": "primitive_colors"
+    },
+    "Secondary20": {
+      "value": "#462c20",
+      "type": "color",
+      "prefix": "primitive_colors"
+    },
+    "Secondary30": {
+      "value": "#6a422f",
+      "type": "color",
+      "prefix": "primitive_colors"
+    },
+    "Secondary40": {
+      "value": "#8d583f",
+      "type": "color",
+      "prefix": "primitive_colors"
+    },
+    "Secondary50": {
+      "value": "#b06e4f",
+      "type": "color",
+      "prefix": "primitive_colors"
+    },
+    "Secondary60": {
+      "value": "#bc846a",
+      "type": "color",
+      "prefix": "primitive_colors"
+    },
+    "Secondary70": {
+      "value": "#d0a895",
+      "type": "color",
+      "prefix": "primitive_colors"
+    },
+    "Secondary80": {
+      "value": "#dfc5b9",
+      "type": "color",
+      "prefix": "primitive_colors"
+    },
+    "Secondary90": {
+      "value": "#efe2dc",
+      "type": "color",
+      "prefix": "primitive_colors"
+    },
+    "Secondary95": {
+      "value": "#f7f0ed",
+      "type": "color",
+      "prefix": "primitive_colors"
+    },
+    "Secondary98": {
+      "value": "#fcf9f8",
+      "type": "color",
+      "prefix": "primitive_colors"
+    },
+    "Secondary99": {
+      "value": "#fdfcfb",
+      "type": "color",
+      "prefix": "primitive_colors"
+    },
+    "Secondary100": {
+      "value": "#ffffff",
+      "type": "color",
+      "prefix": "primitive_colors"
+    }
+  },
+  "tertiary": {
+    "Tertiary0": {
+      "value": "#000000",
+      "type": "color",
+      "prefix": "primitive_colors"
+    },
+    "Tertiary10": {
+      "value": "#25230e",
+      "type": "color",
+      "prefix": "primitive_colors"
+    },
+    "Tertiary20": {
+      "value": "#4b451b",
+      "type": "color",
+      "prefix": "primitive_colors"
+    },
+    "Tertiary30": {
+      "value": "#706829",
+      "type": "color",
+      "prefix": "primitive_colors"
+    },
+    "Tertiary40": {
+      "value": "#9e9239",
+      "type": "color",
+      "prefix": "primitive_colors"
+    },
+    "Tertiary50": {
+      "value": "#bbad44",
+      "type": "color",
+      "prefix": "primitive_colors"
+    },
+    "Tertiary60": {
+      "value": "#c9be69",
+      "type": "color",
+      "prefix": "primitive_colors"
+    },
+    "Tertiary70": {
+      "value": "#d6ce8f",
+      "type": "color",
+      "prefix": "primitive_colors"
+    },
+    "Tertiary80": {
+      "value": "#e4deb4",
+      "type": "color",
+      "prefix": "primitive_colors"
+    },
+    "Tertiary90": {
+      "value": "#f1efda",
+      "type": "color",
+      "prefix": "primitive_colors"
+    },
+    "Tertiary95": {
+      "value": "#f8f7ec",
+      "type": "color",
+      "prefix": "primitive_colors"
+    },
+    "Tertiary98": {
+      "value": "#fcfcf8",
+      "type": "color",
+      "prefix": "primitive_colors"
+    },
+    "Tertiary99": {
+      "value": "#fefdfb",
+      "type": "color",
+      "prefix": "primitive_colors"
+    },
+    "Tertiary100": {
+      "value": "#ffffff",
+      "type": "color",
+      "prefix": "primitive_colors"
+    },
+    "Tertiary40(20%)": {
+      "value": "#9e923933",
+      "type": "color",
+      "prefix": "primitive_colors"
+    },
+    "Tertiary40(10%)": {
+      "value": "#9e92391a",
+      "type": "color",
+      "prefix": "primitive_colors"
+    },
+    "Tertiary80(20%)": {
+      "value": "#e4deb433",
+      "type": "color",
+      "prefix": "primitive_colors"
+    },
+    "Tertiary80(10%)": {
+      "value": "#e4deb41a",
+      "type": "color",
+      "prefix": "primitive_colors"
+    }
+  },
+  "neutral": {
+    "Neutral0": {
+      "value": "#000000",
+      "type": "color",
+      "prefix": "primitive_colors"
+    },
+    "Neutral10": {
+      "value": "#1a191a",
+      "type": "color",
+      "prefix": "primitive_colors"
+    },
+    "Neutral10(20%)": {
+      "value": "#1a191a33",
+      "type": "color",
+      "prefix": "primitive_colors"
+    },
+    "Neutral20": {
+      "value": "#343234",
+      "type": "color",
+      "prefix": "primitive_colors"
+    },
+    "Neutral20(92%)": {
+      "value": "#343234eb",
+      "type": "color",
+      "prefix": "primitive_colors"
+    },
+    "Neutral30": {
+      "value": "#4e4b4e",
+      "type": "color",
+      "prefix": "primitive_colors"
+    },
+    "Neutral40": {
+      "value": "#615d61",
+      "type": "color",
+      "prefix": "primitive_colors"
+    },
+    "Neutral50": {
+      "value": "#827d82",
+      "type": "color",
+      "prefix": "primitive_colors"
+    },
+    "Neutral60": {
+      "value": "#9b979b",
+      "type": "color",
+      "prefix": "primitive_colors"
+    },
+    "Neutral70": {
+      "value": "#b4b1b4",
+      "type": "color",
+      "prefix": "primitive_colors"
+    },
+    "Neutral80": {
+      "value": "#cdcbcd",
+      "type": "color",
+      "prefix": "primitive_colors"
+    },
+    "Neutral80(76%)": {
+      "value": "#cdcbcdc2",
+      "type": "color",
+      "prefix": "primitive_colors"
+    },
+    "Neutral90": {
+      "value": "#e6e5e6",
+      "type": "color",
+      "prefix": "primitive_colors"
+    },
+    "Neutral90(10%)": {
+      "value": "#e6e5e61a",
+      "type": "color",
+      "prefix": "primitive_colors"
+    },
+    "Neutral90(38%)": {
+      "value": "#e6e5e661",
+      "type": "color",
+      "prefix": "primitive_colors"
+    },
+    "Neutral95": {
+      "value": "#f2f2f2",
+      "type": "color",
+      "prefix": "primitive_colors"
+    },
+    "Neutral95(50%)": {
+      "value": "#f2f2f280",
+      "type": "color",
+      "prefix": "primitive_colors"
+    },
+    "Neutral98": {
+      "value": "#fafafa",
+      "type": "color",
+      "prefix": "primitive_colors"
+    },
+    "Neutral99": {
+      "value": "#fcfcfc",
+      "type": "color",
+      "prefix": "primitive_colors"
+    },
+    "Neutral100": {
+      "value": "#ffffff",
+      "type": "color",
+      "prefix": "primitive_colors"
+    },
+    "Neutral100(20%)": {
+      "value": "#ffffff33",
+      "type": "color",
+      "prefix": "primitive_colors"
+    },
+    "Neutral20(10%)": {
+      "value": "#3432341a",
+      "type": "color",
+      "prefix": "primitive_colors"
+    },
+    "Neutral20(38%)": {
+      "value": "#34323461",
+      "type": "color",
+      "prefix": "primitive_colors"
+    },
+    "Neutral10(50%)": {
+      "value": "#1a191a80",
+      "type": "color",
+      "prefix": "primitive_colors"
+    }
+  },
+  "neutralVariant": {
+    "Neutral Variant0": {
+      "value": "#000000",
+      "type": "color",
+      "prefix": "primitive_colors"
+    },
+    "Neutral Variant10": {
+      "value": "#1a181b",
+      "type": "color",
+      "prefix": "primitive_colors"
+    },
+    "Neutral Variant20": {
+      "value": "#343036",
+      "type": "color",
+      "prefix": "primitive_colors"
+    },
+    "Neutral Variant30": {
+      "value": "#4d4950",
+      "type": "color",
+      "prefix": "primitive_colors"
+    },
+    "Neutral Variant40": {
+      "value": "#625c66",
+      "type": "color",
+      "prefix": "primitive_colors"
+    },
+    "Neutral Variant50": {
+      "value": "#817986",
+      "type": "color",
+      "prefix": "primitive_colors"
+    },
+    "Neutral Variant60": {
+      "value": "#9a949e",
+      "type": "color",
+      "prefix": "primitive_colors"
+    },
+    "Neutral Variant70": {
+      "value": "#b3aeb6",
+      "type": "color",
+      "prefix": "primitive_colors"
+    },
+    "Neutral Variant80": {
+      "value": "#ccc9cf",
+      "type": "color",
+      "prefix": "primitive_colors"
+    },
+    "Neutral Variant90": {
+      "value": "#e6e4e7",
+      "type": "color",
+      "prefix": "primitive_colors"
+    },
+    "Neutral Variant95": {
+      "value": "#f2f2f3",
+      "type": "color",
+      "prefix": "primitive_colors"
+    },
+    "Neutral Variant98": {
+      "value": "#fafafa",
+      "type": "color",
+      "prefix": "primitive_colors"
+    },
+    "Neutral Variant99": {
+      "value": "#fcfcfd",
+      "type": "color",
+      "prefix": "primitive_colors"
+    },
+    "Neutral Variant100": {
+      "value": "#ffffff",
+      "type": "color",
+      "prefix": "primitive_colors"
+    }
+  },
+  "success": {
+    "Success0": {
+      "value": "#000000",
+      "type": "color",
+      "prefix": "primitive_colors"
+    },
+    "Success10": {
+      "value": "#003322",
+      "type": "color",
+      "prefix": "primitive_colors"
+    },
+    "Success20": {
+      "value": "#006644",
+      "type": "color",
+      "prefix": "primitive_colors"
+    },
+    "Success30": {
+      "value": "#009966",
+      "type": "color",
+      "prefix": "primitive_colors"
+    },
+    "Success40": {
+      "value": "#00cc88",
+      "type": "color",
+      "prefix": "primitive_colors"
+    },
+    "Success50": {
+      "value": "#00ffaa",
+      "type": "color",
+      "prefix": "primitive_colors"
+    },
+    "Success60": {
+      "value": "#33ffbb",
+      "type": "color",
+      "prefix": "primitive_colors"
+    },
+    "Success70": {
+      "value": "#66ffcc",
+      "type": "color",
+      "prefix": "primitive_colors"
+    },
+    "Success80": {
+      "value": "#99ffdd",
+      "type": "color",
+      "prefix": "primitive_colors"
+    },
+    "Success90": {
+      "value": "#ccffee",
+      "type": "color",
+      "prefix": "primitive_colors"
+    },
+    "Success95": {
+      "value": "#e5fff6",
+      "type": "color",
+      "prefix": "primitive_colors"
+    },
+    "Success98": {
+      "value": "#f5fffc",
+      "type": "color",
+      "prefix": "primitive_colors"
+    },
+    "Success99": {
+      "value": "#fafffd",
+      "type": "color",
+      "prefix": "primitive_colors"
+    },
+    "Success100": {
+      "value": "#ffffff",
+      "type": "color",
+      "prefix": "primitive_colors"
+    },
+    "Success40(20%)": {
+      "value": "#00cc8833",
+      "type": "color",
+      "prefix": "primitive_colors"
+    },
+    "Success40(10%)": {
+      "value": "#00cc881a",
+      "type": "color",
+      "prefix": "primitive_colors"
+    },
+    "Success80(20%)": {
+      "value": "#99ffdd33",
+      "type": "color",
+      "prefix": "primitive_colors"
+    },
+    "Success80(10%)": {
+      "value": "#99ffdd1a",
+      "type": "color",
+      "prefix": "primitive_colors"
+    }
+  },
+  "warning": {
+    "Warning0": {
+      "value": "#000000",
+      "type": "color",
+      "prefix": "primitive_colors"
+    },
+    "Warning10": {
+      "value": "#654301",
+      "type": "color",
+      "prefix": "primitive_colors"
+    },
+    "Warning20": {
+      "value": "#654301",
+      "type": "color",
+      "prefix": "primitive_colors"
+    },
+    "Warning30": {
+      "value": "#8e5d01",
+      "type": "color",
+      "prefix": "primitive_colors"
+    },
+    "Warning40": {
+      "value": "#a36b01",
+      "type": "color",
+      "prefix": "primitive_colors"
+    },
+    "Warning50": {
+      "value": "#fda602",
+      "type": "color",
+      "prefix": "primitive_colors"
+    },
+    "Warning60": {
+      "value": "#feb834",
+      "type": "color",
+      "prefix": "primitive_colors"
+    },
+    "Warning70": {
+      "value": "#feca67",
+      "type": "color",
+      "prefix": "primitive_colors"
+    },
+    "Warning80": {
+      "value": "#fedc9a",
+      "type": "color",
+      "prefix": "primitive_colors"
+    },
+    "Warning90": {
+      "value": "#ffedcc",
+      "type": "color",
+      "prefix": "primitive_colors"
+    },
+    "Warning95": {
+      "value": "#fff6e6",
+      "type": "color",
+      "prefix": "primitive_colors"
+    },
+    "Warning98": {
+      "value": "#fffbf5",
+      "type": "color",
+      "prefix": "primitive_colors"
+    },
+    "Warning99": {
+      "value": "#fffdfa",
+      "type": "color",
+      "prefix": "primitive_colors"
+    },
+    "Warning100": {
+      "value": "#ffffff",
+      "type": "color",
+      "prefix": "primitive_colors"
+    },
+    "Warning40(20%)": {
+      "value": "#a36b0133",
+      "type": "color",
+      "prefix": "primitive_colors"
+    },
+    "Warning40(10%)": {
+      "value": "#a36b011a",
+      "type": "color",
+      "prefix": "primitive_colors"
+    },
+    "Warning80(20%)": {
+      "value": "#fedc9a33",
+      "type": "color",
+      "prefix": "primitive_colors"
+    },
+    "Warning80(10%)": {
+      "value": "#fedc9a1a",
+      "type": "color",
+      "prefix": "primitive_colors"
+    }
+  },
+  "error": {
+    "Error0": {
+      "value": "#000000",
+      "type": "color",
+      "prefix": "primitive_colors"
+    },
+    "Error10": {
+      "value": "#2f0407",
+      "type": "color",
+      "prefix": "primitive_colors"
+    },
+    "Error20": {
+      "value": "#5f070d",
+      "type": "color",
+      "prefix": "primitive_colors"
+    },
+    "Error30": {
+      "value": "#8e0b14",
+      "type": "color",
+      "prefix": "primitive_colors"
+    },
+    "Error40": {
+      "value": "#bd0f1b",
+      "type": "color",
+      "prefix": "primitive_colors"
+    },
+    "Error50": {
+      "value": "#ec1322",
+      "type": "color",
+      "prefix": "primitive_colors"
+    },
+    "Error60": {
+      "value": "#f0424e",
+      "type": "color",
+      "prefix": "primitive_colors"
+    },
+    "Error70": {
+      "value": "#f4717a",
+      "type": "color",
+      "prefix": "primitive_colors"
+    },
+    "Error80": {
+      "value": "#f8a0a6",
+      "type": "color",
+      "prefix": "primitive_colors"
+    },
+    "Error90": {
+      "value": "#fbd0d3",
+      "type": "color",
+      "prefix": "primitive_colors"
+    },
+    "Error95": {
+      "value": "#fde7e9",
+      "type": "color",
+      "prefix": "primitive_colors"
+    },
+    "Error98": {
+      "value": "#fef6f6",
+      "type": "color",
+      "prefix": "primitive_colors"
+    },
+    "Error99": {
+      "value": "#fffafb",
+      "type": "color",
+      "prefix": "primitive_colors"
+    },
+    "Error100": {
+      "value": "#ffffff",
+      "type": "color",
+      "prefix": "primitive_colors"
+    },
+    "Error40(20%)": {
+      "value": "#bd0f1b33",
+      "type": "color",
+      "prefix": "primitive_colors"
+    },
+    "Error40(10%)": {
+      "value": "#bd0f1b1a",
+      "type": "color",
+      "prefix": "primitive_colors"
+    },
+    "Error80(20%)": {
+      "value": "#f8a0a633",
+      "type": "color",
+      "prefix": "primitive_colors"
+    },
+    "Error80(10%)": {
+      "value": "#f8a0a61a",
+      "type": "color",
+      "prefix": "primitive_colors"
+    }
+  },
+  "accent": {
+    "Accent50(20%)": {
+      "value": "#ffcd0033",
+      "type": "color",
+      "prefix": "primitive_colors"
+    },
+    "Accent50(10%)": {
+      "value": "#ffcd001a",
+      "type": "color",
+      "prefix": "primitive_colors"
+    },
+    "Accent80(20%)": {
+      "value": "#ffeb9933",
+      "type": "color",
+      "prefix": "primitive_colors"
+    },
+    "Accent80(10%)": {
+      "value": "#ffeb991a",
+      "type": "color",
+      "prefix": "primitive_colors"
+    },
+    "Accent0": {
+      "value": "#000000",
+      "type": "color",
+      "prefix": "primitive_colors"
+    },
+    "Accent10": {
+      "value": "#332900",
+      "type": "color",
+      "prefix": "primitive_colors"
+    },
+    "Accent20": {
+      "value": "#665200",
+      "type": "color",
+      "prefix": "primitive_colors"
+    },
+    "Accent30": {
+      "value": "#997b00",
+      "type": "color",
+      "prefix": "primitive_colors"
+    },
+    "Accent40": {
+      "value": "#cca400",
+      "type": "color",
+      "prefix": "primitive_colors"
+    },
+    "Accent50": {
+      "value": "#ffcd00",
+      "type": "color",
+      "prefix": "primitive_colors"
+    },
+    "Accent60": {
+      "value": "#ffd733",
+      "type": "color",
+      "prefix": "primitive_colors"
+    },
+    "Accent70": {
+      "value": "#ffe166",
+      "type": "color",
+      "prefix": "primitive_colors"
+    },
+    "Accent80": {
+      "value": "#ffeb99",
+      "type": "color",
+      "prefix": "primitive_colors"
+    },
+    "Accent90": {
+      "value": "#fff5cc",
+      "type": "color",
+      "prefix": "primitive_colors"
+    },
+    "Accent95": {
+      "value": "#fffae5",
+      "type": "color",
+      "prefix": "primitive_colors"
+    },
+    "Accent98": {
+      "value": "#fffdf5",
+      "type": "color",
+      "prefix": "primitive_colors"
+    },
+    "Accent99": {
+      "value": "#fffefa",
+      "type": "color",
+      "prefix": "primitive_colors"
+    },
+    "Accent100": {
+      "value": "#ffffff",
+      "type": "color",
+      "prefix": "primitive_colors"
+    }
+  },
+  "accent2": {
+    "Accent 2_0": {
+      "value": "#000000",
+      "type": "color",
+      "prefix": "primitive_colors"
+    },
+    "Accent 2_10": {
+      "value": "#190a29",
+      "type": "color",
+      "prefix": "primitive_colors"
+    },
+    "Accent 2_20": {
+      "value": "#311353",
+      "type": "color",
+      "prefix": "primitive_colors"
+    },
+    "Accent 2_30": {
+      "value": "#4a1d7c",
+      "type": "color",
+      "prefix": "primitive_colors"
+    },
+    "Accent 2_40": {
+      "value": "#5f259f",
+      "type": "color",
+      "prefix": "primitive_colors"
+    },
+    "Accent 2_50": {
+      "value": "#7c30cf",
+      "type": "color",
+      "prefix": "primitive_colors"
+    },
+    "Accent 2_60": {
+      "value": "#965ad8",
+      "type": "color",
+      "prefix": "primitive_colors"
+    },
+    "Accent 2_70": {
+      "value": "#b083e2",
+      "type": "color",
+      "prefix": "primitive_colors"
+    },
+    "Accent 2_80": {
+      "value": "#caacec",
+      "type": "color",
+      "prefix": "primitive_colors"
+    },
+    "Accent 2_90": {
+      "value": "#e5d6f5",
+      "type": "color",
+      "prefix": "primitive_colors"
+    },
+    "Accent 2_95": {
+      "value": "#f2eafa",
+      "type": "color",
+      "prefix": "primitive_colors"
+    },
+    "Accent 2_98": {
+      "value": "#faf7fd",
+      "type": "color",
+      "prefix": "primitive_colors"
+    },
+    "Accent 2_99": {
+      "value": "#fcfbfe",
+      "type": "color",
+      "prefix": "primitive_colors"
+    },
+    "Accent 2_100": {
+      "value": "#ffffff",
+      "type": "color",
+      "prefix": "primitive_colors"
+    },
+    "Accent 2_40(20%)": {
+      "value": "#5f259f33",
+      "type": "color",
+      "prefix": "primitive_colors"
+    },
+    "Accent 2_40(10%)": {
+      "value": "#5f259f1a",
+      "type": "color",
+      "prefix": "primitive_colors"
+    },
+    "Accent 2_80(20%)": {
+      "value": "#caacec33",
+      "type": "color",
+      "prefix": "primitive_colors"
+    },
+    "Accent80(10%) 2": {
+      "value": "#caacec1a",
+      "type": "color",
+      "prefix": "primitive_colors"
+    }
+  }
+}

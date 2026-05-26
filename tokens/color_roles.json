@@ -1,633 +1,770 @@
 {
-  "Primary": {
-    "Primary0": {
-      "value": "#000000",
-      "type": "color",
-      "prefix": "color_roles"
+  "light": {
+    "primaryColors": {
+      "Primary": {
+        "value": "{primary.Primary50}",
+        "type": "color",
+        "prefix": "color_roles"
+      },
+      "On Primary": {
+        "value": "{primary.Primary100}",
+        "type": "color",
+        "prefix": "color_roles"
+      },
+      "Primary Container": {
+        "value": "{primary.Primary90}",
+        "type": "color",
+        "prefix": "color_roles"
+      },
+      "On Primary Container": {
+        "value": "{primary.Primary30}",
+        "type": "color",
+        "prefix": "color_roles"
+      },
+      "On Primary Container Inactive": {
+        "value": "{primary.Primary90}",
+        "type": "color",
+        "prefix": "color_roles"
+      },
+      "Primary Button Pressed": {
+        "value": "{primary.Primary20}",
+        "type": "color",
+        "prefix": "color_roles"
+      },
+      "Primary Pill bg": {
+        "value": "{primary.Primary40(20%)}",
+        "type": "color",
+        "prefix": "color_roles"
+      },
+      "Primary Icon bg": {
+        "value": "{primary.Primary40(10%)}",
+        "type": "color",
+        "prefix": "color_roles"
+      }
     },
-    "Primary10": {
-      "value": "#331500",
-      "type": "color",
-      "prefix": "color_roles"
+    "secondaryColors": {
+      "Secondary": {
+        "value": "{secondary.Secondary50}",
+        "type": "color",
+        "prefix": "color_roles"
+      },
+      "On Secondary": {
+        "value": "{secondary.Secondary100}",
+        "type": "color",
+        "prefix": "color_roles"
+      },
+      "Secondary Container": {
+        "value": "{secondary.Secondary90}",
+        "type": "color",
+        "prefix": "color_roles"
+      },
+      "On Secondary Container": {
+        "value": "{secondary.Secondary30}",
+        "type": "color",
+        "prefix": "color_roles"
+      }
     },
-    "Primary20": {
-      "value": "#662a00",
-      "type": "color",
-      "prefix": "color_roles"
+    "tertiaryColors": {
+      "Tertiary": {
+        "value": "{tertiary.Tertiary40}",
+        "type": "color",
+        "prefix": "color_roles"
+      },
+      "On Tertiary": {
+        "value": "{tertiary.Tertiary100}",
+        "type": "color",
+        "prefix": "color_roles"
+      },
+      "Tertiary Container": {
+        "value": "{tertiary.Tertiary90}",
+        "type": "color",
+        "prefix": "color_roles"
+      },
+      "On Tertiary Container": {
+        "value": "{tertiary.Tertiary30}",
+        "type": "color",
+        "prefix": "color_roles"
+      },
+      "Tertiary Pill bg": {
+        "value": "{tertiary.Tertiary40(20%)}",
+        "type": "color",
+        "prefix": "color_roles"
+      },
+      "Tertiary Icon bg": {
+        "value": "{tertiary.Tertiary40(10%)}",
+        "type": "color",
+        "prefix": "color_roles"
+      }
     },
-    "Primary30": {
-      "value": "#993f00",
-      "type": "color",
-      "prefix": "color_roles"
+    "surfaceColors": {
+      "Surface": {
+        "value": "{neutral.Neutral95}",
+        "type": "color",
+        "prefix": "color_roles"
+      },
+      "On Surface": {
+        "value": "{neutral.Neutral20}",
+        "type": "color",
+        "prefix": "color_roles"
+      },
+      "On Surface_Disabled": {
+        "value": "{neutral.Neutral20(10%)}",
+        "type": "color",
+        "prefix": "color_roles"
+      },
+      "On Surface_Label_Disabled": {
+        "value": "{neutral.Neutral20(38%)}",
+        "type": "color",
+        "prefix": "color_roles"
+      },
+      "Surface Variant": {
+        "value": "{neutralVariant.Neutral Variant90}",
+        "type": "color",
+        "prefix": "color_roles"
+      },
+      "On Surface Variant": {
+        "value": "{neutralVariant.Neutral Variant10}",
+        "type": "color",
+        "prefix": "color_roles"
+      },
+      "Surface Container Highest": {
+        "value": "{neutral.Neutral90}",
+        "type": "color",
+        "prefix": "color_roles"
+      },
+      "Surface Container High": {
+        "value": "#ebeaeb",
+        "type": "color",
+        "prefix": "color_roles"
+      },
+      "Surface Container": {
+        "value": "#f0eff0",
+        "type": "color",
+        "prefix": "color_roles"
+      },
+      "Surface Container Low": {
+        "value": "{neutral.Neutral100}",
+        "type": "color",
+        "prefix": "color_roles"
+      },
+      "Surface Container Lowest": {
+        "value": "{neutral.Neutral100}",
+        "type": "color",
+        "prefix": "color_roles"
+      },
+      "Inverse Surface": {
+        "value": "{neutral.Neutral20}",
+        "type": "color",
+        "prefix": "color_roles"
+      },
+      "Inverse On Surface": {
+        "value": "{neutral.Neutral95}",
+        "type": "color",
+        "prefix": "color_roles"
+      },
+      "Surface Tint": {
+        "value": "{primary.Primary50}",
+        "type": "color",
+        "prefix": "color_roles"
+      },
+      "Surface Grey": {
+        "value": "{neutral.Neutral50}",
+        "type": "color",
+        "prefix": "color_roles"
+      },
+      "On Surface(10%)": {
+        "value": "{neutral.Neutral20(10%)}",
+        "type": "color",
+        "prefix": "color_roles"
+      },
+      "On Surface(50%)": {
+        "value": "{neutral.Neutral10(50%)}",
+        "type": "color",
+        "prefix": "color_roles"
+      },
+      "Surface(20%)": {
+        "value": "{neutral.Neutral100(20%)}",
+        "type": "color",
+        "prefix": "color_roles"
+      },
+      "Keyboard Surface": {
+        "value": "{neutral.Neutral80}",
+        "type": "color",
+        "prefix": "color_roles"
+      },
+      "Keyboard Surface(76%)": {
+        "value": "{neutral.Neutral80(76%)}",
+        "type": "color",
+        "prefix": "color_roles"
+      }
     },
-    "Primary40": {
-      "value": "#cc5400",
-      "type": "color",
-      "prefix": "color_roles"
+    "errorColors": {
+      "Error": {
+        "value": "{error.Error50}",
+        "type": "color",
+        "prefix": "color_roles"
+      },
+      "On Error": {
+        "value": "{error.Error100}",
+        "type": "color",
+        "prefix": "color_roles"
+      },
+      "Error Container": {
+        "value": "{error.Error90}",
+        "type": "color",
+        "prefix": "color_roles"
+      },
+      "On Error Container": {
+        "value": "{error.Error30}",
+        "type": "color",
+        "prefix": "color_roles"
+      },
+      "Error Pill bg": {
+        "value": "{error.Error40(20%)}",
+        "type": "color",
+        "prefix": "color_roles"
+      },
+      "Error Icon bg": {
+        "value": "{error.Error40(10%)}",
+        "type": "color",
+        "prefix": "color_roles"
+      }
     },
-    "Primary50": {
-      "value": "#ff6900",
-      "type": "color",
-      "prefix": "color_roles"
+    "successColors": {
+      "Success": {
+        "value": "{success.Success30}",
+        "type": "color",
+        "prefix": "color_roles"
+      },
+      "On Success": {
+        "value": "{success.Success100}",
+        "type": "color",
+        "prefix": "color_roles"
+      },
+      "Success Container": {
+        "value": "{success.Success90}",
+        "type": "color",
+        "prefix": "color_roles"
+      },
+      "On Success Container": {
+        "value": "{success.Success30}",
+        "type": "color",
+        "prefix": "color_roles"
+      },
+      "Success Pill bg": {
+        "value": "{success.Success40(20%)}",
+        "type": "color",
+        "prefix": "color_roles"
+      },
+      "Success Icon bg": {
+        "value": "{success.Success40(10%)}",
+        "type": "color",
+        "prefix": "color_roles"
+      }
     },
-    "Primary60": {
-      "value": "#ff8733",
-      "type": "color",
-      "prefix": "color_roles"
+    "warningColors": {
+      "Warning": {
+        "value": "{warning.Warning40}",
+        "type": "color",
+        "prefix": "color_roles"
+      },
+      "On Warning": {
+        "value": "{warning.Warning100}",
+        "type": "color",
+        "prefix": "color_roles"
+      },
+      "Warning Container": {
+        "value": "{warning.Warning90}",
+        "type": "color",
+        "prefix": "color_roles"
+      },
+      "On Warning Container": {
+        "value": "{warning.Warning30}",
+        "type": "color",
+        "prefix": "color_roles"
+      },
+      "Warning Pill bg": {
+        "value": "{warning.Warning40(20%)}",
+        "type": "color",
+        "prefix": "color_roles"
+      },
+      "Warning Icon bg": {
+        "value": "{warning.Warning40(10%)}",
+        "type": "color",
+        "prefix": "color_roles"
+      }
     },
-    "Primary70": {
-      "value": "#ffa566",
-      "type": "color",
-      "prefix": "color_roles"
+    "accentColors": {
+      "Accent": {
+        "value": "{accent.Accent50}",
+        "type": "color",
+        "prefix": "color_roles"
+      },
+      "On Accent": {
+        "value": "{accent.Accent100}",
+        "type": "color",
+        "prefix": "color_roles"
+      },
+      "Accent Container": {
+        "value": "{accent.Accent90}",
+        "type": "color",
+        "prefix": "color_roles"
+      },
+      "On Accent Container": {
+        "value": "{accent.Accent30}",
+        "type": "color",
+        "prefix": "color_roles"
+      },
+      "Accent Pill bg": {
+        "value": "{accent.Accent50(20%)}",
+        "type": "color",
+        "prefix": "color_roles"
+      },
+      "Accent Icon bg": {
+        "value": "{accent.Accent50(10%)}",
+        "type": "color",
+        "prefix": "color_roles"
+      }
     },
-    "Primary80": {
-      "value": "#ffc399",
-      "type": "color",
-      "prefix": "color_roles"
+    "outlineColors": {
+      "Outline": {
+        "value": "{neutralVariant.Neutral Variant50}",
+        "type": "color",
+        "prefix": "color_roles"
+      },
+      "Outline Variant": {
+        "value": "{neutralVariant.Neutral Variant80}",
+        "type": "color",
+        "prefix": "color_roles"
+      }
     },
-    "Primary90": {
-      "value": "#ffe1cc",
-      "type": "color",
-      "prefix": "color_roles"
+    "textColors": {
+      "Primary text": {
+        "value": "{neutral.Neutral20}",
+        "type": "color",
+        "prefix": "color_roles"
+      },
+      "Secondary text": {
+        "value": "{neutral.Neutral50}",
+        "type": "color",
+        "prefix": "color_roles"
+      }
     },
-    "Primary95": {
-      "value": "#fff0e5",
-      "type": "color",
-      "prefix": "color_roles"
-    },
-    "Primary98": {
-      "value": "#fff9f5",
-      "type": "color",
-      "prefix": "color_roles"
-    },
-    "Primary99": {
-      "value": "#fffcfa",
-      "type": "color",
-      "prefix": "color_roles"
-    },
-    "Primary100": {
-      "value": "#ffffff",
-      "type": "color",
-      "prefix": "color_roles"
+    "accentColors2": {
+      "Accent 2": {
+        "value": "{accent2.Accent 2_50}",
+        "type": "color",
+        "prefix": "color_roles"
+      },
+      "On Accent 2": {
+        "value": "{accent2.Accent 2_100}",
+        "type": "color",
+        "prefix": "color_roles"
+      },
+      "Accent Container 2": {
+        "value": "{accent2.Accent 2_90}",
+        "type": "color",
+        "prefix": "color_roles"
+      },
+      "On Accent Container 2": {
+        "value": "{accent2.Accent 2_30}",
+        "type": "color",
+        "prefix": "color_roles"
+      },
+      "Accent Pill bg 2": {
+        "value": "{accent2.Accent 2_40(20%)}",
+        "type": "color",
+        "prefix": "color_roles"
+      },
+      "Accent Icon bg 2": {
+        "value": "{accent2.Accent 2_40(10%)}",
+        "type": "color",
+        "prefix": "color_roles"
+      }
     }
   },
-  "Secondary": {
-    "Secondary0": {
-      "value": "#000000",
-      "type": "color",
-      "prefix": "color_roles"
-    },
-    "Secondary10": {
-      "value": "#231610",
-      "type": "color",
-      "prefix": "color_roles"
-    },
-    "Secondary20": {
-      "value": "#462c20",
-      "type": "color",
-      "prefix": "color_roles"
-    },
-    "Secondary30": {
-      "value": "#6a422f",
-      "type": "color",
-      "prefix": "color_roles"
-    },
-    "Secondary30_10%": {
-      "value": "#6a422f1a",
-      "type": "color",
-      "prefix": "color_roles"
-    },
-    "Secondary40": {
-      "value": "#8d583f",
-      "type": "color",
-      "prefix": "color_roles"
-    },
-    "Secondary40_10%": {
-      "value": "#8d583f1a",
-      "type": "color",
-      "prefix": "color_roles"
-    },
-    "Secondary50": {
-      "value": "#b06e4f",
-      "type": "color",
-      "prefix": "color_roles"
-    },
-    "Secondary60": {
-      "value": "#c08b72",
-      "type": "color",
-      "prefix": "color_roles"
-    },
-    "Secondary70": {
-      "value": "#cfa895",
-      "type": "color",
-      "prefix": "color_roles"
-    },
-    "Secondary80": {
-      "value": "#dfc5b9",
-      "type": "color",
-      "prefix": "color_roles"
-    },
-    "Secondary90": {
-      "value": "#efe2dc",
-      "type": "color",
-      "prefix": "color_roles"
-    },
-    "Secondary90_10%": {
-      "value": "#efe2dc1a",
-      "type": "color",
-      "prefix": "color_roles"
-    },
-    "Secondary95": {
-      "value": "#f7f0ed",
-      "type": "color",
-      "prefix": "color_roles"
-    },
-    "Secondary98": {
-      "value": "#fcf9f8",
-      "type": "color",
-      "prefix": "color_roles"
-    },
-    "Secondary99": {
-      "value": "#fdfcfb",
-      "type": "color",
-      "prefix": "color_roles"
-    },
-    "Secondary100": {
-      "value": "#ffffff",
-      "type": "color",
-      "prefix": "color_roles"
-    }
-  },
-  "Tertiary": {
-    "Tertiary0": {
-      "value": "#000000",
-      "type": "color",
-      "prefix": "color_roles"
-    },
-    "Tertiary10": {
-      "value": "#25230e",
-      "type": "color",
-      "prefix": "color_roles"
-    },
-    "Tertiary15": {
-      "value": "#383414",
-      "type": "color",
-      "prefix": "color_roles"
-    },
-    "Tertiary20": {
-      "value": "#4b451b",
-      "type": "color",
-      "prefix": "color_roles"
-    },
-    "Tertiary30": {
-      "value": "#706829",
-      "type": "color",
-      "prefix": "color_roles"
-    },
-    "Tertiary40": {
-      "value": "#968a36",
-      "type": "color",
-      "prefix": "color_roles"
-    },
-    "Tertiary50": {
-      "value": "#bbad44",
-      "type": "color",
-      "prefix": "color_roles"
-    },
-    "Tertiary60": {
-      "value": "#c9be69",
-      "type": "color",
-      "prefix": "color_roles"
-    },
-    "Tertiary70": {
-      "value": "#d6ce8e",
-      "type": "color",
-      "prefix": "color_roles"
-    },
-    "Tertiary80": {
-      "value": "#e4deb4",
-      "type": "color",
-      "prefix": "color_roles"
-    },
-    "Tertiary90": {
-      "value": "#f1efd9",
-      "type": "color",
-      "prefix": "color_roles"
-    },
-    "Tertiary95": {
-      "value": "#f8f7ec",
-      "type": "color",
-      "prefix": "color_roles"
-    },
-    "Tertiary98": {
-      "value": "#fcfcf7",
-      "type": "color",
-      "prefix": "color_roles"
-    },
-    "Tertiary99": {
-      "value": "#fefdfb",
-      "type": "color",
-      "prefix": "color_roles"
-    },
-    "Tertiary100": {
-      "value": "#ffffff",
-      "type": "color",
-      "prefix": "color_roles"
-    }
-  },
-  "Error": {
-    "Error0": {
-      "value": "#000000",
-      "type": "color",
-      "prefix": "color_roles"
-    },
-    "Error10": {
-      "value": "#330300",
-      "type": "color",
-      "prefix": "color_roles"
-    },
-    "Error20": {
-      "value": "#660600",
-      "type": "color",
-      "prefix": "color_roles"
-    },
-    "Error30": {
-      "value": "#990900",
-      "type": "color",
-      "prefix": "color_roles"
-    },
-    "Error40": {
-      "value": "#cc0c00",
-      "type": "color",
-      "prefix": "color_roles"
-    },
-    "Error50": {
-      "value": "#ff0f00",
-      "type": "color",
-      "prefix": "color_roles"
-    },
-    "Error60": {
-      "value": "#ff3f33",
-      "type": "color",
-      "prefix": "color_roles"
-    },
-    "Error70": {
-      "value": "#ff6f66",
-      "type": "color",
-      "prefix": "color_roles"
-    },
-    "Error80": {
-      "value": "#ff9f99",
-      "type": "color",
-      "prefix": "color_roles"
-    },
-    "Error90": {
-      "value": "#ffcfcc",
-      "type": "color",
-      "prefix": "color_roles"
-    },
-    "Error95": {
-      "value": "#ffe7e5",
-      "type": "color",
-      "prefix": "color_roles"
-    },
-    "Error98": {
-      "value": "#fff5f5",
-      "type": "color",
-      "prefix": "color_roles"
-    },
-    "Error99": {
-      "value": "#fffafa",
-      "type": "color",
-      "prefix": "color_roles"
-    },
-    "Error100": {
-      "value": "#ffffff",
-      "type": "color",
-      "prefix": "color_roles"
-    }
-  },
-  "Neutral": {
-    "Neutral0": {
-      "value": "#000000",
-      "type": "color",
-      "prefix": "color_roles"
-    },
-    "Scrim_Neutral0": {
-      "value": "#00000052",
-      "type": "color",
-      "prefix": "color_roles"
-    },
-    "Disabled_Neutral": {
-      "value": "#1b19181a",
-      "type": "color",
-      "prefix": "color_roles"
-    },
-    "Label_Disabled_Neutral": {
-      "value": "#1b191861",
-      "type": "color",
-      "prefix": "color_roles"
-    },
-    "Neutral10": {
-      "value": "#1b1918",
-      "type": "color",
-      "prefix": "color_roles"
-    },
-    "Neutral20": {
-      "value": "#363230",
-      "type": "color",
-      "prefix": "color_roles"
-    },
-    "Neutral30": {
-      "value": "#514a48",
-      "type": "color",
-      "prefix": "color_roles"
-    },
-    "Neutral40": {
-      "value": "#6d635f",
-      "type": "color",
-      "prefix": "color_roles"
-    },
-    "Neutral50": {
-      "value": "#887c77",
-      "type": "color",
-      "prefix": "color_roles"
-    },
-    "Neutral60": {
-      "value": "#9f9692",
-      "type": "color",
-      "prefix": "color_roles"
-    },
-    "Neutral70": {
-      "value": "#b7b0ae",
-      "type": "color",
-      "prefix": "color_roles"
-    },
-    "Neutral80": {
-      "value": "#cfcbc9",
-      "type": "color",
-      "prefix": "color_roles"
-    },
-    "Neutral90": {
-      "value": "#e7e5e4",
-      "type": "color",
-      "prefix": "color_roles"
-    },
-    "Disabled_Nuetral DM": {
-      "value": "#e7e5e41a",
-      "type": "color",
-      "prefix": "color_roles"
-    },
-    "Disabled_Label_Nuetral DM": {
-      "value": "#e7e5e461",
-      "type": "color",
-      "prefix": "color_roles"
-    },
-    "Neutral95": {
-      "value": "#f3f2f1",
-      "type": "color",
-      "prefix": "color_roles"
-    },
-    "Neutral98": {
-      "value": "#fafafa",
-      "type": "color",
-      "prefix": "color_roles"
-    },
-    "Neutral99": {
-      "value": "#fdfcfc",
-      "type": "color",
-      "prefix": "color_roles"
-    },
-    "Neutral100": {
-      "value": "#ffffff",
-      "type": "color",
-      "prefix": "color_roles"
-    }
-  },
-  "Neutral-Variant": {
-    "Neutral-Variant0": {
-      "value": "#000000",
-      "type": "color",
-      "prefix": "color_roles"
-    },
-    "Neutral-Variant10": {
-      "value": "#1d1816",
-      "type": "color",
-      "prefix": "color_roles"
-    },
-    "Neutral-Variant20": {
-      "value": "#39302d",
-      "type": "color",
-      "prefix": "color_roles"
-    },
-    "Neutral-Variant30": {
-      "value": "#564943",
-      "type": "color",
-      "prefix": "color_roles"
-    },
-    "Neutral-Variant30_10%": {
-      "value": "#5649431a",
-      "type": "color",
-      "prefix": "color_roles"
-    },
-    "Neutral-Variant40": {
-      "value": "#736159",
-      "type": "color",
-      "prefix": "color_roles"
-    },
-    "Neutral-Variant50": {
-      "value": "#8f7970",
-      "type": "color",
-      "prefix": "color_roles"
-    },
-    "Neutral-Variant60": {
-      "value": "#a6948c",
-      "type": "color",
-      "prefix": "color_roles"
-    },
-    "Neutral-Variant70": {
-      "value": "#bcafa9",
-      "type": "color",
-      "prefix": "color_roles"
-    },
-    "Neutral-Variant80": {
-      "value": "#d2c9c6",
-      "type": "color",
-      "prefix": "color_roles"
-    },
-    "Neutral-Variant80_10%": {
-      "value": "#d2c9c61a",
-      "type": "color",
-      "prefix": "color_roles"
-    },
-    "Neutral-Variant90": {
-      "value": "#e9e4e2",
-      "type": "color",
-      "prefix": "color_roles"
-    },
-    "Neutral-Variant95": {
-      "value": "#f4f2f1",
-      "type": "color",
-      "prefix": "color_roles"
-    },
-    "Neutral-Variant98": {
-      "value": "#fbfaf9",
-      "type": "color",
-      "prefix": "color_roles"
-    },
-    "Neutral-Variant99": {
-      "value": "#fdfcfc",
-      "type": "color",
-      "prefix": "color_roles"
-    },
-    "Neutral-Variant100": {
-      "value": "#ffffff",
-      "type": "color",
-      "prefix": "color_roles"
-    }
-  },
-  "Success": {
-    "Success0": {
-      "value": "#000000",
-      "type": "color",
-      "prefix": "color_roles"
-    },
-    "Success10": {
-      "value": "#072c16",
-      "type": "color",
-      "prefix": "color_roles"
-    },
-    "Success20": {
-      "value": "#0e582d",
-      "type": "color",
-      "prefix": "color_roles"
-    },
-    "Success30": {
-      "value": "#158443",
-      "type": "color",
-      "prefix": "color_roles"
-    },
-    "Success40": {
-      "value": "#1bb05a",
-      "type": "color",
-      "prefix": "color_roles"
-    },
-    "Success50": {
-      "value": "#23dd70",
-      "type": "color",
-      "prefix": "color_roles"
-    },
-    "Success60": {
-      "value": "#4ee38d",
-      "type": "color",
-      "prefix": "color_roles"
-    },
-    "Success70": {
-      "value": "#7beaa9",
-      "type": "color",
-      "prefix": "color_roles"
-    },
-    "Success80": {
-      "value": "#a7f1c6",
-      "type": "color",
-      "prefix": "color_roles"
-    },
-    "Success90": {
-      "value": "#d3f8e2",
-      "type": "color",
-      "prefix": "color_roles"
-    },
-    "Success95": {
-      "value": "#e9fcf1",
-      "type": "color",
-      "prefix": "color_roles"
-    },
-    "Success98": {
-      "value": "#f6fef9",
-      "type": "color",
-      "prefix": "color_roles"
-    },
-    "Success99": {
-      "value": "#fbfefc",
-      "type": "color",
-      "prefix": "color_roles"
-    },
-    "Success100": {
-      "value": "#ffffff",
-      "type": "color",
-      "prefix": "color_roles"
-    }
-  },
-  "Warning": {
-    "Warning0": {
-      "value": "#000000",
-      "type": "color",
-      "prefix": "color_roles"
-    },
-    "Warning10": {
-      "value": "#303300",
-      "type": "color",
-      "prefix": "color_roles"
-    },
-    "Warning20": {
-      "value": "#5f6600",
-      "type": "color",
-      "prefix": "color_roles"
-    },
-    "Warning30": {
-      "value": "#8f9900",
-      "type": "color",
-      "prefix": "color_roles"
-    },
-    "Warning40": {
-      "value": "#becc00",
-      "type": "color",
-      "prefix": "color_roles"
-    },
-    "Warning50": {
-      "value": "#eeff00",
-      "type": "color",
-      "prefix": "color_roles"
-    },
-    "Warning60": {
-      "value": "#f1ff33",
-      "type": "color",
-      "prefix": "color_roles"
-    },
-    "Warning70": {
-      "value": "#f5ff66",
-      "type": "color",
-      "prefix": "color_roles"
-    },
-    "Warning80": {
-      "value": "#f8ff99",
-      "type": "color",
-      "prefix": "color_roles"
-    },
-    "Warning90": {
-      "value": "#fcffcc",
-      "type": "color",
-      "prefix": "color_roles"
-    },
-    "Warning95": {
-      "value": "#fdffe5",
-      "type": "color",
-      "prefix": "color_roles"
-    },
-    "Warning98": {
-      "value": "#fefff5",
-      "type": "color",
-      "prefix": "color_roles"
-    },
-    "Warning99": {
-      "value": "#fffffa",
-      "type": "color",
-      "prefix": "color_roles"
-    },
-    "Warning100": {
-      "value": "#ffffff",
-      "type": "color",
-      "prefix": "color_roles"
+  "dark": {
+    "primaryColors": {
+      "Primary": {
+        "value": "{primary.Primary50}",
+        "type": "color",
+        "prefix": "color_roles"
+      },
+      "On Primary": {
+        "value": "{primary.Primary100}",
+        "type": "color",
+        "prefix": "color_roles"
+      },
+      "Primary Container": {
+        "value": "{primary.Primary10}",
+        "type": "color",
+        "prefix": "color_roles"
+      },
+      "On Primary Container": {
+        "value": "{primary.Primary90}",
+        "type": "color",
+        "prefix": "color_roles"
+      },
+      "On Primary Container Inactive": {
+        "value": "{primary.Primary20}",
+        "type": "color",
+        "prefix": "color_roles"
+      },
+      "Primary Button Pressed": {
+        "value": "{primary.Primary90}",
+        "type": "color",
+        "prefix": "color_roles"
+      },
+      "Primary Pill bg": {
+        "value": "{primary.Primary80(20%)}",
+        "type": "color",
+        "prefix": "color_roles"
+      },
+      "Primary Icon bg": {
+        "value": "{primary.Primary80(10%)}",
+        "type": "color",
+        "prefix": "color_roles"
+      }
+    },
+    "secondaryColors": {
+      "Secondary": {
+        "value": "{secondary.Secondary80}",
+        "type": "color",
+        "prefix": "color_roles"
+      },
+      "On Secondary": {
+        "value": "{secondary.Secondary20}",
+        "type": "color",
+        "prefix": "color_roles"
+      },
+      "Secondary Container": {
+        "value": "{secondary.Secondary30}",
+        "type": "color",
+        "prefix": "color_roles"
+      },
+      "On Secondary Container": {
+        "value": "{secondary.Secondary90}",
+        "type": "color",
+        "prefix": "color_roles"
+      }
+    },
+    "tertiaryColors": {
+      "Tertiary": {
+        "value": "{tertiary.Tertiary80}",
+        "type": "color",
+        "prefix": "color_roles"
+      },
+      "On Tertiary": {
+        "value": "{tertiary.Tertiary20}",
+        "type": "color",
+        "prefix": "color_roles"
+      },
+      "Tertiary Container": {
+        "value": "{tertiary.Tertiary30}",
+        "type": "color",
+        "prefix": "color_roles"
+      },
+      "On Tertiary Container": {
+        "value": "{tertiary.Tertiary90}",
+        "type": "color",
+        "prefix": "color_roles"
+      },
+      "Tertiary Pill bg": {
+        "value": "{tertiary.Tertiary80(20%)}",
+        "type": "color",
+        "prefix": "color_roles"
+      },
+      "Tertiary Icon bg": {
+        "value": "{tertiary.Tertiary80(10%)}",
+        "type": "color",
+        "prefix": "color_roles"
+      }
+    },
+    "surfaceColors": {
+      "Surface": {
+        "value": "{primary.Primary1}",
+        "type": "color",
+        "prefix": "color_roles"
+      },
+      "On Surface": {
+        "value": "{neutral.Neutral90}",
+        "type": "color",
+        "prefix": "color_roles"
+      },
+      "On Surface_Disabled": {
+        "value": "{neutral.Neutral90(10%)}",
+        "type": "color",
+        "prefix": "color_roles"
+      },
+      "On Surface_Label_Disabled": {
+        "value": "{neutral.Neutral90(38%)}",
+        "type": "color",
+        "prefix": "color_roles"
+      },
+      "Surface Variant": {
+        "value": "{neutralVariant.Neutral Variant30}",
+        "type": "color",
+        "prefix": "color_roles"
+      },
+      "On Surface Variant": {
+        "value": "{neutralVariant.Neutral Variant80}",
+        "type": "color",
+        "prefix": "color_roles"
+      },
+      "Surface Container Highest": {
+        "value": "#393739",
+        "type": "color",
+        "prefix": "color_roles"
+      },
+      "Surface Container High": {
+        "value": "#2c2b2c",
+        "type": "color",
+        "prefix": "color_roles"
+      },
+      "Surface Container": {
+        "value": "#1f1e1f",
+        "type": "color",
+        "prefix": "color_roles"
+      },
+      "Surface Container Low": {
+        "value": "{neutral.Neutral10}",
+        "type": "color",
+        "prefix": "color_roles"
+      },
+      "Surface Container Lowest": {
+        "value": "#0a0a0a",
+        "type": "color",
+        "prefix": "color_roles"
+      },
+      "Inverse Surface": {
+        "value": "{neutral.Neutral90}",
+        "type": "color",
+        "prefix": "color_roles"
+      },
+      "Inverse On Surface": {
+        "value": "{neutral.Neutral20}",
+        "type": "color",
+        "prefix": "color_roles"
+      },
+      "Surface Tint": {
+        "value": "{primary.Primary80}",
+        "type": "color",
+        "prefix": "color_roles"
+      },
+      "Surface Grey": {
+        "value": "{neutral.Neutral50}",
+        "type": "color",
+        "prefix": "color_roles"
+      },
+      "On Surface(10%)": {
+        "value": "{neutral.Neutral90(10%)}",
+        "type": "color",
+        "prefix": "color_roles"
+      },
+      "On Surface(50%)": {
+        "value": "{neutral.Neutral10(20%)}",
+        "type": "color",
+        "prefix": "color_roles"
+      },
+      "Surface(20%)": {
+        "value": "{neutral.Neutral100(20%)}",
+        "type": "color",
+        "prefix": "color_roles"
+      },
+      "Keyboard Surface": {
+        "value": "{neutral.Neutral20}",
+        "type": "color",
+        "prefix": "color_roles"
+      },
+      "Keyboard Surface(76%)": {
+        "value": "{neutral.Neutral20(92%)}",
+        "type": "color",
+        "prefix": "color_roles"
+      }
+    },
+    "errorColors": {
+      "Error": {
+        "value": "{error.Error80}",
+        "type": "color",
+        "prefix": "color_roles"
+      },
+      "On Error": {
+        "value": "{error.Error20}",
+        "type": "color",
+        "prefix": "color_roles"
+      },
+      "Error Container": {
+        "value": "{error.Error30}",
+        "type": "color",
+        "prefix": "color_roles"
+      },
+      "On Error Container": {
+        "value": "{error.Error90}",
+        "type": "color",
+        "prefix": "color_roles"
+      },
+      "Error Pill bg": {
+        "value": "{error.Error80(20%)}",
+        "type": "color",
+        "prefix": "color_roles"
+      },
+      "Error Icon bg": {
+        "value": "{error.Error80(10%)}",
+        "type": "color",
+        "prefix": "color_roles"
+      }
+    },
+    "successColors": {
+      "Success": {
+        "value": "{success.Success80}",
+        "type": "color",
+        "prefix": "color_roles"
+      },
+      "On Success": {
+        "value": "{success.Success20}",
+        "type": "color",
+        "prefix": "color_roles"
+      },
+      "Success Container": {
+        "value": "{success.Success30}",
+        "type": "color",
+        "prefix": "color_roles"
+      },
+      "On Success Container": {
+        "value": "{success.Success90}",
+        "type": "color",
+        "prefix": "color_roles"
+      },
+      "Success Pill bg": {
+        "value": "{success.Success80(20%)}",
+        "type": "color",
+        "prefix": "color_roles"
+      },
+      "Success Icon bg": {
+        "value": "{success.Success80(10%)}",
+        "type": "color",
+        "prefix": "color_roles"
+      }
+    },
+    "warningColors": {
+      "Warning": {
+        "value": "{warning.Warning80}",
+        "type": "color",
+        "prefix": "color_roles"
+      },
+      "On Warning": {
+        "value": "{warning.Warning20}",
+        "type": "color",
+        "prefix": "color_roles"
+      },
+      "Warning Container": {
+        "value": "{warning.Warning30}",
+        "type": "color",
+        "prefix": "color_roles"
+      },
+      "On Warning Container": {
+        "value": "{warning.Warning90}",
+        "type": "color",
+        "prefix": "color_roles"
+      },
+      "Warning Pill bg": {
+        "value": "{warning.Warning80(20%)}",
+        "type": "color",
+        "prefix": "color_roles"
+      },
+      "Warning Icon bg": {
+        "value": "{warning.Warning80(10%)}",
+        "type": "color",
+        "prefix": "color_roles"
+      }
+    },
+    "accentColors": {
+      "Accent": {
+        "value": "{accent.Accent80}",
+        "type": "color",
+        "prefix": "color_roles"
+      },
+      "On Accent": {
+        "value": "{accent.Accent20}",
+        "type": "color",
+        "prefix": "color_roles"
+      },
+      "Accent Container": {
+        "value": "{accent.Accent30}",
+        "type": "color",
+        "prefix": "color_roles"
+      },
+      "On Accent Container": {
+        "value": "{accent.Accent90}",
+        "type": "color",
+        "prefix": "color_roles"
+      },
+      "Accent Pill bg": {
+        "value": "{accent.Accent80(20%)}",
+        "type": "color",
+        "prefix": "color_roles"
+      },
+      "Accent Icon bg": {
+        "value": "{accent.Accent80(10%)}",
+        "type": "color",
+        "prefix": "color_roles"
+      }
+    },
+    "outlineColors": {
+      "Outline": {
+        "value": "{neutralVariant.Neutral Variant60}",
+        "type": "color",
+        "prefix": "color_roles"
+      },
+      "Outline Variant": {
+        "value": "{neutralVariant.Neutral Variant30}",
+        "type": "color",
+        "prefix": "color_roles"
+      }
+    },
+    "textColors": {
+      "Primary text": {
+        "value": "{neutral.Neutral95}",
+        "type": "color",
+        "prefix": "color_roles"
+      },
+      "Secondary text": {
+        "value": "{neutral.Neutral80}",
+        "type": "color",
+        "prefix": "color_roles"
+      }
+    },
+    "accentColors2": {
+      "Accent 2": {
+        "value": "{accent2.Accent 2_80}",
+        "type": "color",
+        "prefix": "color_roles"
+      },
+      "On Accent 2": {
+        "value": "{accent2.Accent 2_20}",
+        "type": "color",
+        "prefix": "color_roles"
+      },
+      "Accent Container 2": {
+        "value": "{accent2.Accent 2_30}",
+        "type": "color",
+        "prefix": "color_roles"
+      },
+      "On Accent Container 2": {
+        "value": "{accent2.Accent 2_90}",
+        "type": "color",
+        "prefix": "color_roles"
+      },
+      "Accent Pill bg 2": {
+        "value": "{accent2.Accent 2_80(20%)}",
+        "type": "color",
+        "prefix": "color_roles"
+      },
+      "Accent Icon bg 2": {
+        "value": "{accent2.Accent80(10%) 2}",
+        "type": "color",
+        "prefix": "color_roles"
+      }
     }
   }
 }

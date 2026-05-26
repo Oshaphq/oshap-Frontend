@@ -1,0 +1,117 @@
+{
+  "screen": "menuScreen",
+  "stack": "vite-react",
+  "componentSet": {
+    "fromContracts": false,
+    "allowlist": [
+      "Header",
+      "CategoryTabs",
+      "MenuCard",
+      "BottomNav",
+      "Button",
+      "Icon",
+      "Image",
+      "Input"
+    ]
+  },
+  "map": [
+    {
+      "layoutNode": "Header",
+      "component": "primitive",
+      "as": "header",
+      "attributes": {
+        "sticky": true,
+        "background": "bg-surface-container-low",
+        "border": "border-b border-outline-variant"
+      },
+      "children": [
+        {
+          "layoutNode": "HeaderLeft",
+          "component": "primitive",
+          "as": "div",
+          "attributes": { "flex": "flex items-center gap-s" },
+          "children": [
+            {
+              "layoutNode": "RestaurantName",
+              "component": "primitive",
+              "as": "h1",
+              "attributes": { "typography": "font-display text-display-h1 font-bold text-primary-text" },
+              "dynamic": { "content": "{restaurantName}" }
+            },
+            {
+              "layoutNode": "TableBadge",
+              "component": "primitive",
+              "as": "span",
+              "attributes": { "typography": "inline-flex items-center p-s rounded-s bg-primary-container text-on-primary-container text-label-l5 font-semibold" },
+              "dynamic": { "content": "Table: {tableId}" }
+            }
+          ]
+        },
+        {
+          "layoutNode": "SearchButton",
+          "component": "primitive",
+          "as": "button",
+          "attributes": { "size": "w-10 h-10 flex items-center justify-center rounded-4xl bg-surface-container text-on-surface-variant text-xl" },
+          "interaction": "toggleSearch",
+          "content": { "icon": "search_line" }
+        }
+      ]
+    },
+    {
+      "layoutNode": "CategoriesWrapper / CategoryTabs",
+      "component": "CategoryTabs",
+      "existing": true,
+      "reuseFrom": "apps/customer/src/components/CategoryTabs.tsx",
+      "props": {
+        "categories": "dynamic: dynamicCategories array",
+        "activeCategory": "string",
+        "onSelect": "fn(category: string)"
+      },
+      "tabs": [
+        { "label": "All", "variant": "active", "background": "bg-primary text-on-primary", "borderRadius": "rounded-4xl" },
+        { "label": "Meals", "variant": "inactive", "background": "bg-surface-container text-on-surface-variant", "borderRadius": "rounded-4xl" },
+        { "label": "Grills", "variant": "inactive", "background": "bg-surface-container text-on-surface-variant", "borderRadius": "rounded-4xl" },
+        { "label": "Drinks", "variant": "inactive", "background": "bg-surface-container text-on-surface-variant", "borderRadius": "rounded-4xl" },
+        { "label": "Sides", "variant": "inactive", "background": "bg-surface-container text-on-surface-variant", "borderRadius": "rounded-4xl" }
+      ],
+      "adaptationNote": "Existing CategoryTabs renders horizontally; this design uses full-width pill tabs with space-between. Refine existing component to match Figma active/inactive styling with filled active and outline inactive variants."
+    },
+    {
+      "layoutNode": "MenuSection",
+      "component": "primitive",
+      "as": "section",
+      "attributes": { "layout": "p-md flex flex-col gap-m safepb" },
+      "children": [
+        {
+          "layoutNode": "SectionTitle",
+          "component": "primitive",
+          "as": "h2",
+          "attributes": { "typography": "font-display text-display-h2 font-semibold text-primary-text" },
+          "dynamic": { "content": "activeCategory === 'All' ? 'Full Menu' : activeCategory" }
+        },
+        {
+          "layoutNode": "ItemsList",
+          "component": "MenuCard",
+          "existing": true,
+          "reuseFrom": "apps/customer/src/components/MenuCard.tsx",
+          "repeat": true,
+          "refinementNote": "Redesign MenuCard to match Figma: horizontal layout with 96x96 rounded image placeholder on left, name/description/price-add on right. Image uses bg-primary-container with image-url when available. Description max 2 lines. Price left, ADD button right (outlined primary, pill shape). Card has bg-surface-container-low, rounded-2xl, subtle bottom border."
+        }
+      ]
+    },
+    {
+      "layoutNode": "BottomNav",
+      "component": "BottomNav",
+      "existing": true,
+      "reuseFrom": "apps/customer/src/components/BottomNav.tsx",
+      "refinementNote": "Existing BottomNav already has 3 items. Match Figma: fixed bottom, 64px height, horizontal space-between, bg-surface-container-low, top border. Active item uses primary text/icon color; inactive uses on-surface-variant. Icons use mingcute classes. Tab labels 12px inter-regular. Vertical stacking (icon above label), gap-0.5, centered."
+    }
+  ],
+  "dynamicData": {
+    "tableId": "from useSearchParams('table')",
+    "restaurantName": "from tableQuery.data?.restaurant?.name ?? 'Aji\\'s Kitchen'",
+    "restaurantId": "from tableQuery.data?.restaurant?.id",
+    "menuItems": "from useMenu(restaurantId)",
+    "categories": "from useMemo: unique categories from menuItems, prefixed with 'All'"
+  }
+}

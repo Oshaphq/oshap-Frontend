@@ -1,0 +1,2117 @@
+{
+    "version": "1.0.0",
+    "source": {
+        "fileName": "Oshap",
+        "selection": [
+            "2020:111"
+        ],
+        "extractedAt": "2026-05-26T04:19:15.224Z"
+    },
+    "tokens": {
+        "colors": {
+            "surfacecolors-surface-container-low": "#FFFFFF",
+            "textcolors-primary-text": "#343234",
+            "textcolors-secondary-text": "#827D82",
+            "primarycolors-primary": "#F56500",
+            "surfacecolors-surface-container": "#F0EFF0",
+            "successcolors-success": "#009966",
+            "outlinecolors-outline-variant": "#CCC9CF",
+            "surfacecolors-on-surface-variant": "#1A181B",
+            "surfacecolors-inverse-surface": "#343234",
+            "surfacecolors-inverse-on-surface": "#F2F2F2",
+            "surfacecolors-surface-container-high": "#EBEAEB"
+        },
+        "typography": {
+            "display-h2-poppins-semi-bold-600": {
+                "fontWeight": 600,
+                "fontSize": 20,
+                "lineHeight": 24,
+                "letterSpacing": -2
+            },
+            "label-l5-inter-reg-400": {
+                "fontWeight": 400,
+                "fontSize": 12,
+                "lineHeight": 14,
+                "letterSpacing": -2
+            },
+            "label-l5-inter-semi-bold-700": {
+                "fontWeight": 600,
+                "fontSize": 12,
+                "lineHeight": 14,
+                "letterSpacing": 0.5
+            },
+            "display-h3-poppins-semi-bold-600": {
+                "fontWeight": 600,
+                "fontSize": 18,
+                "lineHeight": 22,
+                "letterSpacing": -1
+            },
+            "paragraph-p2-inter-reg-400": {
+                "fontWeight": 400,
+                "fontSize": 14,
+                "lineHeight": 20,
+                "letterSpacing": -2
+            },
+            "label-l3-inter-semi-bold-700": {
+                "fontWeight": 600,
+                "fontSize": 16,
+                "lineHeight": 20,
+                "letterSpacing": -2
+            },
+            "label-l4-inter-reg-400": {
+                "fontWeight": 400,
+                "fontSize": 14,
+                "lineHeight": 16,
+                "letterSpacing": -2
+            },
+            "label-l4-poppins-semi-bold-600": {
+                "fontWeight": 600,
+                "fontSize": 14,
+                "lineHeight": 16,
+                "letterSpacing": 0
+            },
+            "caption-c1-inter-med-500": {
+                "fontWeight": 500,
+                "fontSize": 12,
+                "lineHeight": 14,
+                "letterSpacing": 0
+            }
+        },
+        "spacing": {
+            "m": 16,
+            "s": 8,
+            "spacing-2xs": 2,
+            "xs": 4
+        },
+        "radius": {
+            "radius-100": 100,
+            "s": 8
+        },
+        "shadows": {}
+    },
+    "components": [
+        {
+            "name": "IconUtensils",
+            "variants": [],
+            "instances": 3
+        },
+        {
+            "name": "AddButton",
+            "variants": [],
+            "instances": 3
+        },
+        {
+            "name": "Divider",
+            "variants": [],
+            "instances": 2
+        },
+        {
+            "name": "NavItem",
+            "variants": [],
+            "instances": 2
+        },
+        {
+            "name": "Header",
+            "variants": [],
+            "instances": 1
+        },
+        {
+            "name": "HeaderLeft",
+            "variants": [],
+            "instances": 1
+        },
+        {
+            "name": "IconArrowLeft",
+            "variants": [],
+            "instances": 1
+        },
+        {
+            "name": "HeaderInfo",
+            "variants": [],
+            "instances": 1
+        },
+        {
+            "name": "TableBadge",
+            "variants": [],
+            "instances": 1
+        },
+        {
+            "name": "PinChip",
+            "variants": [],
+            "instances": 1
+        },
+        {
+            "name": "MyOrderSection",
+            "variants": [],
+            "instances": 1
+        },
+        {
+            "name": "ItemsList",
+            "variants": [],
+            "instances": 1
+        },
+        {
+            "name": "ItemRowChickenShawarma",
+            "variants": [],
+            "instances": 1
+        },
+        {
+            "name": "ItemRowJollofRice&Chicken",
+            "variants": [],
+            "instances": 1
+        },
+        {
+            "name": "ItemRowChapman",
+            "variants": [],
+            "instances": 1
+        },
+        {
+            "name": "YourTotalRow",
+            "variants": [],
+            "instances": 1
+        },
+        {
+            "name": "TotalRow",
+            "variants": [],
+            "instances": 1
+        },
+        {
+            "name": "BottomNav",
+            "variants": [
+                "ActiveTab=myOrders"
+            ],
+            "instances": 1
+        },
+        {
+            "name": "IconBook",
+            "variants": [],
+            "instances": 1
+        },
+        {
+            "name": "Menu",
+            "variants": [],
+            "instances": 1
+        },
+        {
+            "name": "NavItemActive",
+            "variants": [],
+            "instances": 1
+        },
+        {
+            "name": "IconUsers",
+            "variants": [],
+            "instances": 1
+        },
+        {
+            "name": "IconCard",
+            "variants": [],
+            "instances": 1
+        },
+        {
+            "name": "OthersBanner",
+            "variants": [],
+            "instances": 1
+        }
+    ],
+    "root": {
+        "id": "2020:111",
+        "kind": "screen",
+        "name": "MyOrdersInSession(withOrders)",
+        "width": 393,
+        "height": 852,
+        "position": "relational",
+        "layout": {
+            "direction": "vertical"
+        },
+        "style": {
+            "background": "surfacecolors-surface-container-low"
+        },
+        "children": [
+            {
+                "id": "2020:112",
+                "kind": "container",
+                "name": "Header",
+                "width": 393,
+                "height": 64,
+                "component": "Header",
+                "position": "relational",
+                "layout": {
+                    "direction": "horizontal",
+                    "padding": {
+                        "top": 16,
+                        "right": 16,
+                        "bottom": 8,
+                        "left": 16
+                    },
+                    "justifyContent": "space-between",
+                    "alignItems": "center"
+                },
+                "responsive": {
+                    "width": "hug"
+                },
+                "style": {
+                    "background": "surfacecolors-surface-container-low"
+                },
+                "children": [
+                    {
+                        "id": "2020:113",
+                        "kind": "container",
+                        "name": "HeaderLeft",
+                        "width": 155,
+                        "height": 40,
+                        "component": "HeaderLeft",
+                        "position": "relational",
+                        "layout": {
+                            "direction": "horizontal",
+                            "gap": "s",
+                            "alignItems": "center"
+                        },
+                        "responsive": {
+                            "width": "hug",
+                            "height": "hug"
+                        },
+                        "children": [
+                            {
+                                "id": "2020:114",
+                                "kind": "icon",
+                                "name": "BackButton",
+                                "width": 36,
+                                "height": 36,
+                                "position": "relational",
+                                "layout": {
+                                    "direction": "horizontal",
+                                    "justifyContent": "center",
+                                    "alignItems": "center"
+                                },
+                                "style": {
+                                    "borderRadius": "radius-100"
+                                },
+                                "semanticRole": "semantic",
+                                "signals": {
+                                    "nonInteractive": true
+                                },
+                                "context": {
+                                    "zIndex": -1,
+                                    "hierarchyDepth": 3
+                                }
+                            },
+                            {
+                                "id": "2020:118",
+                                "kind": "container",
+                                "name": "HeaderInfo",
+                                "width": 111,
+                                "height": 40,
+                                "component": "HeaderInfo",
+                                "position": "relational",
+                                "layout": {
+                                    "direction": "vertical",
+                                    "gap": "spacing-2xs"
+                                },
+                                "responsive": {
+                                    "width": "hug",
+                                    "height": "hug"
+                                },
+                                "children": [
+                                    {
+                                        "id": "2020:119",
+                                        "kind": "text",
+                                        "name": "My Orders",
+                                        "width": 101,
+                                        "height": 24,
+                                        "position": "relational",
+                                        "text": {
+                                            "content": "My Orders",
+                                            "typography": "display-h2-poppins-semi-bold-600",
+                                            "color": "textcolors-primary-text",
+                                            "textAlign": "left"
+                                        },
+                                        "semanticRole": "semantic",
+                                        "signals": {
+                                            "nonInteractive": true
+                                        },
+                                        "context": {
+                                            "zIndex": -1,
+                                            "hierarchyDepth": 4
+                                        }
+                                    },
+                                    {
+                                        "id": "2020:120",
+                                        "kind": "text",
+                                        "name": "Order id: 1234-5678",
+                                        "width": 111,
+                                        "height": 14,
+                                        "position": "relational",
+                                        "text": {
+                                            "content": "Order id: 1234-5678",
+                                            "typography": "label-l5-inter-reg-400",
+                                            "color": "textcolors-secondary-text",
+                                            "textAlign": "left"
+                                        },
+                                        "semanticRole": "semantic",
+                                        "signals": {
+                                            "nonInteractive": true
+                                        },
+                                        "context": {
+                                            "zIndex": -1,
+                                            "hierarchyDepth": 4
+                                        }
+                                    }
+                                ],
+                                "semanticRole": "structural",
+                                "signals": {
+                                    "nonInteractive": true
+                                },
+                                "context": {
+                                    "zIndex": -1,
+                                    "hierarchyDepth": 3
+                                }
+                            }
+                        ],
+                        "semanticRole": "structural",
+                        "signals": {
+                            "nonInteractive": true
+                        },
+                        "context": {
+                            "zIndex": -1,
+                            "hierarchyDepth": 2
+                        }
+                    },
+                    {
+                        "id": "2035:59",
+                        "kind": "component",
+                        "name": "TableBadge",
+                        "width": 85,
+                        "height": 38,
+                        "component": "TableBadge",
+                        "position": "relational",
+                        "layout": {
+                            "direction": "horizontal",
+                            "padding": {
+                                "top": 12,
+                                "right": 16,
+                                "bottom": 12,
+                                "left": 16
+                            },
+                            "alignItems": "center"
+                        },
+                        "responsive": {
+                            "width": "hug",
+                            "height": "hug"
+                        },
+                        "style": {
+                            "borderColor": "primarycolors-primary",
+                            "borderWidth": 2,
+                            "borderRadius": "radius-100"
+                        },
+                        "children": [
+                            {
+                                "id": "I2035:59;2035:50",
+                                "kind": "text",
+                                "name": "Table: T1",
+                                "width": 53,
+                                "height": 14,
+                                "position": "relational",
+                                "text": {
+                                    "content": "Table: T1",
+                                    "typography": "label-l5-inter-semi-bold-700",
+                                    "color": "primarycolors-primary",
+                                    "textAlign": "left"
+                                },
+                                "semanticRole": "semantic",
+                                "signals": {
+                                    "nonInteractive": true
+                                },
+                                "context": {
+                                    "zIndex": -1,
+                                    "insideComponent": true,
+                                    "hierarchyDepth": 3
+                                },
+                                "interaction": {
+                                    "insideInteractiveComponent": true
+                                }
+                            }
+                        ],
+                        "semanticRole": "interactive",
+                        "signals": {
+                            "interactive": true
+                        },
+                        "context": {
+                            "zIndex": -1,
+                            "insideComponent": true,
+                            "interactive": true,
+                            "hierarchyDepth": 2
+                        },
+                        "interaction": {
+                            "interactive": true,
+                            "insideInteractiveComponent": true
+                        }
+                    }
+                ],
+                "semanticRole": "structural",
+                "signals": {
+                    "nonInteractive": true
+                },
+                "context": {
+                    "zIndex": -1,
+                    "hierarchyDepth": 1
+                }
+            },
+            {
+                "id": "2020:123",
+                "kind": "container",
+                "name": "OrderTogether(session)",
+                "width": 393,
+                "height": 162,
+                "position": "relational",
+                "layout": {
+                    "direction": "horizontal",
+                    "padding": {
+                        "top": 24,
+                        "right": 16,
+                        "bottom": 24,
+                        "left": 16
+                    }
+                },
+                "responsive": {
+                    "width": "hug"
+                },
+                "style": {
+                    "background": "surfacecolors-surface-container-low",
+                    "borderColor": "surfacecolors-surface-container",
+                    "borderWidth": {
+                        "bottom": 6
+                    }
+                },
+                "children": [
+                    {
+                        "id": "2020:124",
+                        "kind": "container",
+                        "name": "Content",
+                        "width": 361,
+                        "height": 114,
+                        "position": "relational",
+                        "layout": {
+                            "direction": "vertical",
+                            "gap": "s"
+                        },
+                        "responsive": {
+                            "width": "hug"
+                        },
+                        "children": [
+                            {
+                                "id": "2020:125",
+                                "kind": "text",
+                                "name": "Order together",
+                                "width": 133,
+                                "height": 22,
+                                "position": "relational",
+                                "text": {
+                                    "content": "Order together",
+                                    "typography": "display-h3-poppins-semi-bold-600",
+                                    "color": "textcolors-primary-text",
+                                    "textAlign": "left"
+                                },
+                                "semanticRole": "semantic",
+                                "signals": {
+                                    "nonInteractive": true
+                                },
+                                "context": {
+                                    "zIndex": -1,
+                                    "hierarchyDepth": 3
+                                }
+                            },
+                            {
+                                "id": "2020:126",
+                                "kind": "text",
+                                "name": "Share PIN with your companions at table & order together.",
+                                "width": 361,
+                                "height": 40,
+                                "position": "relational",
+                                "text": {
+                                    "content": "Share PIN with your companions at table & order together.",
+                                    "typography": "paragraph-p2-inter-reg-400",
+                                    "color": "textcolors-secondary-text",
+                                    "textAlign": "left"
+                                },
+                                "semanticRole": "semantic",
+                                "signals": {
+                                    "nonInteractive": true
+                                },
+                                "context": {
+                                    "zIndex": -1,
+                                    "hierarchyDepth": 3
+                                }
+                            },
+                            {
+                                "id": "2035:88",
+                                "kind": "component",
+                                "name": "PinChip",
+                                "width": 152,
+                                "height": 36,
+                                "component": "PinChip",
+                                "position": "relational",
+                                "layout": {
+                                    "direction": "horizontal",
+                                    "padding": {
+                                        "top": 8,
+                                        "right": 16,
+                                        "bottom": 8,
+                                        "left": 16
+                                    },
+                                    "alignItems": "center"
+                                },
+                                "responsive": {
+                                    "width": "hug",
+                                    "height": "hug"
+                                },
+                                "style": {
+                                    "borderColor": "successcolors-success",
+                                    "borderWidth": 2,
+                                    "borderRadius": "s"
+                                },
+                                "children": [
+                                    {
+                                        "id": "I2035:88;2035:82",
+                                        "kind": "text",
+                                        "name": "Table PIN : 4821",
+                                        "width": 120,
+                                        "height": 20,
+                                        "position": "relational",
+                                        "text": {
+                                            "content": "Table PIN : 4821",
+                                            "typography": "label-l3-inter-semi-bold-700",
+                                            "color": "successcolors-success",
+                                            "textAlign": "left"
+                                        },
+                                        "semanticRole": "semantic",
+                                        "signals": {
+                                            "nonInteractive": true
+                                        },
+                                        "context": {
+                                            "zIndex": -1,
+                                            "insideComponent": true,
+                                            "hierarchyDepth": 4
+                                        },
+                                        "interaction": {
+                                            "insideInteractiveComponent": true
+                                        }
+                                    }
+                                ],
+                                "semanticRole": "interactive",
+                                "signals": {
+                                    "interactive": true
+                                },
+                                "context": {
+                                    "zIndex": -1,
+                                    "insideComponent": true,
+                                    "interactive": true,
+                                    "hierarchyDepth": 3
+                                },
+                                "interaction": {
+                                    "interactive": true,
+                                    "insideInteractiveComponent": true
+                                }
+                            }
+                        ],
+                        "semanticRole": "structural",
+                        "signals": {
+                            "nonInteractive": true
+                        },
+                        "context": {
+                            "zIndex": -1,
+                            "hierarchyDepth": 2
+                        }
+                    }
+                ],
+                "semanticRole": "structural",
+                "signals": {
+                    "nonInteractive": true
+                },
+                "context": {
+                    "zIndex": -1,
+                    "hierarchyDepth": 1
+                }
+            },
+            {
+                "id": "2020:137",
+                "kind": "container",
+                "name": "MyOrderSection",
+                "width": 393,
+                "height": 354,
+                "component": "MyOrderSection",
+                "position": "relational",
+                "layout": {
+                    "direction": "vertical",
+                    "gap": "s",
+                    "padding": {
+                        "top": 24,
+                        "right": 16,
+                        "bottom": 16,
+                        "left": 16
+                    }
+                },
+                "responsive": {
+                    "height": "hug"
+                },
+                "style": {
+                    "background": "surfacecolors-surface-container-low"
+                },
+                "children": [
+                    {
+                        "id": "2020:138",
+                        "kind": "text",
+                        "name": "Binjo's Order",
+                        "width": 113,
+                        "height": 22,
+                        "position": "relational",
+                        "text": {
+                            "content": "Binjo's Order",
+                            "typography": "display-h3-poppins-semi-bold-600",
+                            "color": "textcolors-primary-text",
+                            "textAlign": "left"
+                        },
+                        "semanticRole": "semantic",
+                        "signals": {
+                            "nonInteractive": true
+                        },
+                        "context": {
+                            "zIndex": -1,
+                            "hierarchyDepth": 2
+                        }
+                    },
+                    {
+                        "id": "2020:139",
+                        "kind": "rectangle",
+                        "name": "Divider",
+                        "width": 361,
+                        "height": 1,
+                        "component": "Divider",
+                        "position": "relational",
+                        "style": {
+                            "background": "outlinecolors-outline-variant"
+                        },
+                        "semanticRole": "structural",
+                        "signals": {
+                            "nonInteractive": true
+                        },
+                        "context": {
+                            "zIndex": -1,
+                            "hierarchyDepth": 2
+                        }
+                    },
+                    {
+                        "id": "2020:140",
+                        "kind": "container",
+                        "name": "Order1",
+                        "width": 361,
+                        "height": 275,
+                        "position": "relational",
+                        "layout": {
+                            "direction": "vertical",
+                            "gap": "m",
+                            "padding": {
+                                "top": 16,
+                                "right": 0,
+                                "bottom": 0,
+                                "left": 0
+                            }
+                        },
+                        "responsive": {
+                            "height": "hug"
+                        },
+                        "children": [
+                            {
+                                "id": "2020:141",
+                                "kind": "text",
+                                "name": "Order 1",
+                                "width": 47,
+                                "height": 16,
+                                "position": "relational",
+                                "text": {
+                                    "content": "Order 1",
+                                    "typography": "label-l4-inter-reg-400",
+                                    "color": "textcolors-secondary-text",
+                                    "textAlign": "left"
+                                },
+                                "semanticRole": "semantic",
+                                "signals": {
+                                    "nonInteractive": true
+                                },
+                                "context": {
+                                    "zIndex": -1,
+                                    "hierarchyDepth": 3
+                                }
+                            },
+                            {
+                                "id": "2020:142",
+                                "kind": "container",
+                                "name": "ItemsList",
+                                "width": 361,
+                                "height": 140,
+                                "component": "ItemsList",
+                                "position": "relational",
+                                "layout": {
+                                    "direction": "vertical",
+                                    "gap": "m"
+                                },
+                                "responsive": {
+                                    "height": "hug"
+                                },
+                                "children": [
+                                    {
+                                        "id": "2020:143",
+                                        "kind": "container",
+                                        "name": "ItemRowChickenShawarma",
+                                        "width": 361,
+                                        "height": 36,
+                                        "component": "ItemRowChickenShawarma",
+                                        "position": "relational",
+                                        "layout": {
+                                            "direction": "horizontal",
+                                            "justifyContent": "space-between",
+                                            "alignItems": "center"
+                                        },
+                                        "responsive": {
+                                            "width": "hug"
+                                        },
+                                        "children": [
+                                            {
+                                                "id": "2020:144",
+                                                "kind": "container",
+                                                "name": "Left",
+                                                "width": 173,
+                                                "height": 36,
+                                                "position": "relational",
+                                                "layout": {
+                                                    "direction": "horizontal",
+                                                    "gap": "s"
+                                                },
+                                                "responsive": {
+                                                    "width": "hug",
+                                                    "height": "hug"
+                                                },
+                                                "children": [
+                                                    {
+                                                        "id": "2020:145",
+                                                        "kind": "icon",
+                                                        "name": "IconUtensils",
+                                                        "width": 20,
+                                                        "height": 20,
+                                                        "component": "IconUtensils",
+                                                        "position": "relational",
+                                                        "layout": {
+                                                            "direction": "stack"
+                                                        },
+                                                        "semanticRole": "semantic",
+                                                        "signals": {
+                                                            "nonInteractive": true
+                                                        },
+                                                        "context": {
+                                                            "zIndex": -1,
+                                                            "hierarchyDepth": 6
+                                                        }
+                                                    },
+                                                    {
+                                                        "id": "2020:150",
+                                                        "kind": "container",
+                                                        "name": "Info",
+                                                        "width": 145,
+                                                        "height": 36,
+                                                        "position": "relational",
+                                                        "layout": {
+                                                            "direction": "vertical",
+                                                            "gap": "spacing-2xs"
+                                                        },
+                                                        "responsive": {
+                                                            "width": "hug",
+                                                            "height": "hug"
+                                                        },
+                                                        "children": [
+                                                            {
+                                                                "id": "2020:151",
+                                                                "kind": "text",
+                                                                "name": "Chicken Shawarma",
+                                                                "width": 145,
+                                                                "height": 20,
+                                                                "position": "relational",
+                                                                "text": {
+                                                                    "content": "Chicken Shawarma",
+                                                                    "typography": "label-l3-inter-semi-bold-700",
+                                                                    "color": "textcolors-primary-text",
+                                                                    "textAlign": "left"
+                                                                },
+                                                                "semanticRole": "semantic",
+                                                                "signals": {
+                                                                    "nonInteractive": true
+                                                                },
+                                                                "context": {
+                                                                    "zIndex": -1,
+                                                                    "hierarchyDepth": 7
+                                                                }
+                                                            },
+                                                            {
+                                                                "id": "2020:152",
+                                                                "kind": "text",
+                                                                "name": "Qty 2",
+                                                                "width": 30,
+                                                                "height": 14,
+                                                                "position": "relational",
+                                                                "text": {
+                                                                    "content": "Qty 2",
+                                                                    "typography": "label-l5-inter-reg-400",
+                                                                    "color": "textcolors-secondary-text",
+                                                                    "textAlign": "left"
+                                                                },
+                                                                "semanticRole": "semantic",
+                                                                "signals": {
+                                                                    "nonInteractive": true
+                                                                },
+                                                                "context": {
+                                                                    "zIndex": -1,
+                                                                    "hierarchyDepth": 7
+                                                                }
+                                                            }
+                                                        ],
+                                                        "semanticRole": "structural",
+                                                        "signals": {
+                                                            "nonInteractive": true
+                                                        },
+                                                        "context": {
+                                                            "zIndex": -1,
+                                                            "hierarchyDepth": 6
+                                                        }
+                                                    }
+                                                ],
+                                                "semanticRole": "structural",
+                                                "signals": {
+                                                    "nonInteractive": true
+                                                },
+                                                "context": {
+                                                    "zIndex": -1,
+                                                    "hierarchyDepth": 5
+                                                }
+                                            },
+                                            {
+                                                "id": "2035:91",
+                                                "kind": "component",
+                                                "name": "AddButton",
+                                                "width": 95,
+                                                "height": 36,
+                                                "component": "AddButton",
+                                                "position": "relational",
+                                                "layout": {
+                                                    "direction": "horizontal",
+                                                    "padding": {
+                                                        "top": 8,
+                                                        "right": 16,
+                                                        "bottom": 8,
+                                                        "left": 16
+                                                    },
+                                                    "justifyContent": "center",
+                                                    "alignItems": "center"
+                                                },
+                                                "responsive": {
+                                                    "width": "hug"
+                                                },
+                                                "style": {
+                                                    "borderColor": "primarycolors-primary",
+                                                    "borderWidth": 2,
+                                                    "borderRadius": "s"
+                                                },
+                                                "children": [
+                                                    {
+                                                        "id": "I2035:91;2035:3",
+                                                        "kind": "text",
+                                                        "name": "ADD",
+                                                        "width": 63,
+                                                        "height": 16,
+                                                        "position": "relational",
+                                                        "text": {
+                                                            "content": "REORDER",
+                                                            "typography": "label-l4-poppins-semi-bold-600",
+                                                            "color": "primarycolors-primary",
+                                                            "textAlign": "left"
+                                                        },
+                                                        "semanticRole": "semantic",
+                                                        "signals": {
+                                                            "nonInteractive": true
+                                                        },
+                                                        "context": {
+                                                            "zIndex": -1,
+                                                            "insideComponent": true,
+                                                            "hierarchyDepth": 6
+                                                        },
+                                                        "interaction": {
+                                                            "insideInteractiveComponent": true
+                                                        }
+                                                    }
+                                                ],
+                                                "semanticRole": "interactive",
+                                                "signals": {
+                                                    "interactive": true
+                                                },
+                                                "context": {
+                                                    "zIndex": -1,
+                                                    "insideComponent": true,
+                                                    "interactive": true,
+                                                    "hierarchyDepth": 5
+                                                },
+                                                "interaction": {
+                                                    "interactive": true,
+                                                    "insideInteractiveComponent": true
+                                                }
+                                            }
+                                        ],
+                                        "semanticRole": "structural",
+                                        "signals": {
+                                            "nonInteractive": true
+                                        },
+                                        "context": {
+                                            "zIndex": -1,
+                                            "hierarchyDepth": 4
+                                        }
+                                    },
+                                    {
+                                        "id": "2020:155",
+                                        "kind": "container",
+                                        "name": "ItemRowJollofRice&Chicken",
+                                        "width": 361,
+                                        "height": 36,
+                                        "component": "ItemRowJollofRice&Chicken",
+                                        "position": "relational",
+                                        "layout": {
+                                            "direction": "horizontal",
+                                            "justifyContent": "space-between",
+                                            "alignItems": "center"
+                                        },
+                                        "responsive": {
+                                            "width": "hug"
+                                        },
+                                        "children": [
+                                            {
+                                                "id": "2020:156",
+                                                "kind": "container",
+                                                "name": "Left",
+                                                "width": 184,
+                                                "height": 36,
+                                                "position": "relational",
+                                                "layout": {
+                                                    "direction": "horizontal",
+                                                    "gap": "s"
+                                                },
+                                                "responsive": {
+                                                    "width": "hug",
+                                                    "height": "hug"
+                                                },
+                                                "children": [
+                                                    {
+                                                        "id": "2020:157",
+                                                        "kind": "icon",
+                                                        "name": "IconUtensils",
+                                                        "width": 20,
+                                                        "height": 20,
+                                                        "component": "IconUtensils",
+                                                        "position": "relational",
+                                                        "layout": {
+                                                            "direction": "stack"
+                                                        },
+                                                        "semanticRole": "semantic",
+                                                        "signals": {
+                                                            "nonInteractive": true
+                                                        },
+                                                        "context": {
+                                                            "zIndex": -1,
+                                                            "hierarchyDepth": 6
+                                                        }
+                                                    },
+                                                    {
+                                                        "id": "2020:162",
+                                                        "kind": "container",
+                                                        "name": "Info",
+                                                        "width": 156,
+                                                        "height": 36,
+                                                        "position": "relational",
+                                                        "layout": {
+                                                            "direction": "vertical",
+                                                            "gap": "spacing-2xs"
+                                                        },
+                                                        "responsive": {
+                                                            "width": "hug",
+                                                            "height": "hug"
+                                                        },
+                                                        "children": [
+                                                            {
+                                                                "id": "2020:163",
+                                                                "kind": "text",
+                                                                "name": "Jollof Rice & Chicken",
+                                                                "width": 156,
+                                                                "height": 20,
+                                                                "position": "relational",
+                                                                "text": {
+                                                                    "content": "Jollof Rice & Chicken",
+                                                                    "typography": "label-l3-inter-semi-bold-700",
+                                                                    "color": "textcolors-primary-text",
+                                                                    "textAlign": "left"
+                                                                },
+                                                                "semanticRole": "semantic",
+                                                                "signals": {
+                                                                    "nonInteractive": true
+                                                                },
+                                                                "context": {
+                                                                    "zIndex": -1,
+                                                                    "hierarchyDepth": 7
+                                                                }
+                                                            },
+                                                            {
+                                                                "id": "2020:164",
+                                                                "kind": "text",
+                                                                "name": "Qty 1",
+                                                                "width": 29,
+                                                                "height": 14,
+                                                                "position": "relational",
+                                                                "text": {
+                                                                    "content": "Qty 1",
+                                                                    "typography": "label-l5-inter-reg-400",
+                                                                    "color": "textcolors-secondary-text",
+                                                                    "textAlign": "left"
+                                                                },
+                                                                "semanticRole": "semantic",
+                                                                "signals": {
+                                                                    "nonInteractive": true
+                                                                },
+                                                                "context": {
+                                                                    "zIndex": -1,
+                                                                    "hierarchyDepth": 7
+                                                                }
+                                                            }
+                                                        ],
+                                                        "semanticRole": "structural",
+                                                        "signals": {
+                                                            "nonInteractive": true
+                                                        },
+                                                        "context": {
+                                                            "zIndex": -1,
+                                                            "hierarchyDepth": 6
+                                                        }
+                                                    }
+                                                ],
+                                                "semanticRole": "structural",
+                                                "signals": {
+                                                    "nonInteractive": true
+                                                },
+                                                "context": {
+                                                    "zIndex": -1,
+                                                    "hierarchyDepth": 5
+                                                }
+                                            },
+                                            {
+                                                "id": "2035:94",
+                                                "kind": "component",
+                                                "name": "AddButton",
+                                                "width": 95,
+                                                "height": 36,
+                                                "component": "AddButton",
+                                                "position": "relational",
+                                                "layout": {
+                                                    "direction": "horizontal",
+                                                    "padding": {
+                                                        "top": 8,
+                                                        "right": 16,
+                                                        "bottom": 8,
+                                                        "left": 16
+                                                    },
+                                                    "justifyContent": "center",
+                                                    "alignItems": "center"
+                                                },
+                                                "responsive": {
+                                                    "width": "hug"
+                                                },
+                                                "style": {
+                                                    "borderColor": "primarycolors-primary",
+                                                    "borderWidth": 2,
+                                                    "borderRadius": "s"
+                                                },
+                                                "children": [
+                                                    {
+                                                        "id": "I2035:94;2035:3",
+                                                        "kind": "text",
+                                                        "name": "ADD",
+                                                        "width": 63,
+                                                        "height": 16,
+                                                        "position": "relational",
+                                                        "text": {
+                                                            "content": "REORDER",
+                                                            "typography": "label-l4-poppins-semi-bold-600",
+                                                            "color": "primarycolors-primary",
+                                                            "textAlign": "left"
+                                                        },
+                                                        "semanticRole": "semantic",
+                                                        "signals": {
+                                                            "nonInteractive": true
+                                                        },
+                                                        "context": {
+                                                            "zIndex": -1,
+                                                            "insideComponent": true,
+                                                            "hierarchyDepth": 6
+                                                        },
+                                                        "interaction": {
+                                                            "insideInteractiveComponent": true
+                                                        }
+                                                    }
+                                                ],
+                                                "semanticRole": "interactive",
+                                                "signals": {
+                                                    "interactive": true
+                                                },
+                                                "context": {
+                                                    "zIndex": -1,
+                                                    "insideComponent": true,
+                                                    "interactive": true,
+                                                    "hierarchyDepth": 5
+                                                },
+                                                "interaction": {
+                                                    "interactive": true,
+                                                    "insideInteractiveComponent": true
+                                                }
+                                            }
+                                        ],
+                                        "semanticRole": "structural",
+                                        "signals": {
+                                            "nonInteractive": true
+                                        },
+                                        "context": {
+                                            "zIndex": -1,
+                                            "hierarchyDepth": 4
+                                        }
+                                    },
+                                    {
+                                        "id": "2020:167",
+                                        "kind": "container",
+                                        "name": "ItemRowChapman",
+                                        "width": 361,
+                                        "height": 36,
+                                        "component": "ItemRowChapman",
+                                        "position": "relational",
+                                        "layout": {
+                                            "direction": "horizontal",
+                                            "justifyContent": "space-between",
+                                            "alignItems": "center"
+                                        },
+                                        "responsive": {
+                                            "width": "hug"
+                                        },
+                                        "children": [
+                                            {
+                                                "id": "2020:168",
+                                                "kind": "container",
+                                                "name": "Left",
+                                                "width": 101,
+                                                "height": 36,
+                                                "position": "relational",
+                                                "layout": {
+                                                    "direction": "horizontal",
+                                                    "gap": "s"
+                                                },
+                                                "responsive": {
+                                                    "width": "hug",
+                                                    "height": "hug"
+                                                },
+                                                "children": [
+                                                    {
+                                                        "id": "2020:169",
+                                                        "kind": "icon",
+                                                        "name": "IconUtensils",
+                                                        "width": 20,
+                                                        "height": 20,
+                                                        "component": "IconUtensils",
+                                                        "position": "relational",
+                                                        "layout": {
+                                                            "direction": "stack"
+                                                        },
+                                                        "semanticRole": "semantic",
+                                                        "signals": {
+                                                            "nonInteractive": true
+                                                        },
+                                                        "context": {
+                                                            "zIndex": -1,
+                                                            "hierarchyDepth": 6
+                                                        }
+                                                    },
+                                                    {
+                                                        "id": "2020:174",
+                                                        "kind": "container",
+                                                        "name": "Info",
+                                                        "width": 73,
+                                                        "height": 36,
+                                                        "position": "relational",
+                                                        "layout": {
+                                                            "direction": "vertical",
+                                                            "gap": "spacing-2xs"
+                                                        },
+                                                        "responsive": {
+                                                            "width": "hug",
+                                                            "height": "hug"
+                                                        },
+                                                        "children": [
+                                                            {
+                                                                "id": "2020:175",
+                                                                "kind": "text",
+                                                                "name": "Chapman",
+                                                                "width": 73,
+                                                                "height": 20,
+                                                                "position": "relational",
+                                                                "text": {
+                                                                    "content": "Chapman",
+                                                                    "typography": "label-l3-inter-semi-bold-700",
+                                                                    "color": "textcolors-primary-text",
+                                                                    "textAlign": "left"
+                                                                },
+                                                                "semanticRole": "semantic",
+                                                                "signals": {
+                                                                    "nonInteractive": true
+                                                                },
+                                                                "context": {
+                                                                    "zIndex": -1,
+                                                                    "hierarchyDepth": 7
+                                                                }
+                                                            },
+                                                            {
+                                                                "id": "2020:176",
+                                                                "kind": "text",
+                                                                "name": "Qty 2",
+                                                                "width": 30,
+                                                                "height": 14,
+                                                                "position": "relational",
+                                                                "text": {
+                                                                    "content": "Qty 2",
+                                                                    "typography": "label-l5-inter-reg-400",
+                                                                    "color": "textcolors-secondary-text",
+                                                                    "textAlign": "left"
+                                                                },
+                                                                "semanticRole": "semantic",
+                                                                "signals": {
+                                                                    "nonInteractive": true
+                                                                },
+                                                                "context": {
+                                                                    "zIndex": -1,
+                                                                    "hierarchyDepth": 7
+                                                                }
+                                                            }
+                                                        ],
+                                                        "semanticRole": "structural",
+                                                        "signals": {
+                                                            "nonInteractive": true
+                                                        },
+                                                        "context": {
+                                                            "zIndex": -1,
+                                                            "hierarchyDepth": 6
+                                                        }
+                                                    }
+                                                ],
+                                                "semanticRole": "structural",
+                                                "signals": {
+                                                    "nonInteractive": true
+                                                },
+                                                "context": {
+                                                    "zIndex": -1,
+                                                    "hierarchyDepth": 5
+                                                }
+                                            },
+                                            {
+                                                "id": "2035:97",
+                                                "kind": "component",
+                                                "name": "AddButton",
+                                                "width": 95,
+                                                "height": 36,
+                                                "component": "AddButton",
+                                                "position": "relational",
+                                                "layout": {
+                                                    "direction": "horizontal",
+                                                    "padding": {
+                                                        "top": 8,
+                                                        "right": 16,
+                                                        "bottom": 8,
+                                                        "left": 16
+                                                    },
+                                                    "justifyContent": "center",
+                                                    "alignItems": "center"
+                                                },
+                                                "responsive": {
+                                                    "width": "hug"
+                                                },
+                                                "style": {
+                                                    "borderColor": "primarycolors-primary",
+                                                    "borderWidth": 2,
+                                                    "borderRadius": "s"
+                                                },
+                                                "children": [
+                                                    {
+                                                        "id": "I2035:97;2035:3",
+                                                        "kind": "text",
+                                                        "name": "ADD",
+                                                        "width": 63,
+                                                        "height": 16,
+                                                        "position": "relational",
+                                                        "text": {
+                                                            "content": "REORDER",
+                                                            "typography": "label-l4-poppins-semi-bold-600",
+                                                            "color": "primarycolors-primary",
+                                                            "textAlign": "left"
+                                                        },
+                                                        "semanticRole": "semantic",
+                                                        "signals": {
+                                                            "nonInteractive": true
+                                                        },
+                                                        "context": {
+                                                            "zIndex": -1,
+                                                            "insideComponent": true,
+                                                            "hierarchyDepth": 6
+                                                        },
+                                                        "interaction": {
+                                                            "insideInteractiveComponent": true
+                                                        }
+                                                    }
+                                                ],
+                                                "semanticRole": "interactive",
+                                                "signals": {
+                                                    "interactive": true
+                                                },
+                                                "context": {
+                                                    "zIndex": -1,
+                                                    "insideComponent": true,
+                                                    "interactive": true,
+                                                    "hierarchyDepth": 5
+                                                },
+                                                "interaction": {
+                                                    "interactive": true,
+                                                    "insideInteractiveComponent": true
+                                                }
+                                            }
+                                        ],
+                                        "semanticRole": "structural",
+                                        "signals": {
+                                            "nonInteractive": true
+                                        },
+                                        "context": {
+                                            "zIndex": -1,
+                                            "hierarchyDepth": 4
+                                        }
+                                    }
+                                ],
+                                "semanticRole": "structural",
+                                "signals": {
+                                    "nonInteractive": true
+                                },
+                                "context": {
+                                    "zIndex": -1,
+                                    "hierarchyDepth": 3
+                                }
+                            },
+                            {
+                                "id": "2020:179",
+                                "kind": "rectangle",
+                                "name": "Divider",
+                                "width": 361,
+                                "height": 1,
+                                "component": "Divider",
+                                "position": "relational",
+                                "style": {
+                                    "background": "outlinecolors-outline-variant"
+                                },
+                                "semanticRole": "structural",
+                                "signals": {
+                                    "nonInteractive": true
+                                },
+                                "context": {
+                                    "zIndex": -1,
+                                    "hierarchyDepth": 3
+                                }
+                            },
+                            {
+                                "id": "2020:180",
+                                "kind": "container",
+                                "name": "YourTotalRow",
+                                "width": 361,
+                                "height": 22,
+                                "component": "YourTotalRow",
+                                "position": "relational",
+                                "layout": {
+                                    "direction": "horizontal",
+                                    "justifyContent": "space-between",
+                                    "alignItems": "center"
+                                },
+                                "responsive": {
+                                    "width": "hug"
+                                },
+                                "children": [
+                                    {
+                                        "id": "2020:181",
+                                        "kind": "text",
+                                        "name": "Your Total",
+                                        "width": 91,
+                                        "height": 22,
+                                        "position": "relational",
+                                        "text": {
+                                            "content": "Your Total",
+                                            "typography": "display-h3-poppins-semi-bold-600",
+                                            "color": "textcolors-primary-text",
+                                            "textAlign": "left"
+                                        },
+                                        "semanticRole": "semantic",
+                                        "signals": {
+                                            "nonInteractive": true
+                                        },
+                                        "context": {
+                                            "zIndex": -1,
+                                            "hierarchyDepth": 4
+                                        }
+                                    },
+                                    {
+                                        "id": "2020:182",
+                                        "kind": "text",
+                                        "name": "₦9,500",
+                                        "width": 57,
+                                        "height": 20,
+                                        "position": "relational",
+                                        "text": {
+                                            "content": "₦9,500",
+                                            "typography": "label-l3-inter-semi-bold-700",
+                                            "color": "textcolors-primary-text",
+                                            "textAlign": "left"
+                                        },
+                                        "semanticRole": "semantic",
+                                        "signals": {
+                                            "nonInteractive": true
+                                        },
+                                        "context": {
+                                            "zIndex": -1,
+                                            "hierarchyDepth": 4
+                                        }
+                                    }
+                                ],
+                                "semanticRole": "structural",
+                                "signals": {
+                                    "nonInteractive": true
+                                },
+                                "context": {
+                                    "zIndex": -1,
+                                    "hierarchyDepth": 3
+                                }
+                            },
+                            {
+                                "id": "2020:183",
+                                "kind": "container",
+                                "name": "TotalRow",
+                                "width": 361,
+                                "height": 16,
+                                "component": "TotalRow",
+                                "position": "relational",
+                                "layout": {
+                                    "direction": "horizontal",
+                                    "justifyContent": "space-between",
+                                    "alignItems": "center"
+                                },
+                                "responsive": {
+                                    "width": "hug"
+                                },
+                                "children": [
+                                    {
+                                        "id": "2020:184",
+                                        "kind": "text",
+                                        "name": "Group Total",
+                                        "width": 75,
+                                        "height": 16,
+                                        "position": "relational",
+                                        "text": {
+                                            "content": "Group Total",
+                                            "typography": "label-l4-inter-reg-400",
+                                            "color": "textcolors-secondary-text",
+                                            "textAlign": "left"
+                                        },
+                                        "semanticRole": "semantic",
+                                        "signals": {
+                                            "nonInteractive": true
+                                        },
+                                        "context": {
+                                            "zIndex": -1,
+                                            "hierarchyDepth": 4
+                                        }
+                                    },
+                                    {
+                                        "id": "2020:185",
+                                        "kind": "text",
+                                        "name": "₦15,200",
+                                        "width": 54,
+                                        "height": 16,
+                                        "position": "relational",
+                                        "text": {
+                                            "content": "₦15,200",
+                                            "typography": "label-l4-inter-reg-400",
+                                            "color": "textcolors-secondary-text",
+                                            "textAlign": "left"
+                                        },
+                                        "semanticRole": "semantic",
+                                        "signals": {
+                                            "nonInteractive": true
+                                        },
+                                        "context": {
+                                            "zIndex": -1,
+                                            "hierarchyDepth": 4
+                                        }
+                                    }
+                                ],
+                                "semanticRole": "structural",
+                                "signals": {
+                                    "nonInteractive": true
+                                },
+                                "context": {
+                                    "zIndex": -1,
+                                    "hierarchyDepth": 3
+                                }
+                            }
+                        ],
+                        "semanticRole": "structural",
+                        "signals": {
+                            "nonInteractive": true
+                        },
+                        "context": {
+                            "zIndex": -1,
+                            "hierarchyDepth": 2
+                        }
+                    }
+                ],
+                "semanticRole": "structural",
+                "signals": {
+                    "nonInteractive": true
+                },
+                "context": {
+                    "zIndex": -1,
+                    "hierarchyDepth": 1
+                }
+            },
+            {
+                "id": "2035:269",
+                "kind": "component",
+                "name": "BottomNav",
+                "width": 393,
+                "height": 64,
+                "component": "BottomNav",
+                "variant": {
+                    "ActiveTab": "myOrders"
+                },
+                "position": "absolute",
+                "layout": {
+                    "direction": "horizontal",
+                    "padding": {
+                        "top": 0,
+                        "right": 24,
+                        "bottom": 0,
+                        "left": 24
+                    },
+                    "justifyContent": "space-between",
+                    "alignItems": "center"
+                },
+                "responsive": {
+                    "width": "fill"
+                },
+                "style": {
+                    "background": "surfacecolors-surface-container-low",
+                    "borderColor": "outlinecolors-outline-variant",
+                    "borderWidth": {
+                        "top": 1
+                    }
+                },
+                "absolute": {
+                    "top": 788,
+                    "left": 0,
+                    "right": 0,
+                    "bottom": 0
+                },
+                "constraints": {
+                    "horizontal": "stretch",
+                    "vertical": "bottom"
+                },
+                "children": [
+                    {
+                        "id": "I2035:269;2035:134",
+                        "kind": "container",
+                        "name": "NavItem",
+                        "width": 65,
+                        "height": 46,
+                        "component": "NavItem",
+                        "position": "relational",
+                        "layout": {
+                            "direction": "vertical",
+                            "gap": "spacing-2xs",
+                            "padding": {
+                                "top": 4,
+                                "right": 16,
+                                "bottom": 4,
+                                "left": 16
+                            },
+                            "justifyContent": "center",
+                            "alignItems": "center"
+                        },
+                        "responsive": {
+                            "width": "hug",
+                            "height": "hug"
+                        },
+                        "children": [
+                            {
+                                "id": "I2035:269;2035:135",
+                                "kind": "icon",
+                                "name": "IconBook",
+                                "width": 22,
+                                "height": 22,
+                                "component": "IconBook",
+                                "position": "relational",
+                                "semanticRole": "semantic",
+                                "signals": {
+                                    "nonInteractive": true
+                                },
+                                "context": {
+                                    "zIndex": -1,
+                                    "insideComponent": true,
+                                    "hierarchyDepth": 3
+                                },
+                                "interaction": {
+                                    "insideInteractiveComponent": true
+                                }
+                            },
+                            {
+                                "id": "I2035:269;2035:137",
+                                "kind": "text",
+                                "name": "Menu",
+                                "width": 33,
+                                "height": 14,
+                                "component": "Menu",
+                                "position": "relational",
+                                "text": {
+                                    "content": "Menu",
+                                    "typography": "caption-c1-inter-med-500",
+                                    "color": "surfacecolors-on-surface-variant",
+                                    "textAlign": "left"
+                                },
+                                "semanticRole": "semantic",
+                                "signals": {
+                                    "nonInteractive": true
+                                },
+                                "context": {
+                                    "zIndex": -1,
+                                    "insideComponent": true,
+                                    "hierarchyDepth": 3
+                                },
+                                "interaction": {
+                                    "insideInteractiveComponent": true
+                                }
+                            }
+                        ],
+                        "semanticRole": "structural",
+                        "signals": {
+                            "nonInteractive": true
+                        },
+                        "context": {
+                            "zIndex": -1,
+                            "insideComponent": true,
+                            "hierarchyDepth": 2
+                        },
+                        "interaction": {
+                            "insideInteractiveComponent": true
+                        }
+                    },
+                    {
+                        "id": "I2035:269;2035:138",
+                        "kind": "container",
+                        "name": "NavItemActive",
+                        "width": 92,
+                        "height": 46,
+                        "component": "NavItemActive",
+                        "position": "relational",
+                        "layout": {
+                            "direction": "vertical",
+                            "gap": "spacing-2xs",
+                            "padding": {
+                                "top": 4,
+                                "right": 16,
+                                "bottom": 4,
+                                "left": 16
+                            },
+                            "justifyContent": "center",
+                            "alignItems": "center"
+                        },
+                        "responsive": {
+                            "width": "hug",
+                            "height": "hug"
+                        },
+                        "children": [
+                            {
+                                "id": "I2035:269;2035:139",
+                                "kind": "icon",
+                                "name": "IconUsers",
+                                "width": 22,
+                                "height": 22,
+                                "component": "IconUsers",
+                                "position": "relational",
+                                "layout": {
+                                    "direction": "stack"
+                                },
+                                "semanticRole": "semantic",
+                                "signals": {
+                                    "nonInteractive": true
+                                },
+                                "context": {
+                                    "zIndex": -1,
+                                    "insideComponent": true,
+                                    "hierarchyDepth": 3
+                                },
+                                "interaction": {
+                                    "insideInteractiveComponent": true
+                                }
+                            },
+                            {
+                                "id": "I2035:269;2035:144",
+                                "kind": "text",
+                                "name": "My Orders",
+                                "width": 60,
+                                "height": 14,
+                                "position": "relational",
+                                "text": {
+                                    "content": "My Orders",
+                                    "typography": "caption-c1-inter-med-500",
+                                    "color": "primarycolors-primary",
+                                    "textAlign": "left"
+                                },
+                                "semanticRole": "semantic",
+                                "signals": {
+                                    "nonInteractive": true
+                                },
+                                "context": {
+                                    "zIndex": -1,
+                                    "insideComponent": true,
+                                    "hierarchyDepth": 3
+                                },
+                                "interaction": {
+                                    "insideInteractiveComponent": true
+                                }
+                            }
+                        ],
+                        "semanticRole": "structural",
+                        "signals": {
+                            "nonInteractive": true
+                        },
+                        "context": {
+                            "zIndex": -1,
+                            "insideComponent": true,
+                            "hierarchyDepth": 2
+                        },
+                        "interaction": {
+                            "insideInteractiveComponent": true
+                        }
+                    },
+                    {
+                        "id": "I2035:269;2035:145",
+                        "kind": "container",
+                        "name": "NavItem",
+                        "width": 74,
+                        "height": 46,
+                        "component": "NavItem",
+                        "position": "relational",
+                        "layout": {
+                            "direction": "vertical",
+                            "gap": "spacing-2xs",
+                            "padding": {
+                                "top": 4,
+                                "right": 16,
+                                "bottom": 4,
+                                "left": 16
+                            },
+                            "justifyContent": "center",
+                            "alignItems": "center"
+                        },
+                        "responsive": {
+                            "width": "hug",
+                            "height": "hug"
+                        },
+                        "children": [
+                            {
+                                "id": "I2035:269;2035:146",
+                                "kind": "icon",
+                                "name": "IconCard",
+                                "width": 22,
+                                "height": 22,
+                                "component": "IconCard",
+                                "position": "relational",
+                                "layout": {
+                                    "direction": "stack"
+                                },
+                                "semanticRole": "semantic",
+                                "signals": {
+                                    "nonInteractive": true
+                                },
+                                "context": {
+                                    "zIndex": -1,
+                                    "insideComponent": true,
+                                    "hierarchyDepth": 3
+                                },
+                                "interaction": {
+                                    "insideInteractiveComponent": true
+                                }
+                            },
+                            {
+                                "id": "I2035:269;2035:149",
+                                "kind": "text",
+                                "name": "Pay Bill",
+                                "width": 42,
+                                "height": 14,
+                                "position": "relational",
+                                "text": {
+                                    "content": "Pay Bill",
+                                    "typography": "caption-c1-inter-med-500",
+                                    "color": "surfacecolors-on-surface-variant",
+                                    "textAlign": "left"
+                                },
+                                "semanticRole": "semantic",
+                                "signals": {
+                                    "nonInteractive": true
+                                },
+                                "context": {
+                                    "zIndex": -1,
+                                    "insideComponent": true,
+                                    "hierarchyDepth": 3
+                                },
+                                "interaction": {
+                                    "insideInteractiveComponent": true
+                                }
+                            }
+                        ],
+                        "semanticRole": "structural",
+                        "signals": {
+                            "nonInteractive": true
+                        },
+                        "context": {
+                            "zIndex": -1,
+                            "insideComponent": true,
+                            "hierarchyDepth": 2
+                        },
+                        "interaction": {
+                            "insideInteractiveComponent": true
+                        }
+                    }
+                ],
+                "semanticRole": "interactive",
+                "signals": {
+                    "interactive": true,
+                    "foregroundLayer": true,
+                    "edgeAttached": true
+                },
+                "context": {
+                    "position": "bottom-edge",
+                    "zIndex": -1,
+                    "insideComponent": true,
+                    "interactive": true,
+                    "hierarchyDepth": 1
+                },
+                "layoutRelationship": {
+                    "edgeAttached": true
+                },
+                "interaction": {
+                    "interactive": true,
+                    "insideInteractiveComponent": true
+                }
+            },
+            {
+                "id": "2020:203",
+                "kind": "container",
+                "name": "OthersBanner",
+                "width": 393,
+                "height": 76,
+                "component": "OthersBanner",
+                "position": "absolute",
+                "layout": {
+                    "direction": "horizontal",
+                    "padding": "m",
+                    "justifyContent": "space-between",
+                    "alignItems": "center"
+                },
+                "responsive": {
+                    "width": "fill"
+                },
+                "style": {
+                    "background": "surfacecolors-inverse-surface"
+                },
+                "absolute": {
+                    "top": 712,
+                    "left": 0,
+                    "right": 0,
+                    "bottom": 64
+                },
+                "constraints": {
+                    "horizontal": "stretch",
+                    "vertical": "bottom"
+                },
+                "children": [
+                    {
+                        "id": "2020:204",
+                        "kind": "container",
+                        "name": "Left",
+                        "width": 291,
+                        "height": 34,
+                        "position": "relational",
+                        "layout": {
+                            "direction": "vertical",
+                            "gap": "xs"
+                        },
+                        "responsive": {
+                            "width": "hug"
+                        },
+                        "children": [
+                            {
+                                "id": "2020:205",
+                                "kind": "text",
+                                "name": "▶ See what others are ordering 🤔",
+                                "width": 241,
+                                "height": 16,
+                                "position": "relational",
+                                "text": {
+                                    "content": "▶ See what others are ordering 🤔",
+                                    "typography": "label-l4-poppins-semi-bold-600",
+                                    "color": "surfacecolors-inverse-on-surface",
+                                    "textAlign": "left"
+                                },
+                                "semanticRole": "semantic",
+                                "signals": {
+                                    "nonInteractive": true
+                                },
+                                "context": {
+                                    "zIndex": -1,
+                                    "hierarchyDepth": 3
+                                }
+                            },
+                            {
+                                "id": "2020:206",
+                                "kind": "text",
+                                "name": "Suya Platter, Chapman, Zobo",
+                                "width": 159,
+                                "height": 14,
+                                "position": "relational",
+                                "text": {
+                                    "content": "Suya Platter, Chapman, Zobo",
+                                    "typography": "label-l5-inter-reg-400",
+                                    "color": "outlinecolors-outline-variant",
+                                    "textAlign": "left"
+                                },
+                                "semanticRole": "semantic",
+                                "signals": {
+                                    "nonInteractive": true
+                                },
+                                "context": {
+                                    "zIndex": -1,
+                                    "hierarchyDepth": 3
+                                }
+                            }
+                        ],
+                        "semanticRole": "structural",
+                        "signals": {
+                            "nonInteractive": true
+                        },
+                        "context": {
+                            "zIndex": -1,
+                            "hierarchyDepth": 2
+                        }
+                    },
+                    {
+                        "id": "2020:207",
+                        "kind": "container",
+                        "name": "Avatars",
+                        "width": 70,
+                        "height": 40,
+                        "position": "relational",
+                        "layout": {
+                            "direction": "horizontal",
+                            "alignItems": "center"
+                        },
+                        "responsive": {
+                            "width": "hug",
+                            "height": "hug"
+                        },
+                        "children": [
+                            {
+                                "id": "2020:208",
+                                "kind": "container",
+                                "name": "Element",
+                                "width": 40,
+                                "height": 40,
+                                "position": "relational",
+                                "style": {
+                                    "background": "surfacecolors-surface-container-high",
+                                    "borderColor": "surfacecolors-inverse-surface",
+                                    "borderWidth": 2,
+                                    "borderRadius": "radius-100"
+                                },
+                                "semanticRole": "structural",
+                                "signals": {
+                                    "nonInteractive": true
+                                },
+                                "context": {
+                                    "zIndex": -1,
+                                    "hierarchyDepth": 3
+                                }
+                            },
+                            {
+                                "id": "2020:209",
+                                "kind": "container",
+                                "name": "Element",
+                                "width": 40,
+                                "height": 40,
+                                "position": "relational",
+                                "style": {
+                                    "background": "surfacecolors-surface-container-high",
+                                    "borderColor": "surfacecolors-inverse-surface",
+                                    "borderWidth": 2,
+                                    "borderRadius": "radius-100"
+                                },
+                                "semanticRole": "structural",
+                                "signals": {
+                                    "nonInteractive": true
+                                },
+                                "context": {
+                                    "zIndex": -1,
+                                    "hierarchyDepth": 3
+                                }
+                            }
+                        ],
+                        "semanticRole": "structural",
+                        "signals": {
+                            "nonInteractive": true
+                        },
+                        "context": {
+                            "zIndex": -1,
+                            "hierarchyDepth": 2
+                        }
+                    }
+                ],
+                "semanticRole": "structural",
+                "signals": {
+                    "nonInteractive": true,
+                    "foregroundLayer": true,
+                    "edgeAttached": true
+                },
+                "context": {
+                    "position": "bottom-edge",
+                    "zIndex": -1,
+                    "hierarchyDepth": 1
+                },
+                "layoutRelationship": {
+                    "edgeAttached": true
+                }
+            }
+        ],
+        "semanticRole": "structural",
+        "signals": {
+            "nonInteractive": true
+        },
+        "context": {
+            "zIndex": -1
+        }
+    }
+}

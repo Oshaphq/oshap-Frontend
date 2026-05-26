@@ -1,0 +1,475 @@
+import { useEffect, useMemo, useState } from "react";
+import { useNavigate, useSearchParams } from "react-router";
+import {
+  formatCurrency,
+  getDeviceToken,
+  useSessionOrders,
+} from "@oshap/shared";
+import type { OrderWithItems, OrderItem } from "@oshap/shared";
+import { CartProvider, useCart } from "../context/CartContext";
+import { useSession } from "../context/SessionContext";
+import BottomNav from "../components/BottomNav";
+import CartBar from "../components/CartBar";
+import CartDrawer from "../components/CartDrawer";
+import TableBadge from "../components/TableBadge";
+import PinChip from "../components/PinChip";
+import AddButton from "../components/AddButton";
+
+export default function OrdersPage() {
+  const [params] = useSearchParams();
+  const tableId = params.get("table") ?? "T1";
+
+  return (
+    <CartProvider tableId={tableId}>
+      <OrdersView tableId={tableId} />
+      <CartBar />
+      <CartDrawer tableId={tableId} />
+      <BottomNav tableId={tableId} />
+    </CartProvider>
+  );
+}
+
+function OrdersView({ tableId }: { tableId: string }) {
+  const navigate = useNavigate();
+  const { session, customerName, setCustomerName, isHydrated, startSession, joinSession } = useSession();
+  const deviceToken = getDeviceToken();
+
+  const [pinInput, setPinInput] = useState("");
+  const [showPinInput, setShowPinInput] = useState(false);
+  const [pinError, setPinError] = useState("");
+  const [showOthersDetail, setShowOthersDetail] = useState(false);
+
+  const sessionOrdersQuery = useSessionOrders({
+    sessionId: session?.id,
+    tableId,
+    deviceToken,
+  });
+
+  // Poll every 5s so newly-joined customers' orders appear without a manual refresh.
+  useEffect(() => {
+    const id = setInterval(() => sessionOrdersQuery.refetch(), 5000);
+    return () => clearInterval(id);
+  }, [sessionOrdersQuery.refetch]);
+
+  const orders = useMemo(() => {
+    const list = sessionOrdersQuery.data?.orders ?? [];
+    return [...list].sort(
+      (a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime(),
+    );
+  }, [sessionOrdersQuery.data]);
+
+  const displayOrderId = useMemo(() => {
+    if (orders.length === 0) return "1234-5678";
+    const ref = orders[0]?.reference ?? "1234-5678";
+    return ref.split("-").pop() ?? ref;
+  }, [orders]);
+
+  const handleStartSession = async () => {
+    if (!customerName.trim()) return;
+    setPinError("");
+    try {
+      await startSession(tableId);
+    } catch (err) {
+      setPinError(
+        err instanceof Error
+          ? err.message
+          : "Could not start session. Please try again.",
+      );
+    }
+  };
+
+  const handleJoinSession = async () => {
+    if (!pinInput.trim()) {
+      setPinError("Enter a PIN to join.");
+      return;
+    }
+    setPinError("");
+    try {
+      await joinSession(pinInput.trim(), tableId);
+      setShowPinInput(false);
+      setPinInput("");
+    } catch {
+      setPinError("Invalid PIN. Please try again.");
+    }
+  };
+
+  // Split orders into the current customer's vs. everyone else's at the table.
+  // Pre-session (no session.id, no customer_name yet) all orders belong to this device.
+  const { myOrders, othersOrders, otherCustomers, otherItemNames } = useMemo(() => {
+    if (!session || !customerName) {
+      return {
+        myOrders: orders,
+        othersOrders: [],
+        otherCustomers: [] as string[],
+        otherItemNames: [] as string[],
+      };
+    }
+    const mine = orders.filter((o) => o.customer_name === customerName);
+    const others = orders.filter((o) => o.customer_name !== customerName);
+    const names = Array.from(
+      new Set(others.map((o) => o.customer_name).filter((n): n is string => !!n)),
+    );
+    const items = Array.from(
+      new Set(others.flatMap((o) => o.order_items.map((i) => i.name))),
+    );
+    return {
+      myOrders: mine,
+      othersOrders: others,
+      otherCustomers: names,
+      otherItemNames: items,
+    };
+  }, [orders, session, customerName]);
+
+  const yourTotal = useMemo(
+    () => myOrders.reduce((sum, o) => sum + o.total, 0),
+    [myOrders],
+  );
+
+  const groupTotal = useMemo(
+    () => orders.reduce((sum, o) => sum + o.total, 0),
+    [orders],
+  );
+
+  const othersTotal = useMemo(
+    () => othersOrders.reduce((sum, o) => sum + o.total, 0),
+    [othersOrders],
+  );
+
+  // Group other customers' orders by name for the expanded sheet.
+  const othersByCustomer = useMemo(() => {
+    const groups = new Map<string, OrderWithItems[]>();
+    for (const order of othersOrders) {
+      const name = order.customer_name ?? "Guest";
+      const existing = groups.get(name) ?? [];
+      existing.push(order);
+      groups.set(name, existing);
+    }
+    return Array.from(groups.entries());
+  }, [othersOrders]);
+
+  return (
+    <div className="min-h-screen bg-surface-container-low pb-20">
+      <header className="flex items-center justify-between pt-md px-md pb-s bg-surface-container-low">
+        <div className="flex items-center gap-s">
+          <button
+            type="button"
+            onClick={() => navigate(`/menu?table=${tableId}`)}
+            aria-label="Back"
+            className="w-9 h-9 flex items-center justify-center rounded-4xl bg-surface-container hover:bg-surface-container-high transition-colors"
+          >
+            <i className="mgc_left_line text-xl" />
+          </button>
+          <div className="flex flex-col gap-0.5">
+            <h1 className="font-display text-display-h2 font-semibold text-primary-text">
+              My Orders
+            </h1>
+            <span className="text-label-l5 text-secondary-text">
+              Order id: {displayOrderId}
+            </span>
+          </div>
+        </div>
+        <TableBadge tableId={tableId} variant="outlined" />
+      </header>
+
+      {!isHydrated ? (
+        <section className="py-l px-md">
+          <p className="text-p2 text-secondary-text">Loading session...</p>
+        </section>
+      ) : session ? (
+        <section className="py-l px-md bg-surface-container-low border-b-[6px] border-surface-container flex flex-col gap-s">
+          <h2 className="font-display text-display-h3 font-semibold text-primary-text">
+            Order together
+          </h2>
+          <p className="text-p2 text-secondary-text">
+            Share PIN with your companions at table & order<br />together.
+          </p>
+          <PinChip pin={session.pin} />
+        </section>
+      ) : (
+        <section className="py-l px-md bg-surface-container-low border-b-[6px] border-surface-container flex flex-col gap-md">
+          <h2 className="font-display text-display-h3 font-semibold text-primary-text">
+            Order together
+          </h2>
+          <p className="text-p2 text-secondary-text">
+            Share PIN with your companions at table & order<br />together.
+          </p>
+
+          <div className="flex flex-col gap-s">
+            <span className="text-label-l5 font-semibold text-secondary-text">
+              YOUR NAME
+            </span>
+            <input
+              type="text"
+              placeholder="e.g. Binjo"
+              value={customerName}
+              onChange={(e) => setCustomerName(e.target.value)}
+              className="px-md py-md bg-surface-container-low border border-outline-variant rounded-lg text-label-l3 text-primary-text placeholder:text-secondary-text outline-none focus:border-primary transition-colors"
+            />
+          </div>
+
+          {showPinInput && (
+            <div className="flex flex-col gap-s">
+              <span className="text-label-l5 font-semibold text-secondary-text">
+                TABLE PIN
+              </span>
+              <input
+                type="text"
+                inputMode="numeric"
+                maxLength={4}
+                placeholder="Enter 4-digit PIN"
+                value={pinInput}
+                onChange={(e) => {
+                  setPinInput(e.target.value);
+                  setPinError("");
+                }}
+                className="px-md py-md bg-surface-container-low border border-outline-variant rounded-lg text-label-l3 text-primary-text placeholder:text-secondary-text outline-none focus:border-primary transition-colors"
+              />
+              {pinError && (
+                <span className="text-caption-sm text-error">{pinError}</span>
+              )}
+            </div>
+          )}
+
+          <div className="flex gap-s">
+            <button
+              type="button"
+              onClick={() => setShowPinInput((v) => !v)}
+              className="flex-1 py-3 px-6 bg-surface-container text-on-surface-variant rounded-lg text-label-l4 font-semibold font-display text-center transition-colors hover:bg-surface-container-high"
+            >
+              Join with PIN
+            </button>
+            <button
+              type="button"
+              onClick={showPinInput ? handleJoinSession : handleStartSession}
+              disabled={!customerName.trim()}
+              className="flex-1 py-3 px-6 bg-primary text-on-primary rounded-lg text-label-l4 font-semibold font-display text-center transition-opacity hover:opacity-90 disabled:opacity-50"
+            >
+              {showPinInput ? "Join" : "Start Session"}
+            </button>
+          </div>
+        </section>
+      )}
+
+      <section className="pt-l pb-md px-md bg-surface-container-low flex flex-col gap-s">
+        <h2 className="font-display text-display-h3 font-semibold text-primary-text">
+          {customerName ? `${customerName}'s Order` : "Your Order"}
+        </h2>
+        <div className="h-px bg-outline-variant" />
+
+        {myOrders.length === 0 ? (
+          <div className="flex flex-col items-center gap-s py-10 px-md">
+            <i className="mgc_shopping_bag_2_line text-5xl text-outline-variant" />
+            <span className="font-display text-display-h4 font-semibold text-primary-text">
+              No orders yet
+            </span>
+            <p className="text-p2 text-secondary-text text-center">
+              Add items from the menu to place your order.
+            </p>
+            <button
+              type="button"
+              onClick={() => navigate(`/menu?table=${tableId}`)}
+              className="py-3 px-6 bg-primary text-on-primary rounded-lg text-label-l4 font-semibold font-display transition-opacity hover:opacity-90"
+            >
+              Browse Menu
+            </button>
+          </div>
+        ) : (
+          <div className="flex flex-col gap-md pt-md">
+            {myOrders.map((order, i) => (
+              <div key={order.id} className="flex flex-col gap-md">
+                <span className="text-label-l4 text-secondary-text">
+                  Order {i + 1}
+                </span>
+                <div className="flex flex-col gap-md">
+                  {order.order_items.map((item) => (
+                    <div
+                      key={item.id}
+                      className="flex items-center justify-between"
+                    >
+                      <div className="flex items-center gap-s">
+                        <i className="mgc_fork_spoon_line text-xl text-primary" />
+                        <div className="flex flex-col gap-0.5">
+                          <span className="text-label-l3 font-semibold text-primary-text">
+                            {item.name}
+                          </span>
+                          <span className="text-label-l5 text-secondary-text">
+                            Qty {item.quantity}
+                          </span>
+                        </div>
+                      </div>
+                      <ReorderButton item={item} />
+                    </div>
+                  ))}
+                </div>
+                {i < myOrders.length - 1 && (
+                  <div className="h-px bg-outline-variant" />
+                )}
+              </div>
+            ))}
+
+            <div className="h-px bg-outline-variant" />
+
+            <div className="flex items-center justify-between">
+              <span className="text-label-l4 text-secondary-text">
+                {othersOrders.length > 0 ? "Your Total" : "Total"}
+              </span>
+              <span className="text-label-l4 font-semibold text-primary-text">
+                {formatCurrency(yourTotal)}
+              </span>
+            </div>
+
+            {othersOrders.length > 0 && (
+              <div className="flex items-center justify-between">
+                <span className="text-label-l4 text-secondary-text">
+                  Group Total
+                </span>
+                <span className="text-label-l4 text-secondary-text">
+                  {formatCurrency(groupTotal)}
+                </span>
+              </div>
+            )}
+          </div>
+        )}
+
+        {otherCustomers.length > 0 && (
+          <button
+            type="button"
+            onClick={() => setShowOthersDetail(true)}
+            aria-label="See what others are ordering"
+            className="fixed left-0 right-0 bottom-16 bg-inverse-surface px-md py-md flex items-center justify-between gap-md z-[44] hover:opacity-95 active:opacity-90 transition-opacity"
+          >
+            <div className="flex flex-col gap-xs min-w-0 text-left">
+              <span className="text-label-l4 font-semibold font-display text-inverse-on-surface">
+                See what others are ordering
+              </span>
+              <span className="text-label-l5 text-outline-variant truncate">
+                {otherItemNames.join(", ")}
+              </span>
+            </div>
+            <div className="flex items-center -space-x-2 shrink-0">
+              {otherCustomers.slice(0, 3).map((name) => (
+                <div
+                  key={name}
+                  title={name}
+                  className="w-10 h-10 rounded-full bg-primary-container border-2 border-inverse-surface flex items-center justify-center text-label-l5 font-semibold text-on-primary-container"
+                >
+                  {name.slice(0, 2).toUpperCase()}
+                </div>
+              ))}
+              {otherCustomers.length > 3 && (
+                <div className="w-10 h-10 rounded-full bg-surface-container-high border-2 border-inverse-surface flex items-center justify-center text-label-l5 font-semibold text-on-surface">
+                  +{otherCustomers.length - 3}
+                </div>
+              )}
+            </div>
+          </button>
+        )}
+      </section>
+
+      {showOthersDetail && (
+        <>
+          <div
+            className="fixed inset-0 bg-scrim z-[90] animate-[fade-in_0.2s_ease]"
+            onClick={() => setShowOthersDetail(false)}
+          />
+          <div
+            role="dialog"
+            aria-label="Others' orders"
+            className="fixed left-0 right-0 bottom-0 max-h-[80vh] bg-surface-container-low rounded-t-l z-[100] flex flex-col shadow-[0_-4px_24px_var(--ds-shadow)] animate-[slide-up-drawer_0.3s_ease]"
+          >
+            <div className="flex justify-center py-s cursor-grab">
+              <div className="w-10 h-1 rounded-4xl bg-outline-variant" />
+            </div>
+
+            <div className="flex items-center justify-between px-md pb-md border-b border-outline-variant">
+              <h2 className="font-display text-display-h2 font-semibold text-primary-text">
+                Others' Orders
+              </h2>
+              <button
+                type="button"
+                onClick={() => setShowOthersDetail(false)}
+                aria-label="Close"
+                className="w-9 h-9 flex items-center justify-center rounded-4xl bg-surface-container text-on-surface-variant hover:bg-surface-container-high transition-colors"
+              >
+                <i className="mgc_close_line text-xl" />
+              </button>
+            </div>
+
+            <div className="flex-1 overflow-y-auto px-md py-md flex flex-col gap-l">
+              {othersByCustomer.map(([name, ordersForName]) => {
+                const customerTotal = ordersForName.reduce(
+                  (sum, o) => sum + o.total,
+                  0,
+                );
+                const items = ordersForName.flatMap((o) => o.order_items);
+                return (
+                  <div key={name} className="flex flex-col gap-s">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-s">
+                        <div className="w-9 h-9 rounded-full bg-primary-container flex items-center justify-center text-label-l5 font-semibold text-on-primary-container">
+                          {name.slice(0, 2).toUpperCase()}
+                        </div>
+                        <span className="text-label-l3 font-semibold text-primary-text">
+                          {name}
+                        </span>
+                      </div>
+                      <span className="text-label-l4 font-semibold text-primary-text">
+                        {formatCurrency(customerTotal)}
+                      </span>
+                    </div>
+                    <div className="flex flex-col gap-s">
+                      {items.map((item) => (
+                        <div
+                          key={item.id}
+                          className="flex items-center justify-between"
+                        >
+                          <div className="flex items-center gap-s">
+                            <i className="mgc_fork_spoon_line text-xl text-primary" />
+                            <div className="flex flex-col gap-0.5">
+                              <span className="text-label-l3 font-semibold text-primary-text">
+                                {item.name}
+                              </span>
+                              <span className="text-label-l5 text-secondary-text">
+                                Qty {item.quantity}
+                              </span>
+                            </div>
+                          </div>
+                          <span className="text-label-l4 text-primary-text">
+                            {formatCurrency(item.price * item.quantity)}
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+
+            <div className="px-md py-md border-t border-outline-variant flex items-center justify-between">
+              <span className="text-label-l4 text-secondary-text">
+                Others' Total
+              </span>
+              <span className="font-display text-display-h2 font-semibold text-primary-text">
+                {formatCurrency(othersTotal)}
+              </span>
+            </div>
+          </div>
+        </>
+      )}
+    </div>
+  );
+}
+
+function ReorderButton({ item }: { item: OrderItem }) {
+  const { addItem, updateQuantity } = useCart();
+
+  return (
+    <AddButton
+      label="REORDER"
+      onClick={() => {
+        addItem({ id: item.id, name: item.name, price: item.price });
+        updateQuantity(item.id, item.quantity);
+      }}
+    />
+  );
+}

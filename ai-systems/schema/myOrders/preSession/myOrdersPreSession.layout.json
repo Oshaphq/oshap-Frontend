@@ -1,0 +1,222 @@
+{
+  "screen": "myOrdersPreSession",
+  "direction": "vertical",
+  "background": "bg-surface-container-low",
+  "layout": [
+    {
+      "name": "Header",
+      "direction": "horizontal",
+      "justifyContent": "space-between",
+      "alignItems": "center",
+      "padding": { "top": 16, "right": 16, "bottom": 8, "left": 16 },
+      "background": "bg-surface-container-low",
+      "children": [
+        {
+          "name": "HeaderLeft",
+          "direction": "horizontal",
+          "gap": "s",
+          "alignItems": "center",
+          "children": [
+            {
+              "name": "BackButton",
+              "kind": "icon-button",
+              "size": 36,
+              "borderRadius": "rounded-4xl",
+              "icon": "mgc_left_line",
+              "signals": ["interactive"]
+            },
+            {
+              "name": "HeaderInfo",
+              "direction": "vertical",
+              "gap": "spacing-2xs",
+              "children": [
+                {
+                  "name": "My Orders",
+                  "kind": "text",
+                  "content": "My Orders",
+                  "typography": "text-display-h2",
+                  "fontWeight": "font-semibold",
+                  "fontFamily": "font-display",
+                  "color": "text-primary-text"
+                },
+                {
+                  "name": "OrderId",
+                  "kind": "text",
+                  "content": "Order id: {displayOrderId}",
+                  "typography": "text-label-l5",
+                  "color": "text-secondary-text"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "TableBadge",
+          "component": "TableBadge",
+          "variant": "outlined",
+          "props": { "tableId": "dynamic" }
+        }
+      ]
+    },
+    {
+      "name": "JoinSection",
+      "direction": "vertical",
+      "gap": "m",
+      "padding": { "top": 24, "right": 16, "bottom": 24, "left": 16 },
+      "background": "bg-surface-container-low",
+      "border": { "bottom": { "width": 6, "color": "surface-container" } },
+      "children": [
+        {
+          "name": "OrderTogether",
+          "kind": "text",
+          "content": "Order together",
+          "typography": "text-display-h3",
+          "fontWeight": "font-semibold",
+          "fontFamily": "font-display",
+          "color": "text-primary-text"
+        },
+        {
+          "name": "Description",
+          "kind": "text",
+          "content": "Share PIN with your companions at table & order together.",
+          "typography": "text-p2",
+          "color": "text-secondary-text"
+        },
+        {
+          "name": "InputGroup",
+          "direction": "vertical",
+          "gap": "s",
+          "children": [
+            {
+              "name": "Label",
+              "kind": "text",
+              "content": "YOUR NAME",
+              "typography": "text-label-l5",
+              "fontWeight": "font-semibold",
+              "color": "text-secondary-text"
+            },
+            {
+              "name": "TextInput",
+              "kind": "input",
+              "placeholder": "e.g. Binjo",
+              "padding": "m",
+              "background": "bg-surface-container-low",
+              "border": { "width": 1.2, "color": "outline-variant" },
+              "borderRadius": "rounded-lg",
+              "typography": "text-label-l3",
+              "color": "text-secondary-text"
+            }
+          ]
+        },
+        {
+          "name": "ButtonRow",
+          "direction": "horizontal",
+          "gap": "s",
+          "children": [
+            {
+              "name": "JoinButton",
+              "kind": "button",
+              "label": "Join with PIN",
+              "variant": "secondary",
+              "background": "bg-surface-container",
+              "color": "text-on-surface-variant",
+              "borderRadius": "rounded-lg",
+              "padding": { "top": 12, "bottom": 12, "left": 24, "right": 24 },
+              "typography": "text-label-l4 font-semibold font-display",
+              "flex": 1,
+              "signals": ["interactive"]
+            },
+            {
+              "name": "StartButton",
+              "kind": "button",
+              "label": "Start Session",
+              "variant": "primary",
+              "background": "bg-primary",
+              "color": "text-on-primary",
+              "borderRadius": "rounded-lg",
+              "padding": { "top": 12, "bottom": 12, "left": 24, "right": 24 },
+              "typography": "text-label-l4 font-semibold font-display",
+              "flex": 1,
+              "signals": ["interactive"]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "MyOrderSection",
+      "direction": "vertical",
+      "gap": "s",
+      "padding": { "top": 24, "right": 16, "bottom": 16, "left": 16 },
+      "background": "bg-surface-container-low",
+      "children": [
+        {
+          "name": "YourOrder",
+          "kind": "text",
+          "content": "Your Order",
+          "typography": "text-display-h3",
+          "fontWeight": "font-semibold",
+          "fontFamily": "font-display",
+          "color": "text-primary-text"
+        },
+        {
+          "name": "Divider",
+          "kind": "divider",
+          "height": 1,
+          "background": "bg-outline-variant"
+        },
+        {
+          "name": "EmptyState",
+          "direction": "vertical",
+          "gap": "s",
+          "padding": { "top": 40, "bottom": 40, "left": 16, "right": 16 },
+          "alignItems": "center",
+          "justifyContent": "center",
+          "children": [
+            {
+              "name": "BagIcon",
+              "kind": "icon",
+              "icon": "mgc_shopping_bag_2_line",
+              "size": 48,
+              "color": "text-outline-variant"
+            },
+            {
+              "name": "NoOrdersYet",
+              "kind": "text",
+              "content": "No orders yet",
+              "typography": "text-display-h4",
+              "fontWeight": "font-semibold",
+              "fontFamily": "font-display"
+            },
+            {
+              "name": "Hint",
+              "kind": "text",
+              "content": "Add items from the menu to place your order.",
+              "typography": "text-p2",
+              "color": "text-secondary-text",
+              "textAlign": "center"
+            },
+            {
+              "name": "BrowseMenuButton",
+              "kind": "button",
+              "label": "Browse Menu",
+              "variant": "primary",
+              "background": "bg-primary",
+              "color": "text-on-primary",
+              "borderRadius": "rounded-lg",
+              "padding": { "top": 12, "bottom": 12, "left": 24, "right": 24 },
+              "typography": "text-label-l4 font-semibold font-display",
+              "signals": ["interactive"]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "BottomNav",
+      "component": "BottomNav",
+      "variant": "myOrders",
+      "signals": ["edgeAttached", "foregroundLayer"]
+    }
+  ]
+}

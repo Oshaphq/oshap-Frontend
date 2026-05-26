@@ -1,25 +1,24 @@
 {
-  "name": "oshap-temp",
+  "name": "oshap",
   "version": "0.1.0",
   "private": true,
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
   "scripts": {
-    "dev": "next dev",
-    "build": "next build",
-    "start": "next start",
-    "lint": "eslint"
-  },
-  "dependencies": {
-    "@supabase/supabase-js": "^2.105.3",
-    "next": "16.2.4",
-    "react": "19.2.4",
-    "react-dom": "19.2.4"
+    "dev:customer": "npm run dev --workspace @oshap/customer",
+    "dev:admin": "npm run dev --workspace @oshap/admin",
+    "build:customer": "npm run build --workspace @oshap/customer",
+    "build:admin": "npm run build --workspace @oshap/admin",
+    "build": "npm run build --workspaces --if-present",
+    "typecheck": "npm run typecheck --workspaces --if-present",
+    "lint": "npm run lint --workspaces --if-present"
   },
   "devDependencies": {
-    "@types/node": "^20",
-    "@types/react": "^19",
-    "@types/react-dom": "^19",
-    "eslint": "^9",
-    "eslint-config-next": "16.2.4",
-    "typescript": "^5"
+    "typescript": "^5.7.2"
+  },
+  "engines": {
+    "node": ">=20"
   }
 }
