@@ -28,9 +28,8 @@ oshap/
 │   ├── openapi.yaml      Source of truth for the backend contract
 │   ├── data-model.md     SQLModel-style entity definitions
 │   ├── ddl.sql           PostgreSQL 15 baseline schema
-│   └── whatsapp-to-fcm-migration.md
-├── tokens/               Source design-token JSON (Figma export)
-└── implementation-plan.md
+│   └── fcm-notifications.md  Push-notification trigger points
+└── tokens/               Source design-token JSON (Figma export)
 ```
 
 ## Quick start
@@ -63,8 +62,7 @@ The contract is [`docs/openapi.yaml`](docs/openapi.yaml). Recommended starting p
 1. Read [`docs/data-model.md`](docs/data-model.md) for the entity shapes (SQLModel-friendly).
 2. Apply [`docs/ddl.sql`](docs/ddl.sql) as your initial Alembic migration.
 3. Stand up the FastAPI app against the OpenAPI spec — every endpoint in `apps/customer` and `apps/admin` is already typed against these schemas.
-4. Read [`docs/whatsapp-to-fcm-migration.md`](docs/whatsapp-to-fcm-migration.md) for the notification trigger points (order placed, payment claimed, payment verified, issue flagged).
-5. See [`docs/handoff-plan.md`](docs/handoff-plan.md) for the final round of frontend changes that landed before handoff.
+4. Read [`docs/fcm-notifications.md`](docs/fcm-notifications.md) for the notification trigger points (order placed, payment claimed, payment verified, issue flagged).
 
 Auth surface (MVP): admin routes expect an `x-admin-pin` header. The customer app is unauthenticated. **One PIN per restaurant** — the admin app calls `GET /admin/me` right after PIN verify to resolve the active restaurant, and uses `restaurant.id` for FCM device registration. There is no `VITE_RESTAURANT_ID` env var.
 
@@ -74,7 +72,7 @@ Auth surface (MVP): admin routes expect an `x-admin-pin` header. The customer ap
 2. Add a Web app under **Project Settings → General → Your apps**.
 3. Copy the SDK config values into `.env.local` — the `VITE_FCM_*` keys.
 4. **Project Settings → Cloud Messaging → Web configuration** → generate a VAPID key pair → set `VITE_FCM_VAPID_KEY`.
-5. Backend sends messages from the FastAPI side using a Firebase Admin SDK service account (separate JSON, **not** committed). See [`docs/whatsapp-to-fcm-migration.md`](docs/whatsapp-to-fcm-migration.md) for trigger points.
+5. Backend sends messages from the FastAPI side using a Firebase Admin SDK service account (separate JSON, **not** committed). See [`docs/fcm-notifications.md`](docs/fcm-notifications.md) for trigger points.
 6. `firebase-messaging-sw.js` is generated at Vite build from these env vars ([`apps/admin/generateFirebaseSw.ts`](apps/admin/generateFirebaseSw.ts)). **If values are empty the service worker initializes empty and silently fails — the build itself does not error.**
 
 ### Menu image storage

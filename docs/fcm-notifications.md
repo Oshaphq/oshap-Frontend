@@ -1,11 +1,9 @@
-# WhatsApp → FCM Migration — Notification Trigger Points
+# FCM Notification Trigger Points
 
 This document describes every server-side event that should send a push
 notification to the merchant device(s) via Firebase Cloud Messaging (FCM).
-
-The old flow used WhatsApp messages (via `whatsapp_number` on the
-`restaurants` table). The new flow uses FCM tokens registered through
-`POST /devices/register`.
+Devices are registered through `POST /devices/register` and looked up by
+`restaurant_id` when an event fires.
 
 ---
 
