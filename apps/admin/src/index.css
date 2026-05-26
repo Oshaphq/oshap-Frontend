@@ -1,5 +1,6 @@
 @import "tailwindcss";
 @import "@oshap/shared/tokens.css";
+@source "../../../packages/shared/src";
 
 html,
 body,
@@ -10,6 +11,28 @@ body,
 
 body {
   font-family: "Inter", system-ui, -apple-system, sans-serif;
+  background: var(--ds-surface-container-low);
+  color: var(--ds-on-surface);
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.oshap-spinner {
+  width: 40px;
+  height: 40px;
+  border: 3px solid var(--ds-surface-container-high);
+  border-top-color: var(--ds-primary);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+/* Force Mingcute icons to inherit color from parent */
+[class*="mgc_"]::before {
+  color: inherit !important;
 }

@@ -7,8 +7,7 @@ import {
 } from "@oshap/shared";
 import { CartProvider, useCart } from "../context/CartContext";
 import { useSession } from "../context/SessionContext";
-import PrimaryButton from "../components/PrimaryButton";
-import TableBadge from "../components/TableBadge";
+import { PrimaryButton, TableBadge } from "@oshap/shared/ui";
 
 export default function CheckoutPage() {
   const [params] = useSearchParams();
@@ -87,6 +86,7 @@ function CheckoutView({ tableId }: { tableId: string }) {
             Add items from the menu to place your order.
           </p>
           <PrimaryButton
+            size="md"
             onClick={() => navigate(`/menu?table=${tableId}`)}
             className="mt-md"
           >

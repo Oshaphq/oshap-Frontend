@@ -5,13 +5,13 @@ import {
   getDeviceToken,
   useSessionOrders,
 } from "@oshap/shared";
-import type { OrderWithItems, OrderItem } from "@oshap/shared";
+import type { OrderStatus, OrderWithItems, OrderItem } from "@oshap/shared";
 import { CartProvider, useCart } from "../context/CartContext";
 import { useSession } from "../context/SessionContext";
 import BottomNav from "../components/BottomNav";
 import CartBar from "../components/CartBar";
 import CartDrawer from "../components/CartDrawer";
-import TableBadge from "../components/TableBadge";
+import { PrimaryButton, SecondaryButton, TableBadge } from "@oshap/shared/ui";
 import PinChip from "../components/PinChip";
 import AddButton from "../components/AddButton";
 
@@ -231,21 +231,21 @@ function OrdersView({ tableId }: { tableId: string }) {
           )}
 
           <div className="flex gap-s">
-            <button
-              type="button"
+            <SecondaryButton
+              size="md"
+              className="flex-1"
               onClick={() => setShowPinInput((v) => !v)}
-              className="flex-1 py-3 px-6 bg-surface-container text-on-surface-variant rounded-lg text-label-l4 font-semibold font-display text-center transition-colors hover:bg-surface-container-high"
             >
               Join with PIN
-            </button>
-            <button
-              type="button"
+            </SecondaryButton>
+            <PrimaryButton
+              size="md"
+              className="flex-1"
               onClick={showPinInput ? handleJoinSession : handleStartSession}
               disabled={!customerName.trim()}
-              className="flex-1 py-3 px-6 bg-primary text-on-primary rounded-lg text-label-l4 font-semibold font-display text-center transition-opacity hover:opacity-90 disabled:opacity-50"
             >
               {showPinInput ? "Join" : "Start Session"}
-            </button>
+            </PrimaryButton>
           </div>
         </section>
       )}
@@ -265,21 +265,23 @@ function OrdersView({ tableId }: { tableId: string }) {
             <p className="text-p2 text-secondary-text text-center">
               Add items from the menu to place your order.
             </p>
-            <button
-              type="button"
+            <PrimaryButton
+              size="md"
               onClick={() => navigate(`/menu?table=${tableId}`)}
-              className="py-3 px-6 bg-primary text-on-primary rounded-lg text-label-l4 font-semibold font-display transition-opacity hover:opacity-90"
             >
               Browse Menu
-            </button>
+            </PrimaryButton>
           </div>
         ) : (
           <div className="flex flex-col gap-md pt-md">
             {myOrders.map((order, i) => (
               <div key={order.id} className="flex flex-col gap-md">
-                <span className="text-label-l4 text-secondary-text">
-                  Order {i + 1}
-                </span>
+                <div className="flex items-center justify-between gap-s">
+                  <span className="text-label-l4 text-secondary-text">
+                    Order {i + 1}
+                  </span>
+                  <OrderStatusBadge status={order.status} />
+                </div>
                 <div className="flex flex-col gap-md">
                   {order.order_items.map((item) => (
                     <div
@@ -457,6 +459,44 @@ function OrdersView({ tableId }: { tableId: string }) {
         </>
       )}
     </div>
+  );
+}
+
+const ORDER_STATUS_META: Record<OrderStatus, { label: string; cls: string }> = {
+  CREATED: {
+    label: "Sent",
+    cls: "bg-surface-container-high text-on-surface-variant",
+  },
+  PREPARING: {
+    label: "Preparing",
+    cls: "bg-warning-container text-on-warning-container",
+  },
+  READY: {
+    label: "Ready",
+    cls: "bg-success-container text-on-success-container",
+  },
+  PAYMENT_PENDING: {
+    label: "Awaiting payment",
+    cls: "bg-warning-container text-on-warning-container",
+  },
+  CONFIRMED: {
+    label: "Paid",
+    cls: "bg-success-container text-on-success-container",
+  },
+  CANCELLED: {
+    label: "Cancelled",
+    cls: "bg-error-container text-on-error-container",
+  },
+};
+
+function OrderStatusBadge({ status }: { status: OrderStatus }) {
+  const { label, cls } = ORDER_STATUS_META[status];
+  return (
+    <span
+      className={`text-caption-xs font-bold uppercase tracking-wider px-s py-xs rounded-4xl whitespace-nowrap ${cls}`}
+    >
+      {label}
+    </span>
   );
 }
 

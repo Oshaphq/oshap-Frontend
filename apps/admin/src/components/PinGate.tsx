@@ -1,11 +1,22 @@
 import { useState, useCallback, useEffect } from "react";
 import { Outlet, useNavigate, NavLink } from "react-router";
-import { setAdminPin, getAdminPin, ApiError, initFCM } from "@oshap/shared";
+import {
+  ADMIN_UNAUTHORIZED_EVENT,
+  ApiError,
+  getAdminPin,
+  getAdminRestaurantId,
+  getAdminRestaurantName,
+  initFCM,
+  setAdminPin,
+  setAdminRestaurant,
+} from "@oshap/shared";
 import { adminApi } from "@oshap/shared/api";
+import { PrimaryButton } from "@oshap/shared/ui";
 
 export default function PinGate() {
   const navigate = useNavigate();
   const [authenticated, setAuthenticated] = useState(false);
+  const [restaurantName, setRestaurantName] = useState<string | null>(null);
   const [checked, setChecked] = useState(false);
   const [pinInput, setPinInput] = useState("");
   const [pinError, setPinError] = useState("");
@@ -15,18 +26,28 @@ export default function PinGate() {
     const stored = getAdminPin();
     if (stored) {
       setAuthenticated(true);
+      setRestaurantName(getAdminRestaurantName());
     }
     setChecked(true);
   }, []);
 
   useEffect(() => {
+    const onUnauthorized = () => {
+      setAuthenticated(false);
+      setRestaurantName(null);
+      setPinInput("");
+      setPinError("Session expired. Sign in again.");
+    };
+    window.addEventListener(ADMIN_UNAUTHORIZED_EVENT, onUnauthorized);
+    return () =>
+      window.removeEventListener(ADMIN_UNAUTHORIZED_EVENT, onUnauthorized);
+  }, []);
+
+  useEffect(() => {
     if (!authenticated) return;
 
-    const restaurantId = import.meta.env.VITE_RESTAURANT_ID ?? "";
-    if (!restaurantId) {
-      console.warn("[FCM] VITE_RESTAURANT_ID not set — skipping device registration.");
-      return;
-    }
+    const restaurantId = getAdminRestaurantId();
+    if (!restaurantId) return;
 
     initFCM(restaurantId, navigator.userAgent).catch((err) => {
       console.error("[FCM] initFCM failed:", err);
@@ -39,7 +60,9 @@ export default function PinGate() {
 
     try {
       setAdminPin(pinInput);
-      await adminApi.adminGetTables();
+      const me = await adminApi.adminGetMe();
+      setAdminRestaurant(me.restaurant);
+      setRestaurantName(me.restaurant.name);
       setAuthenticated(true);
     } catch (err) {
       if (err instanceof ApiError && err.status === 401) {
@@ -56,6 +79,7 @@ export default function PinGate() {
   const handleLogout = () => {
     setAdminPin(null);
     setAuthenticated(false);
+    setRestaurantName(null);
     setPinInput("");
     setPinError("");
     navigate("/");
@@ -63,7 +87,7 @@ export default function PinGate() {
 
   if (!checked) {
     return (
-      <div className="flex items-center justify-center min-h-screen bg-surface">
+      <div className="flex items-center justify-center min-h-screen bg-surface-container-lowest">
         <div className="oshap-spinner" />
       </div>
     );
@@ -71,22 +95,21 @@ export default function PinGate() {
 
   if (!authenticated) {
     return (
-      <div className="flex items-center justify-center min-h-screen bg-surface p-md">
-        <div className="w-full max-w-sm bg-surface-container-low rounded-2xl p-8 shadow-lg">
-          <div className="flex flex-col items-center gap-md mb-lg">
-            <div className="w-16 h-16 rounded-full bg-primary-container flex items-center justify-center">
-              <i className="mgc_lock_fill text-3xl text-on-primary-container" />
-            </div>
-            <h1 className="text-display-h2 font-bold text-primary-text">Staff Login</h1>
-            <p className="text-label-l4 text-secondary-text">Enter your PIN to access the dashboard</p>
+      <div className="flex items-center justify-center min-h-screen bg-surface-container-lowest p-md">
+        <div className="w-full max-w-sm bg-surface-container rounded-xl p-xl flex flex-col items-center gap-md">
+          <div className="w-16 h-16 rounded-full bg-primary-container flex items-center justify-center text-2xl text-on-primary-container">
+            <i className="mgc_lock_fill" />
           </div>
+          <h1 className="font-display text-display-h2 font-semibold text-primary-text">
+            Staff Login
+          </h1>
+          <p className="text-p2 text-secondary-text text-center">
+            Enter your PIN to access the dashboard.
+          </p>
 
           <input
-            className={`w-full px-lg py-md rounded-xl bg-surface text-p text-primary-text placeholder:text-secondary-text border outline-none transition-colors ${
-              pinError
-                ? "border-error"
-                : "border-outline-variant focus:border-primary"
-            }`}
+            className={`w-full px-md py-md rounded-lg bg-surface-container-lowest border-2 text-xl text-center text-primary-text placeholder:text-outline outline-none transition-colors font-mono tracking-[16px] ${pinError ? "border-error" : "border-outline-variant focus:border-primary"
+              }`}
             type="password"
             inputMode="numeric"
             maxLength={6}
@@ -102,53 +125,64 @@ export default function PinGate() {
             autoFocus
           />
           {pinError && (
-            <p className="mt-s text-caption text-error">{pinError}</p>
+            <p className="text-caption-md text-error">{pinError}</p>
           )}
 
-          <button
-            className="w-full mt-lg py-md rounded-xl bg-primary text-on-primary font-semibold text-label-l4 transition-opacity hover:opacity-90 disabled:opacity-50"
+          <PrimaryButton
             onClick={handleLogin}
             disabled={isLoggingIn || pinInput.length < 3}
+            className="w-full"
           >
             {isLoggingIn ? "Verifying..." : "Login"}
-          </button>
+          </PrimaryButton>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-surface">
-      <nav className="flex gap-1 px-md py-s bg-surface-container border-b border-outline-variant overflow-x-auto">
-        {[
-          { to: "/", label: "Tables", end: true },
-          { to: "/menu", label: "Menu" },
-          { to: "/kitchen", label: "Kitchen" },
-          { to: "/history", label: "History" },
-        ].map((tab) => (
-          <NavLink
-            key={tab.to}
-            to={tab.to}
-            end={tab.end}
-            className={({ isActive }) =>
-              `px-md py-s rounded-lg font-semibold text-label-l5 whitespace-nowrap transition-colors no-underline ${
-                isActive
-                  ? "bg-primary text-white"
+    <div className="min-h-screen bg-surface-container-lowest">
+      <nav className="flex items-center justify-between gap-md px-md py-s bg-surface-container-lowest border-b border-surface-container-high overflow-x-auto">
+        <div className="flex items-center gap-1">
+          {[
+            { to: "/", label: "Tables", end: true },
+            { to: "/menu", label: "Menu" },
+            { to: "/kitchen", label: "Kitchen" },
+            { to: "/history", label: "History" },
+          ].map((tab) => (
+            <NavLink
+              key={tab.to}
+              to={tab.to}
+              end={tab.end}
+              className={({ isActive }) =>
+                `px-md py-s rounded-lg text-label-l4 font-semibold font-display whitespace-nowrap transition-colors no-underline ${isActive
+                  ? "bg-primary text-on-primary"
                   : "text-secondary-text hover:bg-surface-container-high"
-              }`
-            }
-          >
-            {tab.label}
-          </NavLink>
-        ))}
+                }`
+              }
+            >
+              {tab.label}
+            </NavLink>
+          ))}
+        </div>
 
-        <button
-          onClick={handleLogout}
-          className="ml-auto px-md py-s rounded-lg text-secondary-text hover:bg-error-container hover:text-on-error-container transition-colors flex items-center gap-1"
-          title="Logout"
-        >
-          <i className="mgc_exit_line" />
-        </button>
+        <div className="flex items-center gap-s">
+          {restaurantName && (
+            <span
+              className="hidden sm:inline text-caption-md font-semibold text-secondary-text truncate max-w-[200px]"
+              title={restaurantName}
+            >
+              {restaurantName}
+            </span>
+          )}
+          <button
+            onClick={handleLogout}
+            className="w-9 h-9 flex items-center justify-center rounded-4xl bg-surface-container text-secondary-text border-[1.5px] border-transparent hover:bg-error-container hover:text-on-error-container transition-colors"
+            title="Logout"
+          >
+            <i className="mgc_exit_line text-lg" />
+          </button>
+        </div>
       </nav>
       <Outlet />
     </div>

@@ -8,7 +8,7 @@ import CartBar from "../components/CartBar";
 import CartDrawer from "../components/CartDrawer";
 import CategoryTabs from "../components/CategoryTabs";
 import MenuCard from "../components/MenuCard";
-import TableBadge from "../components/TableBadge";
+import { TableBadge } from "@oshap/shared/ui";
 
 export default function MenuPage() {
   const [params] = useSearchParams();
@@ -39,8 +39,7 @@ function MenuView({ tableId }: { tableId: string }) {
     sessionId: session?.id,
   });
   const restaurantId = tableQuery.data?.restaurant?.id;
-  const restaurantName =
-    tableQuery.data?.restaurant?.name ?? "Aji's Kitchen";
+  const restaurantName = tableQuery.data?.restaurant?.name ?? "";
 
   const menuQuery = useMenu(restaurantId);
   const menuItems = menuQuery.data ?? [];

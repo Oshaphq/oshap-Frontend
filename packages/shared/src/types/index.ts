@@ -194,6 +194,10 @@ export interface SessionOrdersResponse {
 // Admin payloads
 // ---------------------------------------------------------------------------
 
+export interface AdminMeResponse {
+  restaurant: Restaurant;
+}
+
 export interface CreateMenuItemRequest {
   name: string;
   price: number;

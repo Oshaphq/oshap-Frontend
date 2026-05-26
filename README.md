@@ -38,13 +38,13 @@ oshap/
 ```bash
 # Node 20+
 npm install
-cp .env.example apps/customer/.env.local
-cp .env.example apps/admin/.env.local
-# Edit each .env.local with your backend URL (and FCM keys for admin)
 
+# No backend needed — mock API auto-activates
 npm run dev:customer   # http://localhost:5173
-npm run dev:admin      # http://localhost:5174
+npm run dev:admin      # http://localhost:5174 (PIN: 0000)
 ```
+
+To point at a real backend, set `VITE_API_BASE_URL` in a `.env.local` file (see `.env.example`). The mock API is tree-shaken when a real backend URL is configured.
 
 ## Scripts
 
@@ -64,8 +64,28 @@ The contract is [`docs/openapi.yaml`](docs/openapi.yaml). Recommended starting p
 2. Apply [`docs/ddl.sql`](docs/ddl.sql) as your initial Alembic migration.
 3. Stand up the FastAPI app against the OpenAPI spec — every endpoint in `apps/customer` and `apps/admin` is already typed against these schemas.
 4. Read [`docs/whatsapp-to-fcm-migration.md`](docs/whatsapp-to-fcm-migration.md) for the notification trigger points (order placed, payment claimed, payment verified, issue flagged).
+5. See [`docs/handoff-plan.md`](docs/handoff-plan.md) for the final round of frontend changes that landed before handoff.
 
-Auth surface (MVP): admin routes expect an `x-admin-pin` header. The customer app is unauthenticated.
+Auth surface (MVP): admin routes expect an `x-admin-pin` header. The customer app is unauthenticated. **One PIN per restaurant** — the admin app calls `GET /admin/me` right after PIN verify to resolve the active restaurant, and uses `restaurant.id` for FCM device registration. There is no `VITE_RESTAURANT_ID` env var.
+
+### Admin push notifications (FCM)
+
+1. Create a Firebase project in the console.
+2. Add a Web app under **Project Settings → General → Your apps**.
+3. Copy the SDK config values into `.env.local` — the `VITE_FCM_*` keys.
+4. **Project Settings → Cloud Messaging → Web configuration** → generate a VAPID key pair → set `VITE_FCM_VAPID_KEY`.
+5. Backend sends messages from the FastAPI side using a Firebase Admin SDK service account (separate JSON, **not** committed). See [`docs/whatsapp-to-fcm-migration.md`](docs/whatsapp-to-fcm-migration.md) for trigger points.
+6. `firebase-messaging-sw.js` is generated at Vite build from these env vars ([`apps/admin/generateFirebaseSw.ts`](apps/admin/generateFirebaseSw.ts)). **If values are empty the service worker initializes empty and silently fails — the build itself does not error.**
+
+### Menu image storage
+
+The admin app posts FormData to `POST /admin/menu/upload` and expects `{ url: string }` back ([`adminUploadImage`](packages/shared/src/api/admin.ts)). Backend picks one of:
+
+- **S3 + CloudFront** — recommended for production. Backend signs uploads, returns the CDN URL.
+- **Local disk + nginx** — fine for single-VPS deploys. Backend writes to a static dir, returns the public path.
+- **GCS / R2 / equivalent** — same pattern as S3.
+
+Whichever — the response shape stays `{ url: string }`. No frontend change.
 
 ## Environment variables
 

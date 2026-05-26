@@ -6,17 +6,9 @@ import {
   useClaimPayment,
   useTable,
 } from "@oshap/shared";
+import { PrimaryButton, SecondaryButton, TableBadge } from "@oshap/shared/ui";
 import BottomNav from "../components/BottomNav";
-import PrimaryButton from "../components/PrimaryButton";
-import SecondaryButton from "../components/SecondaryButton";
-import TableBadge from "../components/TableBadge";
 import { useSession } from "../context/SessionContext";
-
-const DEFAULT_BANK = {
-  bankName: "Access Bank",
-  accountNumber: "0123456789",
-  accountName: "Aji's Kitchen Ltd",
-};
 
 export default function PayPage() {
   const [params] = useSearchParams();
@@ -69,13 +61,11 @@ export default function PayPage() {
   }
 
   const restaurant = tableQuery.data?.restaurant;
-  const bank = restaurant
-    ? {
-        bankName: restaurant.bank_name ?? DEFAULT_BANK.bankName,
-        accountNumber: restaurant.account_number ?? DEFAULT_BANK.accountNumber,
-        accountName: restaurant.account_name ?? DEFAULT_BANK.accountName,
-      }
-    : DEFAULT_BANK;
+  const bank = {
+    bankName: restaurant?.bank_name ?? "",
+    accountNumber: restaurant?.account_number ?? "",
+    accountName: restaurant?.account_name ?? "",
+  };
 
   const unpaidOrder = tableQuery.data?.unpaid_order ?? null;
   const pendingPayments = tableQuery.data?.pending_payments ?? null;
@@ -288,7 +278,7 @@ function EmptyState({
         {title}
       </span>
       <p className="text-p2 text-secondary-text max-w-sm">{message}</p>
-      <PrimaryButton onClick={onCta} className="mt-md">
+      <PrimaryButton size="md" onClick={onCta} className="mt-md">
         {cta}
       </PrimaryButton>
     </div>

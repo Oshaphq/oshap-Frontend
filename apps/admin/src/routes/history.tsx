@@ -1,5 +1,7 @@
-import { useState, useCallback } from "react";
+import { useState } from "react";
 import { useAdminHistory, formatCurrency } from "@oshap/shared";
+import { SecondaryButton } from "@oshap/shared/ui";
+import QueryError from "../components/QueryError";
 
 function formatDate(dateStr: string) {
   const d = new Date(dateStr);
@@ -31,36 +33,33 @@ export default function HistoryPage() {
     date: dateFilter || undefined,
   });
 
-  const fetchPage = useCallback(
-    (newPage: number) => {
-      setPage(newPage);
-    },
-    [],
-  );
-
   const data = historyQuery.data;
   const orders = data?.orders ?? [];
-  const pagination = data?.pagination ?? { page: 1, per_page: 20, total: 0, total_pages: 0 };
-  const summary = data?.summary ?? { confirmed_count: 0, cancelled_count: 0, page_revenue: 0 };
+  const pagination = data?.pagination ?? {
+    page: 1,
+    per_page: 20,
+    total: 0,
+    total_pages: 0,
+  };
+  const summary = data?.summary ?? {
+    confirmed_count: 0,
+    cancelled_count: 0,
+    page_revenue: 0,
+  };
 
   return (
-    <main className="p-md">
-      <header className="flex items-center justify-between mb-lg">
-        <h1 className="text-display-h1 font-bold text-primary-text">
+    <main className="p-md flex flex-col gap-l">
+      <header className="flex items-center justify-between">
+        <h1 className="font-display text-display-h2 font-semibold text-primary-text">
           Transaction History
         </h1>
-        <button
-          className="flex items-center gap-1 px-md py-s rounded-xl bg-surface-container-high text-label-l5 font-semibold text-primary-text hover:bg-surface-container-highest transition-colors"
-          onClick={() => historyQuery.refetch()}
-        >
-          <i className="mgc_refresh_3_line" />
-          Refresh
-        </button>
+        <SecondaryButton size="md" onClick={() => historyQuery.refetch()}>
+          <i className="mgc_refresh_3_line" /> Refresh
+        </SecondaryButton>
       </header>
 
-      <div className="flex gap-md mb-lg">
+      <div className="flex flex-col sm:flex-row gap-md">
         <input
-          className="flex-1 px-lg py-md rounded-xl bg-surface-container-low border border-outline-variant text-p text-primary-text placeholder:text-secondary-text outline-none focus:border-primary transition-colors"
           type="text"
           placeholder="Filter by table (e.g. T1)"
           value={tableFilter}
@@ -68,37 +67,31 @@ export default function HistoryPage() {
             setTableFilter(e.target.value.toUpperCase());
             setPage(1);
           }}
+          className="flex-1 px-md py-md rounded-lg bg-surface-container border border-outline-variant text-caption-md text-primary-text placeholder:text-outline outline-none focus:border-primary transition-colors"
         />
         <input
-          className="flex-1 px-lg py-md rounded-xl bg-surface-container-low border border-outline-variant text-p text-primary-text placeholder:text-secondary-text outline-none focus:border-primary transition-colors"
           type="date"
           value={dateFilter}
           onChange={(e) => {
             setDateFilter(e.target.value);
             setPage(1);
           }}
+          className="flex-1 px-md py-md rounded-lg bg-surface-container border border-outline-variant text-caption-md text-primary-text outline-none focus:border-primary transition-colors"
         />
       </div>
 
-      <div className="flex gap-md mb-lg">
-        <div className="flex-1 bg-surface-container-low rounded-2xl p-lg">
-          <span className="text-display-h2 font-bold text-primary-text block">
-            {pagination.total}
-          </span>
-          <span className="text-label-l5 text-secondary-text">Total Orders</span>
-        </div>
-        <div className="flex-1 bg-surface-container-low rounded-2xl p-lg">
-          <span className="text-display-h2 font-bold text-success block">
-            {summary.confirmed_count}
-          </span>
-          <span className="text-label-l5 text-secondary-text">Confirmed</span>
-        </div>
-        <div className="flex-1 bg-surface-container-low rounded-2xl p-lg">
-          <span className="text-display-h2 font-bold text-error block">
-            {summary.cancelled_count}
-          </span>
-          <span className="text-label-l5 text-secondary-text">Cancelled</span>
-        </div>
+      <div className="flex gap-s">
+        <SummaryCard label="Total Orders" value={pagination.total} />
+        <SummaryCard
+          label="Confirmed"
+          value={summary.confirmed_count}
+          tone="success"
+        />
+        <SummaryCard
+          label="Cancelled"
+          value={summary.cancelled_count}
+          tone="error"
+        />
       </div>
 
       {historyQuery.isLoading ? (
@@ -106,50 +99,56 @@ export default function HistoryPage() {
           <div className="oshap-spinner" />
           <p>Loading history...</p>
         </div>
+      ) : historyQuery.isError ? (
+        <QueryError onRetry={() => historyQuery.refetch()} />
       ) : orders.length === 0 ? (
-        <div className="flex flex-col items-center justify-center min-h-[40vh] gap-md text-secondary-text">
-          <i className="mgc_history_line text-5xl opacity-30" />
-          <p>No transactions found</p>
+        <div className="flex flex-col items-center justify-center gap-s py-10 px-md text-center">
+          <i className="mgc_history_line text-5xl text-outline-variant opacity-40" />
+          <span className="font-display text-display-h4 font-semibold text-primary-text">
+            No transactions found
+          </span>
+          <p className="text-p2 text-secondary-text">
+            Try a different filter or date range.
+          </p>
         </div>
       ) : (
-        <div className="flex flex-col gap-s">
+        <div className="flex flex-col gap-md">
           {orders.map((order) => {
             const isExpanded = expandedOrder === order.id;
             const payment = order.payments?.[0];
 
             return (
-              <div
+              <button
                 key={order.id}
-                className={`rounded-2xl border p-lg cursor-pointer transition-colors hover:bg-surface-container-low ${
-                  order.status === "CANCELLED"
-                    ? "bg-error/5 border-error/20"
-                    : "bg-surface-container-low border-outline-variant"
-                }`}
+                type="button"
                 onClick={() =>
                   setExpandedOrder(isExpanded ? null : order.id)
                 }
+                className={`text-left rounded-md p-md flex flex-col gap-md bg-surface-container border-[1.5px] border-transparent transition-colors hover:border-outline-variant cursor-pointer ${
+                  order.status === "CANCELLED" ? "opacity-55" : ""
+                }`}
               >
-                <div className="flex items-start justify-between">
-                  <div className="flex flex-col">
-                    <span className="text-label-l4 font-semibold text-primary-text">
+                <div className="flex items-start justify-between gap-md">
+                  <div className="flex flex-col gap-xs min-w-0">
+                    <span className="text-caption-md font-bold text-primary-text font-mono">
                       {order.reference}
                     </span>
-                    <span className="text-caption text-secondary-text">
+                    <span className="text-caption-sm text-secondary-text">
                       {order.table_id}
                       {order.customer_name && (
-                        <> · {order.customer_name}</>
+                        <span className="text-primary font-medium"> · {order.customer_name}</span>
                       )}
                     </span>
                   </div>
-                  <div className="flex flex-col items-end">
-                    <span className="text-label-l4 font-semibold text-primary-text">
+                  <div className="flex flex-col items-end gap-xs shrink-0">
+                    <span className="text-p font-semibold text-primary-text">
                       {formatCurrency(order.total)}
                     </span>
                     <span
-                      className={`text-caption font-semibold px-s py-0.5 rounded-lg ${
+                      className={`text-caption-xs font-bold uppercase tracking-wider px-s py-xs rounded-4xl whitespace-nowrap ${
                         order.status === "CONFIRMED"
-                          ? "bg-success/10 text-success"
-                          : "bg-error/10 text-error"
+                          ? "bg-success-container text-on-success-container"
+                          : "bg-error-container text-on-error-container"
                       }`}
                     >
                       {order.status === "CONFIRMED" ? "Paid" : "Cancelled"}
@@ -158,19 +157,19 @@ export default function HistoryPage() {
                 </div>
 
                 {isExpanded && order.order_items?.length > 0 && (
-                  <div className="mt-md pt-md border-t border-outline-variant flex flex-col gap-s">
+                  <div className="flex flex-col gap-s py-s border-t border-surface-container-high">
                     {order.order_items.map((item) => (
                       <div
                         key={item.id}
-                        className="flex items-center justify-between"
+                        className="flex items-center justify-between text-caption-md"
                       >
-                        <span className="text-label-l5 text-primary-text">
-                          <span className="font-semibold text-primary mr-1">
+                        <span className="text-secondary-text flex gap-s">
+                          <span className="text-primary font-bold min-w-6 shrink-0">
                             {item.quantity}×
                           </span>
-                          {item.name}
+                          <span className="min-w-0">{item.name}</span>
                         </span>
-                        <span className="text-label-l5 text-secondary-text">
+                        <span className="text-primary-text font-semibold shrink-0">
                           {formatCurrency(item.price * item.quantity)}
                         </span>
                       </div>
@@ -178,16 +177,16 @@ export default function HistoryPage() {
                   </div>
                 )}
 
-                <div className="flex items-center justify-between mt-md pt-s border-t border-outline-variant/50">
-                  <span className="text-caption text-secondary-text">
+                <div className="flex items-center justify-between pt-s border-t border-surface-container-high">
+                  <span className="text-caption-sm text-outline">
                     {formatDate(order.created_at)} · {formatTime(order.created_at)}
                   </span>
                   {payment && (
                     <span
-                      className={`text-caption font-semibold px-s py-0.5 rounded-lg ${
+                      className={`text-caption-xs font-bold uppercase tracking-wider px-s py-xs rounded-4xl whitespace-nowrap ${
                         payment.status === "VERIFIED"
-                          ? "bg-success/10 text-success"
-                          : "bg-surface-container-high text-secondary-text"
+                          ? "bg-success-container text-on-success-container"
+                          : "bg-surface-container-high text-outline"
                       }`}
                     >
                       {payment.status === "VERIFIED"
@@ -198,33 +197,62 @@ export default function HistoryPage() {
                     </span>
                   )}
                 </div>
-              </div>
+              </button>
             );
           })}
         </div>
       )}
 
       {pagination.total_pages > 1 && (
-        <div className="flex items-center justify-center gap-md mt-lg">
-          <button
-            className="px-lg py-s rounded-xl border border-outline-variant text-label-l5 font-semibold text-primary-text hover:bg-surface-container-high transition-colors disabled:opacity-30"
+        <div className="flex items-center justify-center gap-md mt-l">
+          <SecondaryButton
+            size="md"
+            onClick={() => setPage(pagination.page - 1)}
             disabled={pagination.page <= 1}
-            onClick={() => fetchPage(pagination.page - 1)}
           >
             Prev
-          </button>
-          <span className="text-label-l5 text-secondary-text">
+          </SecondaryButton>
+          <span className="text-caption-md font-medium text-secondary-text">
             Page {pagination.page} of {pagination.total_pages}
           </span>
-          <button
-            className="px-lg py-s rounded-xl border border-outline-variant text-label-l5 font-semibold text-primary-text hover:bg-surface-container-high transition-colors disabled:opacity-30"
+          <SecondaryButton
+            size="md"
+            onClick={() => setPage(pagination.page + 1)}
             disabled={pagination.page >= pagination.total_pages}
-            onClick={() => fetchPage(pagination.page + 1)}
           >
             Next
-          </button>
+          </SecondaryButton>
         </div>
       )}
     </main>
+  );
+}
+
+const SUMMARY_TONE_CLS = {
+  neutral: "text-primary",
+  success: "text-success",
+  error: "text-error",
+} as const;
+
+function SummaryCard({
+  label,
+  value,
+  tone = "neutral",
+}: {
+  label: string;
+  value: number;
+  tone?: keyof typeof SUMMARY_TONE_CLS;
+}) {
+  return (
+    <div className="flex-1 bg-surface-container rounded-md px-s py-md flex flex-col items-center gap-xs">
+      <span
+        className={`font-display text-display-h2 font-semibold block ${SUMMARY_TONE_CLS[tone]}`}
+      >
+        {value}
+      </span>
+      <span className="text-caption-sm font-medium text-secondary-text uppercase tracking-wider">
+        {label}
+      </span>
+    </div>
   );
 }

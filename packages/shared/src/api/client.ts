@@ -12,6 +12,8 @@
  * `x-admin-pin` on admin endpoints.
  */
 
+import type { Restaurant } from "../types/index";
+
 export class ApiError extends Error {
   status: number;
   body: unknown;
@@ -24,16 +26,32 @@ export class ApiError extends Error {
   }
 }
 
+export const ADMIN_UNAUTHORIZED_EVENT = "oshap:admin-unauthorized";
+
 // ---------------------------------------------------------------------------
-// Admin PIN — module-scoped + sessionStorage backed
+// Admin PIN + restaurant context — module-scoped + sessionStorage backed
 // ---------------------------------------------------------------------------
 
 const PIN_STORAGE_KEY = "oshap-admin-pin";
+const RESTAURANT_STORAGE_KEY = "oshap-admin-restaurant";
+
 let adminPin: string | null = null;
+let adminRestaurant: Restaurant | null = null;
 
 function readPinFromStorage(): string | null {
   if (typeof window === "undefined") return null;
   return window.sessionStorage.getItem(PIN_STORAGE_KEY);
+}
+
+function readRestaurantFromStorage(): Restaurant | null {
+  if (typeof window === "undefined") return null;
+  const raw = window.sessionStorage.getItem(RESTAURANT_STORAGE_KEY);
+  if (!raw) return null;
+  try {
+    return JSON.parse(raw) as Restaurant;
+  } catch {
+    return null;
+  }
 }
 
 export function setAdminPin(pin: string | null): void {
@@ -43,6 +61,7 @@ export function setAdminPin(pin: string | null): void {
     window.sessionStorage.setItem(PIN_STORAGE_KEY, pin);
   } else {
     window.sessionStorage.removeItem(PIN_STORAGE_KEY);
+    setAdminRestaurant(null);
   }
 }
 
@@ -50,6 +69,33 @@ export function getAdminPin(): string | null {
   if (adminPin) return adminPin;
   adminPin = readPinFromStorage();
   return adminPin;
+}
+
+export function setAdminRestaurant(restaurant: Restaurant | null): void {
+  adminRestaurant = restaurant;
+  if (typeof window === "undefined") return;
+  if (restaurant) {
+    window.sessionStorage.setItem(
+      RESTAURANT_STORAGE_KEY,
+      JSON.stringify(restaurant),
+    );
+  } else {
+    window.sessionStorage.removeItem(RESTAURANT_STORAGE_KEY);
+  }
+}
+
+export function getAdminRestaurant(): Restaurant | null {
+  if (adminRestaurant) return adminRestaurant;
+  adminRestaurant = readRestaurantFromStorage();
+  return adminRestaurant;
+}
+
+export function getAdminRestaurantId(): string | null {
+  return getAdminRestaurant()?.id ?? null;
+}
+
+export function getAdminRestaurantName(): string | null {
+  return getAdminRestaurant()?.name ?? null;
 }
 
 // ---------------------------------------------------------------------------
@@ -159,6 +205,9 @@ export async function request<T>(
     : await response.text().catch(() => null);
 
   if (!response.ok) {
+    if (response.status === 401 && options.admin) {
+      handleAdminUnauthorized();
+    }
     const message =
       (isJson &&
         typeof payload === "object" &&
@@ -172,6 +221,14 @@ export async function request<T>(
   }
 
   return payload as T;
+}
+
+function handleAdminUnauthorized(): void {
+  setAdminPin(null);
+  setAdminRestaurant(null);
+  if (typeof window !== "undefined") {
+    window.dispatchEvent(new CustomEvent(ADMIN_UNAUTHORIZED_EVENT));
+  }
 }
 
 // ---------------------------------------------------------------------------
@@ -188,6 +245,9 @@ async function mockRequest(
   const { mockRequest: handler } = await import("./mock");
   const match = await handler(path, method, body, query, admin);
   if (match.status >= 400) {
+    if (match.status === 401 && admin) {
+      handleAdminUnauthorized();
+    }
     throw new ApiError(
       match.status,
       typeof match.body === "object" && match.body !== null && "error" in match.body

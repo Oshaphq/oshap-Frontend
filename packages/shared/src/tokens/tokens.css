@@ -271,9 +271,19 @@
   --spacing-9xl: var(--ds-spacing-9xl);
   --spacing-10xl: var(--ds-spacing-10xl);
   --spacing-11xl: var(--ds-spacing-11xl);
+  --spacing-button-py: 10px;
+  --spacing-button-px: 20px;
 
-  /* ---------- Radius ---------- */
+  /* ---------- Radius ---------- *
+   * Single-letter tokens (`--radius-s`, `--radius-l`) would normally collide
+   * with Tailwind v4's directional rounded shorthands. The @layer utilities
+   * override at the bottom of this file flips the cascade so `rounded-s` and
+   * `rounded-l` emit the full 4-corner radius from our tokens.
+   * Directional+size forms (`rounded-t-l`, `rounded-bl-s`, etc.) need no
+   * override — they use different class names that Tailwind parses normally.
+   */
   --radius-xs: 4px;
+  --radius-sm: 8px;
   --radius-s: 8px;
   --radius-md: 16px;
   --radius-l: 24px;
@@ -281,18 +291,6 @@
   --radius-2xl: 40px;
   --radius-3xl: 48px;
   --radius-4xl: 100px;
-  /*
-   * Tailwind v4 reserves single-letter suffixes (s, e, l, r, t, b) for
-   * directional utilities. `rounded-s` / `rounded-l` get shadowed by
-   * `border-start-start-radius` / `border-left-radius` and only round one
-   * side. Workarounds:
-   *   8px  → use `rounded-sm` (overridden below) or `rounded-lg` (Tailwind default)
-   *   24px → use `rounded-[24px]` arbitrary value (no safe Tailwind name maps to 24px;
-   *          `rounded-lg` keeps its 8px default so existing chip/pill styles stay intact)
-   * Directional+size forms like `rounded-t-l` still work — the size segment
-   * is parsed after the direction prefix.
-   */
-  --radius-sm: 8px;
 
   /* ---------- Typography (font sizes — responsive via --ds-* swap) ---------- */
   --text-h1: var(--ds-h1-size);
@@ -582,5 +580,30 @@
     --ds-h3-line-height: 38px;
     --ds-h4-size: 28px;
     --ds-h4-line-height: 34px;
+  }
+}
+
+/* ============================================================================
+ * Tailwind v4 directional-shorthand fix.
+ *
+ * Tailwind v4 emits *two* competing rules for `rounded-s` / `rounded-l`:
+ *   1. .rounded-s { border-radius: var(--radius-s); }       (from @theme)
+ *   2. .rounded-s { border-start-start-radius: …; … }       (directional)
+ * The second wins by cascade order, so the class only rounds one side.
+ *
+ * Re-emitting the full-radius rules in the utilities layer AFTER Tailwind's
+ * import (tokens.css is imported after tailwindcss in each app's index.css)
+ * flips the cascade and makes `rounded-s` / `rounded-l` behave like every
+ * other size token.
+ *
+ * Directional+size combos (`rounded-t-l`, `rounded-bl-s`, `rounded-r-md` …)
+ * are unaffected — they use different class names Tailwind parses correctly.
+ * ========================================================================= */
+@layer utilities {
+  .rounded-s {
+    border-radius: var(--radius-s);
+  }
+  .rounded-l {
+    border-radius: var(--radius-l);
   }
 }

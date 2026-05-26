@@ -3,6 +3,7 @@ import type {
   AdminCloseResponse,
   AdminHistoryQuery,
   AdminHistoryResponse,
+  AdminMeResponse,
   AdminTablesResponse,
   AdminVerifyRequest,
   AdminVerifyResponse,
@@ -15,6 +16,12 @@ import type {
   UploadResponse,
 } from "../types/index";
 import { request } from "./client";
+
+// ---------- Identity ----------
+
+export function adminGetMe(): Promise<AdminMeResponse> {
+  return request<AdminMeResponse>("/admin/me", { admin: true });
+}
 
 // ---------- Menu management ----------
 

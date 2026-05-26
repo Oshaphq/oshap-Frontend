@@ -13,6 +13,7 @@ import type {
   AdminCloseRequest,
   AdminCloseResponse,
   AdminHistoryResponse,
+  AdminMeResponse,
   AdminTablesResponse,
   AdminVerifyRequest,
   AdminVerifyResponse,
@@ -508,6 +509,10 @@ route("POST", /^\/payment\/confirm$/, ({ body }) => {
 // Admin endpoints — used by admin app
 // ---------------------------------------------------------------------------
 
+route("GET", /^\/admin\/me$/, () => {
+  return json(200, { restaurant: RESTAURANT } satisfies AdminMeResponse);
+});
+
 route("GET", /^\/admin\/tables$/, () => {
   const allOrders = [..._orders.values()].filter((o) =>
     ["CREATED", "PAYMENT_PENDING"].includes(o.status),
@@ -533,7 +538,7 @@ route("GET", /^\/admin\/tables$/, () => {
 
 route("GET", /^\/admin\/kitchen$/, () => {
   const orders = [..._orders.values()]
-    .filter((o) => ["CREATED", "PREPARING"].includes(o.status))
+    .filter((o) => ["CREATED", "PREPARING", "READY"].includes(o.status))
     .sort((a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime());
 
   return json(200, orders);

@@ -1,3 +1,4 @@
-// Shared UI primitives — populated as components are extracted.
-
-export {};
+export { default as PrimaryButton } from "./PrimaryButton";
+export { default as SecondaryButton } from "./SecondaryButton";
+export { default as TertiaryButton } from "./TertiaryButton";
+export { default as TableBadge } from "./TableBadge";

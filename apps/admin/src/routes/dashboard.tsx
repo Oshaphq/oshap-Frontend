@@ -5,6 +5,8 @@ import {
   useAdminCloseTable,
   formatCurrency,
 } from "@oshap/shared";
+import { PrimaryButton, SecondaryButton } from "@oshap/shared/ui";
+import QueryError from "../components/QueryError";
 
 export default function DashboardPage() {
   const tablesQuery = useAdminTables(5000);
@@ -22,6 +24,10 @@ export default function DashboardPage() {
     );
   }
 
+  if (tablesQuery.isError) {
+    return <QueryError onRetry={() => tablesQuery.refetch()} />;
+  }
+
   const tables = tablesQuery.data?.tables ?? [];
   const activeTablesCount = tables.filter((t) => t.hasPending || t.hasUnpaid).length;
   const pendingCount = tables.filter((t) => t.hasPending).length;
@@ -34,7 +40,10 @@ export default function DashboardPage() {
     }
   };
 
-  const handleClearWithReason = async (tableId: string, reason: "paid" | "abandoned") => {
+  const handleClearWithReason = async (
+    tableId: string,
+    reason: "paid" | "abandoned",
+  ) => {
     setClearPromptTable(null);
     try {
       await closeTable.mutateAsync({ table_id: tableId, reason });
@@ -43,44 +52,49 @@ export default function DashboardPage() {
     }
   };
 
+  const hasPending = pendingCount > 0;
+
   return (
-    <main className="p-md">
-      <header className="flex items-center justify-between mb-lg">
-        <h1 className="text-display-h1 font-bold text-primary-text">
+    <main className="p-md flex flex-col gap-l">
+      <header className="flex items-center justify-between">
+        <h1 className="font-display text-display-h2 font-semibold text-primary-text">
           Waiter Dashboard
         </h1>
-        <div className="flex items-center gap-s">
-          <button
-            className="flex items-center gap-1 px-md py-s rounded-xl bg-surface-container-high text-label-l5 font-semibold text-primary-text hover:bg-surface-container-highest transition-colors"
-            onClick={() => tablesQuery.refetch()}
-          >
-            <i className="mgc_refresh_3_line" />
-            Refresh
-          </button>
-        </div>
+        <SecondaryButton size="md" onClick={() => tablesQuery.refetch()}>
+          <i className="mgc_refresh_3_line" /> Refresh
+        </SecondaryButton>
       </header>
 
-      <div className="flex gap-md mb-lg">
-        <div className="flex-1 bg-surface-container-low rounded-2xl p-lg">
-          <span className="text-display-h2 font-bold text-primary-text block">
+      <div className="flex gap-md">
+        <div className="flex-1 bg-surface-container rounded-md p-md flex flex-col items-center gap-xs">
+          <span className="font-display text-display-h2 font-semibold text-primary block">
             {activeTablesCount}
           </span>
-          <span className="text-label-l5 text-secondary-text">Active Tables</span>
+          <span className="text-caption-sm font-medium text-secondary-text uppercase tracking-wider">
+            Active Tables
+          </span>
         </div>
         <div
-          className="flex-1 rounded-2xl p-lg"
-          style={{
-            backgroundColor:
-              pendingCount > 0 ? "rgba(255,153,0,0.1)" : "var(--color-surface-container-low)",
-          }}
+          className={`flex-1 rounded-md p-md flex flex-col items-center gap-xs border-[1.5px] ${
+            hasPending
+              ? "bg-warning-container border-warning"
+              : "bg-surface-container border-transparent"
+          }`}
         >
           <span
-            className="text-display-h2 font-bold block"
-            style={{ color: pendingCount > 0 ? "#ff9900" : "var(--color-primary-text)" }}
+            className={`font-display text-display-h2 font-semibold block ${
+              hasPending ? "text-on-warning-container" : "text-primary"
+            }`}
           >
             {pendingCount}
           </span>
-          <span className="text-label-l5 text-secondary-text">Payments to Verify</span>
+          <span
+            className={`text-caption-sm font-medium uppercase tracking-wider ${
+              hasPending ? "text-on-warning-container" : "text-secondary-text"
+            }`}
+          >
+            Payments to Verify
+          </span>
         </div>
       </div>
 
@@ -89,114 +103,119 @@ export default function DashboardPage() {
           const isPending = table.hasPending;
           const isUnpaid = table.hasUnpaid;
           const isEmpty = !isPending && !isUnpaid;
-          const isVerifying = verifyPayment.isPending && verifyPayment.variables?.table_id === table.id;
-          const isClosing = closeTable.isPending && closeTable.variables?.table_id === table.id;
+          const isVerifying =
+            verifyPayment.isPending && verifyPayment.variables?.table_id === table.id;
+          const isClosing =
+            closeTable.isPending && closeTable.variables?.table_id === table.id;
+
+          const cardCls = isPending
+            ? "bg-warning-container border-warning"
+            : !isEmpty
+              ? "bg-surface-container border-outline-variant"
+              : "bg-surface-container border-transparent";
 
           return (
             <div
               key={table.id}
-              className={`rounded-2xl border p-lg transition-colors ${
-                isPending
-                  ? "bg-warning/10 border-warning/30"
-                  : !isEmpty
-                    ? "bg-surface-container-low border-primary/30"
-                    : "bg-surface-container-low border-outline-variant"
-              }`}
+              className={`rounded-md p-md flex flex-col gap-s border-[1.5px] transition-colors min-h-[120px] ${cardCls}`}
             >
-              <div className="flex items-center justify-between mb-md">
-                <span className="text-label-l4 font-bold text-primary-text">
+              <div className="flex items-center justify-between">
+                <span className="font-display text-display-h3 font-semibold text-primary-text">
                   {table.id}
                 </span>
                 {isPending ? (
-                  <span className="px-s py-0.5 rounded-lg bg-warning/20 text-warning text-caption font-semibold">
+                  <span className="px-s py-xs rounded-4xl font-bold text-caption-xs uppercase tracking-wider whitespace-nowrap bg-warning text-on-warning">
                     Verification Req.
                   </span>
                 ) : isUnpaid ? (
-                  <span className="px-s py-0.5 rounded-lg bg-primary-container text-on-primary-container text-caption font-semibold">
+                  <span className="px-s py-xs rounded-4xl font-bold text-caption-xs uppercase tracking-wider whitespace-nowrap bg-error-container text-on-error-container">
                     Dining
                   </span>
                 ) : (
-                  <span className="px-s py-0.5 rounded-lg bg-surface-container-high text-secondary-text text-caption font-semibold">
+                  <span className="px-s py-xs rounded-4xl font-bold text-caption-xs uppercase tracking-wider whitespace-nowrap bg-surface-container-high text-outline">
                     Empty
                   </span>
                 )}
               </div>
 
-              <div className="mb-md">
+              <div className="flex flex-col gap-xs flex-1">
                 {!isEmpty ? (
                   <>
                     {isUnpaid && (
-                      <p className="text-label-l5 text-secondary-text">
+                      <p className="text-caption-md text-secondary-text">
                         Current Bill:{" "}
-                        <span className="font-semibold text-primary-text">
+                        <span className="font-bold text-primary-text">
                           {formatCurrency(table.unpaidTotal)}
                         </span>
                       </p>
                     )}
                     {isPending && (
-                      <p className="text-label-l5" style={{ color: "#ff9900" }}>
+                      <p className="text-caption-md text-on-warning-container">
                         Claimed:{" "}
-                        <span className="font-semibold" style={{ color: "#ff9900" }}>
+                        <span className="font-bold">
                           {formatCurrency(table.pendingTotal)}
                         </span>
                       </p>
                     )}
                   </>
                 ) : (
-                  <p className="text-label-l5 text-secondary-text">No active orders</p>
+                  <p className="text-caption-md text-secondary-text">No active orders</p>
                 )}
               </div>
 
               {isPending && (
-                <button
-                  className="w-full py-s rounded-xl bg-primary text-on-primary text-label-l5 font-semibold transition-opacity hover:opacity-90 disabled:opacity-50"
+                <PrimaryButton
                   onClick={() => handleVerify(table.id)}
                   disabled={isVerifying}
                 >
                   {isVerifying ? "Verifying..." : "Verify Payment"}
-                </button>
+                </PrimaryButton>
               )}
 
               {!isEmpty && isClosing && (
-                <div className="py-s text-center text-caption text-secondary-text">
+                <div className="py-s text-center text-caption-md font-semibold text-secondary-text">
                   Clearing...
                 </div>
               )}
 
               {!isEmpty && !isClosing && clearPromptTable !== table.id && (
-                <button
-                  className="w-full py-s rounded-xl border border-outline-variant text-label-l5 font-semibold text-secondary-text hover:bg-surface-container-high transition-colors"
+                <SecondaryButton
+                  size="md"
                   onClick={() => setClearPromptTable(table.id)}
+                  className="w-full"
                 >
                   Clear Table
-                </button>
+                </SecondaryButton>
               )}
 
               {clearPromptTable === table.id && (
-                <div className="mt-s p-md rounded-xl bg-surface-container-high">
-                  <span className="block text-caption font-semibold text-secondary-text mb-s">
+                <div className="flex flex-col gap-s pt-s border-t border-surface-container-high">
+                  <span className="text-caption-sm font-semibold text-secondary-text text-center uppercase tracking-wider">
                     Why are you clearing?
                   </span>
-                  <div className="flex flex-col gap-s">
-                    <button
-                      className="flex items-center gap-s py-s px-md rounded-xl bg-success/10 text-success text-label-l5 font-semibold hover:opacity-80 transition-opacity"
-                      onClick={() => handleClearWithReason(table.id, "paid")}
-                    >
-                      <i className="mgc_wallet_4_line" /> Paid (Cash/Transfer)
-                    </button>
-                    <button
-                      className="flex items-center gap-s py-s px-md rounded-xl bg-error/10 text-error text-label-l5 font-semibold hover:opacity-80 transition-opacity"
-                      onClick={() => handleClearWithReason(table.id, "abandoned")}
-                    >
-                      <i className="mgc_exit_line" /> Abandoned / Left
-                    </button>
-                    <button
-                      className="py-s px-md rounded-xl border border-outline-variant text-label-l5 text-secondary-text hover:bg-surface-container-highest transition-colors"
-                      onClick={() => setClearPromptTable(null)}
-                    >
-                      Cancel
-                    </button>
-                  </div>
+                  <button
+                    type="button"
+                    onClick={() => handleClearWithReason(table.id, "paid")}
+                    className="flex items-center justify-center gap-s py-s rounded-lg font-bold text-caption-md text-white transition-all hover:opacity-90 active:scale-[0.98] bg-success"
+                  >
+                    <i className="mgc_wallet_4_line" />
+                    Paid (Cash/Transfer)
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => handleClearWithReason(table.id, "abandoned")}
+                    className="flex items-center justify-center gap-s py-s rounded-lg font-bold text-caption-md text-error border-[1.5px] border-error bg-transparent transition-all hover:bg-error/5 active:scale-[0.98]"
+                  >
+                    <i className="mgc_exit_line" />
+                    Abandoned / Left
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setClearPromptTable(null)}
+                    className="py-s text-center text-caption-sm font-medium text-outline bg-transparent border-none cursor-pointer hover:text-primary-text transition-colors"
+                  >
+                    Cancel
+                  </button>
                 </div>
               )}
             </div>
@@ -205,9 +224,14 @@ export default function DashboardPage() {
       </div>
 
       {tables.length === 0 && (
-        <div className="flex flex-col items-center justify-center min-h-[40vh] gap-md text-secondary-text">
-          <i className="mgc_table_line text-5xl opacity-30" />
-          <p className="text-label-l4">No tables configured</p>
+        <div className="flex flex-col items-center justify-center gap-s py-10 px-md text-center">
+          <i className="mgc_table_line text-5xl text-outline-variant opacity-40" />
+          <span className="font-display text-display-h4 font-semibold text-primary-text">
+            No tables configured
+          </span>
+          <p className="text-p2 text-secondary-text">
+            Add tables in your restaurant settings to get started.
+          </p>
         </div>
       )}
     </main>

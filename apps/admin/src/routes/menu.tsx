@@ -1,4 +1,4 @@
-import { useState, useRef } from "react";
+import { useRef, useState } from "react";
 import type { ChangeEvent } from "react";
 import {
   useAdminMenu,
@@ -10,6 +10,26 @@ import {
   formatCurrency,
 } from "@oshap/shared";
 import type { MenuItem } from "@oshap/shared";
+import { PrimaryButton, SecondaryButton } from "@oshap/shared/ui";
+import QueryError from "../components/QueryError";
+
+interface MenuFormState {
+  name: string;
+  price: string;
+  category: string;
+  description: string;
+  image_url: string;
+}
+
+const EMPTY_FORM: MenuFormState = {
+  name: "",
+  price: "",
+  category: "Meals",
+  description: "",
+  image_url: "",
+};
+
+const CATEGORIES = ["Meals", "Grills", "Drinks", "Sides"] as const;
 
 export default function MenuPage() {
   const menuQuery = useAdminMenu();
@@ -21,23 +41,7 @@ export default function MenuPage() {
 
   const [editingId, setEditingId] = useState<string | null>(null);
   const [showNewForm, setShowNewForm] = useState(false);
-  const [form, setForm] = useState({
-    name: "",
-    price: "",
-    category: "Meals",
-    description: "",
-    image_url: "",
-  });
-  const fileInputRef = useRef<HTMLInputElement>(null);
-
-  const handleImageUpload = async (file: File) => {
-    try {
-      const result = await uploadImage.mutateAsync(file);
-      setForm((prev) => ({ ...prev, image_url: result.url }));
-    } catch {
-      alert("Upload failed. Please try again.");
-    }
-  };
+  const [form, setForm] = useState<MenuFormState>(EMPTY_FORM);
 
   const handleCreate = async () => {
     if (!form.name || !form.price || !form.category) {
@@ -53,13 +57,7 @@ export default function MenuPage() {
         image_url: form.image_url || undefined,
       });
       setShowNewForm(false);
-      setForm({
-        name: "",
-        price: "",
-        category: "Meals",
-        description: "",
-        image_url: "",
-      });
+      setForm(EMPTY_FORM);
     } catch {
       alert("Failed to create item");
     }
@@ -85,6 +83,7 @@ export default function MenuPage() {
 
   const handleEdit = (item: MenuItem) => {
     setEditingId(item.id);
+    setShowNewForm(false);
     setForm({
       name: item.name,
       price: String(item.price),
@@ -120,312 +119,298 @@ export default function MenuPage() {
     );
   }
 
+  if (menuQuery.isError) {
+    return <QueryError onRetry={() => menuQuery.refetch()} />;
+  }
+
   const items = menuQuery.data ?? [];
   const isSaving = createItem.isPending || updateItem.isPending;
 
   return (
-    <main className="p-md">
-      <header className="flex items-center justify-between mb-lg">
-        <h1 className="text-display-h1 font-bold text-primary-text">
+    <main className="p-md flex flex-col gap-l">
+      <header className="flex items-center justify-between">
+        <h1 className="font-display text-display-h2 font-semibold text-primary-text">
           Menu Management
         </h1>
-        <button
-          className="px-lg py-s rounded-xl bg-primary text-on-primary text-label-l5 font-semibold transition-opacity hover:opacity-90"
+        <PrimaryButton
+          size="md"
           onClick={() => {
             setShowNewForm(true);
             setEditingId(null);
-            setForm({
-              name: "",
-              price: "",
-              category: "Meals",
-              description: "",
-              image_url: "",
-            });
+            setForm(EMPTY_FORM);
           }}
         >
           + Add Item
-        </button>
+        </PrimaryButton>
       </header>
 
-      <div className="max-w-3xl">
+      <div className="flex flex-col gap-md">
         {showNewForm && (
-          <div className="mb-lg bg-surface-container-low rounded-2xl border border-outline-variant p-lg">
-            <h3 className="text-display-h3 font-semibold text-primary-text mb-md">
-              New Menu Item
-            </h3>
-            <div className="flex flex-col gap-md">
-              <input
-                className="px-lg py-md rounded-xl bg-surface border border-outline-variant text-p text-primary-text placeholder:text-secondary-text outline-none focus:border-primary transition-colors"
-                placeholder="Name"
-                value={form.name}
-                onChange={(e) =>
-                  setForm({ ...form, name: e.target.value })
-                }
-              />
-              <input
-                className="px-lg py-md rounded-xl bg-surface border border-outline-variant text-p text-primary-text placeholder:text-secondary-text outline-none focus:border-primary transition-colors"
-                placeholder="Price (e.g. 2500)"
-                type="number"
-                value={form.price}
-                onChange={(e) =>
-                  setForm({ ...form, price: e.target.value })
-                }
-              />
-              <select
-                className="px-lg py-md rounded-xl bg-surface border border-outline-variant text-p text-primary-text outline-none focus:border-primary transition-colors"
-                value={form.category}
-                onChange={(e) =>
-                  setForm({ ...form, category: e.target.value })
-                }
-              >
-                <option>Meals</option>
-                <option>Grills</option>
-                <option>Drinks</option>
-                <option>Sides</option>
-              </select>
-              <input
-                className="px-lg py-md rounded-xl bg-surface border border-outline-variant text-p text-primary-text placeholder:text-secondary-text outline-none focus:border-primary transition-colors"
-                placeholder="Description"
-                value={form.description}
-                onChange={(e) =>
-                  setForm({ ...form, description: e.target.value })
-                }
-              />
-
-              <div className="flex flex-col gap-s">
-                <input
-                  ref={fileInputRef}
-                  type="file"
-                  accept="image/jpeg,image/png,image/webp,image/gif"
-                  className="hidden"
-                  onChange={(e: ChangeEvent<HTMLInputElement>) => {
-                    const f = e.target.files?.[0];
-                    if (f) handleImageUpload(f);
-                  }}
-                />
-                <div className="flex items-center gap-s">
-                  <button
-                    type="button"
-                    className="px-lg py-s rounded-xl bg-surface-container-high text-label-l5 font-semibold text-primary-text hover:bg-surface-container-highest transition-colors disabled:opacity-50"
-                    onClick={() => fileInputRef.current?.click()}
-                    disabled={uploadImage.isPending}
-                  >
-                    {uploadImage.isPending ? "Uploading..." : "Upload Image"}
-                  </button>
-                  <input
-                    className="flex-1 px-lg py-md rounded-xl bg-surface border border-outline-variant text-p text-primary-text placeholder:text-secondary-text outline-none focus:border-primary transition-colors"
-                    placeholder="Or paste image URL"
-                    value={form.image_url}
-                    onChange={(e) =>
-                      setForm({ ...form, image_url: e.target.value })
-                    }
-                  />
-                </div>
-                {form.image_url && (
-                  <img
-                    src={form.image_url}
-                    alt="Preview"
-                    className="w-24 h-24 object-cover rounded-xl border border-outline-variant"
-                  />
-                )}
-              </div>
-            </div>
-            <div className="flex items-center justify-end gap-s mt-lg">
-              <button
-                className="px-lg py-s rounded-xl border border-outline-variant text-label-l5 text-secondary-text hover:bg-surface-container-high transition-colors"
-                onClick={() => setShowNewForm(false)}
-              >
-                Cancel
-              </button>
-              <button
-                className="px-lg py-s rounded-xl bg-primary text-on-primary text-label-l5 font-semibold transition-opacity hover:opacity-90 disabled:opacity-50"
-                onClick={handleCreate}
-                disabled={isSaving || uploadImage.isPending}
-              >
-                {createItem.isPending ? "Saving..." : "Create"}
-              </button>
-            </div>
-          </div>
+          <MenuItemForm
+            heading="New Menu Item"
+            form={form}
+            setForm={setForm}
+            onCancel={() => {
+              setShowNewForm(false);
+              setForm(EMPTY_FORM);
+            }}
+            onSubmit={handleCreate}
+            submitLabel="Create"
+            submitting={createItem.isPending}
+            isSaving={isSaving}
+            uploadImage={uploadImage}
+          />
         )}
 
-        <div className="flex flex-col gap-s">
-          {items.map((item) => {
-            const isEditing = editingId === item.id;
+        {items.map((item) => {
+          const isEditing = editingId === item.id;
+          if (isEditing) {
             return (
-              <div
+              <MenuItemForm
                 key={item.id}
-                className={`rounded-2xl border p-lg transition-colors ${
-                  !item.available
-                    ? "bg-surface-container-low opacity-60"
-                    : "bg-surface-container-low border-outline-variant"
-                }`}
-              >
-                {isEditing ? (
-                  <div>
-                    <h3 className="text-display-h3 font-semibold text-primary-text mb-md">
-                      Edit {item.name}
-                    </h3>
-                    <div className="flex flex-col gap-md">
-                      <input
-                        className="px-lg py-md rounded-xl bg-surface border border-outline-variant text-p text-primary-text placeholder:text-secondary-text outline-none focus:border-primary transition-colors"
-                        placeholder="Name"
-                        value={form.name}
-                        onChange={(e) =>
-                          setForm({ ...form, name: e.target.value })
-                        }
-                      />
-                      <input
-                        className="px-lg py-md rounded-xl bg-surface border border-outline-variant text-p text-primary-text placeholder:text-secondary-text outline-none focus:border-primary transition-colors"
-                        placeholder="Price"
-                        type="number"
-                        value={form.price}
-                        onChange={(e) =>
-                          setForm({ ...form, price: e.target.value })
-                        }
-                      />
-                      <select
-                        className="px-lg py-md rounded-xl bg-surface border border-outline-variant text-p text-primary-text outline-none focus:border-primary transition-colors"
-                        value={form.category}
-                        onChange={(e) =>
-                          setForm({ ...form, category: e.target.value })
-                        }
-                      >
-                        <option>Meals</option>
-                        <option>Grills</option>
-                        <option>Drinks</option>
-                        <option>Sides</option>
-                      </select>
-                      <input
-                        className="px-lg py-md rounded-xl bg-surface border border-outline-variant text-p text-primary-text placeholder:text-secondary-text outline-none focus:border-primary transition-colors"
-                        placeholder="Description"
-                        value={form.description}
-                        onChange={(e) =>
-                          setForm({ ...form, description: e.target.value })
-                        }
-                      />
-
-                      <div className="flex flex-col gap-s">
-                        <input
-                          ref={fileInputRef}
-                          type="file"
-                          accept="image/jpeg,image/png,image/webp,image/gif"
-                          className="hidden"
-                          onChange={(e: ChangeEvent<HTMLInputElement>) => {
-                            const f = e.target.files?.[0];
-                            if (f) handleImageUpload(f);
-                          }}
-                        />
-                        <div className="flex items-center gap-s">
-                          <button
-                            type="button"
-                            className="px-lg py-s rounded-xl bg-surface-container-high text-label-l5 font-semibold text-primary-text hover:bg-surface-container-highest transition-colors disabled:opacity-50"
-                            onClick={() => fileInputRef.current?.click()}
-                            disabled={uploadImage.isPending}
-                          >
-                            {uploadImage.isPending
-                              ? "Uploading..."
-                              : "Upload Image"}
-                          </button>
-                          <input
-                            className="flex-1 px-lg py-md rounded-xl bg-surface border border-outline-variant text-p text-primary-text placeholder:text-secondary-text outline-none focus:border-primary transition-colors"
-                            placeholder="Or paste image URL"
-                            value={form.image_url}
-                            onChange={(e) =>
-                              setForm({
-                                ...form,
-                                image_url: e.target.value,
-                              })
-                            }
-                          />
-                        </div>
-                        {form.image_url && (
-                          <img
-                            src={form.image_url}
-                            alt="Preview"
-                            className="w-24 h-24 object-cover rounded-xl border border-outline-variant"
-                          />
-                        )}
-                      </div>
-                    </div>
-                    <div className="flex items-center justify-end gap-s mt-lg">
-                      <button
-                        className="px-lg py-s rounded-xl border border-outline-variant text-label-l5 text-secondary-text hover:bg-surface-container-high transition-colors"
-                        onClick={() => setEditingId(null)}
-                      >
-                        Cancel
-                      </button>
-                      <button
-                        className="px-lg py-s rounded-xl bg-primary text-on-primary text-label-l5 font-semibold transition-opacity hover:opacity-90 disabled:opacity-50"
-                        onClick={() => handleSave(item.id)}
-                        disabled={isSaving || uploadImage.isPending}
-                      >
-                        {updateItem.isPending ? "Saving..." : "Save"}
-                      </button>
-                    </div>
-                  </div>
-                ) : (
-                  <div>
-                    <div className="flex items-start justify-between">
-                      <div className="flex flex-col">
-                        <span className="text-label-l4 font-semibold text-primary-text">
-                          {item.name}
-                        </span>
-                        <span className="text-caption text-secondary-text">
-                          {item.category} · {formatCurrency(item.price)}
-                        </span>
-                        {item.description && (
-                          <span className="text-caption text-secondary-text mt-s">
-                            {item.description}
-                          </span>
-                        )}
-                      </div>
-                      <div className="flex items-center gap-s">
-                        <span
-                          className={`w-2 h-2 rounded-full ${
-                            item.available ? "bg-success" : "bg-error"
-                          }`}
-                        />
-                        <span className="text-caption text-secondary-text">
-                          {item.available ? "Available" : "Unavailable"}
-                        </span>
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-s mt-md pt-md border-t border-outline-variant">
-                      <button
-                        className="px-md py-s rounded-xl border border-outline-variant text-label-l5 text-secondary-text hover:bg-surface-container-high transition-colors"
-                        onClick={() =>
-                          handleToggleAvailable(item.id, item.available)
-                        }
-                      >
-                        {item.available ? "Mark Unavailable" : "Mark Available"}
-                      </button>
-                      <button
-                        className="px-md py-s rounded-xl bg-primary-container text-on-primary-container text-label-l5 font-semibold hover:opacity-80 transition-opacity"
-                        onClick={() => handleEdit(item)}
-                      >
-                        Edit
-                      </button>
-                      <button
-                        className="px-md py-s rounded-xl bg-error/10 text-error text-label-l5 font-semibold hover:opacity-80 transition-opacity"
-                        onClick={() => handleDelete(item.id)}
-                      >
-                        Delete
-                      </button>
-                    </div>
-                  </div>
-                )}
-              </div>
+                heading={`Edit ${item.name}`}
+                form={form}
+                setForm={setForm}
+                onCancel={() => setEditingId(null)}
+                onSubmit={() => handleSave(item.id)}
+                submitLabel="Save"
+                submitting={updateItem.isPending}
+                isSaving={isSaving}
+                uploadImage={uploadImage}
+              />
             );
-          })}
+          }
+          return (
+            <MenuItemRow
+              key={item.id}
+              item={item}
+              onToggle={() => handleToggleAvailable(item.id, item.available)}
+              onEdit={() => handleEdit(item)}
+              onDelete={() => handleDelete(item.id)}
+            />
+          );
+        })}
 
-          {items.length === 0 && (
-            <div className="flex flex-col items-center justify-center min-h-[40vh] gap-md text-secondary-text">
-              <i className="mgc_cook_line text-5xl opacity-30" />
-              <p>No menu items yet. Click "+ Add Item" to create one.</p>
-            </div>
-          )}
-        </div>
+        {items.length === 0 && !showNewForm && (
+          <div className="flex flex-col items-center justify-center gap-s py-10 px-md text-center">
+            <i className="mgc_cook_line text-5xl text-outline-variant opacity-40" />
+            <span className="font-display text-display-h4 font-semibold text-primary-text">
+              No menu items yet
+            </span>
+            <p className="text-p2 text-secondary-text">
+              Click <span className="font-semibold">+ Add Item</span> to create your first menu item.
+            </p>
+          </div>
+        )}
       </div>
     </main>
+  );
+}
+
+interface ItemRowProps {
+  item: MenuItem;
+  onToggle: () => void;
+  onEdit: () => void;
+  onDelete: () => void;
+}
+
+function MenuItemRow({ item, onToggle, onEdit, onDelete }: ItemRowProps) {
+  return (
+    <div
+      className={`rounded-md bg-surface-container border-[1.5px] border-transparent transition-all hover:border-outline-variant overflow-hidden ${
+        !item.available ? "opacity-55" : ""
+      }`}
+    >
+      <div className="p-md flex flex-col gap-s">
+        <div className="flex items-start justify-between gap-md">
+          <div className="flex items-start gap-md flex-1 min-w-0">
+            {item.image_url ? (
+              <img
+                src={item.image_url}
+                alt={item.name}
+                className="w-16 h-16 object-cover rounded-lg border border-outline-variant shrink-0"
+              />
+            ) : (
+              <div className="w-16 h-16 rounded-lg bg-primary-container flex items-center justify-center shrink-0">
+                <i className="mgc_fork_spoon_line text-2xl text-on-primary-container" />
+              </div>
+            )}
+            <div className="flex flex-col gap-xs min-w-0">
+              <span className="font-bold text-primary-text truncate">
+                {item.name}
+              </span>
+              <span className="text-caption-md text-secondary-text">
+                {item.category} · {formatCurrency(item.price)}
+              </span>
+              {item.description && (
+                <span className="text-caption-sm text-outline line-clamp-2">
+                  {item.description}
+                </span>
+              )}
+            </div>
+          </div>
+          <div className="flex items-center gap-s shrink-0">
+            <span
+              className={`w-2 h-2 rounded-full ${
+                item.available ? "bg-success" : "bg-error"
+              }`}
+            />
+            <span className="text-caption-sm font-medium text-secondary-text">
+              {item.available ? "Available" : "Unavailable"}
+            </span>
+          </div>
+        </div>
+        <div className="flex items-center gap-s flex-wrap">
+          <button
+            type="button"
+            onClick={onToggle}
+            className="px-md py-s rounded-lg border-[1.5px] border-outline-variant bg-transparent text-secondary-text text-caption-sm font-semibold hover:border-primary-text hover:text-primary-text transition-all"
+          >
+            {item.available ? "Mark Unavailable" : "Mark Available"}
+          </button>
+          <button
+            type="button"
+            onClick={onEdit}
+            className="px-md py-s rounded-lg border-[1.5px] border-primary bg-transparent text-primary text-caption-sm font-bold hover:bg-primary hover:text-on-primary transition-all"
+          >
+            Edit
+          </button>
+          <button
+            type="button"
+            onClick={onDelete}
+            className="px-md py-s rounded-lg border-[1.5px] border-error bg-transparent text-error text-caption-sm font-bold hover:bg-error hover:text-on-error transition-all"
+          >
+            Delete
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+interface FormProps {
+  heading: string;
+  form: MenuFormState;
+  setForm: (next: MenuFormState) => void;
+  onCancel: () => void;
+  onSubmit: () => void;
+  submitLabel: string;
+  submitting: boolean;
+  isSaving: boolean;
+  uploadImage: ReturnType<typeof useAdminUploadImage>;
+}
+
+function MenuItemForm({
+  heading,
+  form,
+  setForm,
+  onCancel,
+  onSubmit,
+  submitLabel,
+  submitting,
+  isSaving,
+  uploadImage,
+}: FormProps) {
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const handleImageUpload = async (file: File) => {
+    try {
+      const result = await uploadImage.mutateAsync(file);
+      setForm({ ...form, image_url: result.url });
+    } catch {
+      alert("Upload failed. Please try again.");
+    }
+  };
+
+  const inputClass =
+    "px-md py-s rounded-lg bg-surface-container-lowest border-[1.5px] border-outline-variant text-body-sm text-primary-text placeholder:text-outline outline-none focus:border-primary transition-colors";
+
+  return (
+    <div className="rounded-md bg-surface-container p-l flex flex-col gap-md border-[1.5px] border-primary">
+      <h3 className="font-bold text-primary-text">{heading}</h3>
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-s">
+        <input
+          className={inputClass}
+          placeholder="Name"
+          value={form.name}
+          onChange={(e) => setForm({ ...form, name: e.target.value })}
+        />
+        <input
+          className={inputClass}
+          placeholder="Price (e.g. 2500)"
+          type="number"
+          value={form.price}
+          onChange={(e) => setForm({ ...form, price: e.target.value })}
+        />
+        <div className="relative">
+          <select
+            className={`${inputClass} appearance-none w-full pr-10`}
+            value={form.category}
+            onChange={(e) => setForm({ ...form, category: e.target.value })}
+          >
+            {CATEGORIES.map((c) => (
+              <option key={c}>{c}</option>
+            ))}
+          </select>
+          <i
+            className="mgc_down_line absolute right-md top-1/2 -translate-y-1/2 text-outline pointer-events-none"
+            aria-hidden
+          />
+        </div>
+        <input
+          className={inputClass}
+          placeholder="Description"
+          value={form.description}
+          onChange={(e) => setForm({ ...form, description: e.target.value })}
+        />
+      </div>
+
+      <div className="flex flex-col gap-s">
+        <input
+          ref={fileInputRef}
+          type="file"
+          accept="image/jpeg,image/png,image/webp,image/gif"
+          className="hidden"
+          onChange={(e: ChangeEvent<HTMLInputElement>) => {
+            const f = e.target.files?.[0];
+            if (f) handleImageUpload(f);
+          }}
+        />
+        <button
+          type="button"
+          onClick={() => fileInputRef.current?.click()}
+          disabled={uploadImage.isPending}
+          className="self-start inline-flex items-center gap-s py-s px-md rounded-lg border border-dashed border-primary bg-transparent text-primary text-caption-md font-semibold transition-all hover:bg-primary/5 disabled:opacity-50 disabled:cursor-not-allowed"
+        >
+          {uploadImage.isPending ? "Uploading..." : "Upload Image"}
+        </button>
+        <input
+          className={`w-full ${inputClass}`}
+          placeholder="Or paste image URL"
+          value={form.image_url}
+          onChange={(e) => setForm({ ...form, image_url: e.target.value })}
+        />
+        {form.image_url && (
+          <img
+            src={form.image_url}
+            alt="Preview"
+            className="w-24 h-24 object-cover rounded-lg border-[1.5px] border-outline-variant"
+          />
+        )}
+      </div>
+
+      <div className="flex items-center justify-end gap-s">
+        <SecondaryButton size="md" onClick={onCancel}>
+          Cancel
+        </SecondaryButton>
+        <PrimaryButton
+          size="md"
+          onClick={onSubmit}
+          disabled={isSaving || uploadImage.isPending}
+        >
+          {submitting ? "Saving..." : submitLabel}
+        </PrimaryButton>
+      </div>
+    </div>
   );
 }

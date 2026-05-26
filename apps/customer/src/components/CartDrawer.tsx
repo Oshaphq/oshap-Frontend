@@ -1,7 +1,7 @@
 import { useNavigate } from "react-router";
 import { formatCurrency } from "@oshap/shared";
 import { useCart } from "../context/CartContext";
-import PrimaryButton from "./PrimaryButton";
+import { PrimaryButton } from "@oshap/shared/ui";
 
 interface CartDrawerProps {
   tableId: string;

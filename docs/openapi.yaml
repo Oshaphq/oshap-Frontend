@@ -642,6 +642,35 @@ paths:
               schema: { $ref: "#/components/schemas/Error" }
 
   # =========================================================================
+  # ADMIN — Identity
+  # =========================================================================
+  /admin/me:
+    get:
+      tags: [Admin]
+      summary: Return the restaurant scoped to the current PIN
+      description: >
+        Called by the admin app right after PIN verification to discover which
+        restaurant this PIN manages. The frontend stores `restaurant` in
+        sessionStorage and uses `restaurant.id` for FCM device registration.
+        One PIN maps to exactly one restaurant.
+      security: [{ adminPin: [] }]
+      responses:
+        "200":
+          description: Restaurant identity
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  restaurant: { $ref: "#/components/schemas/Restaurant" }
+                required: [restaurant]
+        "401":
+          description: Invalid PIN
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+
+  # =========================================================================
   # ADMIN — Tables
   # =========================================================================
   /admin/tables:
@@ -667,7 +696,12 @@ paths:
   /admin/kitchen:
     get:
       tags: [Admin]
-      summary: List active kitchen orders (CREATED + PREPARING)
+      summary: List active kitchen orders (CREATED, PREPARING, READY)
+      description: >
+        Returns all orders in the kitchen pipeline. Frontend buckets them
+        into three columns: New (CREATED), Cooking (PREPARING), Ready (READY).
+        Orders that have moved past READY (PAYMENT_PENDING, CONFIRMED,
+        CANCELLED) are excluded.
       security: [{ adminPin: [] }]
       responses:
         "200":
