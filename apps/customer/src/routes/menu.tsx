@@ -136,9 +136,11 @@ function MenuView({ tableId }: { tableId: string }) {
               />
             ))}
             {filteredItems.length === 0 && (
-              <p className="text-center text-secondary-text mt-8">
-                No items found in this category.
-              </p>
+              <div className="py-xl text-center">
+                <p className="text-secondary-text">
+                  No items found in this category.
+                </p>
+              </div>
             )}
           </div>
         )}

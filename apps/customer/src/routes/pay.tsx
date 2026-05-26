@@ -272,13 +272,15 @@ function EmptyState({
   onCta: () => void;
 }) {
   return (
-    <div className="flex flex-col items-center gap-s py-10 px-md text-center">
-      <i className={`${icon} text-5xl ${iconClassName}`} />
-      <span className="font-display text-display-h4 font-semibold text-primary-text">
-        {title}
-      </span>
-      <p className="text-p2 text-secondary-text max-w-sm">{message}</p>
-      <PrimaryButton size="md" onClick={onCta} className="mt-md">
+    <div className="flex flex-col items-center gap-l py-10 px-md text-center">
+      <div className="flex flex-col items-center gap-s">
+        <i className={`${icon} text-5xl ${iconClassName}`} />
+        <span className="font-display text-display-h4 font-semibold text-primary-text">
+          {title}
+        </span>
+        <p className="text-p2 text-secondary-text max-w-sm">{message}</p>
+      </div>
+      <PrimaryButton size="md" onClick={onCta}>
         {cta}
       </PrimaryButton>
     </div>

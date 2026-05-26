@@ -77,18 +77,19 @@ function CheckoutView({ tableId }: { tableId: string }) {
           tableId={tableId}
           onBack={() => navigate(`/menu?table=${tableId}`)}
         />
-        <div className="flex flex-col items-center gap-s py-10 px-md text-center">
-          <i className="mgc_clipboard_line text-5xl text-outline-variant" />
-          <span className="font-display text-display-h4 font-semibold text-primary-text">
-            No items yet
-          </span>
-          <p className="text-p2 text-secondary-text max-w-sm">
-            Add items from the menu to place your order.
-          </p>
+        <div className="flex flex-col items-center gap-l py-10 px-md text-center">
+          <div className="flex flex-col items-center gap-s">
+            <i className="mgc_clipboard_line text-5xl text-outline-variant" />
+            <span className="font-display text-display-h4 font-semibold text-primary-text">
+              No items yet
+            </span>
+            <p className="text-p2 text-secondary-text max-w-sm">
+              Add items from the menu to place your order.
+            </p>
+          </div>
           <PrimaryButton
             size="md"
             onClick={() => navigate(`/menu?table=${tableId}`)}
-            className="mt-md"
           >
             Browse Menu
           </PrimaryButton>

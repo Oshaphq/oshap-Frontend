@@ -204,7 +204,7 @@ export default function HistoryPage() {
       )}
 
       {pagination.total_pages > 1 && (
-        <div className="flex items-center justify-center gap-md mt-l">
+        <div className="flex items-center justify-center gap-md">
           <SecondaryButton
             size="md"
             onClick={() => setPage(pagination.page - 1)}
