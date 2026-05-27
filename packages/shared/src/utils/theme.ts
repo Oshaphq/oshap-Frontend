@@ -11,7 +11,7 @@
  * See the <script> block in each app's index.html.
  */
 
-const DARK_START_HOUR = 19; // 7 PM
+const DARK_START_HOUR = 18; // 6 PM
 const DARK_END_HOUR = 7; //    7 AM
 
 function isNight(now = new Date()): boolean {
@@ -37,7 +37,7 @@ function applyTheme(): void {
  * to stop the watcher (rarely needed; theme runs for app lifetime).
  */
 export function initTimeBasedTheme(): () => void {
-  if (typeof window === "undefined") return () => {};
+  if (typeof window === "undefined") return () => { };
   applyTheme();
 
   const intervalId = window.setInterval(applyTheme, 5 * 60_000);
