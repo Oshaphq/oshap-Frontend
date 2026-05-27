@@ -1,0 +1,26 @@
+{
+  "name": "Oshap Admin",
+  "short_name": "Oshap Admin",
+  "description": "Merchant dashboard — kitchen, history, menu management, and live payment verification.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#ffffff",
+  "theme_color": "#ff6900",
+  "categories": ["business", "productivity", "food"],
+  "icons": [
+    {
+      "src": "/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    },
+    {
+      "src": "/icon-maskable.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "maskable"
+    }
+  ]
+}
