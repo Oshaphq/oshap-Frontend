@@ -1,4 +1,8 @@
-import type { TableInfo } from "../types/index";
+import type {
+  CallWaiterRequest,
+  CallWaiterResponse,
+  TableInfo,
+} from "../types/index";
 import { request } from "./client";
 
 export interface GetTableParams {
@@ -18,4 +22,17 @@ export function getTable({
       session_id: sessionId,
     },
   });
+}
+
+export function callWaiter({
+  table_id,
+  session_id,
+}: CallWaiterRequest): Promise<CallWaiterResponse> {
+  return request<CallWaiterResponse>(
+    `/table/${encodeURIComponent(table_id)}/call-waiter`,
+    {
+      method: "POST",
+      body: session_id ? { session_id } : {},
+    },
+  );
 }

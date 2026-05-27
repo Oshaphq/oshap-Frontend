@@ -126,7 +126,33 @@ Devices are registered through `POST /devices/register` and looked up by
 
 ---
 
-### 6. Issue / Dispute Flag (future)
+### 6. Waiter Called
+**When:** `POST /table/{id}/call-waiter` succeeds.
+
+**FCM target:** All devices registered for the table's `restaurant_id`.
+
+**FCM payload:**
+```json
+{
+  "notification": {
+    "title": "Waiter Requested",
+    "body": "Table {table_id} — customer needs assistance"
+  },
+  "data": {
+    "type": "waiter_called",
+    "table_id": "{table_id}",
+    "session_id": "{session_id}"
+  }
+}
+```
+
+**Android channel:** `service_requests` (high priority, distinct sound from `new_orders`).
+
+**Backend dedupe (required):** Suppress duplicate notifications for the same `restaurant_id` + `table_id` within a 30-second window. The customer button is always tappable — there is no client-side cooldown — so the backend is the only line of defense against staff getting spam-pinged. Always return HTTP 200 to the customer regardless of whether the push was sent or suppressed.
+
+---
+
+### 7. Issue / Dispute Flag (future)
 **When:** (not yet implemented — placeholder for Phase 2).
 
 **FCM target:** All devices registered for the restaurant.

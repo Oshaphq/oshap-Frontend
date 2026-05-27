@@ -481,6 +481,50 @@ paths:
             application/json:
               schema: { $ref: "#/components/schemas/Error" }
 
+  /table/{id}/call-waiter:
+    post:
+      tags: [Tables]
+      summary: Summon a waiter to the table
+      description: >
+        Fires an FCM push to all merchant devices registered for the table's
+        restaurant. The customer button is always tappable (no client
+        cooldown), so the backend MUST dedupe at the restaurant+table level
+        within a short window (e.g. 30s) to avoid spamming staff when a
+        customer taps repeatedly or multiple devices on the same table fire
+        simultaneously. Always return 200 — the dedupe is silent from the
+        caller's perspective.
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string }
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                session_id:
+                  type: string
+                  format: uuid
+                  description: Group session ID if the caller is in one (for attribution).
+      responses:
+        "200":
+          description: Waiter notified
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success: { type: boolean, enum: [true] }
+                required: [success]
+        "404":
+          description: Table not found
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+
   # -----------------------------------------------------------------------
   # CUSTOMER — Orders
   # -----------------------------------------------------------------------

@@ -292,6 +292,16 @@ route("GET", /^\/table\/(.+)$/, ({ path, query }) => {
   return json(200, result);
 });
 
+// -------------------- Customer: Call Waiter --------------------
+
+route("POST", /^\/table\/(.+)\/call-waiter$/, ({ path }) => {
+  const tableId = decodeURIComponent(path.split("/table/")[1]!.replace(/\/call-waiter$/, ""));
+  if (!SEED_TABLES.includes(tableId)) {
+    return json(404, { error: "Table not found" });
+  }
+  return json(200, { success: true as const });
+});
+
 // -------------------- Customer: Create Order --------------------
 
 route("POST", /^\/order$/, ({ body, query }) => {

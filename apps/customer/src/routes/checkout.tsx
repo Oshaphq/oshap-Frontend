@@ -7,6 +7,7 @@ import {
 } from "@oshap/shared";
 import { CartProvider, useCart } from "../context/CartContext";
 import { useSession } from "../context/SessionContext";
+import CallWaiterButton from "../components/CallWaiterButton";
 import { PrimaryButton, TableBadge } from "@oshap/shared/ui";
 
 export default function CheckoutPage() {
@@ -188,7 +189,10 @@ function CheckoutHeader({
           Confirm Order
         </h1>
       </div>
-      <TableBadge tableId={tableId} variant="outlined" />
+      <div className="flex items-center gap-s">
+        <CallWaiterButton tableId={tableId} />
+        <TableBadge tableId={tableId} variant="outlined" />
+      </div>
     </header>
   );
 }

@@ -9,6 +9,7 @@ import type { OrderStatus, OrderWithItems, OrderItem } from "@oshap/shared";
 import { CartProvider, useCart } from "../context/CartContext";
 import { useSession } from "../context/SessionContext";
 import BottomNav from "../components/BottomNav";
+import CallWaiterButton from "../components/CallWaiterButton";
 import CartBar from "../components/CartBar";
 import CartDrawer from "../components/CartDrawer";
 import { PrimaryButton, SecondaryButton, TableBadge } from "@oshap/shared/ui";
@@ -168,7 +169,10 @@ function OrdersView({ tableId }: { tableId: string }) {
             </span>
           </div>
         </div>
-        <TableBadge tableId={tableId} variant="outlined" />
+        <div className="flex items-center gap-s">
+          <CallWaiterButton tableId={tableId} />
+          <TableBadge tableId={tableId} variant="outlined" />
+        </div>
       </header>
 
       {!isHydrated ? (

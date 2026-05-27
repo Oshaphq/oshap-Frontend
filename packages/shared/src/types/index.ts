@@ -190,6 +190,15 @@ export interface SessionOrdersResponse {
   orders: OrderWithItems[];
 }
 
+export interface CallWaiterRequest {
+  table_id: string;
+  session_id?: string;
+}
+
+export interface CallWaiterResponse {
+  success: true;
+}
+
 // ---------------------------------------------------------------------------
 // Admin payloads
 // ---------------------------------------------------------------------------

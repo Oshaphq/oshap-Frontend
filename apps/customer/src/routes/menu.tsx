@@ -4,6 +4,7 @@ import { getDeviceToken, useMenu, useTable } from "@oshap/shared";
 import { CartProvider } from "../context/CartContext";
 import { useSession } from "../context/SessionContext";
 import BottomNav from "../components/BottomNav";
+import CallWaiterButton from "../components/CallWaiterButton";
 import CartBar from "../components/CartBar";
 import CartDrawer from "../components/CartDrawer";
 import CategoryTabs from "../components/CategoryTabs";
@@ -76,17 +77,20 @@ function MenuView({ tableId }: { tableId: string }) {
           </h1>
           <TableBadge tableId={tableId} />
         </div>
-        <button
-          type="button"
-          aria-label="Search menu"
-          onClick={() => {
-            setSearchOpen((open) => !open);
-            if (searchOpen) setSearchQuery("");
-          }}
-          className="w-10 h-10 flex items-center justify-center rounded-4xl bg-surface-container text-on-surface-variant text-xl transition-colors hover:bg-surface-container-high"
-        >
-          <i className={searchOpen ? "mgc_close_line" : "mgc_search_line"} />
-        </button>
+        <div className="flex items-center gap-s">
+          <CallWaiterButton tableId={tableId} />
+          <button
+            type="button"
+            aria-label="Search menu"
+            onClick={() => {
+              setSearchOpen((open) => !open);
+              if (searchOpen) setSearchQuery("");
+            }}
+            className="w-10 h-10 flex items-center justify-center rounded-4xl bg-surface-container text-on-surface-variant text-xl transition-colors hover:bg-surface-container-high"
+          >
+            <i className={searchOpen ? "mgc_close_line" : "mgc_search_line"} />
+          </button>
+        </div>
       </header>
 
       {searchOpen && (

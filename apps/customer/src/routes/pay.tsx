@@ -8,6 +8,7 @@ import {
 } from "@oshap/shared";
 import { PrimaryButton, SecondaryButton, TableBadge } from "@oshap/shared/ui";
 import BottomNav from "../components/BottomNav";
+import CallWaiterButton from "../components/CallWaiterButton";
 import { useSession } from "../context/SessionContext";
 
 export default function PayPage() {
@@ -251,7 +252,10 @@ function PayHeader({
           )}
         </div>
       </div>
-      <TableBadge tableId={tableId} variant="outlined" />
+      <div className="flex items-center gap-s">
+        <CallWaiterButton tableId={tableId} />
+        <TableBadge tableId={tableId} variant="outlined" />
+      </div>
     </header>
   );
 }
