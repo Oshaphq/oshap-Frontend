@@ -11,6 +11,12 @@
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="default" />
     <meta name="apple-mobile-web-app-title" content="Oshap Admin" />
+    <script>
+      (function () {
+        var h = new Date().getHours();
+        if (h >= 19 || h < 7) document.documentElement.setAttribute('data-theme', 'dark');
+      })();
+    </script>
     <title>Oshap Admin</title>
     <meta name="description" content="Merchant dashboard — kitchen, history, menu management." />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
