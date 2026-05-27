@@ -60,8 +60,19 @@ export default function DashboardPage() {
         <h1 className="font-display text-display-h2 font-semibold text-primary-text">
           Waiter Dashboard
         </h1>
-        <SecondaryButton size="md" onClick={() => tablesQuery.refetch()}>
-          <i className="mgc_refresh_3_line" /> Refresh
+        <SecondaryButton
+          size="md"
+          onClick={() => tablesQuery.refetch()}
+          disabled={tablesQuery.isRefetching}
+        >
+          <i
+            className={
+              tablesQuery.isRefetching
+                ? "mgc_loading_line animate-spin"
+                : "mgc_refresh_3_line"
+            }
+          />{" "}
+          {tablesQuery.isRefetching ? "Refreshing…" : "Refresh"}
         </SecondaryButton>
       </header>
 

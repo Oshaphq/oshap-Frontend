@@ -53,8 +53,19 @@ export default function HistoryPage() {
         <h1 className="font-display text-display-h2 font-semibold text-primary-text">
           Transaction History
         </h1>
-        <SecondaryButton size="md" onClick={() => historyQuery.refetch()}>
-          <i className="mgc_refresh_3_line" /> Refresh
+        <SecondaryButton
+          size="md"
+          onClick={() => historyQuery.refetch()}
+          disabled={historyQuery.isRefetching}
+        >
+          <i
+            className={
+              historyQuery.isRefetching
+                ? "mgc_loading_line animate-spin"
+                : "mgc_refresh_3_line"
+            }
+          />{" "}
+          {historyQuery.isRefetching ? "Refreshing…" : "Refresh"}
         </SecondaryButton>
       </header>
 

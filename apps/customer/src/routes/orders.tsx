@@ -12,6 +12,7 @@ import BottomNav from "../components/BottomNav";
 import CallWaiterButton from "../components/CallWaiterButton";
 import CartBar from "../components/CartBar";
 import CartDrawer from "../components/CartDrawer";
+import { useDragToDismiss } from "../hooks/useDragToDismiss";
 import { PrimaryButton, SecondaryButton, TableBadge } from "@oshap/shared/ui";
 import PinChip from "../components/PinChip";
 import AddButton from "../components/AddButton";
@@ -39,6 +40,8 @@ function OrdersView({ tableId }: { tableId: string }) {
   const [showPinInput, setShowPinInput] = useState(false);
   const [pinError, setPinError] = useState("");
   const [showOthersDetail, setShowOthersDetail] = useState(false);
+  const { sheetRef: othersSheetRef, handleProps: othersHandleProps } =
+    useDragToDismiss(() => setShowOthersDetail(false));
 
   const sessionOrdersQuery = useSessionOrders({
     sessionId: session?.id,
@@ -383,11 +386,12 @@ function OrdersView({ tableId }: { tableId: string }) {
             onClick={() => setShowOthersDetail(false)}
           />
           <div
+            ref={othersSheetRef}
             role="dialog"
             aria-label="Others' orders"
-            className="fixed left-0 right-0 bottom-0 max-h-[80vh] bg-surface-container-low rounded-t-l z-[100] flex flex-col shadow-[0_-4px_24px_var(--ds-shadow)] animate-[slide-up-drawer_0.3s_ease]"
+            className="fixed left-0 right-0 bottom-0 max-h-[80vh] bg-surface-container-low rounded-t-l z-[100] flex flex-col shadow-[0_-4px_24px_var(--ds-shadow)] animate-[slide-up-drawer_0.3s_ease] will-change-transform"
           >
-            <div className="flex justify-center py-s cursor-grab">
+            <div {...othersHandleProps} className="flex justify-center py-s cursor-grab active:cursor-grabbing">
               <div className="w-10 h-1 rounded-4xl bg-outline-variant" />
             </div>
 

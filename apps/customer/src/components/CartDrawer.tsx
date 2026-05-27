@@ -1,6 +1,7 @@
 import { useNavigate } from "react-router";
 import { formatCurrency } from "@oshap/shared";
 import { useCart } from "../context/CartContext";
+import { useDragToDismiss } from "../hooks/useDragToDismiss";
 import { PrimaryButton } from "@oshap/shared/ui";
 
 interface CartDrawerProps {
@@ -17,6 +18,7 @@ export default function CartDrawer({ tableId }: CartDrawerProps) {
     setIsCartOpen,
   } = useCart();
   const navigate = useNavigate();
+  const { sheetRef, handleProps } = useDragToDismiss(() => setIsCartOpen(false));
 
   if (!isCartOpen) return null;
 
@@ -32,11 +34,12 @@ export default function CartDrawer({ tableId }: CartDrawerProps) {
         onClick={() => setIsCartOpen(false)}
       />
       <div
+        ref={sheetRef}
         role="dialog"
         aria-label="Your cart"
-        className="fixed left-0 right-0 bottom-0 max-h-[80vh] bg-surface-container-low rounded-t-l z-[100] flex flex-col shadow-[0_-4px_24px_var(--ds-shadow)] animate-[slide-up-drawer_0.3s_ease]"
+        className="fixed left-0 right-0 bottom-0 max-h-[80vh] bg-surface-container-low rounded-t-l z-[100] flex flex-col shadow-[0_-4px_24px_var(--ds-shadow)] animate-[slide-up-drawer_0.3s_ease] will-change-transform"
       >
-        <div className="flex justify-center py-s cursor-grab">
+        <div {...handleProps} className="flex justify-center py-s cursor-grab active:cursor-grabbing">
           <div className="w-10 h-1 rounded-4xl bg-outline-variant" />
         </div>
 
