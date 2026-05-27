@@ -89,8 +89,12 @@ function OrdersView({ tableId }: { tableId: string }) {
       await joinSession(pinInput.trim(), tableId);
       setShowPinInput(false);
       setPinInput("");
-    } catch {
-      setPinError("Invalid PIN. Please try again.");
+    } catch (err) {
+      setPinError(
+        err instanceof Error
+          ? err.message
+          : "Could not join session. Please try again.",
+      );
     }
   };
 
