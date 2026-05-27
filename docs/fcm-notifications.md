@@ -152,7 +152,34 @@ Devices are registered through `POST /devices/register` and looked up by
 
 ---
 
-### 7. Issue / Dispute Flag (future)
+### 7. POS Requested
+**When:** `POST /table/{id}/request-pos` succeeds (orders moved to `PAYMENT_PENDING`).
+
+**FCM target:** All devices registered for the table's `restaurant_id`.
+
+**FCM payload:**
+```json
+{
+  "notification": {
+    "title": "POS Requested",
+    "body": "Table {table_id} wants to pay by card — N{total}"
+  },
+  "data": {
+    "type": "pos_requested",
+    "table_id": "{table_id}",
+    "session_id": "{session_id}",
+    "total": "{total}"
+  }
+}
+```
+
+**Android channel:** `service_requests` (high priority, sound on). Foreground admin app plays a chime via Web Audio API ([`apps/admin/src/utils/chime.ts`](apps/admin/src/utils/chime.ts)) and renders an in-app alert ([`apps/admin/src/components/AlertCenter.tsx`](apps/admin/src/components/AlertCenter.tsx)).
+
+**Follow-up flow:** The waiter brings the POS, the customer pays by card, then the waiter taps **Verify Payment** on the dashboard — the same handler used for bank-transfer verification — which moves the orders from `PAYMENT_PENDING` → `CONFIRMED`. No separate "mark POS paid" endpoint is needed.
+
+---
+
+### 8. Issue / Dispute Flag (future)
 **When:** (not yet implemented — placeholder for Phase 2).
 
 **FCM target:** All devices registered for the restaurant.
@@ -189,7 +216,7 @@ Devices are registered through `POST /devices/register` and looked up by
   the correct admin tab).
 
 ### Frontend (admin app)
-- `packages/shared/src/utils/fcm.ts` handles token retrieval and registration.
+- `apps/admin/src/utils/fcm.ts` handles token retrieval and registration.
 - `apps/admin/src/components/PinGate.tsx` calls `initFCM()` after login.
 - `firebase-messaging-sw.js` handles background notification display.
 - For foreground `onMessage` handling (optional), use the `getMessagingInstance()`

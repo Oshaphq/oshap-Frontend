@@ -6,12 +6,13 @@ import {
   getAdminPin,
   getAdminRestaurantId,
   getAdminRestaurantName,
-  initFCM,
   setAdminPin,
   setAdminRestaurant,
 } from "@oshap/shared";
 import { adminApi } from "@oshap/shared/api";
 import { PrimaryButton } from "@oshap/shared/ui";
+import { initFCM } from "../utils/fcm";
+import AlertCenter from "./AlertCenter";
 
 export default function PinGate() {
   const navigate = useNavigate();
@@ -185,6 +186,7 @@ export default function PinGate() {
         </div>
       </nav>
       <Outlet />
+      <AlertCenter />
     </div>
   );
 }

@@ -70,9 +70,9 @@ export async function initFCM(
   const token = await requestPermissionAndGetToken(_messaging, vapidKey);
   if (!token) return null;
 
-  const { registerDevice } = await import("../api/devices");
+  const { devicesApi } = await import("@oshap/shared/api");
   try {
-    await registerDevice({
+    await devicesApi.registerDevice({
       fcm_token: token,
       restaurant_id: restaurantId,
       device_label: deviceLabel,

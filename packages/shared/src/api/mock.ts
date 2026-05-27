@@ -302,6 +302,54 @@ route("POST", /^\/table\/(.+)\/call-waiter$/, ({ path }) => {
   return json(200, { success: true as const });
 });
 
+// -------------------- Customer: Request POS --------------------
+
+route("POST", /^\/table\/(.+)\/request-pos$/, ({ path, body }) => {
+  const tableId = decodeURIComponent(
+    path.split("/table/")[1]!.replace(/\/request-pos$/, ""),
+  );
+  if (!SEED_TABLES.includes(tableId)) {
+    return json(404, { error: "Table not found" });
+  }
+
+  const b = (body as { session_id?: string; device_token?: string }) ?? {};
+  const sessionId = b.session_id;
+  const deviceToken = b.device_token;
+
+  // Scope CREATED orders to this device/session — same scoping as GET /table/:id.
+  const createdOrders = [..._orders.values()].filter((o) => {
+    if (o.table_id !== tableId || o.status !== "CREATED") return false;
+    if (sessionId && deviceToken) {
+      return (
+        o.session_id === sessionId ||
+        (o.session_id === null && o.device_token === deviceToken)
+      );
+    }
+    if (sessionId) return o.session_id === sessionId;
+    if (deviceToken) return o.device_token === deviceToken;
+    return true;
+  });
+
+  for (const order of createdOrders) {
+    order.status = "PAYMENT_PENDING";
+    _payments.set(order.id, {
+      id: uid(),
+      order_id: order.id,
+      amount: order.total,
+      status: "CLAIMED",
+      proof_url: null,
+      created_at: now(),
+    });
+  }
+
+  syncToStorage();
+
+  return json(200, {
+    success: true as const,
+    processed: createdOrders.length,
+  });
+});
+
 // -------------------- Customer: Create Order --------------------
 
 route("POST", /^\/order$/, ({ body, query }) => {

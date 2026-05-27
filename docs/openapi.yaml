@@ -481,6 +481,56 @@ paths:
             application/json:
               schema: { $ref: "#/components/schemas/Error" }
 
+  /table/{id}/request-pos:
+    post:
+      tags: [Tables]
+      summary: Request a POS terminal at the table
+      description: >
+        Moves all unpaid (CREATED) orders on this table scoped to the caller's
+        device/session into PAYMENT_PENDING, attaches a CLAIMED payment record
+        to each (no proof_url; the proof is the in-person card transaction),
+        and fires an FCM push with type `pos_requested` so a waiter brings the
+        POS terminal. After the customer pays via card, the waiter taps the
+        existing "Verify Payment" button on the admin dashboard to mark the
+        orders CONFIRMED — same flow as bank-transfer verification.
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string }
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                session_id:
+                  type: string
+                  format: uuid
+                  description: Group session ID, if joined.
+                device_token:
+                  type: string
+                  description: Anonymous device UUID — used to scope which CREATED orders move to PAYMENT_PENDING.
+      responses:
+        "200":
+          description: POS requested
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success: { type: boolean, enum: [true] }
+                  processed:
+                    type: integer
+                    description: Number of orders moved to PAYMENT_PENDING.
+                required: [success, processed]
+        "404":
+          description: Table not found
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+
   /table/{id}/call-waiter:
     post:
       tags: [Tables]

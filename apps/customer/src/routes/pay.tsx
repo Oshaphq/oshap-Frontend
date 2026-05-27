@@ -4,6 +4,7 @@ import {
   formatCurrency,
   getDeviceToken,
   useClaimPayment,
+  useRequestPos,
   useTable,
 } from "@oshap/shared";
 import { PrimaryButton, SecondaryButton, TableBadge } from "@oshap/shared/ui";
@@ -32,7 +33,48 @@ export default function PayPage() {
   }, [tableQuery.refetch]);
 
   const claimPayment = useClaimPayment();
+  const requestPos = useRequestPos();
   const [copiedField, setCopiedField] = useState<string | null>(null);
+
+  const posFlagKey = `oshap-pos-requested-${tableId}`;
+  const [posRequested, setPosRequested] = useState<boolean>(() => {
+    if (typeof window === "undefined") return false;
+    return window.sessionStorage.getItem(posFlagKey) === "1";
+  });
+
+  const handleRequestPos = async () => {
+    if (!tableQuery.data?.unpaid_order || requestPos.isPending) return;
+    try {
+      await requestPos.mutateAsync({
+        table_id: tableId,
+        session_id: session?.id,
+        device_token: deviceToken,
+      });
+      window.sessionStorage.setItem(posFlagKey, "1");
+      setPosRequested(true);
+      tableQuery.refetch();
+    } catch (err) {
+      console.error("POS request error:", err);
+      alert(
+        err instanceof Error
+          ? err.message
+          : "Could not request POS. Please try again.",
+      );
+    }
+  };
+
+  // Clear the POS flag once the merchant verifies (no more pending payments).
+  useEffect(() => {
+    if (!tableQuery.data) return;
+    if (
+      posRequested &&
+      !tableQuery.data.pending_payments &&
+      !tableQuery.data.unpaid_order
+    ) {
+      window.sessionStorage.removeItem(posFlagKey);
+      setPosRequested(false);
+    }
+  }, [tableQuery.data, posRequested, posFlagKey]);
 
   const copyToClipboard = useCallback(async (text: string, field: string) => {
     try {
@@ -111,8 +153,9 @@ export default function PayPage() {
     );
   }
 
-  // Case 2: previously claimed, awaiting verification
+  // Case 2: previously claimed (bank transfer or POS) — awaiting verification
   if (!unpaidOrder && pendingPayments) {
+    const isPos = posRequested;
     return (
       <div className="min-h-screen bg-surface-container-low pb-20">
         <PayHeader
@@ -121,10 +164,14 @@ export default function PayPage() {
           onBack={() => navigate(`/menu?table=${tableId}`)}
         />
         <EmptyState
-          icon="mgc_time_line"
-          iconClassName="text-outline-variant"
-          title="Payment Claimed"
-          message={`We've notified the restaurant. They will verify your payment of ${formatCurrency(pendingPayments.total)} shortly.`}
+          icon={isPos ? "mgc_card_pay_line" : "mgc_time_line"}
+          iconClassName={isPos ? "text-primary" : "text-outline-variant"}
+          title={isPos ? "POS On The Way" : "Payment Claimed"}
+          message={
+            isPos
+              ? `A waiter is bringing the POS to your table. They'll mark the ${formatCurrency(pendingPayments.total)} as received once your card is processed.`
+              : `We've notified the restaurant. They will verify your payment of ${formatCurrency(pendingPayments.total)} shortly.`
+          }
           cta="Order More"
           onCta={() => navigate(`/menu?table=${tableId}`)}
         />
@@ -207,12 +254,15 @@ export default function PayPage() {
       <section className="py-l px-md bg-surface-container-low flex flex-col gap-md">
         <PrimaryButton
           onClick={handleClaimPayment}
-          disabled={claimPayment.isPending}
+          disabled={claimPayment.isPending || requestPos.isPending}
         >
           {claimPayment.isPending ? "Sending…" : "I've Sent the Money"}
         </PrimaryButton>
-        <SecondaryButton onClick={() => navigate(`/menu?table=${tableId}`)}>
-          Order More
+        <SecondaryButton
+          onClick={handleRequestPos}
+          disabled={requestPos.isPending || claimPayment.isPending}
+        >
+          {requestPos.isPending ? "Requesting…" : "Request a POS"}
         </SecondaryButton>
       </section>
 

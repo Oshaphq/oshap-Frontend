@@ -1,6 +1,8 @@
 import type {
   CallWaiterRequest,
   CallWaiterResponse,
+  RequestPosRequest,
+  RequestPosResponse,
   TableInfo,
 } from "../types/index";
 import { request } from "./client";
@@ -33,6 +35,23 @@ export function callWaiter({
     {
       method: "POST",
       body: session_id ? { session_id } : {},
+    },
+  );
+}
+
+export function requestPos({
+  table_id,
+  session_id,
+  device_token,
+}: RequestPosRequest): Promise<RequestPosResponse> {
+  const body: Record<string, string> = {};
+  if (session_id) body.session_id = session_id;
+  if (device_token) body.device_token = device_token;
+  return request<RequestPosResponse>(
+    `/table/${encodeURIComponent(table_id)}/request-pos`,
+    {
+      method: "POST",
+      body,
     },
   );
 }

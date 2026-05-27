@@ -199,6 +199,17 @@ export interface CallWaiterResponse {
   success: true;
 }
 
+export interface RequestPosRequest {
+  table_id: string;
+  session_id?: string;
+  device_token?: string;
+}
+
+export interface RequestPosResponse {
+  success: true;
+  processed: number;
+}
+
 // ---------------------------------------------------------------------------
 // Admin payloads
 // ---------------------------------------------------------------------------
