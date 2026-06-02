@@ -123,7 +123,7 @@
 ## Phase 5 — Customer Notification Center
 
 **Goal:** Persistent customer notification feed so nothing is missed.
-**Status:** ⬜ Not started
+**Status:** ✅ Complete
 **Effort:** 1–2 weeks
 **Dependencies:** None — frontend-only
 **Can start immediately**
@@ -265,7 +265,7 @@ Phase 1    ⬜  Backend integration         ← current priority
 Phase 2    ⬜  Pilot prep
 Phase 3    ⬜  Pilot launch
 Phase 4    ✅  Restaurant Settings UI
-Phase 5    ⬜  Customer notification center← can start immediately
+Phase 5    ✅  Customer Notification Center← can start immediately
 Phase 6    ⬜  Per-user accounts + RBAC    ← after Phase 1
 Phase 7    ⬜  Analytics dashboard         ← after Phase 6
 Phase 8    ⬜  Payment gateway + tip       ← after Phase 1

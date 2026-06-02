@@ -9,13 +9,13 @@ import type { OrderStatus, OrderWithItems, OrderItem } from "@oshap/shared";
 import { CartProvider, useCart } from "../context/CartContext";
 import { useSession } from "../context/SessionContext";
 import BottomNav from "../components/BottomNav";
-import CallWaiterButton from "../components/CallWaiterButton";
 import CartBar from "../components/CartBar";
 import CartDrawer from "../components/CartDrawer";
 import { useDragToDismiss } from "../hooks/useDragToDismiss";
-import { PrimaryButton, SecondaryButton, TableBadge, ThemeToggle } from "@oshap/shared/ui";
+import { PrimaryButton, SecondaryButton } from "@oshap/shared/ui";
 import PinChip from "../components/PinChip";
 import AddButton from "../components/AddButton";
+import CustomerHeader from "../components/CustomerHeader";
 
 export default function OrdersPage() {
   const [params] = useSearchParams();
@@ -158,8 +158,11 @@ function OrdersView({ tableId }: { tableId: string }) {
 
   return (
     <div className="min-h-screen bg-surface-container-low pb-20">
-      <header className="flex items-center justify-between pt-md px-md pb-s bg-surface-container-low">
-        <div className="flex items-center gap-s">
+      <CustomerHeader
+        tableId={tableId}
+        title="My Orders"
+        subtitle={`Order id: ${displayOrderId}`}
+        leftSlot={
           <button
             type="button"
             onClick={() => navigate(`/menu?table=${tableId}`)}
@@ -168,21 +171,8 @@ function OrdersView({ tableId }: { tableId: string }) {
           >
             <i className="mgc_left_line text-xl" />
           </button>
-          <div className="flex flex-col gap-0.5">
-            <h1 className="font-display text-display-h2 font-semibold text-primary-text">
-              My Orders
-            </h1>
-            <span className="text-label-l5 text-secondary-text">
-              Order id: {displayOrderId}
-            </span>
-          </div>
-        </div>
-        <div className="flex items-center gap-s">
-          <ThemeToggle />
-          <CallWaiterButton tableId={tableId} />
-          <TableBadge tableId={tableId} variant="outlined" />
-        </div>
-      </header>
+        }
+      />
 
       {!isHydrated ? (
         <section className="py-l px-md">

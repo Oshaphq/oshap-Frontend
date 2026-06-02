@@ -7,8 +7,8 @@ import {
 } from "@oshap/shared";
 import { CartProvider, useCart } from "../context/CartContext";
 import { useSession } from "../context/SessionContext";
-import CallWaiterButton from "../components/CallWaiterButton";
-import { PrimaryButton, TableBadge, ThemeToggle, toast } from "@oshap/shared/ui";
+import CustomerHeader from "../components/CustomerHeader";
+import { PrimaryButton, toast } from "@oshap/shared/ui";
 
 export default function CheckoutPage() {
   const [params] = useSearchParams();
@@ -74,9 +74,19 @@ function CheckoutView({ tableId }: { tableId: string }) {
   if (items.length === 0) {
     return (
       <div className="min-h-screen bg-surface-container-low pb-20">
-        <CheckoutHeader
+        <CustomerHeader
           tableId={tableId}
-          onBack={() => navigate(`/menu?table=${tableId}`)}
+          title="Confirm Order"
+          leftSlot={
+            <button
+              type="button"
+              onClick={() => navigate(`/menu?table=${tableId}`)}
+              aria-label="Back to menu"
+              className="w-9 h-9 flex items-center justify-center rounded-4xl bg-surface-container hover:bg-surface-container-high transition-colors"
+            >
+              <i className="mgc_left_line text-xl" />
+            </button>
+          }
         />
         <div className="flex flex-col items-center gap-l py-10 px-md text-center">
           <div className="flex flex-col items-center gap-s">
@@ -101,9 +111,19 @@ function CheckoutView({ tableId }: { tableId: string }) {
 
   return (
     <div className="min-h-screen bg-surface-container-low pb-20">
-      <CheckoutHeader
+      <CustomerHeader
         tableId={tableId}
-        onBack={() => navigate(`/menu?table=${tableId}`)}
+        title="Confirm Order"
+        leftSlot={
+          <button
+            type="button"
+            onClick={() => navigate(`/menu?table=${tableId}`)}
+            aria-label="Back to menu"
+            className="w-9 h-9 flex items-center justify-center rounded-4xl bg-surface-container hover:bg-surface-container-high transition-colors"
+          >
+            <i className="mgc_left_line text-xl" />
+          </button>
+        }
       />
 
       <section className="py-l px-md bg-surface-container-low border-b-[6px] border-surface-container flex flex-col gap-md">
@@ -167,33 +187,3 @@ function CheckoutView({ tableId }: { tableId: string }) {
   );
 }
 
-function CheckoutHeader({
-  tableId,
-  onBack,
-}: {
-  tableId: string;
-  onBack: () => void;
-}) {
-  return (
-    <header className="flex items-center justify-between pt-md px-md pb-s bg-surface-container-low">
-      <div className="flex items-center gap-s">
-        <button
-          type="button"
-          onClick={onBack}
-          aria-label="Back to menu"
-          className="w-9 h-9 flex items-center justify-center rounded-4xl bg-surface-container hover:bg-surface-container-high transition-colors"
-        >
-          <i className="mgc_left_line text-xl" />
-        </button>
-        <h1 className="font-display text-display-h2 font-semibold text-primary-text">
-          Confirm Order
-        </h1>
-      </div>
-      <div className="flex items-center gap-s">
-        <ThemeToggle />
-        <CallWaiterButton tableId={tableId} />
-        <TableBadge tableId={tableId} variant="outlined" />
-      </div>
-    </header>
-  );
-}

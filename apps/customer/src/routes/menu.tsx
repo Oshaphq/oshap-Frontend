@@ -4,12 +4,11 @@ import { getDeviceToken, useMenu, useTable } from "@oshap/shared";
 import { CartProvider } from "../context/CartContext";
 import { useSession } from "../context/SessionContext";
 import BottomNav from "../components/BottomNav";
-import CallWaiterButton from "../components/CallWaiterButton";
 import CartBar from "../components/CartBar";
 import CartDrawer from "../components/CartDrawer";
 import CategoryTabs from "../components/CategoryTabs";
 import MenuCard from "../components/MenuCard";
-import { TableBadge, ThemeToggle } from "@oshap/shared/ui";
+import CustomerHeader from "../components/CustomerHeader";
 
 export default function MenuPage() {
   const [params] = useSearchParams();
@@ -39,7 +38,6 @@ function MenuView({ tableId }: { tableId: string }) {
     sessionId: session?.id,
   });
   const restaurantId = tableQuery.data?.restaurant?.id;
-  const restaurantName = tableQuery.data?.restaurant?.name ?? "";
 
   const menuQuery = useMenu(restaurantId);
   const menuItems = useMemo(() => menuQuery.data ?? [], [menuQuery.data]);
@@ -69,16 +67,9 @@ function MenuView({ tableId }: { tableId: string }) {
 
   return (
     <div className="min-h-screen bg-surface pb-20">
-      <header className="sticky top-0 z-40 flex items-center justify-between p-md bg-surface-container-low border-b border-outline-variant">
-        <div className="flex items-center gap-s">
-          <h1 className="font-display text-display-h1 font-bold text-primary-text">
-            {restaurantName}
-          </h1>
-          <TableBadge tableId={tableId} />
-        </div>
-        <div className="flex items-center gap-s">
-          <ThemeToggle />
-          <CallWaiterButton tableId={tableId} />
+      <CustomerHeader 
+        tableId={tableId}
+        rightSlot={
           <button
             type="button"
             aria-label="Search menu"
@@ -90,8 +81,8 @@ function MenuView({ tableId }: { tableId: string }) {
           >
             <i className={searchOpen ? "mgc_close_line" : "mgc_search_line"} />
           </button>
-        </div>
-      </header>
+        }
+      />
 
       {searchOpen && (
         <div className="px-md py-s bg-surface-container-low border-b border-outline-variant">

@@ -7,9 +7,9 @@ import {
   useRequestPos,
   useTable,
 } from "@oshap/shared";
-import { PrimaryButton, SecondaryButton, TableBadge, ThemeToggle, toast } from "@oshap/shared/ui";
+import { PrimaryButton, SecondaryButton, toast } from "@oshap/shared/ui";
 import BottomNav from "../components/BottomNav";
-import CallWaiterButton from "../components/CallWaiterButton";
+import CustomerHeader from "../components/CustomerHeader";
 import { useSession } from "../context/SessionContext";
 
 export default function PayPage() {
@@ -90,10 +90,19 @@ export default function PayPage() {
   if (tableQuery.isLoading) {
     return (
       <div className="min-h-screen bg-surface-container-low pb-20">
-        <PayHeader
+        <CustomerHeader
           tableId={tableId}
-          reference=""
-          onBack={() => navigate(`/menu?table=${tableId}`)}
+          title="Pay Bill"
+          leftSlot={
+            <button
+              type="button"
+              onClick={() => navigate(`/menu?table=${tableId}`)}
+              aria-label="Back"
+              className="w-9 h-9 flex items-center justify-center rounded-4xl bg-surface-container hover:bg-surface-container-high transition-colors"
+            >
+              <i className="mgc_left_line text-xl" />
+            </button>
+          }
         />
         <div className="flex flex-col items-center gap-s py-10 px-md">
           <div className="oshap-spinner" />
@@ -136,10 +145,19 @@ export default function PayPage() {
   if (!unpaidOrder && !pendingPayments && !refParam) {
     return (
       <div className="min-h-screen bg-surface-container-low pb-20">
-        <PayHeader
+        <CustomerHeader
           tableId={tableId}
-          reference=""
-          onBack={() => navigate(`/menu?table=${tableId}`)}
+          title="Pay Bill"
+          leftSlot={
+            <button
+              type="button"
+              onClick={() => navigate(`/menu?table=${tableId}`)}
+              aria-label="Back"
+              className="w-9 h-9 flex items-center justify-center rounded-4xl bg-surface-container hover:bg-surface-container-high transition-colors"
+            >
+              <i className="mgc_left_line text-xl" />
+            </button>
+          }
         />
         <EmptyState
           icon="mgc_check_double_fill"
@@ -159,10 +177,20 @@ export default function PayPage() {
     const isPos = posRequested;
     return (
       <div className="min-h-screen bg-surface-container-low pb-20">
-        <PayHeader
+        <CustomerHeader
           tableId={tableId}
-          reference={pendingPayments.reference}
-          onBack={() => navigate(`/menu?table=${tableId}`)}
+          title="Pay Bill"
+          subtitle={`Ref: ${pendingPayments.reference}`}
+          leftSlot={
+            <button
+              type="button"
+              onClick={() => navigate(`/menu?table=${tableId}`)}
+              aria-label="Back"
+              className="w-9 h-9 flex items-center justify-center rounded-4xl bg-surface-container hover:bg-surface-container-high transition-colors"
+            >
+              <i className="mgc_left_line text-xl" />
+            </button>
+          }
         />
         <EmptyState
           icon={isPos ? "mgc_card_pay_line" : "mgc_time_line"}
@@ -186,10 +214,20 @@ export default function PayPage() {
 
   return (
     <div className="min-h-screen bg-surface-container-low pb-20">
-      <PayHeader
+      <CustomerHeader
         tableId={tableId}
-        reference={reference}
-        onBack={() => navigate(`/menu?table=${tableId}`)}
+        title="Pay Bill"
+        subtitle={reference ? `Ref: ${reference}` : undefined}
+        leftSlot={
+          <button
+            type="button"
+            onClick={() => navigate(`/menu?table=${tableId}`)}
+            aria-label="Back"
+            className="w-9 h-9 flex items-center justify-center rounded-4xl bg-surface-container hover:bg-surface-container-high transition-colors"
+          >
+            <i className="mgc_left_line text-xl" />
+          </button>
+        }
       />
 
       {pendingPayments && (
@@ -269,46 +307,6 @@ export default function PayPage() {
 
       <BottomNav tableId={tableId} />
     </div>
-  );
-}
-
-function PayHeader({
-  tableId,
-  reference,
-  onBack,
-}: {
-  tableId: string;
-  reference: string;
-  onBack: () => void;
-}) {
-  return (
-    <header className="flex items-center justify-between pt-md px-md pb-s bg-surface-container-low">
-      <div className="flex items-center gap-s">
-        <button
-          type="button"
-          onClick={onBack}
-          aria-label="Back"
-          className="w-9 h-9 flex items-center justify-center rounded-4xl bg-surface-container hover:bg-surface-container-high transition-colors"
-        >
-          <i className="mgc_left_line text-xl" />
-        </button>
-        <div className="flex flex-col gap-0.5">
-          <h1 className="font-display text-display-h2 font-semibold text-primary-text">
-            Pay Bill
-          </h1>
-          {reference && (
-            <span className="text-label-l5 text-secondary-text">
-              Ref: {reference}
-            </span>
-          )}
-        </div>
-      </div>
-      <div className="flex items-center gap-s">
-        <ThemeToggle />
-        <CallWaiterButton tableId={tableId} />
-        <TableBadge tableId={tableId} variant="outlined" />
-      </div>
-    </header>
   );
 }
 

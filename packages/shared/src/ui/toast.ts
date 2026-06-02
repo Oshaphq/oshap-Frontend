@@ -18,12 +18,14 @@ export interface Toast {
 }
 
 type Subscriber = (toasts: Toast[]) => void;
+export type PushSubscriber = (toast: Toast) => void;
 
 const DEFAULT_DURATION_MS = 4000;
 
 let _toasts: Toast[] = [];
 let _nextId = 1;
 const _subscribers = new Set<Subscriber>();
+const _pushSubscribers = new Set<PushSubscriber>();
 
 function notify(): void {
   for (const fn of _subscribers) fn(_toasts);
@@ -38,6 +40,9 @@ function push(message: string, variant: ToastVariant, durationMs?: number): numb
     durationMs: durationMs ?? DEFAULT_DURATION_MS,
   };
   _toasts = [..._toasts, t];
+  
+  for (const fn of _pushSubscribers) fn(t);
+  
   notify();
   if (typeof window !== "undefined" && t.durationMs > 0) {
     window.setTimeout(() => dismiss(id), t.durationMs);
@@ -55,6 +60,13 @@ export function subscribe(fn: Subscriber): () => void {
   fn(_toasts);
   return () => {
     _subscribers.delete(fn);
+  };
+}
+
+export function subscribeToPush(fn: PushSubscriber): () => void {
+  _pushSubscribers.add(fn);
+  return () => {
+    _pushSubscribers.delete(fn);
   };
 }
 
