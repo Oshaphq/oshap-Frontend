@@ -1,5 +1,5 @@
 import { ReactNode } from "react";
-import { TableBadge, ThemeToggle } from "@oshap/shared/ui";
+import { TableBadge } from "@oshap/shared/ui";
 import CallWaiterButton from "./CallWaiterButton";
 import NotificationBell from "./NotificationBell";
 import { getDeviceToken, useTable } from "@oshap/shared";
@@ -38,7 +38,6 @@ export default function CustomerHeader({ tableId, leftSlot, rightSlot, title, su
         {!title && <TableBadge tableId={tableId} />}
       </div>
       <div className="flex items-center gap-s">
-        <ThemeToggle />
         <NotificationBell />
         <CallWaiterButton tableId={tableId} />
         {rightSlot}
