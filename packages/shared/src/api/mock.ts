@@ -37,15 +37,19 @@ import type {
   TableSession,
   UpdateMenuItemRequest,
   UploadResponse,
+  Restaurant,
 } from "../types/index";
 
 // ---------------------------------------------------------------------------
 // Seed data
 // ---------------------------------------------------------------------------
 
-const RESTAURANT = {
+let _restaurant: Restaurant = {
   id: "00000000-0000-0000-0000-000000000001",
   name: "Aji's Kitchen",
+  description: "Authentic African cuisine",
+  logo_url: null,
+  operating_hours: "09:00 - 22:00",
   bank_name: "Access Bank",
   account_number: "0123456789",
   account_name: "Aji's Kitchen Ltd",
@@ -53,23 +57,23 @@ const RESTAURANT = {
 };
 
 const SEED_MENU: MenuItem[] = [
-  { id: "m-001", restaurant_id: RESTAURANT.id, name: "Chicken Shawarma", price: 2500, category: "Meals", description: "Grilled chicken wrap with garlic sauce, pickles and fries", image_url: "https://www.simplyquinoa.com/wp-content/uploads/2023/05/chicken-shawarma-gyros-9.jpg", available: true, sort_order: 1 },
-  { id: "m-002", restaurant_id: RESTAURANT.id, name: "Beef Shawarma", price: 3000, category: "Meals", description: "Tender beef strips with tahini sauce and fresh vegetables", image_url: "https://live.staticflickr.com/65535/51249894956_3d8a1b8b2b_h.jpg", available: true, sort_order: 2 },
-  { id: "m-003", restaurant_id: RESTAURANT.id, name: "Jollof Rice & Chicken", price: 3500, category: "Meals", description: "Party-style jollof rice with a perfectly grilled chicken thigh", image_url: "https://cdn.guardian.ng/wp-content/uploads/2023/12/Photo-Credit-Jollof-Festival-.jpg", available: true, sort_order: 3 },
-  { id: "m-004", restaurant_id: RESTAURANT.id, name: "Fried Rice & Turkey", price: 4000, category: "Meals", description: "Vegetable fried rice served with peppered turkey", image_url: "https://opensharaton.com/wp-content/uploads/2023/02/Fried_Rice_with_Turkey.jpeg", available: true, sort_order: 4 },
-  { id: "m-005", restaurant_id: RESTAURANT.id, name: "Peppered Chicken", price: 2000, category: "Meals", description: "Spicy fried chicken in a pepper sauce", image_url: "https://flavorquotient.com/wp-content/uploads/2025/04/Pepper-Chicken-Dry-FQ-8-2.webp", available: true, sort_order: 5 },
-  { id: "m-006", restaurant_id: RESTAURANT.id, name: "Suya Platter", price: 3000, category: "Grills", description: "Grilled beef skewers with yaji spice, onions and tomatoes", image_url: "https://cheflolaskitchen.com/wp-content/uploads/2025/07/Suya-960x960.jpg.webp", available: true, sort_order: 1 },
-  { id: "m-007", restaurant_id: RESTAURANT.id, name: "Grilled Fish", price: 5000, category: "Grills", description: "Whole catfish grilled with pepper sauce and plantain", image_url: "https://simshomekitchen.com/wp-content/uploads/2025/08/Two-whole-grilled-tilapia-in-a-tray-with-plantain-lettuce-and-pepper-sauce.jpg", available: true, sort_order: 2 },
-  { id: "m-008", restaurant_id: RESTAURANT.id, name: "Asun", price: 3500, category: "Grills", description: "Spicy smoked goat meat with peppers and onions", image_url: "https://lowcarbafrica.com/wp-content/uploads/2019/09/Asun-recipe-IG-1.jpg", available: true, sort_order: 3 },
-  { id: "m-009", restaurant_id: RESTAURANT.id, name: "Chapman", price: 1500, category: "Drinks", description: "Classic Nigerian cocktail with Fanta, Sprite and bitters", image_url: "https://www.africanrecipes.com.ng/wp-content/uploads/2025/08/chapman-drink-featured.png.webp", available: true, sort_order: 1 },
-  { id: "m-010", restaurant_id: RESTAURANT.id, name: "Zobo", price: 800, category: "Drinks", description: "Refreshing hibiscus drink with ginger and pineapple", image_url: "https://lowcarbafrica.com/wp-content/uploads/2020/07/Sorrel-drink-sobolo-zobo-Drink-blog-1a.jpg", available: true, sort_order: 2 },
-  { id: "m-011", restaurant_id: RESTAURANT.id, name: "Fresh Orange Juice", price: 1200, category: "Drinks", description: "Freshly squeezed orange juice, no sugar added", image_url: "https://images.unsplash.com/photo-1600271886742-f049cd451bba?w=400&q=80", available: true, sort_order: 3 },
-  { id: "m-012", restaurant_id: RESTAURANT.id, name: "Coca-Cola", price: 500, category: "Drinks", description: "Classic Coca-Cola 50cl bottle", image_url: "https://images.unsplash.com/photo-1622483767028-3f66f32aef97?w=400&q=80", available: true, sort_order: 4 },
-  { id: "m-013", restaurant_id: RESTAURANT.id, name: "Malt", price: 600, category: "Drinks", description: "Amstel Malt 50cl bottle", image_url: "https://m.media-amazon.com/images/I/71LH6-Oi6iL.jpg", available: true, sort_order: 5 },
-  { id: "m-014", restaurant_id: RESTAURANT.id, name: "Puff Puff", price: 500, category: "Sides", description: "6 pieces of fluffy Nigerian doughnuts", image_url: "https://allnigerianfoods.com/wp-content/uploads/puff_puff_recipe.jpg", available: true, sort_order: 1 },
-  { id: "m-015", restaurant_id: RESTAURANT.id, name: "Plantain Chips", price: 800, category: "Sides", description: "Crunchy plantain chips with a spicy dip", image_url: "https://foreignfork.com/wp-content/uploads/2022/02/SweetPlantainChipsFEATURE-500x500.jpg", available: true, sort_order: 2 },
-  { id: "m-016", restaurant_id: RESTAURANT.id, name: "French Fries", price: 1000, category: "Sides", description: "Golden crispy fries with ketchup", image_url: "https://images.unsplash.com/photo-1573080496219-bb080dd4f877?w=400&q=80", available: true, sort_order: 3 },
-  { id: "m-017", restaurant_id: RESTAURANT.id, name: "Coleslaw", price: 500, category: "Sides", description: "Fresh coleslaw with creamy dressing", image_url: "https://www.inspiredtaste.net/wp-content/uploads/2015/01/Coleslaw-Recipe-1-1200.jpg", available: true, sort_order: 4 },
+  { id: "m-001", restaurant_id: _restaurant.id, name: "Chicken Shawarma", price: 2500, category: "Meals", description: "Grilled chicken wrap with garlic sauce, pickles and fries", image_url: "https://www.simplyquinoa.com/wp-content/uploads/2023/05/chicken-shawarma-gyros-9.jpg", available: true, sort_order: 1 },
+  { id: "m-002", restaurant_id: _restaurant.id, name: "Beef Shawarma", price: 3000, category: "Meals", description: "Tender beef strips with tahini sauce and fresh vegetables", image_url: "https://live.staticflickr.com/65535/51249894956_3d8a1b8b2b_h.jpg", available: true, sort_order: 2 },
+  { id: "m-003", restaurant_id: _restaurant.id, name: "Jollof Rice & Chicken", price: 3500, category: "Meals", description: "Party-style jollof rice with a perfectly grilled chicken thigh", image_url: "https://cdn.guardian.ng/wp-content/uploads/2023/12/Photo-Credit-Jollof-Festival-.jpg", available: true, sort_order: 3 },
+  { id: "m-004", restaurant_id: _restaurant.id, name: "Fried Rice & Turkey", price: 4000, category: "Meals", description: "Vegetable fried rice served with peppered turkey", image_url: "https://opensharaton.com/wp-content/uploads/2023/02/Fried_Rice_with_Turkey.jpeg", available: true, sort_order: 4 },
+  { id: "m-005", restaurant_id: _restaurant.id, name: "Peppered Chicken", price: 2000, category: "Meals", description: "Spicy fried chicken in a pepper sauce", image_url: "https://flavorquotient.com/wp-content/uploads/2025/04/Pepper-Chicken-Dry-FQ-8-2.webp", available: true, sort_order: 5 },
+  { id: "m-006", restaurant_id: _restaurant.id, name: "Suya Platter", price: 3000, category: "Grills", description: "Grilled beef skewers with yaji spice, onions and tomatoes", image_url: "https://cheflolaskitchen.com/wp-content/uploads/2025/07/Suya-960x960.jpg.webp", available: true, sort_order: 1 },
+  { id: "m-007", restaurant_id: _restaurant.id, name: "Grilled Fish", price: 5000, category: "Grills", description: "Whole catfish grilled with pepper sauce and plantain", image_url: "https://simshomekitchen.com/wp-content/uploads/2025/08/Two-whole-grilled-tilapia-in-a-tray-with-plantain-lettuce-and-pepper-sauce.jpg", available: true, sort_order: 2 },
+  { id: "m-008", restaurant_id: _restaurant.id, name: "Asun", price: 3500, category: "Grills", description: "Spicy smoked goat meat with peppers and onions", image_url: "https://lowcarbafrica.com/wp-content/uploads/2019/09/Asun-recipe-IG-1.jpg", available: true, sort_order: 3 },
+  { id: "m-009", restaurant_id: _restaurant.id, name: "Chapman", price: 1500, category: "Drinks", description: "Classic Nigerian cocktail with Fanta, Sprite and bitters", image_url: "https://www.africanrecipes.com.ng/wp-content/uploads/2025/08/chapman-drink-featured.png.webp", available: true, sort_order: 1 },
+  { id: "m-010", restaurant_id: _restaurant.id, name: "Zobo", price: 800, category: "Drinks", description: "Refreshing hibiscus drink with ginger and pineapple", image_url: "https://lowcarbafrica.com/wp-content/uploads/2020/07/Sorrel-drink-sobolo-zobo-Drink-blog-1a.jpg", available: true, sort_order: 2 },
+  { id: "m-011", restaurant_id: _restaurant.id, name: "Fresh Orange Juice", price: 1200, category: "Drinks", description: "Freshly squeezed orange juice, no sugar added", image_url: "https://images.unsplash.com/photo-1600271886742-f049cd451bba?w=400&q=80", available: true, sort_order: 3 },
+  { id: "m-012", restaurant_id: _restaurant.id, name: "Coca-Cola", price: 500, category: "Drinks", description: "Classic Coca-Cola 50cl bottle", image_url: "https://images.unsplash.com/photo-1622483767028-3f66f32aef97?w=400&q=80", available: true, sort_order: 4 },
+  { id: "m-013", restaurant_id: _restaurant.id, name: "Malt", price: 600, category: "Drinks", description: "Amstel Malt 50cl bottle", image_url: "https://m.media-amazon.com/images/I/71LH6-Oi6iL.jpg", available: true, sort_order: 5 },
+  { id: "m-014", restaurant_id: _restaurant.id, name: "Puff Puff", price: 500, category: "Sides", description: "6 pieces of fluffy Nigerian doughnuts", image_url: "https://allnigerianfoods.com/wp-content/uploads/puff_puff_recipe.jpg", available: true, sort_order: 1 },
+  { id: "m-015", restaurant_id: _restaurant.id, name: "Plantain Chips", price: 800, category: "Sides", description: "Crunchy plantain chips with a spicy dip", image_url: "https://foreignfork.com/wp-content/uploads/2022/02/SweetPlantainChipsFEATURE-500x500.jpg", available: true, sort_order: 2 },
+  { id: "m-016", restaurant_id: _restaurant.id, name: "French Fries", price: 1000, category: "Sides", description: "Golden crispy fries with ketchup", image_url: "https://images.unsplash.com/photo-1573080496219-bb080dd4f877?w=400&q=80", available: true, sort_order: 3 },
+  { id: "m-017", restaurant_id: _restaurant.id, name: "Coleslaw", price: 500, category: "Sides", description: "Fresh coleslaw with creamy dressing", image_url: "https://www.inspiredtaste.net/wp-content/uploads/2015/01/Coleslaw-Recipe-1-1200.jpg", available: true, sort_order: 4 },
 ];
 
 const SEED_TABLES = [
@@ -104,6 +108,7 @@ let _orderCounter = 0;
 const STORAGE_KEY = "oshap-mock-state";
 
 interface PersistedState {
+  restaurant?: Restaurant;
   menu?: MenuItem[];
   orders?: Array<[string, StoredOrder]>;
   payments?: Array<[string, Payment]>;
@@ -118,6 +123,7 @@ function syncFromStorage(): void {
     if (!raw) return;
     const saved = JSON.parse(raw) as PersistedState;
 
+    if (saved.restaurant) _restaurant = saved.restaurant;
     if (Array.isArray(saved.menu)) _menu = saved.menu;
 
     _orders.clear();
@@ -141,6 +147,7 @@ function syncToStorage(): void {
   if (typeof localStorage === "undefined") return;
   try {
     const payload: PersistedState = {
+      restaurant: _restaurant,
       menu: _menu,
       orders: Array.from(_orders.entries()),
       payments: Array.from(_payments.entries()),
@@ -284,7 +291,7 @@ route("GET", /^\/table\/(.+)$/, ({ path, query }) => {
   const result: TableInfo = {
     table_id: tableId,
     status: "OPEN",
-    restaurant: RESTAURANT,
+    restaurant: _restaurant,
     unpaid_order: unpaidOrder as TableInfo["unpaid_order"],
     pending_payments: pendingPayments as TableInfo["pending_payments"],
   };
@@ -352,7 +359,7 @@ route("POST", /^\/table\/(.+)\/request-pos$/, ({ path, body }) => {
 
 // -------------------- Customer: Create Order --------------------
 
-route("POST", /^\/order$/, ({ body, query }) => {
+route("POST", /^\/order$/, ({ body }) => {
   const b = body as CreateOrderRequest;
   if (!b.table || !b.restaurant_id || !b.items?.length) {
     return json(400, { error: "Missing required fields" });
@@ -568,7 +575,32 @@ route("POST", /^\/payment\/confirm$/, ({ body }) => {
 // ---------------------------------------------------------------------------
 
 route("GET", /^\/admin\/me$/, () => {
-  return json(200, { restaurant: RESTAURANT } satisfies AdminMeResponse);
+  return json(200, { restaurant: _restaurant } satisfies AdminMeResponse);
+});
+
+route("GET", /^\/admin\/settings$/, () => {
+  return json(200, _restaurant);
+});
+
+route("PATCH", /^\/admin\/settings$/, ({ body }) => {
+  const b = body as import("../types/index").AdminUpdateSettingsRequest;
+  if (b.name !== undefined) _restaurant.name = b.name;
+  if (b.description !== undefined) _restaurant.description = b.description;
+  if (b.logo_url !== undefined) _restaurant.logo_url = b.logo_url;
+  if (b.operating_hours !== undefined) _restaurant.operating_hours = b.operating_hours;
+  if (b.bank_name !== undefined) _restaurant.bank_name = b.bank_name;
+  if (b.account_number !== undefined) _restaurant.account_number = b.account_number;
+  if (b.account_name !== undefined) _restaurant.account_name = b.account_name;
+  if (b.whatsapp_number !== undefined) _restaurant.whatsapp_number = b.whatsapp_number;
+  
+  syncToStorage();
+  return json(200, _restaurant);
+});
+
+route("POST", /^\/admin\/settings\/upload$/, () => {
+  return json(200, {
+    url: "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=400&q=80",
+  } satisfies UploadResponse);
 });
 
 route("GET", /^\/admin\/tables$/, () => {
@@ -670,7 +702,7 @@ route("POST", /^\/admin\/menu$/, ({ body }) => {
 
   const item: MenuItem = {
     id: uid(),
-    restaurant_id: RESTAURANT.id,
+    restaurant_id: _restaurant.id,
     name: b.name,
     price: b.price,
     category: b.category,

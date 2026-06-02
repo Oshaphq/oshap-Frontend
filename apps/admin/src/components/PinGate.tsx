@@ -150,6 +150,7 @@ export default function PinGate() {
             { to: "/menu", label: "Menu" },
             { to: "/kitchen", label: "Kitchen" },
             { to: "/history", label: "History" },
+            { to: "/settings", label: "Settings" },
           ].map((tab) => (
             <NavLink
               key={tab.to}

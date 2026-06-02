@@ -33,5 +33,6 @@ export const queryKeys = {
     history: (page: number, perPage: number, table?: string, date?: string) =>
       ["admin", "history", page, perPage, table, date] as const,
     tables: () => ["admin", "tables"] as const,
+    settings: () => ["admin", "settings"] as const,
   },
 } as const;

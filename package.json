@@ -12,10 +12,18 @@
     "build:customer": "npm run build --workspace @oshap/customer",
     "build:admin": "npm run build --workspace @oshap/admin",
     "build": "npm run build --workspaces --if-present",
-    "typecheck": "npm run typecheck --workspaces --if-present"
+    "typecheck": "npm run typecheck --workspaces --if-present",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix"
   },
   "devDependencies": {
-    "typescript": "^5.7.2"
+    "@eslint/js": "^9.39.4",
+    "eslint": "^9.39.4",
+    "eslint-plugin-react": "^7.37.5",
+    "eslint-plugin-react-hooks": "^7.1.1",
+    "globals": "^17.6.0",
+    "typescript": "^5.7.2",
+    "typescript-eslint": "^8.60.1"
   },
   "engines": {
     "node": ">=20"

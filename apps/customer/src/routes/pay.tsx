@@ -30,6 +30,7 @@ export default function PayPage() {
   useEffect(() => {
     const id = setInterval(() => tableQuery.refetch(), 5000);
     return () => clearInterval(id);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [tableQuery.refetch]);
 
   const claimPayment = useClaimPayment();

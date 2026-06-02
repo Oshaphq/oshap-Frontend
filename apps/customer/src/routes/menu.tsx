@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import { useNavigate, useSearchParams } from "react-router";
+import { useSearchParams } from "react-router";
 import { getDeviceToken, useMenu, useTable } from "@oshap/shared";
 import { CartProvider } from "../context/CartContext";
 import { useSession } from "../context/SessionContext";
@@ -26,7 +26,6 @@ export default function MenuPage() {
 }
 
 function MenuView({ tableId }: { tableId: string }) {
-  const navigate = useNavigate();
   const { session } = useSession();
   const deviceToken = getDeviceToken();
 
@@ -43,7 +42,7 @@ function MenuView({ tableId }: { tableId: string }) {
   const restaurantName = tableQuery.data?.restaurant?.name ?? "";
 
   const menuQuery = useMenu(restaurantId);
-  const menuItems = menuQuery.data ?? [];
+  const menuItems = useMemo(() => menuQuery.data ?? [], [menuQuery.data]);
 
   const categories = useMemo(() => {
     const unique = new Set(menuItems.map((item) => item.category));

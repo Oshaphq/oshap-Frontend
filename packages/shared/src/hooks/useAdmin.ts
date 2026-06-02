@@ -10,19 +10,49 @@ import {
   adminDeleteMenuItem,
   adminGetHistory,
   adminGetKitchen,
+  adminGetSettings,
   adminGetTables,
   adminListMenu,
   adminToggleMenuItem,
   adminUpdateKitchenStatus,
   adminUpdateMenuItem,
+  adminUpdateSettings,
   adminUploadImage,
+  adminUploadSettingsImage,
   adminVerifyPayment,
 } from "../api/admin";
 import type {
   AdminHistoryQuery,
+  AdminUpdateSettingsRequest,
   CreateMenuItemRequest,
   UpdateMenuItemRequest,
 } from "../types/index";
+
+// ---------- Settings ----------
+
+export function useAdminSettings() {
+  return useQuery({
+    queryKey: queryKeys.admin.settings(),
+    queryFn: adminGetSettings,
+  });
+}
+
+export function useAdminUpdateSettings() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (payload: AdminUpdateSettingsRequest) =>
+      adminUpdateSettings(payload),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: queryKeys.admin.settings() });
+    },
+  });
+}
+
+export function useAdminUploadSettingsImage() {
+  return useMutation({
+    mutationFn: (file: File) => adminUploadSettingsImage(file),
+  });
+}
 
 // ---------- Menu management ----------
 

@@ -53,6 +53,7 @@ function OrdersView({ tableId }: { tableId: string }) {
   useEffect(() => {
     const id = setInterval(() => sessionOrdersQuery.refetch(), 5000);
     return () => clearInterval(id);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [sessionOrdersQuery.refetch]);
 
   const orders = useMemo(() => {

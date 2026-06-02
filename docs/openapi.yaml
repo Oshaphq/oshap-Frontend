@@ -50,11 +50,26 @@ components:
       properties:
         id: { type: string, format: uuid }
         name: { type: string }
+        description: { type: string, nullable: true }
+        logo_url: { type: string, nullable: true }
+        operating_hours: { type: string, nullable: true }
         bank_name: { type: string, nullable: true }
         account_number: { type: string, nullable: true }
         account_name: { type: string, nullable: true }
         whatsapp_number: { type: string, nullable: true }
       required: [id, name]
+
+    AdminUpdateSettingsRequest:
+      type: object
+      properties:
+        name: { type: string }
+        description: { type: string, nullable: true }
+        logo_url: { type: string, nullable: true }
+        operating_hours: { type: string, nullable: true }
+        bank_name: { type: string, nullable: true }
+        account_number: { type: string, nullable: true }
+        account_name: { type: string, nullable: true }
+        whatsapp_number: { type: string, nullable: true }
 
     MenuItem:
       type: object
@@ -758,6 +773,69 @@ paths:
                 properties:
                   restaurant: { $ref: "#/components/schemas/Restaurant" }
                 required: [restaurant]
+        "401":
+          description: Invalid PIN
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+
+  # =========================================================================
+  # ADMIN — Settings
+  # =========================================================================
+  /admin/settings:
+    get:
+      tags: [Admin]
+      summary: Get restaurant settings
+      security: [{ adminPin: [] }]
+      responses:
+        "200":
+          description: Settings fetched
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Restaurant" }
+        "401":
+          description: Invalid PIN
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+    
+    patch:
+      tags: [Admin]
+      summary: Update restaurant settings
+      security: [{ adminPin: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/AdminUpdateSettingsRequest" }
+      responses:
+        "200":
+          description: Settings updated
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Restaurant" }
+        "400":
+          description: Invalid data
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+        "401":
+          description: Invalid PIN
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+
+  /admin/settings/upload:
+    post:
+      tags: [Admin]
+      summary: Upload a restaurant logo
+      security: [{ adminPin: [] }]
+      responses:
+        "200":
+          description: Image uploaded
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/UploadResponse" }
         "401":
           description: Invalid PIN
           content:

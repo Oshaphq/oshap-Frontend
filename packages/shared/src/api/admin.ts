@@ -5,6 +5,7 @@ import type {
   AdminHistoryResponse,
   AdminMeResponse,
   AdminTablesResponse,
+  AdminUpdateSettingsRequest,
   AdminVerifyRequest,
   AdminVerifyResponse,
   CreateMenuItemRequest,
@@ -12,6 +13,7 @@ import type {
   MenuItem,
   Order,
   OrderWithItems,
+  Restaurant,
   UpdateMenuItemRequest,
   UploadResponse,
 } from "../types/index";
@@ -21,6 +23,32 @@ import { request } from "./client";
 
 export function adminGetMe(): Promise<AdminMeResponse> {
   return request<AdminMeResponse>("/admin/me", { admin: true });
+}
+
+// ---------- Settings ----------
+
+export function adminGetSettings(): Promise<Restaurant> {
+  return request<Restaurant>("/admin/settings", { admin: true });
+}
+
+export function adminUpdateSettings(
+  payload: AdminUpdateSettingsRequest,
+): Promise<Restaurant> {
+  return request<Restaurant>("/admin/settings", {
+    method: "PATCH",
+    body: payload,
+    admin: true,
+  });
+}
+
+export function adminUploadSettingsImage(file: File): Promise<UploadResponse> {
+  const formData = new FormData();
+  formData.append("file", file);
+  return request<UploadResponse>("/admin/settings/upload", {
+    method: "POST",
+    formData,
+    admin: true,
+  });
 }
 
 // ---------- Menu management ----------

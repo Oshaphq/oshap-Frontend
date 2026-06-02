@@ -30,6 +30,9 @@ export type CloseReason = "paid" | "abandoned";
 export interface Restaurant {
   id: string;
   name: string;
+  description?: string | null;
+  logo_url?: string | null;
+  operating_hours?: string | null;
   bank_name?: string | null;
   account_number?: string | null;
   account_name?: string | null;
@@ -305,6 +308,17 @@ export interface AdminCloseResponse {
 
 export interface UploadResponse {
   url: string;
+}
+
+export interface AdminUpdateSettingsRequest {
+  name?: string;
+  description?: string | null;
+  logo_url?: string | null;
+  operating_hours?: string | null;
+  bank_name?: string | null;
+  account_number?: string | null;
+  account_name?: string | null;
+  whatsapp_number?: string | null;
 }
 
 // ---------------------------------------------------------------------------

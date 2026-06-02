@@ -135,13 +135,13 @@ Each test is **pass / fail** in the box. Mark a failure with `[F]` and a one-lin
 - [ ] Dark mode renders all routes legibly (no white-on-white or black-on-black text)
 - [ ] No native `alert()` dialogs anywhere — only the new `<Toaster />` toasts
 - [ ] Vercel deploy: refresh on `/menu?table=T1`, `/kitchen`, `/menu/foo` doesn't 404
+- [ ] `npm run lint` passes with 0 errors and 0 warnings
 
 ---
 
 ## Known limitations (not blockers)
 
 - Mock mode is browser-local: cross-device group-session join won't work until the real backend is wired
-- ESLint isn't configured yet — typecheck is the only static gate today
 - No automated test suite — this checklist is the only smoke layer
 - `RBAC`, `Analytics`, `Staff Management`, customer Notification Center are all Phase 2
 

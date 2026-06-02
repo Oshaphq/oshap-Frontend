@@ -13,7 +13,8 @@
     "./tokens.css": "./src/tokens/tokens.css"
   },
   "scripts": {
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint ."
   },
   "peerDependencies": {
     "@tanstack/react-query": "^5.0.0",
