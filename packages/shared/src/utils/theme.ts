@@ -1,54 +1,95 @@
+import { useState, useEffect } from "react";
+
 /**
- * Time-based dark mode.
+ * Manual dark mode with persistence.
  *
- * Light during the day, dark at night — flips on the `data-theme="dark"`
- * attribute on <html>, which the Tailwind v4 @theme block in
- * `packages/shared/src/tokens/tokens.css` already wires up across all
- * semantic color utilities.
+ * `data-theme="dark"` on <html> is the single source of truth — every
+ * semantic Tailwind utility in `tokens.css` keys off that attribute.
  *
- * Apps should ALSO inline a tiny script in index.html that sets the attribute
- * synchronously before React mounts, to avoid a light-flash on dark-time loads.
- * See the <script> block in each app's index.html.
+ * Persistence: the user's choice is stored in localStorage under
+ * `oshap-theme` and re-applied on every page load. Each app's index.html
+ * inlines a tiny script that reads this key and sets the attribute BEFORE
+ * React mounts, so a dark-mode user never sees a light flash on reload.
  */
 
-const DARK_START_HOUR = 18; // 6 PM
-const DARK_END_HOUR = 7; //    7 AM
+export type Theme = "light" | "dark";
 
-function isNight(now = new Date()): boolean {
-  const h = now.getHours();
-  return h >= DARK_START_HOUR || h < DARK_END_HOUR;
+const STORAGE_KEY = "oshap-theme";
+
+function readStoredTheme(): Theme | null {
+  if (typeof window === "undefined") return null;
+  const raw = window.localStorage.getItem(STORAGE_KEY);
+  return raw === "dark" || raw === "light" ? raw : null;
 }
 
-function applyTheme(): void {
+function writeStoredTheme(theme: Theme): void {
+  if (typeof window === "undefined") return;
+  window.localStorage.setItem(STORAGE_KEY, theme);
+}
+
+function applyTheme(theme: Theme): void {
   if (typeof document === "undefined") return;
-  const el = document.documentElement;
-  if (isNight()) {
-    el.setAttribute("data-theme", "dark");
+  if (theme === "dark") {
+    document.documentElement.setAttribute("data-theme", "dark");
   } else {
-    el.removeAttribute("data-theme");
+    document.documentElement.removeAttribute("data-theme");
   }
 }
 
+function currentDomTheme(): Theme {
+  if (typeof document === "undefined") return "light";
+  return document.documentElement.getAttribute("data-theme") === "dark"
+    ? "dark"
+    : "light";
+}
+
+export function useTheme() {
+  const [theme, setTheme] = useState<Theme>(() => currentDomTheme());
+
+  useEffect(() => {
+    if (typeof document === "undefined") return;
+    const observer = new MutationObserver(() => {
+      setTheme(currentDomTheme());
+    });
+    observer.observe(document.documentElement, {
+      attributes: true,
+      attributeFilter: ["data-theme"],
+    });
+    return () => observer.disconnect();
+  }, []);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
+    const handleChange = (e: MediaQueryListEvent) => {
+      if (!readStoredTheme()) {
+        applyTheme(e.matches ? "dark" : "light");
+      }
+    };
+    mediaQuery.addEventListener("change", handleChange);
+    return () => mediaQuery.removeEventListener("change", handleChange);
+  }, []);
+
+  const toggleTheme = () => {
+    const next: Theme = theme === "light" ? "dark" : "light";
+    applyTheme(next);
+    writeStoredTheme(next);
+  };
+
+  const setThemeExplicit = (next: Theme) => {
+    applyTheme(next);
+    writeStoredTheme(next);
+  };
+
+  return { theme, toggleTheme, setTheme: setThemeExplicit };
+}
+
 /**
- * Apply the time-based theme now, then re-check periodically and on tab focus
- * so the UI flips at the right hour without needing a refresh.
- *
- * Returns a teardown function — call it from a useEffect cleanup if you need
- * to stop the watcher (rarely needed; theme runs for app lifetime).
+ * Read the stored theme and apply it synchronously. Safe to call before
+ * React mounts. Used by the inline script in index.html and as a hook safety
+ * net inside main.tsx.
  */
-export function initTimeBasedTheme(): () => void {
-  if (typeof window === "undefined") return () => { };
-  applyTheme();
-
-  const intervalId = window.setInterval(applyTheme, 5 * 60_000);
-
-  const onVisibility = () => {
-    if (document.visibilityState === "visible") applyTheme();
-  };
-  document.addEventListener("visibilitychange", onVisibility);
-
-  return () => {
-    window.clearInterval(intervalId);
-    document.removeEventListener("visibilitychange", onVisibility);
-  };
+export function applyStoredTheme(): void {
+  const stored = readStoredTheme();
+  if (stored) applyTheme(stored);
 }

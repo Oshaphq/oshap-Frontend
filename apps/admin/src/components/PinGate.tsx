@@ -10,7 +10,7 @@ import {
   setAdminRestaurant,
 } from "@oshap/shared";
 import { adminApi } from "@oshap/shared/api";
-import { PrimaryButton } from "@oshap/shared/ui";
+import { PrimaryButton, ThemeToggle } from "@oshap/shared/ui";
 import { initFCM } from "../utils/fcm";
 import AlertCenter from "./AlertCenter";
 
@@ -168,6 +168,7 @@ export default function PinGate() {
         </div>
 
         <div className="flex items-center gap-s">
+          <ThemeToggle />
           {restaurantName && (
             <span
               className="hidden sm:inline text-caption-md font-semibold text-secondary-text truncate max-w-[200px]"

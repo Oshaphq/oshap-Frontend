@@ -7,10 +7,15 @@
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <script>
       (function () {
-        var h = new Date().getHours();
-        if (h >= 19 || h < 7) document.documentElement.setAttribute('data-theme', 'dark');
+        try {
+          var stored = localStorage.getItem('oshap-theme');
+          if (stored === 'dark' || (!stored && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+            document.documentElement.setAttribute('data-theme', 'dark');
+          }
+        } catch (e) {}
       })();
     </script>
+
     <title>Oshap — Scan. Order. Pay.</title>
     <meta name="description" content="QR-based table ordering and payment. Scan, browse, order, pay." />
     <link rel="preconnect" href="https://fonts.googleapis.com" />

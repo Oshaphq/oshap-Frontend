@@ -2,208 +2,213 @@
 
 **Version:** 1.1
 **Status:** MVP build complete, backend handoff
-**Last updated:** 2026-05-27
-
----
-
-## Changelog — v1.0 → v1.1
-
-The product pivoted significantly during the MVP build. v1.1 documents the system as it actually shipped to the backend handoff. The headline shifts:
-
-- **WhatsApp merchant flow removed.** All merchant operations now happen in a dedicated Admin web app. WhatsApp commands (`PAID T12`, `TODAY`, `PENDING`, etc.) are gone. Push notifications are delivered via **Firebase Cloud Messaging (FCM) web push**, not WhatsApp.
-- **Merchant dashboard is now in the MVP.** v1.0 deferred any dashboard to "future scope." v1.1 ships a full Admin SPA with Waiter Dashboard, Kitchen, History, and Menu management.
-- **Kitchen workflow added.** Orders now move through `CREATED → PREPARING → READY` before payment. v1.0 had no kitchen states.
-- **Group ordering moved into MVP.** v1.0 deferred "shared table ordering" to Phase 3. v1.1 ships PIN-based group sessions on day one.
-- **Customer order history added.** v1.0 deferred this; v1.1 ships an Orders tab on the customer app.
-- **Multi-restaurant support.** v1.0 implicitly assumed one merchant. v1.1 scopes every resource by `restaurant_id`; one admin PIN maps to one restaurant.
-- **Tech stack frozen.** v1.0 had no stack commitment. v1.1 is Vite 6 + React 19 + TypeScript + Tailwind v4 + TanStack Query v5 across two apps in an npm workspace.
-- **Payment proof upload.** v1.0 marked screenshot upload as optional/aspirational. v1.1 ships it as a real `proof_url` on the Payment entity.
-- **Admin auth surface defined.** v1.0 was silent on merchant auth. v1.1 uses an `x-admin-pin` header; one PIN per restaurant; the customer app remains fully unauthenticated.
+**Last updated:** 2026-06-02
 
 ---
 
 # 1. Product Overview
 
-**Oshap** is a QR-based table-ordering and payment system for restaurants and bars. Customers scan a QR at their table, browse a menu, place orders, and pay via bank transfer — no app install, no waiter call, no login.
+## Product Name
+Oshap
 
-Merchants run a web-based Admin app that receives real-time FCM push notifications for new orders, payment claims, and flagged issues, and lets staff drive the kitchen, verify payments, and manage the menu without a POS.
+## Tagline
+Order shap shap.
 
-The system ships as two SPAs against a shared FastAPI + PostgreSQL backend (separate repo).
+## Summary
+Oshap is a QR-first ordering and payment platform for restaurants and bars.
 
----
+Customers scan a QR code at their table, browse the menu, place orders, pay via bank transfer or by requesting a POS terminal, and receive real-time order updates. Restaurant staff manage orders, kitchen, payments, tables, and the menu through a single Admin web app gated by a shared 4-digit PIN.
 
-# 2. Objectives
-
-## Primary
-
-- Reduce customer wait time for ordering and paying.
-- Eliminate dependency on waiters for order capture and payment collection.
-- Prevent payment leakage (staff diverting cash / unverified transfers).
-- Give merchants a single screen for kitchen + payment + reconciliation, replacing the WhatsApp-driven workflow originally envisioned.
-
-## Secondary
-
-- Increase order frequency per table (frictionless re-ordering, group ordering).
-- Build the foundation for a full restaurant OS (history, analytics, multi-location).
+The goal is to eliminate ordering friction, reduce payment leakages, give merchants live visibility into table state, and make ordering through Oshap measurably faster than calling a waiter.
 
 ---
 
-# 3. Target Users
+# 2. Problem Statement
+
+Restaurants and bars commonly experience:
+- Long wait times before customers can order
+- Dependence on waiters for order capture
+- Manual payment verification
+- Payment leakages
+- Poor visibility into active tables
+- Fragmented communication between front-of-house and kitchen
+
+Customers commonly experience:
+- Delayed service
+- Difficulty getting staff attention
+- Unclear order status
+- Slow bill settlement
+
+---
+
+# 3. Product Vision
+
+Create the fastest and simplest way for customers to order and pay at restaurants and bars while giving merchants live visibility and control over operations.
+
+---
+
+# 4. Target Users
 
 ## Customers
+Restaurant guests, bar patrons, walk-in customers.
 
-- Diners at restaurants
-- Patrons at bars and lounges (high-frequency repeat orders, group tabs)
-
-## Merchants
-
-- Small to medium restaurants and bars
-- Businesses without an existing POS
-- Multi-staff venues that need a shared kitchen + waiter view
+## Restaurant Staff
+For the MVP, all staff share one Admin PIN per restaurant and see the full operational surface (dashboard, kitchen, history, menu). Role-based access (Owner / Manager / Cashier / Waiter / Kitchen / Bartender) is **deferred to Phase 2** — see [§17 Future Roadmap](#17-future-roadmap).
 
 ---
 
-# 4. System Architecture
+# 5. Product Structure
 
-Two apps, one shared package, one backend.
+The MVP ships **two web applications** in a single npm workspace.
+
+## Customer Web Application
+Public, unauthenticated SPA. QR-first ordering experience served from `apps/customer`.
+
+## Admin Web Application
+PIN-gated SPA for restaurant staff served from `apps/admin`. Single shared role for the MVP.
+
+> **Platform administration** (internal Oshap management) is deferred — not in the MVP.
+
+---
+
+# 6. Customer Experience
+
+## Entry Point
+Customer scans a QR code printed on the table. The QR encodes:
 
 ```
-oshap/                              this repo (frontend only)
-├── apps/
-│   ├── customer/        Public SPA — /menu /checkout /pay /orders
-│   └── admin/           Merchant SPA — /dashboard /kitchen /history /menu
-├── packages/
-│   └── shared/          Typed API client, TanStack hooks, design tokens, utils
-└── docs/openapi.yaml    Contract for the FastAPI backend (separate repo)
+https://oshap.app/menu?table=T12
 ```
 
-| Layer | Tool |
-|---|---|
-| Apps | Vite 6 + React 19 + TypeScript |
-| Routing | React Router v7 |
-| Styling | Tailwind CSS v4 (CSS-first `@theme` block) |
-| Data | TanStack Query v5 over typed `fetch` wrappers |
-| Push (admin only) | Firebase Cloud Messaging (web push) |
-| Package manager | npm workspaces (Node 20+) |
-| Backend | FastAPI + PostgreSQL 15 (separate repo, contract in [`docs/openapi.yaml`](docs/openapi.yaml)) |
-
-**Auth surface (MVP):**
-
-- Customer app — fully unauthenticated. No login, no session cookie, no JWT.
-- Admin app — `x-admin-pin` header attached by `packages/shared/src/api/client.ts`. One PIN per restaurant; `GET /admin/me` resolves the PIN to its restaurant on login.
+The table ID resolves to its restaurant on the backend (`GET /table/:id`). No login required. No user account. Pre-session orders on a single device are scoped by an anonymous `device_token` (UUID stored in `sessionStorage` per browser tab).
 
 ---
 
-# 5. Core Features — Customer App
+# 7. Customer Features
 
-## 5.1 QR-based table entry
+## 7.1 Menu Browsing
+- View categories (derived from the distinct values of `MenuItem.category` — no separate Category entity in MVP)
+- View menu items: name, price, description, image
+- Search within the menu
 
-Each table has a printed QR encoding `https://oshap.app/menu?table=T12`. Scanning loads the menu scoped to that table's restaurant. No app install. Works on any mobile browser.
+## 7.2 Cart Management
+- Add, remove, change quantity
+- Running total
+- Cart persists per browser tab
 
-## 5.2 Menu browsing
+## 7.3 Order Placement
+- Review summary in cart drawer
+- Confirm → `POST /order` creates the order
+- Order is assigned a unique reference `OSHAP-{tableId}-{4-digit random}`
+- Order immediately enters the kitchen workflow as `CREATED`
 
-- Restaurant name + table badge in header.
-- Category tabs (built dynamically from menu items).
-- Search.
-- Item cards: image, name, price, optional description.
-- "Add" button per item; quantity controls inline.
+## 7.4 Group / Shared Table Ordering ("Order Together")
+- Any customer at the table can **Start a session** → backend generates a 4-digit PIN
+- Other customers tap **Join** and enter the PIN; their existing unclaimed orders migrate into the session
+- All session members see the shared tab and can pay individually or jointly
+- Sessions are `ACTIVE` until the table is closed or all session orders are paid
 
-## 5.3 Cart
+## 7.5 Payment
 
-- Persists per browser tab.
-- Add / remove / change quantity.
-- Running total in the cart bar.
-- Cart drawer for full review before checkout.
+### Bank Transfer (default)
+Pay Bill screen displays:
+- Bank name, account name, account number
+- Amount payable
+- Unique payment reference (the order reference)
 
-## 5.4 Order placement
+Customer transfers, then taps **"I've Sent the Money"**. Optional proof screenshot upload. Orders move to `PAYMENT_PENDING` (Order) / `CLAIMED` (Payment). Waiter verifies on the Admin dashboard.
 
-1. Customer taps "Checkout".
-2. Order summary shown with running total.
-3. Customer confirms — order is created (`POST /order`) and assigned a unique reference `OSHAP-{tableId}-{4-digit random}`.
-4. Order appears in the customer's "My Orders" tab and on the admin Kitchen screen.
+### Request a POS
+Alternative CTA on the pay page. Customer taps **"Request a POS"**:
+- `POST /table/{id}/request-pos` moves unpaid orders to `PAYMENT_PENDING` with `CLAIMED` payment records
+- FCM push fires to admin devices (`pos_requested`)
+- Waiter brings the POS, customer taps card, waiter taps **Verify Payment** on the dashboard — same handler that bank-transfer verification uses
 
-Pre-session orders are scoped by an anonymous `device_token` (UUID per browser tab) so one phone can't see another phone's orders at the same table.
+No separate "mark POS paid" endpoint or admin button.
 
-## 5.5 Group ordering (shared session)
+## 7.6 Call a Waiter
+Service-bell icon in every customer header. Tap → `POST /table/{id}/call-waiter` → FCM `waiter_called` push + audio chime + in-app alert on every admin device. Button is always tappable; the backend dedupes within 30 seconds per restaurant + table.
 
-Promoted from v1.0 Phase 3 into MVP.
+## 7.7 Order Tracking
+Customer "My Orders" tab shows every order on this device or session with live status — updated by polling `GET /session/orders` every 5 seconds.
 
-- Anyone at the table can tap "Order together" to **start** a session — backend generates a 4-digit PIN.
-- Others tap "Join" and enter the PIN. Existing unclaimed orders on their device migrate into the session.
-- All session members see the shared tab and can pay individually or jointly.
-- Sessions are `ACTIVE` until the admin closes the table or all orders are paid.
+Status visible to customer:
+```
+CREATED → PREPARING → READY → PAYMENT_PENDING → CONFIRMED
+```
 
-## 5.6 Payment
+## 7.8 In-App Toasts
+- "A waiter is on the way" on call-waiter
+- "POS On The Way" / "Payment Claimed — awaiting verification" on pay actions
+- Error states for failed actions
 
-Bank transfer with reference matching — no payment gateway in v1.1.
-
-The Pay Bill screen shows:
-
-- Total amount (sum of unpaid orders on the device or session)
-- Bank name
-- Account name
-- Account number
-- Payment reference (the order reference, or combined for multi-order pay)
-
-After transferring, the customer taps **"I've sent the money"**, optionally uploads a screenshot (`proof_url`), and the orders move to `PAYMENT_PENDING` (Order) / `CLAIMED` (Payment). The admin sees the table go pending and verifies in the Waiter Dashboard.
-
-## 5.7 Customer order history
-
-A "My Orders" tab lists every order on this device or session with its current status (`CREATED → PREPARING → READY → PAYMENT_PENDING → CONFIRMED`).
-
----
-
-# 6. Core Features — Admin App
-
-A merchant SPA — gated by a 4-digit PIN — that replaces the v1.0 WhatsApp command surface entirely.
-
-## 6.1 PIN login + restaurant resolution
-
-- Staff enter a 4-digit PIN. Shared `client.ts` attaches it as `x-admin-pin` on every admin request.
-- `GET /admin/me` resolves the PIN to a `Restaurant` (one PIN = one restaurant). The frontend stores the restaurant in sessionStorage and uses `restaurant.id` for FCM device registration.
-
-## 6.2 Waiter Dashboard
-
-- Live table list (polled every 5s via `GET /admin/tables`).
-- Each table card shows: unpaid total, pending-payment total, and action buttons.
-- **Verify Payment** — `POST /admin/verify` flips all `PAYMENT_PENDING` orders on that table to `CONFIRMED`.
-- **Clear Table** — `POST /admin/close` with reason `paid` or `abandoned`. Closing an abandoned table cancels its orders.
-
-## 6.3 Kitchen view
-
-- Lists active orders in `CREATED`, `PREPARING`, `READY` states.
-- Kitchen taps "Start" → `PREPARING`. Taps "Ready" → `READY`.
-- Customer sees the same status update on their My Orders tab.
-
-## 6.4 History
-
-- Paginated list of `CONFIRMED` + `CANCELLED` orders.
-- Per-page summary: confirmed count, cancelled count, page revenue.
-- Filterable by date range.
-
-## 6.5 Menu management
-
-- CRUD on menu items: name, price, category, description, image, availability, sort order.
-- **Image upload**: admin posts FormData to `POST /admin/menu/upload`; backend returns `{ url }`. Storage backend (S3 + CloudFront, local disk + nginx, or GCS/R2) is a backend deployment choice — the response shape is fixed.
-
-## 6.6 FCM push notifications
-
-Admin staff register their browser as an FCM device on login (`POST /devices/register` with `fcm_token` and `restaurant_id`). The backend sends push on four triggers:
-
-- New order placed
-- Payment claimed (customer hit "I've sent the money")
-- Payment verified (cross-device sync to other staff)
-- Issue flagged
-
-Trigger points are documented in [`docs/fcm-notifications.md`](docs/fcm-notifications.md). The Firebase service worker is generated at build time from `VITE_FCM_*` env vars (see [`apps/admin/generateFirebaseSw.ts`](apps/admin/generateFirebaseSw.ts)). FCM is not imported in the customer app.
+> **Persistent customer notification center** is deferred to Phase 2. MVP has transient toasts only.
 
 ---
 
-# 7. Data Model & Lifecycles
+# 8. Admin Application
 
-Full schema lives in [`docs/data-model.md`](docs/data-model.md) and [`docs/ddl.sql`](docs/ddl.sql). Key entities: `Restaurant`, `Table`, `MenuItem`, `Order`, `OrderItem`, `Payment`, `TableSession`, `DeviceToken`.
+## 8.1 Authentication
+- One **4-digit PIN per restaurant**, sent as `x-admin-pin` header on every admin request
+- `GET /admin/me` resolves the PIN to a `Restaurant`; the frontend stores it in `sessionStorage` and uses `restaurant.id` for FCM device registration
+- No JWT, no per-user sessions, no role separation in MVP
+- 401 from any admin endpoint triggers a re-login
 
-## 7.1 Order lifecycle (v1.1 — kitchen states added)
+## 8.2 Modules
+
+### Waiter Dashboard (`/`)
+- Live table list (polled every 5s via `GET /admin/tables`)
+- Per-table: unpaid total, pending-payment total, action buttons
+- **Verify Payment** → `POST /admin/verify` flips `PAYMENT_PENDING` orders to `CONFIRMED`; auto-closes the table when nothing is outstanding
+- **Clear Table** → `POST /admin/close` with reason `paid` or `abandoned`; `abandoned` cancels remaining orders
+
+### Kitchen (`/kitchen`)
+- Lists active orders in `CREATED`, `PREPARING`, `READY`
+- Tap **Start** → `PREPARING`. Tap **Ready** → `READY`
+- Customer sees the same status updates on their My Orders tab
+
+### History (`/history`)
+- Paginated list of `CONFIRMED` and `CANCELLED` orders
+- Per-page summary: confirmed count, cancelled count, page revenue
+- Filterable by table and date
+- Refresh button shows spinner during in-flight refetch
+
+### Menu (`/menu`)
+- CRUD on menu items: name, price, category (free-text), description, image, availability, sort order
+- Image upload: `POST /admin/menu/upload` returns `{ url }` — backend chooses storage (S3 / nginx / GCS / R2)
+
+> **Staff Management**, **Analytics**, and **Settings UI** are deferred to Phase 2. For MVP, restaurant info (bank details, hours, branding) is managed directly in the database / by the platform team.
+
+## 8.3 Push Notifications (FCM)
+
+After login, the admin device registers an FCM token via `POST /devices/register`. The backend pushes on **seven trigger types** (full spec in [`docs/fcm-notifications.md`](docs/fcm-notifications.md)):
+
+1. `new_order` — order placed
+2. `order_ready` — kitchen marked an order `READY`
+3. `payment_claimed` — bank-transfer claim
+4. `payment_verified` — admin verified (cross-device sync)
+5. `table_closed` — admin force-closed a table
+6. `waiter_called` — customer tapped the service bell
+7. `pos_requested` — customer tapped Request a POS
+
+### Foreground behaviour
+When the admin app is open, an `AlertCenter` component intercepts FCM messages, plays an audio chime (Web Audio API two-tone bell — no asset file), and renders a queued top-right toast for `pos_requested`, `waiter_called`, `new_order`, and `payment_claimed`.
+
+### Background behaviour
+`firebase-messaging-sw.js` shows OS-level notifications when the tab is hidden.
+
+## 8.4 PWA
+Admin app is installable to home screen with `display: "standalone"`. Manifest at `apps/admin/public/manifest.webmanifest`, brand favicon + maskable icon, iOS apple-touch-icon, and full status-bar config. No offline data cache in MVP (dashboard depends on live state).
+
+---
+
+# 9. Data Model & Lifecycles
+
+Full schema lives in [`docs/data-model.md`](docs/data-model.md) and [`docs/ddl.sql`](docs/ddl.sql).
+
+Entities: `Restaurant`, `Table`, `MenuItem`, `Order`, `OrderItem`, `Payment`, `TableSession`, `DeviceToken`.
+
+## 9.1 Order Lifecycle
 
 ```
 CREATED ──► PREPARING ──► READY
@@ -217,158 +222,237 @@ CREATED ──► PREPARING ──► READY
    (verified)  (abandoned, admin force-close)
 ```
 
-## 7.2 Payment lifecycle
+No separate "ACCEPTED" or "SERVED" states. Kitchen tap-to-start moves `CREATED → PREPARING` directly; terminal states are `CONFIRMED` (paid + verified) and `CANCELLED` (abandoned).
+
+## 9.2 Payment Lifecycle
 
 ```
-NOT_PAID ──► CLAIMED ──► CONFIRMED   (auto on order confirm)
+NOT_PAID ──► CLAIMED ──► CONFIRMED   (auto, on order confirm)
                     └──► VERIFIED    (admin manual verify)
 ```
 
+No `REJECTED` state. A wrongful claim is resolved by **Clear Table → abandoned**, which `CANCELLED`s the orders.
+
 One payment per order (`unique order_id`). Re-submissions upsert.
 
-## 7.3 Session lifecycle
+## 9.3 Session Lifecycle
 
 ```
-ACTIVE ──► CLOSED   (admin closes table, or all session orders paid)
+ACTIVE ──► CLOSED   (admin closes table, or all session orders are paid)
 ```
 
-## 7.4 Reference format
+## 9.4 Reference Format
 
-`OSHAP-{tableId}-{4-digit random}` — globally unique, used as the bank-transfer reference for reconciliation.
+`OSHAP-{tableId}-{4-digit random}` — globally unique, doubles as the bank-transfer reference for reconciliation.
 
-## 7.5 Matching logic
+## 9.5 Multi-Restaurant Scoping
 
-Reconciliation against bank alerts (manual today, automatable later) matches on:
-
-- Payment reference (primary key)
-- Amount (sanity check)
-- Table ID (extracted from the reference)
+Every operational resource (`Table`, `MenuItem`, `Order`, `Payment`, `DeviceToken`) is scoped by `restaurant_id`. One Admin PIN maps to exactly one restaurant. This is the foundation for the "multi-location restaurant groups" line in [§13 Non-Functional Requirements](#13-non-functional-requirements).
 
 ---
 
-# 8. UX Requirements
+# 10. Real-Time Updates
+
+The MVP uses **TanStack Query polling at 5-second intervals** for live screens (dashboard, pay page, My Orders), plus **FCM push** for instant admin alerts when the app is in foreground or background.
+
+There is no WebSocket / SSE channel in the MVP. "Real-time" in this PRD means *near-real-time via polling + push*. Sub-second server-push is deferred.
+
+---
+
+# 11. Notifications
+
+## 11.1 Admin
+- FCM web push (background + foreground) — see [§8.3](#83-push-notifications-fcm)
+- In-app alert toasts + audio chime when foreground
+- OS notifications via service worker when background
+
+## 11.2 Customer
+- Transient in-app toasts for action confirmations and error states
+- Persistent customer notification center is deferred to Phase 2
+
+---
+
+# 12. Tech Stack
+
+| Layer | Tool |
+|---|---|
+| Apps | Vite 6 + React 19 + TypeScript |
+| Routing | React Router v7 |
+| Styling | Tailwind CSS v4 (CSS-first `@theme` block) |
+| Data | TanStack Query v5 over typed `fetch` wrappers in `packages/shared` |
+| Admin push | Firebase Cloud Messaging (web push) |
+| Package manager | npm workspaces (Node 20+) |
+| Backend | FastAPI + PostgreSQL 15 (separate repo, contract in [`docs/openapi.yaml`](docs/openapi.yaml)) |
+| Hosting | Vercel (static SPA per app, SPA fallback via `vercel.json`) |
+
+### Design system
+- Tailwind v4 `@theme` block in [`packages/shared/src/tokens/tokens.css`](packages/shared/src/tokens/tokens.css) — single source of truth for tokens
+- Semantic color utilities (`bg-primary`, `text-on-surface-variant`, …) auto-swap on `[data-theme="dark"]`
+- **Time-based dark mode**: light by day, dark from 6 PM to 7 AM (local browser time)
+
+### UX polish baked into MVP
+- Drag-to-dismiss on every bottom sheet (cart drawer, others-ordering sheet)
+- Inline SVG icon for Call Waiter (via Iconify)
+- Spinners on refresh buttons during refetch
+- Toast confirmations for service requests
+
+---
+
+# 13. Non-Functional Requirements
 
 ## Performance
+Initial customer page load under 2 seconds on 3G. Lightweight bundle; the mock API is tree-shaken out when `VITE_API_BASE_URL` is set.
 
-- Load time < 2s on 3G.
-- Lightweight bundle; tree-shaken mock API in prod builds.
-- Optimized menu images (admin upload pipeline handles resize).
+## Mobile-First
+Customer experience is mobile-first; admin is responsive and supports staff tablets.
 
-## Interaction
+## Reliability
+Order integrity is preserved — no duplicate orders (idempotent reference generation), no lost orders (server-side persistence).
 
-- ≤ 4 taps from QR scan to order placed.
-- No login. No typing required for the golden path.
-- Clear CTAs; bottom nav on customer app.
+## Scalability
+The data model supports single-location restaurants, multi-location restaurant groups, bars, and lounges via `restaurant_id` scoping.
 
-## First screen
-
-- Restaurant name + table prominent.
-- Categories before search — reduce decision fatigue.
-
-## Design system
-
-- Tailwind v4 `@theme` block in [`packages/shared/src/tokens/tokens.css`](packages/shared/src/tokens/tokens.css).
-- Semantic color utilities (`bg-primary`, `text-on-surface-variant`) auto-swap on `[data-theme="dark"]`. No `dark:` prefix in markup.
-- Typography scale (`text-h1` … `text-h6`, `text-p`, `text-caption-*`, plus Figma aliases). Headings shrink under 768px.
-- Spacing/radius/typography fully tokenized; no inline styles or CSS modules.
+## Auth surface
+- Customer app: zero auth
+- Admin app: shared PIN per restaurant via `x-admin-pin` header
+- 401 from any admin endpoint kicks the user back to PIN entry
 
 ---
 
-# 9. Success Metrics
+# 14. MVP Scope
 
-## Customer
+### Included
+- QR table access
+- Menu browsing + search
+- Cart
+- Order placement
+- Kitchen workflow (`CREATED → PREPARING → READY`)
+- Group / shared table ordering (PIN-based session join)
+- Bank-transfer payment + payment proof upload
+- **Request a POS** in-person card flow
+- **Call a Waiter** service-bell
+- Admin app: Waiter Dashboard, Kitchen, History, Menu CRUD with image upload
+- Admin PIN auth (one PIN per restaurant)
+- FCM web push (admin: background + foreground + audio chime)
+- Admin PWA install
+- Customer in-app toasts
+- Time-based dark mode
+- Real-time updates via 5s polling
 
+### Excluded (Phase 2+)
+- Role-based access control (Owner / Manager / Cashier / Waiter / Kitchen / Bartender)
+- Per-user staff accounts
+- Staff Management UI
+- Analytics dashboard
+- Restaurant Settings UI (bank account / hours / branding editing)
+- Customer Notification Center (persistent feed)
+- Payment-gateway card payments (Paystack, Flutterwave, etc.)
+- Loyalty system, CRM, promotions, customer profiles
+- Reservations, pre-ordering
+- Inventory management, stock-out auto-disable
+- Multi-branch consolidated analytics
+- WebSocket / SSE server-push
+- Platform Administration application
+- Native mobile wrappers
+
+---
+
+# 15. Rollout Plan
+
+## Phase 1 — MVP build ✅ (complete, this handoff)
+Frontend shipped: customer app, admin app, shared package, OpenAPI contract, DDL.
+
+## Phase 2 — Backend integration
+- Backend team implements FastAPI against [`docs/openapi.yaml`](docs/openapi.yaml)
+- Apply [`docs/ddl.sql`](docs/ddl.sql) as initial Alembic migration
+- Wire Firebase Admin SDK on the backend for push
+- Pick image storage backend (S3 + CloudFront recommended)
+
+## Phase 3 — Pilot
+- Deploy to 1–2 venues
+- Monitor scan-to-order conversion, payment verification latency, kitchen state usage
+
+## Phase 4 — V1.2 enhancements
+See [§17 Future Roadmap](#17-future-roadmap).
+
+---
+
+# 16. Risks & Mitigation
+
+| Risk | Mitigation |
+|---|---|
+| Slow internet at venue | Lightweight bundle; menu cached via TanStack Query |
+| Payment fraud (false "I've paid" claims) | Reference codes + admin manual verify before order is `CONFIRMED`; optional screenshot proof |
+| Staff don't notice new orders | FCM web push with audio chime; multi-device registration so multiple tablets ring |
+| Customer loses session on refresh | `device_token` in `sessionStorage`; session PIN re-joinable |
+| Single PIN leaked across staff | Per-restaurant PIN rotation. Future: per-user accounts in Phase 2 |
+| FCM env misconfigured | Service worker initializes empty and silently fails — flagged in setup docs |
+| Backend down | Customer app shows clear error states via `QueryError`; mock API available for dev |
+| Group order cross-device | Real backend enables true cross-device sessions; mock is browser-local for local testing only |
+
+---
+
+# 17. Future Roadmap
+
+## Phase 2
+- Role-based access control (Owner, Manager, Cashier, Waiter, Kitchen, Bartender)
+- Per-user staff accounts (replace shared PIN)
+- Staff Management UI
+- Analytics dashboard (revenue, popular items, table performance, staff activity)
+- Restaurant Settings UI (info, hours, bank accounts, branding)
+- Payment-gateway card payments (Paystack, Flutterwave)
+- Customer Notification Center (persistent feed)
+- Tip flow
+- WebSocket / SSE for sub-second updates
+- Customer order history beyond the current session
+
+## Phase 3
+- Loyalty system & CRM
+- Promotions
+- Customer profiles
+- Repeat-order recommendations
+- Reservations + pre-ordering
+- Inventory management
+- Multi-branch consolidated analytics
+- Platform Administration app
+
+---
+
+# 18. Out of Scope for v1.1
+
+Documented explicitly so backend, frontend, and product stay aligned:
+
+- WhatsApp Business integration (deprecated from v1.0 draft)
+- Payment gateways (bank transfer + Request-a-POS only)
+- Customer login / accounts
+- Tipping
+- Multi-location admin in a single PIN session (one PIN = one restaurant)
+- Native mobile apps
+- Offline order queueing
+- Server-push (WebSocket / SSE)
+
+---
+
+# 19. Success Metric
+
+> Oshap succeeds when ordering through Oshap is **faster than calling a waiter**.
+
+Every UX decision and every backend optimization defers to this rule.
+
+## Operational metrics
+
+### Customer
 - QR scan → first order conversion rate
 - Time from scan to order placed
 - Drop-off rate at each step
 
-## Business
-
+### Business
 - Orders per table per day
 - Average order value
-- Payment completion rate (`CLAIMED` → `CONFIRMED`)
-- Re-order rate within a session
+- Payment completion rate (`CLAIMED → CONFIRMED`)
+- Bank-transfer vs Request-a-POS mix
 
-## Merchant
-
-- Time from `PAYMENT_PENDING` → `CONFIRMED` (verification latency)
-- Kitchen throughput (`CREATED` → `READY`)
-- Daily reconciliation accuracy (claimed vs. bank-reconciled)
-
----
-
-# 10. Risks & Mitigation
-
-| Risk | Mitigation |
-|---|---|
-| Slow internet at venue | Lightweight bundle; menu cached via TanStack Query; mock API for offline dev |
-| Payment fraud (false "I've paid" claims) | Reference codes + admin manual verify before order is considered paid; screenshot proof upload |
-| Staff don't notice new orders | FCM web push with sound; multi-device registration so several phones/tablets ring |
-| Customer loses session on refresh | `device_token` in sessionStorage; session PIN re-joinable |
-| One PIN leaked across staff | Per-restaurant rotation; future scope: per-user accounts |
-| FCM env misconfigured | Service worker initializes empty and silently fails — flagged in `docs/fcm-notifications.md` and README setup steps |
-| Backend down | Customer app shows clear error states via `QueryError`; mock API for dev |
-
----
-
-# 11. Rollout Plan
-
-## Phase 1 — MVP build ✅ (complete, this handoff)
-
-Frontend shipped: customer app (menu, cart, checkout, pay, orders, group sessions), admin app (dashboard, kitchen, history, menu, FCM), shared package, OpenAPI contract, DDL.
-
-## Phase 2 — Backend integration
-
-- Backend team implements FastAPI against [`docs/openapi.yaml`](docs/openapi.yaml).
-- Apply [`docs/ddl.sql`](docs/ddl.sql) as the initial Alembic migration.
-- Wire FCM Admin SDK on the backend (separate service account).
-- Pick image storage backend (S3/CloudFront recommended).
-
-## Phase 3 — Pilot
-
-- Deploy to 1–2 venues.
-- Monitor: scan-to-order conversion, payment verification latency, kitchen state usage.
-- Iterate on copy, default categories, error messaging.
-
-## Phase 4 — V1.2 enhancements
-
-- Upsells / "frequently ordered with" on item cards
-- Per-staff accounts (replace shared PIN)
-- Loyalty: returning device recognition
-- Tip flow
-- Optional payment gateway (Paystack / Flutterwave) alongside bank transfer
-
----
-
-# 12. Future Scope
-
-- Payment gateway integration (Paystack, Flutterwave)
-- Multi-location merchant accounts
-- Reservations + pre-ordering
-- Inventory / stock-out auto-disable
-- CRM and loyalty
-- Analytics dashboard
-- Native mobile wrappers (only if web push limitations bite)
-
----
-
-# 13. Out of Scope for v1.1
-
-Documented explicitly so backend and product stay aligned:
-
-- WhatsApp Business integration (deprecated from v1.0)
-- Payment gateways (bank transfer + manual verify only)
-- Customer accounts / login
-- Tipping
-- Multi-location admin (one PIN = one restaurant)
-- Native apps
-- Offline order queueing
-
----
-
-# 14. Key Principle
-
-> Oshap must always be faster than calling a waiter.
-> If it's not faster, it fails.
-
-Every UX decision and every backend optimization defers to this rule.
+### Merchant
+- Time from `PAYMENT_PENDING → CONFIRMED` (verification latency)
+- Kitchen throughput (`CREATED → READY`)
+- Daily reconciliation accuracy

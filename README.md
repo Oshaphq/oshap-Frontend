@@ -1,8 +1,12 @@
 # Oshap
 
-QR-based table ordering and payment system. Customers scan a QR at a table, browse a menu, order, and pay via bank transfer. The merchant gets push notifications and can verify payments from a dashboard.
+QR-based table ordering and payment system. Customers scan a QR at a table, browse a menu, order, and pay via bank transfer or by requesting a POS terminal. The merchant gets push notifications and verifies payments from a PIN-gated dashboard.
 
 This repo holds the **frontend only**. The Python/FastAPI backend lives in a separate repo and is built against the contract in [`docs/openapi.yaml`](docs/openapi.yaml).
+
+Product docs:
+- [`PRD.md`](PRD.md) — what Oshap is, v1.1 MVP scope, lifecycles
+- [`docs/jtbd.md`](docs/jtbd.md) — what Oshap is hired to do (Jobs To Be Done)
 
 ## Stack
 
@@ -12,7 +16,9 @@ This repo holds the **frontend only**. The Python/FastAPI backend lives in a sep
 | Routing | React Router v7 |
 | Styling | Tailwind CSS v4 (CSS-first `@theme`) |
 | Data | TanStack Query v5 over typed `fetch` wrappers |
-| Push (admin only) | Firebase Cloud Messaging |
+| Push (admin only) | Firebase Cloud Messaging (web push) |
+| Admin install | PWA — installable to home screen, `display: standalone` |
+| Hosting | Vercel (SPA fallback via per-app `vercel.json`) |
 | Package manager | npm workspaces (Node 20+) |
 
 ## Repository layout
@@ -21,14 +27,16 @@ This repo holds the **frontend only**. The Python/FastAPI backend lives in a sep
 oshap/
 ├── apps/
 │   ├── customer/         Public Vite SPA — /menu /checkout /pay /orders
-│   └── admin/            Merchant Vite SPA — /kitchen /history /menu
+│   └── admin/            PIN-gated Vite SPA — / (dashboard) /kitchen /history /menu
 ├── packages/
-│   └── shared/           Typed API client, TanStack hooks, design tokens, utils
+│   └── shared/           Typed API client, TanStack hooks, design tokens, UI primitives
 ├── docs/
-│   ├── openapi.yaml      Source of truth for the backend contract
-│   ├── data-model.md     SQLModel-style entity definitions
-│   ├── ddl.sql           PostgreSQL 15 baseline schema
-│   └── fcm-notifications.md  Push-notification trigger points
+│   ├── openapi.yaml          Source of truth for the backend contract
+│   ├── data-model.md         SQLModel-style entity definitions
+│   ├── ddl.sql               PostgreSQL 15 baseline schema
+│   ├── fcm-notifications.md  Push-notification trigger points (7 types)
+│   └── jtbd.md               Jobs To Be Done — user-facing rationale
+├── PRD.md                Product requirements (v1.1)
 └── tokens/               Source design-token JSON (Figma export)
 ```
 
@@ -53,7 +61,8 @@ To point at a real backend, set `VITE_API_BASE_URL` in a `.env.local` file (see 
 | `npm run build:customer` / `build:admin` | Production build into `apps/*/dist` |
 | `npm run build` | Builds every workspace |
 | `npm run typecheck` | `tsc --noEmit` across every workspace |
-| `npm run lint` | ESLint across every workspace |
+
+> ESLint isn't configured yet — it's tracked as a Phase 0 follow-up. Typecheck currently catches most categorical issues thanks to strict TS settings.
 
 ## Backend dev — start here
 
@@ -97,9 +106,29 @@ Semantic color utilities (`bg-primary`, `text-on-surface-variant`, etc.) auto-sw
 
 Typography utilities `text-h1` through `text-h6`, `text-p`, `text-caption-*`, plus Figma aliases (`text-p1`, `text-label-l3`, `text-display-h1`, `text-emphasized-lg`). Heading sizes shrink at `<768px`.
 
+### Dark mode
+
+Both apps expose a `<ThemeToggle />` button (from `@oshap/shared/ui`). The user's choice persists in `localStorage` under `oshap-theme`. An inline `<script>` in each `index.html` applies the stored theme synchronously before React mounts, so there's no light-flash on dark loads. New visitors with no stored preference fall back to the OS `prefers-color-scheme`.
+
+### Toasts
+
+Use `toast.success(msg)`, `toast.error(msg)`, `toast.info(msg)` from `@oshap/shared/ui` for any user-visible feedback. The `<Toaster />` is mounted once at each app root; auto-dismiss is 4s, tap to dismiss earlier. Don't use the native `alert()` — there are no callers left in the codebase.
+
 ## Adding a new endpoint
 
 1. Add the request/response types to [`packages/shared/src/types/index.ts`](packages/shared/src/types/index.ts).
 2. Add a typed fetch fn to the matching `packages/shared/src/api/*.ts` (`menu`, `tables`, `orders`, `payments`, `sessions`, `admin`, `devices`).
 3. Add a TanStack Query hook in `packages/shared/src/hooks/`.
-4. Update [`docs/openapi.yaml`](docs/openapi.yaml) so the backend dev sees it.
+4. Add a handler in `packages/shared/src/api/mock.ts` so the frontend keeps working without the backend.
+5. Update [`docs/openapi.yaml`](docs/openapi.yaml) so the backend dev sees it.
+6. If the endpoint triggers an FCM push, update [`docs/fcm-notifications.md`](docs/fcm-notifications.md).
+
+## Deploy (Vercel)
+
+Each app is its own Vercel project pointing at `apps/customer` or `apps/admin` as the Root Directory. Both directories contain a `vercel.json` with an SPA rewrite — required so client-side routes survive page refresh and direct URL hits.
+
+Per-project env vars (set in Vercel dashboard, **not** committed):
+- `VITE_API_BASE_URL` — the FastAPI backend URL. If unset, the app runs in mock mode (great for previews, not for production).
+- Admin only: `VITE_FCM_API_KEY`, `VITE_FCM_AUTH_DOMAIN`, `VITE_FCM_PROJECT_ID`, `VITE_FCM_STORAGE_BUCKET`, `VITE_FCM_MESSAGING_SENDER_ID`, `VITE_FCM_APP_ID`, `VITE_FCM_VAPID_KEY`.
+
+The customer app is unauthenticated; the admin app requires the `x-admin-pin` header on every request.

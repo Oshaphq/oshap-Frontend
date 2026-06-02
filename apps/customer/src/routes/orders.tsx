@@ -13,7 +13,7 @@ import CallWaiterButton from "../components/CallWaiterButton";
 import CartBar from "../components/CartBar";
 import CartDrawer from "../components/CartDrawer";
 import { useDragToDismiss } from "../hooks/useDragToDismiss";
-import { PrimaryButton, SecondaryButton, TableBadge } from "@oshap/shared/ui";
+import { PrimaryButton, SecondaryButton, TableBadge, ThemeToggle } from "@oshap/shared/ui";
 import PinChip from "../components/PinChip";
 import AddButton from "../components/AddButton";
 
@@ -177,6 +177,7 @@ function OrdersView({ tableId }: { tableId: string }) {
           </div>
         </div>
         <div className="flex items-center gap-s">
+          <ThemeToggle />
           <CallWaiterButton tableId={tableId} />
           <TableBadge tableId={tableId} variant="outlined" />
         </div>

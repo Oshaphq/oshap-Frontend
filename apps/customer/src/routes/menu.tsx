@@ -9,7 +9,7 @@ import CartBar from "../components/CartBar";
 import CartDrawer from "../components/CartDrawer";
 import CategoryTabs from "../components/CategoryTabs";
 import MenuCard from "../components/MenuCard";
-import { TableBadge } from "@oshap/shared/ui";
+import { TableBadge, ThemeToggle } from "@oshap/shared/ui";
 
 export default function MenuPage() {
   const [params] = useSearchParams();
@@ -78,6 +78,7 @@ function MenuView({ tableId }: { tableId: string }) {
           <TableBadge tableId={tableId} />
         </div>
         <div className="flex items-center gap-s">
+          <ThemeToggle />
           <CallWaiterButton tableId={tableId} />
           <button
             type="button"

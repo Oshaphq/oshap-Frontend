@@ -7,7 +7,7 @@ import {
   useRequestPos,
   useTable,
 } from "@oshap/shared";
-import { PrimaryButton, SecondaryButton, TableBadge } from "@oshap/shared/ui";
+import { PrimaryButton, SecondaryButton, TableBadge, ThemeToggle, toast } from "@oshap/shared/ui";
 import BottomNav from "../components/BottomNav";
 import CallWaiterButton from "../components/CallWaiterButton";
 import { useSession } from "../context/SessionContext";
@@ -55,7 +55,7 @@ export default function PayPage() {
       tableQuery.refetch();
     } catch (err) {
       console.error("POS request error:", err);
-      alert(
+      toast.error(
         err instanceof Error
           ? err.message
           : "Could not request POS. Please try again.",
@@ -123,7 +123,7 @@ export default function PayPage() {
       });
     } catch (err) {
       console.error("Payment confirmation error:", err);
-      alert(
+      toast.error(
         err instanceof Error
           ? err.message
           : "Failed to confirm payment. Please try again.",
@@ -303,6 +303,7 @@ function PayHeader({
         </div>
       </div>
       <div className="flex items-center gap-s">
+        <ThemeToggle />
         <CallWaiterButton tableId={tableId} />
         <TableBadge tableId={tableId} variant="outlined" />
       </div>

@@ -5,7 +5,7 @@ import {
   useAdminCloseTable,
   formatCurrency,
 } from "@oshap/shared";
-import { PrimaryButton, SecondaryButton } from "@oshap/shared/ui";
+import { PrimaryButton, SecondaryButton, toast } from "@oshap/shared/ui";
 import QueryError from "../components/QueryError";
 
 export default function DashboardPage() {
@@ -36,7 +36,7 @@ export default function DashboardPage() {
     try {
       await verifyPayment.mutateAsync({ table_id: tableId });
     } catch {
-      alert("Failed to verify payment. Please try again.");
+      toast.error("Failed to verify payment. Please try again.");
     }
   };
 
@@ -48,7 +48,7 @@ export default function DashboardPage() {
     try {
       await closeTable.mutateAsync({ table_id: tableId, reason });
     } catch {
-      alert("Failed to clear table. Please try again.");
+      toast.error("Failed to clear table. Please try again.");
     }
   };
 

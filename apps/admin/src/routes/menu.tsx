@@ -10,7 +10,7 @@ import {
   formatCurrency,
 } from "@oshap/shared";
 import type { MenuItem } from "@oshap/shared";
-import { PrimaryButton, SecondaryButton } from "@oshap/shared/ui";
+import { PrimaryButton, SecondaryButton, toast } from "@oshap/shared/ui";
 import QueryError from "../components/QueryError";
 
 interface MenuFormState {
@@ -45,7 +45,7 @@ export default function MenuPage() {
 
   const handleCreate = async () => {
     if (!form.name || !form.price || !form.category) {
-      alert("Name, price, and category are required.");
+      toast.error("Name, price, and category are required.");
       return;
     }
     try {
@@ -59,7 +59,7 @@ export default function MenuPage() {
       setShowNewForm(false);
       setForm(EMPTY_FORM);
     } catch {
-      alert("Failed to create item");
+      toast.error("Failed to create item");
     }
   };
 
@@ -77,7 +77,7 @@ export default function MenuPage() {
       });
       setEditingId(null);
     } catch {
-      alert("Failed to save");
+      toast.error("Failed to save");
     }
   };
 
@@ -97,7 +97,7 @@ export default function MenuPage() {
     try {
       await toggleItem.mutateAsync({ id, available: !available });
     } catch {
-      alert("Failed to update item");
+      toast.error("Failed to update item");
     }
   };
 
@@ -106,7 +106,7 @@ export default function MenuPage() {
     try {
       await deleteItem.mutateAsync(id);
     } catch {
-      alert("Failed to delete");
+      toast.error("Failed to delete");
     }
   };
 
@@ -318,7 +318,7 @@ function MenuItemForm({
       const result = await uploadImage.mutateAsync(file);
       setForm({ ...form, image_url: result.url });
     } catch {
-      alert("Upload failed. Please try again.");
+      toast.error("Upload failed. Please try again.");
     }
   };
 

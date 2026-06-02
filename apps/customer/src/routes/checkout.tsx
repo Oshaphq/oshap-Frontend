@@ -8,7 +8,7 @@ import {
 import { CartProvider, useCart } from "../context/CartContext";
 import { useSession } from "../context/SessionContext";
 import CallWaiterButton from "../components/CallWaiterButton";
-import { PrimaryButton, TableBadge } from "@oshap/shared/ui";
+import { PrimaryButton, TableBadge, ThemeToggle, toast } from "@oshap/shared/ui";
 
 export default function CheckoutPage() {
   const [params] = useSearchParams();
@@ -33,7 +33,7 @@ function CheckoutView({ tableId }: { tableId: string }) {
   const handleConfirmOrder = async () => {
     const restaurantId = tableQuery.data?.restaurant?.id;
     if (!restaurantId) {
-      alert("Could not load table details. Please refresh and try again.");
+      toast.error("Could not load table details. Please refresh and try again.");
       return;
     }
 
@@ -63,7 +63,7 @@ function CheckoutView({ tableId }: { tableId: string }) {
       navigate(`/orders?table=${tableId}`);
     } catch (err) {
       console.error("Order error:", err);
-      alert(
+      toast.error(
         err instanceof Error
           ? err.message
           : "Failed to place order. Please try again.",
@@ -190,6 +190,7 @@ function CheckoutHeader({
         </h1>
       </div>
       <div className="flex items-center gap-s">
+        <ThemeToggle />
         <CallWaiterButton tableId={tableId} />
         <TableBadge tableId={tableId} variant="outlined" />
       </div>

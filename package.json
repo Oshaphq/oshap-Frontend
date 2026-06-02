@@ -12,8 +12,7 @@
     "build:customer": "npm run build --workspace @oshap/customer",
     "build:admin": "npm run build --workspace @oshap/admin",
     "build": "npm run build --workspaces --if-present",
-    "typecheck": "npm run typecheck --workspaces --if-present",
-    "lint": "npm run lint --workspaces --if-present"
+    "typecheck": "npm run typecheck --workspaces --if-present"
   },
   "devDependencies": {
     "typescript": "^5.7.2"
