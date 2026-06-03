@@ -144,15 +144,15 @@ export default function AuthGate() {
 
   return (
     <div className="min-h-screen bg-surface-container-lowest flex flex-col">
-      <nav className="flex items-center justify-between gap-md px-md py-s bg-surface-container-lowest border-b border-surface-container-high overflow-x-auto">
-        <div className="flex items-center gap-1">
+      <nav className="flex items-center justify-between gap-s px-s sm:px-md py-s bg-surface-container-lowest border-b border-surface-container-high">
+        <div className="flex items-center gap-0.5 overflow-x-auto scrollbar-none shrink min-w-0">
           {tabs.map((tab) => (
             <NavLink
               key={tab.to}
               to={tab.to}
               end={tab.end}
               className={({ isActive }) =>
-                `px-md py-s rounded-lg text-label-l4 font-semibold font-display whitespace-nowrap transition-colors no-underline ${isActive
+                `px-s sm:px-md py-s rounded-lg text-label-l4 font-semibold font-display whitespace-nowrap transition-colors no-underline shrink-0 ${isActive
                   ? "bg-primary text-on-primary"
                   : "text-secondary-text hover:bg-surface-container-high"
                 }`
@@ -163,15 +163,15 @@ export default function AuthGate() {
           ))}
         </div>
 
-        <div className="flex items-center gap-md">
+        <div className="flex items-center gap-s shrink-0">
           <ThemeToggle />
-          <div className="hidden sm:flex flex-col items-end mr-s">
+          <div className="hidden md:flex flex-col items-end mr-s">
              <span className="text-label-l4 font-semibold text-primary-text">{user.name}</span>
              <span className="text-caption-md text-secondary-text">{user.role}</span>
           </div>
           {restaurantName && (
             <span
-              className="hidden md:inline text-caption-md font-semibold text-secondary-text truncate max-w-[200px]"
+              className="hidden lg:inline text-caption-md font-semibold text-secondary-text truncate max-w-[200px]"
               title={restaurantName}
             >
               {restaurantName}

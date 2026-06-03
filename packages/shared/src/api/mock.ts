@@ -365,7 +365,7 @@ route("GET", /^\/table\/(.+)$/, ({ path, query }) => {
   const tableOrders = [..._orders.values()].filter(
     (o) =>
       o.table_id === tableId &&
-      (o.status === "CREATED" || o.status === "PAYMENT_PENDING"),
+      ["CREATED", "PREPARING", "READY", "PAYMENT_PENDING"].includes(o.status),
   );
 
   let scopedOrders = tableOrders;
@@ -381,7 +381,7 @@ route("GET", /^\/table\/(.+)$/, ({ path, query }) => {
     scopedOrders = tableOrders.filter((o) => o.device_token === deviceToken);
   }
 
-  const createdOrders = scopedOrders.filter((o) => o.status === "CREATED");
+  const createdOrders = scopedOrders.filter((o) => ["CREATED", "PREPARING", "READY"].includes(o.status));
   const pendingOrders = scopedOrders.filter((o) => o.status === "PAYMENT_PENDING");
 
   let unpaidOrder = null;
@@ -439,9 +439,9 @@ route("POST", /^\/table\/(.+)\/request-pos$/, ({ path, body }) => {
   const sessionId = b.session_id;
   const deviceToken = b.device_token;
 
-  // Scope CREATED orders to this device/session — same scoping as GET /table/:id.
+  // Scope CREATED/PREPARING/READY orders to this device/session
   const createdOrders = [..._orders.values()].filter((o) => {
-    if (o.table_id !== tableId || o.status !== "CREATED") return false;
+    if (o.table_id !== tableId || !["CREATED", "PREPARING", "READY"].includes(o.status)) return false;
     if (sessionId && deviceToken) {
       return (
         o.session_id === sessionId ||
@@ -741,12 +741,12 @@ route("POST", /^\/admin\/settings\/upload$/, () => {
 
 route("GET", /^\/admin\/tables$/, () => {
   const allOrders = [..._orders.values()].filter((o) =>
-    ["CREATED", "PAYMENT_PENDING"].includes(o.status),
+    ["CREATED", "PREPARING", "READY", "PAYMENT_PENDING"].includes(o.status),
   );
 
   const tables = SEED_TABLES.map((tableId) => {
     const tOrders = allOrders.filter((o) => o.table_id === tableId);
-    const unpaid = tOrders.filter((o) => o.status === "CREATED");
+    const unpaid = tOrders.filter((o) => ["CREATED", "PREPARING", "READY"].includes(o.status));
     const pending = tOrders.filter((o) => o.status === "PAYMENT_PENDING");
 
     return {
@@ -906,7 +906,9 @@ route("POST", /^\/admin\/verify$/, ({ body }) => {
 
   // Auto-close if no unpaid remain
   const hasUnpaid = [..._orders.values()].some(
-    (o) => o.table_id === b.table_id && o.status === "CREATED",
+    (o) =>
+      o.table_id === b.table_id &&
+      ["CREATED", "PREPARING", "READY"].includes(o.status),
   );
 
   let autoClosed = false;
@@ -922,6 +924,40 @@ route("POST", /^\/admin\/verify$/, ({ body }) => {
     verified_count: pendingOrders.length,
     auto_closed: autoClosed,
   } satisfies AdminVerifyResponse);
+});
+
+// -------------------- Admin: Close Table --------------------
+
+route("POST", /^\/admin\/close$/, ({ body }) => {
+  const b = body as { table_id: string; reason: "paid" | "abandoned" };
+  if (!b.table_id) return json(400, { error: "table_id is required" });
+
+  const newStatus = b.reason === "paid" ? "CONFIRMED" : "CANCELLED";
+
+  // Close all active orders at this table
+  const activeOrders = [..._orders.values()].filter(
+    (o) =>
+      o.table_id === b.table_id &&
+      ["CREATED", "PREPARING", "READY", "PAYMENT_PENDING"].includes(o.status),
+  );
+
+  for (const o of activeOrders) {
+    o.status = newStatus;
+    const p = _payments.get(o.id);
+    if (p) p.status = b.reason === "paid" ? "VERIFIED" : "FAILED";
+  }
+
+  // Clear the table session
+  for (const [sid, s] of _sessions) {
+    if (s.table_id === b.table_id) _sessions.delete(sid);
+  }
+
+  syncToStorage();
+
+  return json(200, {
+    success: true as const,
+    closed_count: activeOrders.length,
+  });
 });
 
 // -------------------- Admin: Analytics --------------------

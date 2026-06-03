@@ -75,35 +75,33 @@ export default function Analytics() {
           Analytics Dashboard
         </h1>
 
-        <div className="flex flex-col gap-md sm:flex-row sm:items-center">
-          <div className="flex items-center gap-md">
+        <div className="flex flex-wrap gap-s items-center">
+          <div className="flex items-center gap-s flex-wrap">
             <input
               type="date"
               value={startDate}
               onChange={(e) => setStartDate(e.target.value)}
-              className="px-md py-s rounded-md bg-surface-container border-[1.5px] border-outline-variant text-p2 text-primary-text outline-none focus:border-primary"
+              className="px-s sm:px-md py-s rounded-md bg-surface-container border border-outline-variant text-p2 text-primary-text outline-none focus:border-primary min-w-0"
             />
-            <span className="text-secondary-text">to</span>
+            <span className="text-secondary-text shrink-0">to</span>
             <input
               type="date"
               value={endDate}
               onChange={(e) => setEndDate(e.target.value)}
-              className="px-md py-s rounded-md bg-surface-container border-[1.5px] border-outline-variant text-p2 text-primary-text outline-none focus:border-primary"
+              className="px-s sm:px-md py-s rounded-md bg-surface-container border border-outline-variant text-p2 text-primary-text outline-none focus:border-primary min-w-0"
             />
           </div>
 
-          <div className="relative">
+          <div className="relative shrink-0">
             <select
-              className="px-md py-s rounded-md bg-surface-container border-[1.5px] border-outline-variant text-p2 text-primary-text outline-none focus:border-primary appearance-none pr-10"
+              className="px-md py-s rounded-md bg-surface-container border border-outline-variant text-p2 text-primary-text outline-none focus:border-primary appearance-none pr-10"
               onChange={(e) => {
                 const days = parseInt(e.target.value, 10);
                 if (isNaN(days)) return;
                 if (days === 30) {
-                  // This Month
                   const d = new Date();
                   setStartDate(new Date(d.getFullYear(), d.getMonth(), 1).toISOString().split("T")[0]!);
                 } else if (days === 365) {
-                  // Year to date
                   const d = new Date();
                   setStartDate(new Date(d.getFullYear(), 0, 1).toISOString().split("T")[0]!);
                 } else {

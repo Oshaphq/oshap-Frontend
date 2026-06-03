@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, useRef } from "react";
 import { useNavigate, useSearchParams } from "react-router";
 import {
   formatCurrency,
@@ -12,7 +12,7 @@ import BottomNav from "../components/BottomNav";
 import CartBar from "../components/CartBar";
 import CartDrawer from "../components/CartDrawer";
 import { useDragToDismiss } from "../hooks/useDragToDismiss";
-import { PrimaryButton, SecondaryButton } from "@oshap/shared/ui";
+import { PrimaryButton, SecondaryButton, toast } from "@oshap/shared/ui";
 import PinChip from "../components/PinChip";
 import AddButton from "../components/AddButton";
 import CustomerHeader from "../components/CustomerHeader";
@@ -128,6 +128,22 @@ function OrdersView({ tableId }: { tableId: string }) {
     () => myOrders.reduce((sum, o) => sum + o.total, 0),
     [myOrders],
   );
+
+  const prevStatuses = useRef<Record<string, OrderStatus>>({});
+
+  useEffect(() => {
+    myOrders.forEach((o) => {
+      const oldStatus = prevStatuses.current[o.id];
+      if (oldStatus && oldStatus !== o.status) {
+        if (o.status === "PREPARING") {
+          toast.info("Your order is being prepared!");
+        } else if (o.status === "READY") {
+          toast.success("Your order is ready!");
+        }
+      }
+      prevStatuses.current[o.id] = o.status;
+    });
+  }, [myOrders]);
 
   const groupTotal = useMemo(
     () => orders.reduce((sum, o) => sum + o.total, 0),

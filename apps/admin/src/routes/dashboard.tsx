@@ -207,7 +207,7 @@ export default function DashboardPage() {
                   <button
                     type="button"
                     onClick={() => handleClearWithReason(table.id, "paid")}
-                    className="flex items-center justify-center gap-s py-s rounded-lg font-bold text-caption-md text-white transition-all hover:opacity-90 active:scale-[0.98] bg-success"
+                    className="flex items-center justify-center gap-s py-s rounded-lg font-bold text-caption-md bg-success text-on-success transition-all hover:opacity-90 active:scale-[0.98]"
                   >
                     <i className="mgc_wallet_4_line" />
                     Paid (Cash/Transfer)
@@ -215,7 +215,7 @@ export default function DashboardPage() {
                   <button
                     type="button"
                     onClick={() => handleClearWithReason(table.id, "abandoned")}
-                    className="flex items-center justify-center gap-s py-s rounded-lg font-bold text-caption-md text-error border-[1.5px] border-error bg-transparent transition-all hover:bg-error/5 active:scale-[0.98]"
+                    className="flex items-center justify-center gap-s py-s rounded-lg font-bold text-caption-md border border-error text-error bg-transparent transition-all hover:bg-error/10 active:scale-[0.98]"
                   >
                     <i className="mgc_exit_line" />
                     Abandoned / Left
