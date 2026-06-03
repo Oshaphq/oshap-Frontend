@@ -135,7 +135,7 @@ export default function HistoryPage() {
                 onClick={() =>
                   setExpandedOrder(isExpanded ? null : order.id)
                 }
-                className={`text-left rounded-md p-md flex flex-col gap-md bg-surface-container border-[1.5px] border-transparent transition-colors hover:border-outline-variant cursor-pointer ${
+                className={`text-left rounded-md p-md flex flex-col gap-md bg-surface-container border border-transparent transition-colors hover:border-outline-variant cursor-pointer ${
                   order.status === "CANCELLED" ? "opacity-55" : ""
                 }`}
               >

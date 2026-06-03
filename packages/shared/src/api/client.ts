@@ -34,9 +34,11 @@ export const ADMIN_UNAUTHORIZED_EVENT = "oshap:admin-unauthorized";
 
 const PIN_STORAGE_KEY = "oshap-admin-pin";
 const RESTAURANT_STORAGE_KEY = "oshap-admin-restaurant";
+const PLATFORM_TOKEN_STORAGE_KEY = "oshap-platform-token";
 
 let adminPin: string | null = null;
 let adminRestaurant: Restaurant | null = null;
+let platformToken: string | null = null;
 
 function readPinFromStorage(): string | null {
   if (typeof window === "undefined") return null;
@@ -99,6 +101,62 @@ export function getAdminRestaurantName(): string | null {
 }
 
 // ---------------------------------------------------------------------------
+// Platform operator token — module-scoped + sessionStorage backed
+// ---------------------------------------------------------------------------
+
+function readPlatformTokenFromStorage(): string | null {
+  if (typeof window === "undefined") return null;
+  return window.sessionStorage.getItem(PLATFORM_TOKEN_STORAGE_KEY);
+}
+
+export function setPlatformToken(token: string | null): void {
+  platformToken = token;
+  if (typeof window === "undefined") return;
+  if (token) {
+    window.sessionStorage.setItem(PLATFORM_TOKEN_STORAGE_KEY, token);
+  } else {
+    window.sessionStorage.removeItem(PLATFORM_TOKEN_STORAGE_KEY);
+  }
+}
+
+export function getPlatformToken(): string | null {
+  if (platformToken) return platformToken;
+  platformToken = readPlatformTokenFromStorage();
+  return platformToken;
+}
+
+// ---------------------------------------------------------------------------
+// Active branch (multi-branch owners) — localStorage backed.
+// When set, it is appended as `branch_id` to admin GET requests so the
+// dashboard, kitchen, history, menu and analytics scope to that branch.
+// Empty/null means "all branches" (the owner's default scope).
+// ---------------------------------------------------------------------------
+
+const ACTIVE_BRANCH_STORAGE_KEY = "oshap-active-branch";
+let activeBranchId: string | null = null;
+
+function readActiveBranchFromStorage(): string | null {
+  if (typeof window === "undefined") return null;
+  return window.localStorage.getItem(ACTIVE_BRANCH_STORAGE_KEY);
+}
+
+export function setActiveBranchId(branchId: string | null): void {
+  activeBranchId = branchId || null;
+  if (typeof window === "undefined") return;
+  if (activeBranchId) {
+    window.localStorage.setItem(ACTIVE_BRANCH_STORAGE_KEY, activeBranchId);
+  } else {
+    window.localStorage.removeItem(ACTIVE_BRANCH_STORAGE_KEY);
+  }
+}
+
+export function getActiveBranchId(): string | null {
+  if (activeBranchId) return activeBranchId;
+  activeBranchId = readActiveBranchFromStorage();
+  return activeBranchId;
+}
+
+// ---------------------------------------------------------------------------
 // Mock mode detection
 // ---------------------------------------------------------------------------
 
@@ -134,6 +192,8 @@ export interface RequestOptions {
   body?: unknown;
   /** Adds the `x-admin-pin` header. Throws if no PIN is set. */
   admin?: boolean;
+  /** Adds the `x-platform-token` header. Throws if no token is set. */
+  platform?: boolean;
   /** Pass FormData directly; skips JSON serialization. */
   formData?: FormData;
   signal?: AbortSignal;
@@ -163,12 +223,21 @@ export async function request<T>(
   path: string,
   options: RequestOptions = {},
 ): Promise<T> {
+  const method = options.method ?? "GET";
+
+  // Scope admin reads to the active branch (if any) via a `branch_id` param.
+  const query: NonNullable<RequestOptions["query"]> = { ...options.query };
+  if (options.admin && method === "GET") {
+    const branchId = getActiveBranchId();
+    if (branchId) query.branch_id = branchId;
+  }
+
   if (isMockMode()) {
     return mockRequest(
       path,
-      options.method ?? "GET",
+      method,
       options.body ?? null,
-      buildSearchParams(options.query),
+      buildSearchParams(query),
       options.admin ?? false,
     ) as Promise<T>;
   }
@@ -191,8 +260,16 @@ export async function request<T>(
     headers["x-admin-pin"] = pin;
   }
 
-  const response = await fetch(buildUrl(path, options.query), {
-    method: options.method ?? "GET",
+  if (options.platform) {
+    const token = getPlatformToken();
+    if (!token) {
+      throw new ApiError(401, "Platform token not set", null);
+    }
+    headers["x-platform-token"] = token;
+  }
+
+  const response = await fetch(buildUrl(path, query), {
+    method,
     headers,
     body,
     signal: options.signal,

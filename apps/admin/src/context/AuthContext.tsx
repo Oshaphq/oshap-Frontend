@@ -1,5 +1,6 @@
 import { createContext, useContext, useState, useEffect, ReactNode } from "react";
-import { StaffMember, Restaurant, getAdminPin, adminApi, ADMIN_UNAUTHORIZED_EVENT, setAdminPin, setAdminRestaurant } from "@oshap/shared";
+import { useQueryClient } from "@tanstack/react-query";
+import { StaffMember, Restaurant, getAdminPin, adminApi, ADMIN_UNAUTHORIZED_EVENT, setAdminPin, setAdminRestaurant, getActiveBranchId, setActiveBranchId, queryKeys } from "@oshap/shared";
 
 interface AuthContextValue {
   user: StaffMember | null;
@@ -7,13 +8,21 @@ interface AuthContextValue {
   login: (user: StaffMember, token: string, restaurant: Restaurant) => void;
   logout: () => void;
   isLoading: boolean;
+  /** Active branch id for multi-branch owners; "" means all branches. */
+  activeBranchId: string;
+  /** Switch the active branch and refetch all branch-scoped admin data. */
+  setActiveBranch: (branchId: string) => void;
 }
 
 const AuthContext = createContext<AuthContextValue | null>(null);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
+  const queryClient = useQueryClient();
   const [user, setUser] = useState<StaffMember | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [activeBranchId, setActiveBranchState] = useState<string>(
+    () => getActiveBranchId() ?? "",
+  );
 
   useEffect(() => {
     const init = async () => {
@@ -49,11 +58,22 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const logout = () => {
     setAdminPin(null);
     setAdminRestaurant(null);
+    setActiveBranchId(null);
+    setActiveBranchState("");
     setUser(null);
   };
 
+  const setActiveBranch = (branchId: string) => {
+    setActiveBranchId(branchId || null);
+    setActiveBranchState(branchId);
+    // Branch-scoped data is keyed without the branch id, so force a refetch.
+    queryClient.invalidateQueries({ queryKey: queryKeys.admin.all });
+  };
+
   return (
-    <AuthContext.Provider value={{ user, isAuthenticated: !!user, login, logout, isLoading }}>
+    <AuthContext.Provider
+      value={{ user, isAuthenticated: !!user, login, logout, isLoading, activeBranchId, setActiveBranch }}
+    >
       {children}
     </AuthContext.Provider>
   );

@@ -51,6 +51,7 @@ export default function RestaurantsPage() {
       <div className="flex flex-wrap gap-s items-center">
         <input
           type="search"
+          aria-label="Search restaurants by name or email"
           placeholder="Search name or email..."
           value={search}
           onChange={(e) => setSearch(e.target.value)}
@@ -58,9 +59,10 @@ export default function RestaurantsPage() {
         />
         <div className="relative">
           <select
+            aria-label="Filter by subscription tier"
             value={tierFilter}
             onChange={(e) => setTierFilter(e.target.value as SubscriptionTier | "ALL")}
-            className="pl-s pr-8 py-s rounded-lg border border-outline-variant bg-surface-container text-p2 text-primary-text outline-none focus:border-primary appearance-none cursor-pointer"
+            className="pl-s pr-xl py-s rounded-lg border border-outline-variant bg-surface-container text-p2 text-primary-text outline-none focus:border-primary appearance-none cursor-pointer"
           >
             <option value="ALL">All Tiers</option>
             {TIER_ORDER.map((t) => (
@@ -71,9 +73,10 @@ export default function RestaurantsPage() {
         </div>
         <div className="relative">
           <select
+            aria-label="Filter by status"
             value={statusFilter}
             onChange={(e) => setStatusFilter(e.target.value as "ALL" | "ACTIVE" | "INACTIVE")}
-            className="pl-s pr-8 py-s rounded-lg border border-outline-variant bg-surface-container text-p2 text-primary-text outline-none focus:border-primary appearance-none cursor-pointer"
+            className="pl-s pr-xl py-s rounded-lg border border-outline-variant bg-surface-container text-p2 text-primary-text outline-none focus:border-primary appearance-none cursor-pointer"
           >
             <option value="ALL">All Status</option>
             <option value="ACTIVE">Active</option>

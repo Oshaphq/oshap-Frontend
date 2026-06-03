@@ -72,7 +72,7 @@ export default function NotificationSheet({
                     <p className={`text-p2 ${n.read ? "text-secondary-text" : "text-primary-text font-medium"}`}>
                       {n.message}
                     </p>
-                    <p className="text-caption-md text-secondary-text mt-1">
+                    <p className="text-caption-md text-secondary-text mt-xs">
                       {new Date(n.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                     </p>
                   </div>

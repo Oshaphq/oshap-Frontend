@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { NavLink, Outlet, Route, Routes, Navigate } from "react-router";
-import { ThemeToggle } from "@oshap/shared/ui";
+import { PrimaryButton, ThemeToggle } from "@oshap/shared/ui";
+import { setPlatformToken } from "@oshap/shared";
 import DashboardPage from "./routes/dashboard";
 import RestaurantsPage from "./routes/restaurants";
 import RestaurantDetailPage from "./routes/restaurant-detail";
@@ -32,7 +33,11 @@ function PlatformLogin({ onLogin }: { onLogin: () => void }) {
     }
     try {
       sessionStorage.setItem(AUTH_KEY, "1");
-    } catch {}
+    } catch {
+      /* sessionStorage unavailable — auth stays in memory for this load */
+    }
+    // Persist the token so the shared client attaches it as x-platform-token.
+    setPlatformToken(token);
     onLogin();
   };
 
@@ -53,6 +58,7 @@ function PlatformLogin({ onLogin }: { onLogin: () => void }) {
         </p>
         <input
           type="password"
+          aria-label="Platform access code"
           placeholder="Platform access code"
           value={token}
           autoFocus
@@ -65,13 +71,9 @@ function PlatformLogin({ onLogin }: { onLogin: () => void }) {
           }`}
         />
         {error && <p className="text-caption-md text-error self-start">{error}</p>}
-        <button
-          type="submit"
-          disabled={!token}
-          className="w-full py-md rounded-xl font-bold text-p font-display bg-primary text-on-primary transition-all hover:opacity-90 active:scale-[0.98] disabled:opacity-40 disabled:cursor-not-allowed"
-        >
+        <PrimaryButton type="submit" disabled={!token} className="w-full">
           Access Platform
-        </button>
+        </PrimaryButton>
       </form>
     </div>
   );
@@ -81,7 +83,10 @@ function PlatformLayout() {
   const handleLogout = () => {
     try {
       sessionStorage.removeItem(AUTH_KEY);
-    } catch {}
+    } catch {
+      /* sessionStorage unavailable — nothing to clear */
+    }
+    setPlatformToken(null);
     window.location.reload();
   };
 
@@ -121,7 +126,7 @@ function PlatformLayout() {
           <ThemeToggle />
           <button
             onClick={handleLogout}
-            className="w-9 h-9 flex items-center justify-center rounded-4xl bg-surface-container text-secondary-text border-[1.5px] border-transparent hover:bg-error-container hover:text-on-error-container transition-colors"
+            className="w-9 h-9 flex items-center justify-center rounded-4xl bg-surface-container text-secondary-text border border-transparent hover:bg-error-container hover:text-on-error-container transition-colors"
             title="Logout"
           >
             <i className="mgc_exit_line text-lg" />

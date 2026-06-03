@@ -27,7 +27,7 @@ export default function CategoryTabs({
             type="button"
             aria-pressed={active}
             onClick={() => onSelect(cat.name)}
-            className={`shrink-0 py-2 px-md rounded-4xl transition-colors text-label-l4-medium ${
+            className={`shrink-0 py-s px-md rounded-4xl transition-colors text-label-l4-medium ${
               active
                 ? "bg-primary text-on-primary"
                 : "bg-surface-container-high text-on-surface-variant border border-outline-variant/30 hover:bg-surface-container-highest"

@@ -264,12 +264,32 @@
 - "Group View →" link from single-branch analytics page
 
 ### Pillar 3 — Platform Admin App ✅
-- `apps/platform` — new Vite + React + Tailwind app (`npm run dev:platform`, port 5175)
-- `VITE_PLATFORM_TOKEN` gate (static token check, sessionStorage-backed)
+- `apps/platform` — new Vite + React + Tailwind app (`npm run dev:platform`, port 5176)
+- `VITE_PLATFORM_TOKEN` gate: the login screen validates the entered code against it, and the shared client sends it to the backend as the `x-platform-token` header on every `/platform/*` call (sessionStorage-backed)
 - Platform mock routes: `GET/POST/PATCH /platform/restaurants`, `GET /platform/health`
 - `usePlatformRestaurants()`, `usePlatformRestaurant()`, `usePlatformHealth()`, `usePlatformCreateRestaurant()`, `usePlatformUpdateRestaurant()` hooks
 - Routes: `/` (dashboard), `/restaurants`, `/restaurants/new` (2-step wizard), `/restaurants/:id`, `/subscriptions` (mock billing table), `/health` (uptime/latency/error metrics)
 - `apps/platform/vercel.json` for SPA rewrite
+
+---
+
+## Phase 13 — Post-Audit Remediation
+
+**Goal:** Close the gaps found in the backend-integration + design-system audit so the handoff is "connect the real endpoints," not "rebuild architecture."
+**Status:** 🔄 In progress (A–E complete; F in progress)
+**Dependencies:** None — all frontend/contract/docs
+
+| Sub-phase | Scope | Status |
+|---|---|---|
+| (contract sync) | OpenAPI spec updated to match the API layer: `/admin/login`, `/admin/staff*`, `/admin/tables` POST+DELETE, `/admin/inventory*`, `/admin/group*`, `/platform/*`, `branch_id` param, `MenuItem` inventory fields, `/admin/me` `user`; added `platformToken` scheme | ✅ |
+| A — Design system | Chart colors → token CSS vars; platform raw buttons → shared `PrimaryButton`/`SecondaryButton`; spacing utilities → DS tokens (exact-px) | ✅ |
+| B — Data layer | `queryKeys` factory extended to staff/analytics/inventory/group/platform; all inline keys routed through it; `PlatformRestaurantsResponse` moved to `types/` | ✅ |
+| C — Functional | Branch switcher wired (client appends `branch_id` to admin GETs; `AuthContext` owns state + invalidates; mock scopes by branch); CSV export escaping; mock WS relay guarded; `owner_name` handling documented | ✅ |
+| D — Accessibility | `aria-label`s on all unlabeled date inputs / selects / login fields; icon-only buttons verified | ✅ |
+| E — Testing | Vitest + jsdom; `npm test`; 14 data-layer tests (currency, mock customer/admin/branch flows, client error envelope + branch scoping) | ✅ |
+| F — Docs | README platform section + script/ESLint fixes; this phase doc; `AGENTS.md`/`CLAUDE.md` three-app structure | 🔄 |
+
+**Platform auth note for backend:** `/platform/*` endpoints expect an `x-platform-token` header (env `PLATFORM_TOKEN`). The client-side access code is UX only — enforce the token server-side.
 
 ---
 
@@ -290,4 +310,5 @@ Phase 9    ⬜  Real-time push (SSE)        ← after Phase 1
 Phase 10   ⬜  Loyalty + CRM              ← after Phase 6
 Phase 11   ⬜  Reservations + pre-ordering ← after Phase 6
 Phase 12   ✅  Inventory + multi-branch + platform admin
+Phase 13   🔄  Post-audit remediation (A–E done, docs in progress)
 ```

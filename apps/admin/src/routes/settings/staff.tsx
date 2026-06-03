@@ -94,7 +94,7 @@ export default function StaffSettings() {
     );
   }
 
-  const inputClass = "w-full px-md py-s rounded-lg bg-surface-container-lowest border-[1.5px] border-outline-variant text-p2 text-primary-text placeholder:text-outline outline-none focus:border-primary transition-colors";
+  const inputClass = "w-full px-md py-s rounded-lg bg-surface-container-lowest border border-outline-variant text-p2 text-primary-text placeholder:text-outline outline-none focus:border-primary transition-colors";
   const labelClass = "block text-caption-md font-semibold text-primary-text mb-xs";
 
   return (
@@ -104,14 +104,14 @@ export default function StaffSettings() {
           Team Members
         </h2>
         {user?.role === "OWNER" && (
-          <PrimaryButton size="md" onClick={handleOpenNew} className="gap-2">
+          <PrimaryButton size="md" onClick={handleOpenNew} className="gap-s">
             <i className="mgc_add_line" />
             Add Staff
           </PrimaryButton>
         )}
       </div>
 
-      <div className="bg-surface-container rounded-md border-[1.5px] border-transparent hover:border-outline-variant transition-colors overflow-hidden">
+      <div className="bg-surface-container rounded-md border border-transparent hover:border-outline-variant transition-colors overflow-hidden">
         <table className="w-full text-left border-collapse">
           <thead>
             <tr className="bg-surface-container-high border-b border-surface-container-highest">
@@ -129,7 +129,7 @@ export default function StaffSettings() {
                 <td className="py-s px-md text-p2 text-primary-text font-medium">{staff.name}</td>
                 <td className="py-s px-md text-p2 text-secondary-text">{staff.email}</td>
                 <td className="py-s px-md">
-                  <span className="px-xs py-1 bg-surface-container-highest text-primary-text text-label-l4 rounded-md font-mono">
+                  <span className="px-xs py-xs bg-surface-container-highest text-primary-text text-label-l4 rounded-md font-mono">
                     {staff.role}
                   </span>
                 </td>
@@ -167,7 +167,7 @@ export default function StaffSettings() {
 
       {isModalOpen && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center bg-scrim backdrop-blur-sm p-md">
-          <div className="w-full max-w-[448px] rounded-md bg-surface-container p-l flex flex-col gap-md border-[1.5px] border-primary shadow-xl">
+          <div className="w-full max-w-[448px] rounded-md bg-surface-container p-l flex flex-col gap-md border border-primary shadow-xl">
             <h3 className="font-bold text-primary-text">
               {editingId ? "Edit Staff" : "Add Staff"}
             </h3>

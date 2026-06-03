@@ -1,35 +1,37 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { request } from "../api/client";
+import { queryKeys } from "../api/keys";
 import type {
   PlatformRestaurant,
+  PlatformRestaurantsResponse,
   PlatformSystemHealth,
   PlatformCreateRestaurantRequest,
   PlatformUpdateRestaurantRequest,
 } from "../types/index";
 
-interface PlatformRestaurantsResponse {
-  restaurants: PlatformRestaurant[];
-}
-
 export function usePlatformRestaurants() {
   return useQuery({
-    queryKey: ["platform", "restaurants"],
-    queryFn: () => request<PlatformRestaurantsResponse>("/platform/restaurants"),
+    queryKey: queryKeys.platform.restaurants(),
+    queryFn: () =>
+      request<PlatformRestaurantsResponse>("/platform/restaurants", { platform: true }),
   });
 }
 
 export function usePlatformRestaurant(id: string) {
   return useQuery({
-    queryKey: ["platform", "restaurants", id],
-    queryFn: () => request<PlatformRestaurant>(`/platform/restaurants/${encodeURIComponent(id)}`),
+    queryKey: queryKeys.platform.restaurant(id),
+    queryFn: () =>
+      request<PlatformRestaurant>(`/platform/restaurants/${encodeURIComponent(id)}`, {
+        platform: true,
+      }),
     enabled: !!id,
   });
 }
 
 export function usePlatformHealth() {
   return useQuery({
-    queryKey: ["platform", "health"],
-    queryFn: () => request<PlatformSystemHealth>("/platform/health"),
+    queryKey: queryKeys.platform.health(),
+    queryFn: () => request<PlatformSystemHealth>("/platform/health", { platform: true }),
     refetchInterval: 30_000,
   });
 }
@@ -41,9 +43,10 @@ export function usePlatformCreateRestaurant() {
       request<PlatformRestaurant>("/platform/restaurants", {
         method: "POST",
         body: payload,
+        platform: true,
       }),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["platform", "restaurants"] });
+      queryClient.invalidateQueries({ queryKey: queryKeys.platform.restaurants() });
     },
   });
 }
@@ -55,10 +58,11 @@ export function usePlatformUpdateRestaurant() {
       request<PlatformRestaurant>(`/platform/restaurants/${encodeURIComponent(id)}`, {
         method: "PATCH",
         body: payload,
+        platform: true,
       }),
     onSuccess: (_data, { id }) => {
-      queryClient.invalidateQueries({ queryKey: ["platform", "restaurants"] });
-      queryClient.invalidateQueries({ queryKey: ["platform", "restaurants", id] });
+      queryClient.invalidateQueries({ queryKey: queryKeys.platform.restaurants() });
+      queryClient.invalidateQueries({ queryKey: queryKeys.platform.restaurant(id) });
     },
   });
 }

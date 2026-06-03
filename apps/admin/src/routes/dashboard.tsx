@@ -156,7 +156,7 @@ export default function DashboardPage() {
           return (
             <div
               key={table.id}
-              className={`rounded-md p-md flex flex-col gap-s border-[1.5px] transition-colors min-h-[120px] ${cardCls}`}
+              className={`rounded-md p-md flex flex-col gap-s border transition-colors min-h-[120px] ${cardCls}`}
             >
               <div className="flex items-center justify-between">
                 <span className="font-display text-display-h3 font-semibold text-primary-text">

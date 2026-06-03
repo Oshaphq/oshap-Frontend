@@ -34,5 +34,17 @@ export const queryKeys = {
       ["admin", "history", page, perPage, table, date] as const,
     tables: () => ["admin", "tables"] as const,
     settings: () => ["admin", "settings"] as const,
+    staff: () => ["admin", "staff"] as const,
+    analytics: (startDate: string, endDate: string) =>
+      ["admin", "analytics", startDate, endDate] as const,
+    inventoryAlerts: () => ["admin", "inventory", "alerts"] as const,
+    group: () => ["admin", "group"] as const,
+    groupAnalytics: () => ["admin", "group", "analytics"] as const,
+  },
+  platform: {
+    all: ["platform"] as const,
+    restaurants: () => ["platform", "restaurants"] as const,
+    restaurant: (id: string) => ["platform", "restaurants", id] as const,
+    health: () => ["platform", "health"] as const,
   },
 } as const;

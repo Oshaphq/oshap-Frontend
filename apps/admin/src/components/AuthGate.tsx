@@ -6,19 +6,9 @@ import { initFCM } from "../utils/fcm";
 import AlertCenter from "./AlertCenter";
 import { useAuth } from "../context/AuthContext";
 
-const BRANCH_KEY = "oshap-active-branch";
-
-function readStoredBranch(): string | null {
-  try {
-    return localStorage.getItem(BRANCH_KEY);
-  } catch {
-    return null;
-  }
-}
-
 export default function AuthGate() {
   const navigate = useNavigate();
-  const { user, isAuthenticated, isLoading, login, logout } = useAuth();
+  const { user, isAuthenticated, isLoading, login, logout, activeBranchId, setActiveBranch } = useAuth();
   const groupQuery = useAdminGroup();
 
   const [email, setEmail] = useState("");
@@ -26,7 +16,6 @@ export default function AuthGate() {
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState("");
   const [isLoggingIn, setIsLoggingIn] = useState(false);
-  const [activeBranchId, setActiveBranchId] = useState<string>(() => readStoredBranch() ?? "");
   const [menuOpen, setMenuOpen] = useState(false);
 
   useEffect(() => {
@@ -88,6 +77,7 @@ export default function AuthGate() {
           <input
             className={`w-full px-md py-md rounded-lg bg-surface-container-lowest border-2 text-p text-primary-text placeholder:text-outline outline-none transition-colors ${error ? "border-error" : "border-outline-variant focus:border-primary"}`}
             type="email"
+            aria-label="Email address"
             placeholder="Email address"
             value={email}
             onChange={(e) => {
@@ -101,6 +91,7 @@ export default function AuthGate() {
           <div className="w-full relative">
             <input
               type={showPassword ? "text" : "password"}
+              aria-label="Password"
               placeholder="Password"
               value={password}
               onChange={(e) => {
@@ -139,13 +130,6 @@ export default function AuthGate() {
   const showBranchSelector =
     user?.role === "OWNER" && (group?.branches.length ?? 0) > 1;
 
-  const handleBranchChange = (id: string) => {
-    setActiveBranchId(id);
-    try {
-      localStorage.setItem(BRANCH_KEY, id);
-    } catch {}
-  };
-
   // Role-based tabs
   const tabs = [];
   if (["OWNER", "MANAGER", "WAITER", "CASHIER"].includes(user.role)) {
@@ -163,6 +147,9 @@ export default function AuthGate() {
   }
   if (user.role === "OWNER") {
     tabs.push({ to: "/analytics", label: "Analytics" });
+    if (group && group.branches && group.branches.length > 1) {
+      tabs.push({ to: "/analytics/group", label: "Group Analytics" });
+    }
   }
 
   return (
@@ -202,9 +189,10 @@ export default function AuthGate() {
             {showBranchSelector && group && (
               <div className="relative">
                 <select
+                  aria-label="Active branch"
                   value={activeBranchId}
-                  onChange={(e) => handleBranchChange(e.target.value)}
-                  className="pl-s pr-8 py-xs rounded-lg border border-outline-variant bg-surface-container text-caption-md text-primary-text font-semibold outline-none focus:border-primary appearance-none cursor-pointer max-w-[160px]"
+                  onChange={(e) => setActiveBranch(e.target.value)}
+                  className="pl-s pr-xl py-xs rounded-lg border border-outline-variant bg-surface-container text-caption-md text-primary-text font-semibold outline-none focus:border-primary appearance-none cursor-pointer max-w-[160px]"
                 >
                   <option value="">All Branches</option>
                   {group.branches.map((b) => (
@@ -231,7 +219,7 @@ export default function AuthGate() {
             )}
             <button
               onClick={handleLogout}
-              className="w-9 h-9 flex items-center justify-center rounded-4xl bg-surface-container text-secondary-text border-[1.5px] border-transparent hover:bg-error-container hover:text-on-error-container transition-colors"
+              className="w-9 h-9 flex items-center justify-center rounded-4xl bg-surface-container text-secondary-text border border-transparent hover:bg-error-container hover:text-on-error-container transition-colors"
               title="Logout"
             >
               <i className="mgc_exit_line text-lg" />

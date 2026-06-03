@@ -1,5 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { request } from "../api/client";
+import { queryKeys } from "../api/keys";
 import type {
   AdminInventoryAlertsResponse,
   InventoryUpdateRequest,
@@ -14,7 +15,7 @@ import type {
 
 export function useAdminInventoryAlerts() {
   return useQuery({
-    queryKey: ["admin", "inventory", "alerts"],
+    queryKey: queryKeys.admin.inventoryAlerts(),
     queryFn: () =>
       request<AdminInventoryAlertsResponse>("/admin/inventory/alerts", { admin: true }),
     refetchInterval: 60_000,
@@ -31,9 +32,9 @@ export function useAdminUpdateStock() {
         admin: true,
       }),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["admin", "menu"] });
-      queryClient.invalidateQueries({ queryKey: ["admin", "inventory", "alerts"] });
-      queryClient.invalidateQueries({ queryKey: ["menu"] });
+      queryClient.invalidateQueries({ queryKey: queryKeys.admin.menu() });
+      queryClient.invalidateQueries({ queryKey: queryKeys.admin.inventoryAlerts() });
+      queryClient.invalidateQueries({ queryKey: queryKeys.menu.all });
     },
   });
 }
@@ -44,14 +45,14 @@ export function useAdminUpdateStock() {
 
 export function useAdminGroup() {
   return useQuery({
-    queryKey: ["admin", "group"],
+    queryKey: queryKeys.admin.group(),
     queryFn: () => request<RestaurantGroup>("/admin/group", { admin: true }),
   });
 }
 
 export function useAdminGroupAnalytics() {
   return useQuery({
-    queryKey: ["admin", "group", "analytics"],
+    queryKey: queryKeys.admin.groupAnalytics(),
     queryFn: () =>
       request<GroupAnalyticsResponse>("/admin/group/analytics", { admin: true }),
   });

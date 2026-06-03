@@ -68,7 +68,7 @@ export function useAdminUploadSettingsImage() {
 
 export function useAdminStaff() {
   return useQuery({
-    queryKey: ["admin", "staff"],
+    queryKey: queryKeys.admin.staff(),
     queryFn: adminGetStaff,
   });
 }
@@ -78,7 +78,7 @@ export function useAdminCreateStaff() {
   return useMutation({
     mutationFn: (payload: CreateStaffRequest) => adminCreateStaff(payload),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["admin", "staff"] });
+      queryClient.invalidateQueries({ queryKey: queryKeys.admin.staff() });
     },
   });
 }
@@ -89,7 +89,7 @@ export function useAdminUpdateStaff() {
     mutationFn: ({ id, payload }: { id: string; payload: UpdateStaffRequest }) =>
       adminUpdateStaff(id, payload),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["admin", "staff"] });
+      queryClient.invalidateQueries({ queryKey: queryKeys.admin.staff() });
     },
   });
 }
@@ -99,7 +99,7 @@ export function useAdminDeleteStaff() {
   return useMutation({
     mutationFn: (id: string) => adminDeleteStaff(id),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["admin", "staff"] });
+      queryClient.invalidateQueries({ queryKey: queryKeys.admin.staff() });
     },
   });
 }
@@ -206,7 +206,7 @@ export function useAdminHistory(query: AdminHistoryQuery = {}) {
 
 export function useAdminAnalytics(startDate: string, endDate: string) {
   return useQuery({
-    queryKey: ["admin", "analytics", startDate, endDate],
+    queryKey: queryKeys.admin.analytics(startDate, endDate),
     queryFn: () => adminAnalytics({ start_date: startDate, end_date: endDate }),
   });
 }

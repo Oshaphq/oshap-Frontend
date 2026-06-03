@@ -502,6 +502,10 @@ export interface PlatformRestaurant extends Restaurant {
   monthly_orders: number;
 }
 
+export interface PlatformRestaurantsResponse {
+  restaurants: PlatformRestaurant[];
+}
+
 export interface PlatformSystemHealth {
   api_uptime_pct: number;
   avg_response_ms: number;

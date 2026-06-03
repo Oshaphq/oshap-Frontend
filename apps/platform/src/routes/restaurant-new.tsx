@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router";
 import { usePlatformCreateRestaurant } from "@oshap/shared";
 import type { SubscriptionTier } from "@oshap/shared";
-import { toast } from "@oshap/shared/ui";
+import { PrimaryButton, SecondaryButton, toast } from "@oshap/shared/ui";
 
 const TIERS: SubscriptionTier[] = ["FREE", "STARTER", "PRO", "ENTERPRISE"];
 
@@ -74,7 +74,7 @@ export default function RestaurantNewPage() {
   };
 
   const inputClass =
-    "w-full px-md py-s rounded-lg bg-surface-container-lowest border-[1.5px] border-outline-variant text-p2 text-primary-text placeholder:text-outline outline-none focus:border-primary transition-colors";
+    "w-full px-md py-s rounded-lg bg-surface-container-lowest border border-outline-variant text-p2 text-primary-text placeholder:text-outline outline-none focus:border-primary transition-colors";
 
   return (
     <main className="p-md flex flex-col gap-l max-w-xl">
@@ -107,9 +107,9 @@ export default function RestaurantNewPage() {
         <form onSubmit={handleNext} className="flex flex-col gap-md">
           <div className="bg-surface-container rounded-md p-md flex flex-col gap-md">
             <h2 className="text-label-l2 font-semibold text-primary-text">Restaurant Details</h2>
-            <input className={inputClass} placeholder="Restaurant name *" value={form.name} onChange={set("name")} />
-            <input className={inputClass} placeholder="Owner full name *" value={form.owner_name} onChange={set("owner_name")} />
-            <input className={inputClass} type="email" placeholder="Owner email *" value={form.owner_email} onChange={set("owner_email")} />
+            <input className={inputClass} aria-label="Restaurant name" placeholder="Restaurant name *" value={form.name} onChange={set("name")} />
+            <input className={inputClass} aria-label="Owner full name" placeholder="Owner full name *" value={form.owner_name} onChange={set("owner_name")} />
+            <input className={inputClass} type="email" aria-label="Owner email" placeholder="Owner email *" value={form.owner_email} onChange={set("owner_email")} />
           </div>
 
           <div className="bg-surface-container rounded-md p-md flex flex-col gap-md">
@@ -133,12 +133,7 @@ export default function RestaurantNewPage() {
             </div>
           </div>
 
-          <button
-            type="submit"
-            className="py-md rounded-xl font-bold text-p font-display bg-primary text-on-primary hover:opacity-90 active:scale-[0.98] transition-all"
-          >
-            Next →
-          </button>
+          <PrimaryButton type="submit">Next →</PrimaryButton>
         </form>
       )}
 
@@ -150,6 +145,7 @@ export default function RestaurantNewPage() {
               className={inputClass}
               type="number"
               min={1}
+              aria-label="Number of tables"
               placeholder="Number of tables (default 10)"
               value={form.table_count}
               onChange={set("table_count")}
@@ -158,26 +154,18 @@ export default function RestaurantNewPage() {
 
           <div className="bg-surface-container rounded-md p-md flex flex-col gap-md">
             <h2 className="text-label-l2 font-semibold text-primary-text">Bank Details (optional)</h2>
-            <input className={inputClass} placeholder="Bank name" value={form.bank_name} onChange={set("bank_name")} />
-            <input className={inputClass} placeholder="Account number" value={form.account_number} onChange={set("account_number")} />
-            <input className={inputClass} placeholder="Account name" value={form.account_name} onChange={set("account_name")} />
+            <input className={inputClass} aria-label="Bank name" placeholder="Bank name" value={form.bank_name} onChange={set("bank_name")} />
+            <input className={inputClass} aria-label="Account number" placeholder="Account number" value={form.account_number} onChange={set("account_number")} />
+            <input className={inputClass} aria-label="Account name" placeholder="Account name" value={form.account_name} onChange={set("account_name")} />
           </div>
 
           <div className="flex gap-s">
-            <button
-              type="button"
-              onClick={() => setStep(1)}
-              className="flex-1 py-md rounded-xl font-bold text-p font-display border border-outline-variant text-secondary-text hover:bg-surface-container-high transition-all"
-            >
+            <SecondaryButton onClick={() => setStep(1)} className="flex-1">
               ← Back
-            </button>
-            <button
-              type="submit"
-              disabled={create.isPending}
-              className="flex-1 py-md rounded-xl font-bold text-p font-display bg-primary text-on-primary hover:opacity-90 active:scale-[0.98] disabled:opacity-50 transition-all"
-            >
+            </SecondaryButton>
+            <PrimaryButton type="submit" disabled={create.isPending} className="flex-1">
               {create.isPending ? "Creating..." : "Create Restaurant"}
-            </button>
+            </PrimaryButton>
           </div>
         </form>
       )}

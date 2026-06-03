@@ -25,8 +25,16 @@ tags:
     description: Payment claims and confirmation
   - name: Admin
     description: Merchant dashboard (kitchen, history, menu mgmt, table mgmt)
+  - name: Inventory
+    description: Stock tracking and low-stock alerts
+  - name: Group
+    description: Multi-branch group overview and analytics
+  - name: Platform
+    description: Internal operator portal (tenant onboarding, subscriptions, health)
   - name: Devices
     description: FCM push notification registration
+  - name: Events
+    description: Server-Sent Events stream
 
 # =========================================================================
 # Security
@@ -40,6 +48,28 @@ components:
       in: header
       name: x-admin-pin
       description: Admin PIN for merchant operations.
+    platformToken:
+      type: apiKey
+      in: header
+      name: x-platform-token
+      description: >
+        Internal operator credential for the platform portal. Set via the
+        `PLATFORM_TOKEN` environment variable on the backend. Required by all
+        `/platform/*` endpoints.
+
+  # -----------------------------------------------------------------------
+  # Reusable parameters
+  # -----------------------------------------------------------------------
+  parameters:
+    BranchId:
+      name: branch_id
+      in: query
+      required: false
+      schema: { type: string, format: uuid }
+      description: >
+        Scope the response to a single branch of a multi-branch group. Sent by
+        the admin app when an OWNER selects a branch from the branch switcher.
+        Omitted = the owner's default scope (all branches / home branch).
 
   # -----------------------------------------------------------------------
   # Schemas
@@ -83,7 +113,14 @@ components:
         image_url: { type: string, nullable: true }
         available: { type: boolean }
         sort_order: { type: integer }
-      required: [id, restaurant_id, name, price, category, available, sort_order]
+        stock_count:
+          type: integer
+          nullable: true
+          description: Remaining stock. `null` = inventory tracking disabled for this item.
+        low_stock_threshold:
+          type: integer
+          description: Stock level at or below which a low-stock alert fires.
+      required: [id, restaurant_id, name, price, category, available, sort_order, low_stock_threshold]
 
     OrderItem:
       type: object
@@ -500,6 +537,216 @@ components:
       properties:
         success: { type: boolean, enum: [true] }
 
+    # ---- Identity / Staff (RBAC) ----
+    Role:
+      type: string
+      enum: [OWNER, MANAGER, CASHIER, WAITER, KITCHEN, BARTENDER]
+
+    StaffMember:
+      type: object
+      properties:
+        id: { type: string, format: uuid }
+        name: { type: string }
+        email: { type: string, format: email }
+        role: { $ref: "#/components/schemas/Role" }
+        created_at: { type: string, format: date-time }
+      required: [id, name, email, role, created_at]
+
+    AdminLoginRequest:
+      type: object
+      properties:
+        email: { type: string, format: email }
+        password: { type: string }
+      required: [email]
+
+    AdminLoginResponse:
+      type: object
+      properties:
+        token: { type: string, description: Admin PIN/token sent as x-admin-pin on subsequent calls. }
+        user: { $ref: "#/components/schemas/StaffMember" }
+        restaurant: { $ref: "#/components/schemas/Restaurant" }
+      required: [token, user, restaurant]
+
+    AdminMeResponse:
+      type: object
+      properties:
+        restaurant: { $ref: "#/components/schemas/Restaurant" }
+        user: { $ref: "#/components/schemas/StaffMember" }
+      required: [restaurant, user]
+
+    CreateStaffRequest:
+      type: object
+      properties:
+        name: { type: string }
+        email: { type: string, format: email }
+        role: { $ref: "#/components/schemas/Role" }
+        password: { type: string }
+      required: [name, email, role]
+
+    UpdateStaffRequest:
+      type: object
+      properties:
+        name: { type: string }
+        email: { type: string, format: email }
+        role: { $ref: "#/components/schemas/Role" }
+        password: { type: string }
+
+    # ---- Table management ----
+    AdminCreateTableRequest:
+      type: object
+      properties:
+        id: { type: string, description: 'Human-facing table label, e.g. "T1".' }
+      required: [id]
+
+    AdminCreateTableResponse:
+      type: object
+      properties:
+        success: { type: boolean, enum: [true] }
+        table_id: { type: string }
+      required: [success, table_id]
+
+    AdminDeleteTableResponse:
+      type: object
+      properties:
+        success: { type: boolean, enum: [true] }
+        table_id: { type: string }
+      required: [success, table_id]
+
+    # ---- Inventory ----
+    LowStockAlert:
+      type: object
+      properties:
+        item_id: { type: string, format: uuid }
+        name: { type: string }
+        category: { type: string }
+        stock_count: { type: integer }
+        threshold: { type: integer }
+      required: [item_id, name, category, stock_count, threshold]
+
+    InventoryUpdateRequest:
+      type: object
+      properties:
+        stock_count:
+          type: integer
+          nullable: true
+          description: New stock level, or `null` to disable tracking.
+        low_stock_threshold: { type: integer }
+      required: [stock_count]
+
+    InventoryUpdateResponse:
+      type: object
+      properties:
+        success: { type: boolean, enum: [true] }
+        item: { $ref: "#/components/schemas/MenuItem" }
+      required: [success, item]
+
+    AdminInventoryAlertsResponse:
+      type: object
+      properties:
+        alerts:
+          type: array
+          items: { $ref: "#/components/schemas/LowStockAlert" }
+      required: [alerts]
+
+    # ---- Multi-branch group ----
+    RestaurantBranch:
+      allOf:
+        - $ref: "#/components/schemas/Restaurant"
+        - type: object
+          properties:
+            is_active: { type: boolean }
+            table_count: { type: integer }
+            staff_count: { type: integer }
+          required: [is_active, table_count, staff_count]
+
+    RestaurantGroup:
+      type: object
+      properties:
+        id: { type: string }
+        name: { type: string }
+        branches:
+          type: array
+          items: { $ref: "#/components/schemas/RestaurantBranch" }
+      required: [id, name, branches]
+
+    GroupBranchAnalytics:
+      type: object
+      properties:
+        branch_id: { type: string }
+        branch_name: { type: string }
+        total_revenue: { type: integer }
+        total_orders: { type: integer }
+        avg_order_value: { type: integer }
+      required: [branch_id, branch_name, total_revenue, total_orders, avg_order_value]
+
+    GroupAnalyticsResponse:
+      type: object
+      properties:
+        group_name: { type: string }
+        total_revenue: { type: integer }
+        total_orders: { type: integer }
+        branches:
+          type: array
+          items: { $ref: "#/components/schemas/GroupBranchAnalytics" }
+      required: [group_name, total_revenue, total_orders, branches]
+
+    # ---- Platform admin ----
+    SubscriptionTier:
+      type: string
+      enum: [FREE, STARTER, PRO, ENTERPRISE]
+
+    PlatformRestaurant:
+      allOf:
+        - $ref: "#/components/schemas/Restaurant"
+        - type: object
+          properties:
+            subscription_tier: { $ref: "#/components/schemas/SubscriptionTier" }
+            is_active: { type: boolean }
+            created_at: { type: string, format: date-time }
+            owner_email: { type: string, format: email }
+            table_count: { type: integer }
+            monthly_orders: { type: integer }
+          required: [subscription_tier, is_active, created_at, owner_email, table_count, monthly_orders]
+
+    PlatformRestaurantsResponse:
+      type: object
+      properties:
+        restaurants:
+          type: array
+          items: { $ref: "#/components/schemas/PlatformRestaurant" }
+      required: [restaurants]
+
+    PlatformSystemHealth:
+      type: object
+      properties:
+        api_uptime_pct: { type: number }
+        avg_response_ms: { type: number }
+        error_rate_pct: { type: number }
+        active_sessions: { type: integer }
+        total_restaurants: { type: integer }
+        total_orders_today: { type: integer }
+      required: [api_uptime_pct, avg_response_ms, error_rate_pct, active_sessions, total_restaurants, total_orders_today]
+
+    PlatformCreateRestaurantRequest:
+      type: object
+      properties:
+        name: { type: string }
+        owner_name: { type: string }
+        owner_email: { type: string, format: email }
+        subscription_tier: { $ref: "#/components/schemas/SubscriptionTier" }
+        table_count: { type: integer }
+        bank_name: { type: string }
+        account_number: { type: string }
+        account_name: { type: string }
+      required: [name, owner_name, owner_email, subscription_tier, table_count]
+
+    PlatformUpdateRestaurantRequest:
+      type: object
+      properties:
+        name: { type: string }
+        subscription_tier: { $ref: "#/components/schemas/SubscriptionTier" }
+        is_active: { type: boolean }
+
     Error:
       type: object
       properties:
@@ -819,28 +1066,136 @@ paths:
   # =========================================================================
   # ADMIN — Identity
   # =========================================================================
+  /admin/login:
+    post:
+      tags: [Admin]
+      summary: Authenticate a staff member by email + password
+      description: >
+        Returns a `token` (used as the `x-admin-pin` header on subsequent
+        admin calls), the authenticated `user` (with role for RBAC), and the
+        `restaurant` they manage.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/AdminLoginRequest" }
+      responses:
+        "200":
+          description: Authenticated
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/AdminLoginResponse" }
+        "401":
+          description: Invalid credentials
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+
   /admin/me:
     get:
       tags: [Admin]
-      summary: Return the restaurant scoped to the current PIN
+      summary: Return the restaurant and staff member scoped to the current PIN
       description: >
-        Called by the admin app right after PIN verification to discover which
-        restaurant this PIN manages. The frontend stores `restaurant` in
-        sessionStorage and uses `restaurant.id` for FCM device registration.
-        One PIN maps to exactly one restaurant.
+        Called by the admin app right after login to discover which restaurant
+        this PIN manages and which staff member (and role) it belongs to. The
+        frontend stores `restaurant` in sessionStorage and uses `restaurant.id`
+        for FCM device registration, and `user.role` to gate RBAC tabs.
       security: [{ adminPin: [] }]
       responses:
         "200":
-          description: Restaurant identity
+          description: Restaurant + staff identity
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/AdminMeResponse" }
+        "401":
+          description: Invalid PIN
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+
+  # =========================================================================
+  # ADMIN — Staff (RBAC)
+  # =========================================================================
+  /admin/staff:
+    get:
+      tags: [Admin]
+      summary: List staff members
+      security: [{ adminPin: [] }]
+      responses:
+        "200":
+          description: Staff list
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/StaffMember" }
+    post:
+      tags: [Admin]
+      summary: Create a staff member
+      security: [{ adminPin: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/CreateStaffRequest" }
+      responses:
+        "201":
+          description: Created staff member
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/StaffMember" }
+        "400":
+          description: Missing fields or email already exists
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+
+  /admin/staff/{id}:
+    patch:
+      tags: [Admin]
+      summary: Update a staff member
+      security: [{ adminPin: [] }]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/UpdateStaffRequest" }
+      responses:
+        "200":
+          description: Updated staff member
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/StaffMember" }
+        "404":
+          description: Staff not found
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+    delete:
+      tags: [Admin]
+      summary: Delete a staff member
+      security: [{ adminPin: [] }]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+      responses:
+        "200":
+          description: Deleted
           content:
             application/json:
               schema:
                 type: object
                 properties:
-                  restaurant: { $ref: "#/components/schemas/Restaurant" }
-                required: [restaurant]
-        "401":
-          description: Invalid PIN
+                  success: { type: boolean, enum: [true] }
+        "400":
+          description: Cannot delete the last owner
           content:
             application/json:
               schema: { $ref: "#/components/schemas/Error" }
@@ -916,6 +1271,8 @@ paths:
       tags: [Admin]
       summary: List all tables with active order summaries
       security: [{ adminPin: [] }]
+      parameters:
+        - $ref: "#/components/parameters/BranchId"
       responses:
         "200":
           description: Table status list
@@ -927,6 +1284,131 @@ paths:
           content:
             application/json:
               schema: { $ref: "#/components/schemas/Error" }
+    post:
+      tags: [Admin]
+      summary: Create a new table
+      security: [{ adminPin: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/AdminCreateTableRequest" }
+      responses:
+        "201":
+          description: Table created
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/AdminCreateTableResponse" }
+        "400":
+          description: Table ID is required
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+        "409":
+          description: Table already exists
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+
+  /admin/tables/{id}:
+    delete:
+      tags: [Admin]
+      summary: Delete a table
+      description: Fails if the table has active orders.
+      security: [{ adminPin: [] }]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string }
+      responses:
+        "200":
+          description: Table deleted
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/AdminDeleteTableResponse" }
+        "404":
+          description: Table not found
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+        "409":
+          description: Cannot delete a table with active orders
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+
+  # =========================================================================
+  # ADMIN — Inventory
+  # =========================================================================
+  /admin/inventory/{id}:
+    patch:
+      tags: [Inventory]
+      summary: Update stock count / low-stock threshold for a menu item
+      description: >
+        Setting `stock_count` to a positive value re-enables a sold-out item.
+        Setting it to `null` disables inventory tracking for the item.
+      security: [{ adminPin: [] }]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/InventoryUpdateRequest" }
+      responses:
+        "200":
+          description: Stock updated
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/InventoryUpdateResponse" }
+        "404":
+          description: Item not found
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+
+  /admin/inventory/alerts:
+    get:
+      tags: [Inventory]
+      summary: List items at or below their low-stock threshold
+      security: [{ adminPin: [] }]
+      responses:
+        "200":
+          description: Low-stock alerts
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/AdminInventoryAlertsResponse" }
+
+  # =========================================================================
+  # ADMIN — Multi-branch group
+  # =========================================================================
+  /admin/group:
+    get:
+      tags: [Group]
+      summary: Get the restaurant group and its branches
+      security: [{ adminPin: [] }]
+      responses:
+        "200":
+          description: Restaurant group
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/RestaurantGroup" }
+
+  /admin/group/analytics:
+    get:
+      tags: [Group]
+      summary: Aggregated revenue/orders across all branches
+      security: [{ adminPin: [] }]
+      responses:
+        "200":
+          description: Group analytics
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/GroupAnalyticsResponse" }
 
   # -----------------------------------------------------------------------
   # ADMIN — Kitchen
@@ -941,6 +1423,8 @@ paths:
         Orders that have moved past READY (PAYMENT_PENDING, CONFIRMED,
         CANCELLED) are excluded.
       security: [{ adminPin: [] }]
+      parameters:
+        - $ref: "#/components/parameters/BranchId"
       responses:
         "200":
           description: Kitchen orders
@@ -993,6 +1477,7 @@ paths:
           in: query
           schema: { type: string, format: date }
           description: Filter by date (YYYY-MM-DD).
+        - $ref: "#/components/parameters/BranchId"
       responses:
         "200":
           description: Paginated history
@@ -1019,6 +1504,7 @@ paths:
           required: true
           schema: { type: string, format: date }
           description: End date for aggregation (YYYY-MM-DD).
+        - $ref: "#/components/parameters/BranchId"
       responses:
         "200":
           description: Analytics data
@@ -1034,6 +1520,8 @@ paths:
       tags: [Admin]
       summary: List all menu items (including unavailable)
       security: [{ adminPin: [] }]
+      parameters:
+        - $ref: "#/components/parameters/BranchId"
       responses:
         "200":
           description: Menu items
@@ -1210,6 +1698,95 @@ paths:
           content:
             application/json:
               schema: { $ref: "#/components/schemas/Error" }
+
+  # =========================================================================
+  # PLATFORM — Internal operator portal
+  # =========================================================================
+  /platform/restaurants:
+    get:
+      tags: [Platform]
+      summary: List all tenant restaurants
+      security: [{ platformToken: [] }]
+      responses:
+        "200":
+          description: Tenant list
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/PlatformRestaurantsResponse" }
+    post:
+      tags: [Platform]
+      summary: Onboard a new tenant restaurant
+      security: [{ platformToken: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/PlatformCreateRestaurantRequest" }
+      responses:
+        "201":
+          description: Restaurant created
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/PlatformRestaurant" }
+
+  /platform/restaurants/{id}:
+    get:
+      tags: [Platform]
+      summary: Get a single tenant restaurant
+      security: [{ platformToken: [] }]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+      responses:
+        "200":
+          description: Tenant detail
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/PlatformRestaurant" }
+        "404":
+          description: Restaurant not found
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+    patch:
+      tags: [Platform]
+      summary: Update a tenant (name, subscription tier, active status)
+      security: [{ platformToken: [] }]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/PlatformUpdateRestaurantRequest" }
+      responses:
+        "200":
+          description: Updated tenant
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/PlatformRestaurant" }
+        "404":
+          description: Restaurant not found
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+
+  /platform/health:
+    get:
+      tags: [Platform]
+      summary: System health metrics for the operator dashboard
+      security: [{ platformToken: [] }]
+      responses:
+        "200":
+          description: System health snapshot
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/PlatformSystemHealth" }
 
   # =========================================================================
   # FCM — Device registration

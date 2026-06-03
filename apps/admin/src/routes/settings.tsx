@@ -5,7 +5,7 @@ import TablesSettings from "./settings/tables";
 import { useAuth } from "../context/AuthContext";
 
 const tabCls = ({ isActive }: { isActive: boolean }) =>
-  `px-md py-s rounded-lg font-semibold text-caption-md transition-all border-[1.5px] ${
+  `px-md py-s rounded-lg font-semibold text-caption-md transition-all border ${
     isActive
       ? "bg-surface-container text-primary border-outline-variant"
       : "text-secondary-text hover:bg-surface-container-high border-transparent"
@@ -26,7 +26,7 @@ export default function SettingsLayout() {
         </p>
       </header>
 
-      <div className="flex items-center gap-2 border-b border-surface-container-high pb-s flex-wrap">
+      <div className="flex items-center gap-s border-b border-surface-container-high pb-s flex-wrap">
         <NavLink to="/settings/general" className={tabCls}>
           General
         </NavLink>

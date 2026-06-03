@@ -394,10 +394,10 @@ function MenuItemForm({
   };
 
   const inputClass =
-    "px-md py-s rounded-lg bg-surface-container-lowest border-[1.5px] border-outline-variant text-p2 text-primary-text placeholder:text-outline outline-none focus:border-primary transition-colors";
+    "px-md py-s rounded-lg bg-surface-container-lowest border border-outline-variant text-p2 text-primary-text placeholder:text-outline outline-none focus:border-primary transition-colors";
 
   return (
-    <div className="rounded-md bg-surface-container p-l flex flex-col gap-md border-[1.5px] border-primary">
+    <div className="rounded-md bg-surface-container p-l flex flex-col gap-md border border-primary">
       <h3 className="font-bold text-primary-text">{heading}</h3>
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-s">
         <input
@@ -465,7 +465,7 @@ function MenuItemForm({
           <img
             src={form.image_url}
             alt="Preview"
-            className="w-24 h-24 object-cover rounded-lg border-[1.5px] border-outline-variant"
+            className="w-24 h-24 object-cover rounded-lg border border-outline-variant"
           />
         )}
       </div>

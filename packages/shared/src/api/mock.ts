@@ -102,13 +102,25 @@ export function dispatchMockEvent(type: string, payload: any = {}) {
 }
 
 // ---------------------------------------------------------------------------
-// WebSocket Relay for cross-port syncing
+// WebSocket Relay for cross-port syncing.
+//
+// The relay (ws-relay.js, port 5175) is an OPTIONAL dev convenience for syncing
+// mock state across the customer/admin tabs. It's frequently not running, so we
+// guard the connection: failures must not throw or surface as uncaught errors.
+// localStorage events still provide same-port cross-tab sync without it.
 // ---------------------------------------------------------------------------
 if (typeof window !== "undefined") {
-  const ws = new WebSocket("ws://localhost:5175");
-  (window as any).__MOCK_WS__ = ws;
+  let ws: WebSocket | null = null;
+  try {
+    ws = new WebSocket("ws://localhost:5175");
+    // Swallow connection errors — the relay is optional.
+    ws.onerror = () => {};
+    (window as any).__MOCK_WS__ = ws;
+  } catch {
+    ws = null;
+  }
 
-  ws.onmessage = (e) => {
+  if (ws) ws.onmessage = (e) => {
     try {
       const data = JSON.parse(e.data);
       if (data.type === "SYNC_STATE" || data.type === "UPDATE_STATE") {
@@ -316,6 +328,23 @@ function findPayment(orderId: string): Payment | null {
 
 function json(status: number, body: unknown) {
   return { status, body };
+}
+
+// Multi-branch: the seed data all belongs to the home branch (_restaurant.id).
+// When the admin app scopes a request to a different branch via `branch_id`,
+// the mock has no data for it — so we return empty, honestly reflecting a
+// branch with no orders/menu yet. A real backend filters by branch instead.
+function isOtherBranch(query: URLSearchParams): boolean {
+  const b = query.get("branch_id");
+  return !!b && b !== _restaurant.id;
+}
+
+// Deterministic per-branch multiplier so analytics visibly differ per branch.
+function branchFactor(query: URLSearchParams): number {
+  const b = query.get("branch_id");
+  if (b === "rest-002") return 0.7;
+  if (b === "rest-003") return 0.4;
+  return 1;
 }
 
 // ---------------------------------------------------------------------------
@@ -757,7 +786,8 @@ route("POST", /^\/admin\/settings\/upload$/, () => {
   } satisfies UploadResponse);
 });
 
-route("GET", /^\/admin\/tables$/, () => {
+route("GET", /^\/admin\/tables$/, ({ query }) => {
+  if (isOtherBranch(query)) return json(200, { tables: [] } satisfies AdminTablesResponse);
   const allOrders = [..._orders.values()].filter((o) =>
     ["CREATED", "PREPARING", "READY", "PAYMENT_PENDING"].includes(o.status),
   );
@@ -802,7 +832,8 @@ route("DELETE", /^\/admin\/tables\/(.+)$/, ({ path }) => {
   return json(200, { success: true as const, table_id: tableId });
 });
 
-route("GET", /^\/admin\/kitchen$/, () => {
+route("GET", /^\/admin\/kitchen$/, ({ query }) => {
+  if (isOtherBranch(query)) return json(200, []);
   const orders = [..._orders.values()]
     .filter((o) => ["CREATED", "PREPARING", "READY"].includes(o.status))
     .sort((a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime());
@@ -826,6 +857,15 @@ route("PATCH", /^\/admin\/kitchen$/, ({ body }) => {
 route("GET", /^\/admin\/history$/, ({ query }) => {
   const page = parseInt(query.get("page") ?? "1", 10);
   const perPage = parseInt(query.get("per_page") ?? "20", 10);
+
+  if (isOtherBranch(query)) {
+    return json(200, {
+      orders: [],
+      pagination: { page, per_page: perPage, total: 0, total_pages: 0 },
+      summary: { confirmed_count: 0, cancelled_count: 0, page_revenue: 0 },
+    } satisfies AdminHistoryResponse);
+  }
+
   const tableFilter = query.get("table") ?? "";
   const dateFilter = query.get("date") ?? "";
 
@@ -866,7 +906,8 @@ route("GET", /^\/admin\/history$/, ({ query }) => {
   } satisfies AdminHistoryResponse);
 });
 
-route("GET", /^\/admin\/menu$/, () => {
+route("GET", /^\/admin\/menu$/, ({ query }) => {
+  if (isOtherBranch(query)) return json(200, []);
   return json(200, [..._menu].sort((a, b) => a.sort_order - b.sort_order));
 });
 
@@ -1015,6 +1056,9 @@ route("GET", /^\/platform\/restaurants\/(.+)$/, ({ path }) => {
 
 route("POST", /^\/platform\/restaurants$/, ({ body }) => {
   const b = body as import("../types/index").PlatformCreateRestaurantRequest;
+  // `owner_name` is intentionally not stored on the restaurant entity — the
+  // real backend uses it (with `owner_email`) to provision the OWNER staff
+  // account for the new tenant. The response surfaces `owner_email` only.
   const newRest: import("../types/index").PlatformRestaurant = {
     id: uid(),
     name: b.name,
@@ -1145,9 +1189,10 @@ route("GET", /^\/admin\/analytics$/, ({ query }) => {
   let totalRevenue = 0;
   let totalOrders = 0;
   
+  const factor = branchFactor(query);
   for (let i = 0; i < 7; i++) {
-    const rev = Math.floor(Math.random() * 100000) + 20000;
-    const ords = Math.floor(Math.random() * 30) + 10;
+    const rev = Math.floor((Math.random() * 100000 + 20000) * factor);
+    const ords = Math.floor((Math.random() * 30 + 10) * factor);
     totalRevenue += rev;
     totalOrders += ords;
     revenueOverTime.push({

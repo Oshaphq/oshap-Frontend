@@ -27,7 +27,8 @@ Product docs:
 oshap/
 ├── apps/
 │   ├── customer/         Public Vite SPA — /menu /checkout /pay /orders
-│   └── admin/            PIN-gated Vite SPA — / (dashboard) /kitchen /history /menu
+│   ├── admin/            Staff-gated Vite SPA — / (dashboard) /kitchen /history /menu /settings /analytics
+│   └── platform/         Internal operator portal — tenant onboarding, subscriptions, system health
 ├── packages/
 │   └── shared/           Typed API client, TanStack hooks, design tokens, UI primitives
 ├── docs/
@@ -48,8 +49,11 @@ npm install
 
 # No backend needed — mock API auto-activates
 npm run dev:customer   # http://localhost:5173
-npm run dev:admin      # http://localhost:5174 (PIN: 0000)
+npm run dev:admin      # http://localhost:5174 (login: owner@oshap.com / password)
+npm run dev:platform   # http://localhost:5176 (operator portal; any access code in mock)
 ```
+
+> Optional: `node ws-relay.js` (port 5175) syncs mock state across the customer/admin tabs in one browser. Not required — same-port tabs already sync via `localStorage`.
 
 To point at a real backend, set `VITE_API_BASE_URL` in a `.env.local` file (see `.env.example`). The mock API is tree-shaken when a real backend URL is configured.
 
@@ -57,12 +61,12 @@ To point at a real backend, set `VITE_API_BASE_URL` in a `.env.local` file (see 
 
 | Command | What it does |
 |---|---|
-| `npm run dev:customer` / `dev:admin` | Vite dev server for the named app |
-| `npm run build:customer` / `build:admin` | Production build into `apps/*/dist` |
+| `npm run dev:customer` / `dev:admin` / `dev:platform` | Vite dev server for the named app |
+| `npm run build:customer` / `build:admin` / `build:platform` | Production build into `apps/*/dist` |
 | `npm run build` | Builds every workspace |
 | `npm run typecheck` | `tsc --noEmit` across every workspace |
-
-> ESLint isn't configured yet — it's tracked as a Phase 0 follow-up. Typecheck currently catches most categorical issues thanks to strict TS settings.
+| `npm run lint` / `lint:fix` | ESLint (flat config) across the repo |
+| `npm test` / `test:watch` | Vitest — data-layer + mock-API tests (jsdom) |
 
 ## Backend dev — start here
 
@@ -73,7 +77,11 @@ The contract is [`docs/openapi.yaml`](docs/openapi.yaml). Recommended starting p
 3. Stand up the FastAPI app against the OpenAPI spec — every endpoint in `apps/customer` and `apps/admin` is already typed against these schemas.
 4. Read [`docs/fcm-notifications.md`](docs/fcm-notifications.md) for the notification trigger points (order placed, payment claimed, payment verified, issue flagged).
 
-Auth surface (MVP): admin routes expect an `x-admin-pin` header. The customer app is unauthenticated. **One PIN per restaurant** — the admin app calls `GET /admin/me` right after PIN verify to resolve the active restaurant, and uses `restaurant.id` for FCM device registration. There is no `VITE_RESTAURANT_ID` env var.
+Auth surfaces:
+
+- **Customer app** — unauthenticated.
+- **Admin app** — staff log in with email/password (`POST /admin/login`); the returned `token` is sent as the `x-admin-pin` header on every admin call. `GET /admin/me` resolves the staff member (its `role` drives RBAC tab gating) and their restaurant; `restaurant.id` is used for FCM device registration. Roles: `OWNER`, `MANAGER`, `CASHIER`, `WAITER`, `KITCHEN`, `BARTENDER`. Multi-branch owners can scope reads to one branch via the optional `branch_id` query param — the shared client appends it to admin GETs automatically when a branch is selected. There is no `VITE_RESTAURANT_ID` env var.
+- **Platform app** — internal operators authenticate with a platform access code; the shared client sends it as the `x-platform-token` header (backend env `PLATFORM_TOKEN`) on all `/platform/*` calls. **Enforce this server-side — the client-side gate is UX only.**
 
 ### Admin push notifications (FCM)
 
@@ -118,17 +126,18 @@ Use `toast.success(msg)`, `toast.error(msg)`, `toast.info(msg)` from `@oshap/sha
 
 1. Add the request/response types to [`packages/shared/src/types/index.ts`](packages/shared/src/types/index.ts).
 2. Add a typed fetch fn to the matching `packages/shared/src/api/*.ts` (`menu`, `tables`, `orders`, `payments`, `sessions`, `admin`, `devices`).
-3. Add a TanStack Query hook in `packages/shared/src/hooks/`.
+3. Add a key to the `queryKeys` factory in [`packages/shared/src/api/keys.ts`](packages/shared/src/api/keys.ts), then a TanStack Query hook in `packages/shared/src/hooks/` that uses it (don't hand-write inline key arrays — invalidation relies on the factory).
 4. Add a handler in `packages/shared/src/api/mock.ts` so the frontend keeps working without the backend.
 5. Update [`docs/openapi.yaml`](docs/openapi.yaml) so the backend dev sees it.
 6. If the endpoint triggers an FCM push, update [`docs/fcm-notifications.md`](docs/fcm-notifications.md).
 
 ## Deploy (Vercel)
 
-Each app is its own Vercel project pointing at `apps/customer` or `apps/admin` as the Root Directory. Both directories contain a `vercel.json` with an SPA rewrite — required so client-side routes survive page refresh and direct URL hits.
+Each app is its own Vercel project pointing at `apps/customer`, `apps/admin`, or `apps/platform` as the Root Directory. Each directory contains a `vercel.json` with an SPA rewrite — required so client-side routes survive page refresh and direct URL hits.
 
 Per-project env vars (set in Vercel dashboard, **not** committed):
 - `VITE_API_BASE_URL` — the FastAPI backend URL. If unset, the app runs in mock mode (great for previews, not for production).
 - Admin only: `VITE_FCM_API_KEY`, `VITE_FCM_AUTH_DOMAIN`, `VITE_FCM_PROJECT_ID`, `VITE_FCM_STORAGE_BUCKET`, `VITE_FCM_MESSAGING_SENDER_ID`, `VITE_FCM_APP_ID`, `VITE_FCM_VAPID_KEY`.
+- Platform only: `VITE_PLATFORM_TOKEN` — the operator access code (must match the backend's `PLATFORM_TOKEN`). **Always set this in production** — if unset, the client-side gate is open.
 
-The customer app is unauthenticated; the admin app requires the `x-admin-pin` header on every request.
+The customer app is unauthenticated; the admin app requires the `x-admin-pin` header on every request; the platform app requires `x-platform-token`.

@@ -93,12 +93,12 @@ export default function GeneralSettings() {
     );
   }
 
-  const inputClass = "w-full px-md py-s rounded-lg bg-surface-container-lowest border-[1.5px] border-outline-variant text-p2 text-primary-text placeholder:text-outline outline-none focus:border-primary transition-colors disabled:opacity-50 disabled:cursor-not-allowed";
+  const inputClass = "w-full px-md py-s rounded-lg bg-surface-container-lowest border border-outline-variant text-p2 text-primary-text placeholder:text-outline outline-none focus:border-primary transition-colors disabled:opacity-50 disabled:cursor-not-allowed";
   const labelClass = "block text-caption-md font-semibold text-primary-text mb-xs";
 
   return (
     <div className="flex flex-col gap-l pb-10">
-      <div className="bg-surface-container rounded-md p-l flex flex-col gap-md border-[1.5px] border-transparent hover:border-outline-variant transition-colors">
+      <div className="bg-surface-container rounded-md p-l flex flex-col gap-md border border-transparent hover:border-outline-variant transition-colors">
         <h3 className="font-bold text-primary-text">
           General Info
         </h3>
@@ -151,7 +151,7 @@ export default function GeneralSettings() {
               Logo
             </label>
             <div 
-              className="w-32 h-32 rounded-xl bg-surface-container-lowest border-[1.5px] border-dashed border-outline-variant flex items-center justify-center overflow-hidden cursor-pointer hover:border-primary transition-colors"
+              className="w-32 h-32 rounded-xl bg-surface-container-lowest border border-dashed border-outline-variant flex items-center justify-center overflow-hidden cursor-pointer hover:border-primary transition-colors"
               onClick={() => fileInputRef.current?.click()}
             >
               {form.logo_url ? (
@@ -161,7 +161,7 @@ export default function GeneralSettings() {
               ) : (
                 <div className="text-center text-secondary-text">
                   <i className="mgc_upload_line text-2xl" />
-                  <div className="text-caption-md mt-1">Upload</div>
+                  <div className="text-caption-md mt-xs">Upload</div>
                 </div>
               )}
             </div>
@@ -176,7 +176,7 @@ export default function GeneralSettings() {
         </div>
       </div>
 
-      <div className="bg-surface-container rounded-md p-l flex flex-col gap-md border-[1.5px] border-transparent hover:border-outline-variant transition-colors">
+      <div className="bg-surface-container rounded-md p-l flex flex-col gap-md border border-transparent hover:border-outline-variant transition-colors">
         <h3 className="font-bold text-primary-text">
           Operating Hours
         </h3>
@@ -194,7 +194,7 @@ export default function GeneralSettings() {
         </div>
       </div>
 
-      <div className="bg-surface-container rounded-md p-l flex flex-col gap-md border-[1.5px] border-transparent hover:border-outline-variant transition-colors">
+      <div className="bg-surface-container rounded-md p-l flex flex-col gap-md border border-transparent hover:border-outline-variant transition-colors">
         <h3 className="font-bold text-primary-text">
           Bank Details
         </h3>
