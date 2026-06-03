@@ -103,10 +103,10 @@ export default function SubscriptionsPage() {
                   {formatCurrency(revenue)}/mo revenue
                 </span>
               )}
-              <ul className="mt-xs flex flex-col gap-xs">
+              <ul className="flex flex-col gap-s">
                 {TIER_FEATURES[tier].map((f) => (
-                  <li key={f} className="text-caption-xs opacity-75 flex items-start gap-xs">
-                    <i className="mgc_check_line text-sm shrink-0 mt-[1px]" />
+                  <li key={f} className="text-caption-xs opacity-75 flex items-start gap-s">
+                    <i className="mgc_check_line text-sm shrink-0" />
                     {f}
                   </li>
                 ))}
