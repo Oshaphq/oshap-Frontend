@@ -7,16 +7,26 @@ import KitchenPage from "./routes/kitchen";
 import HistoryPage from "./routes/history";
 import MenuPage from "./routes/menu";
 import SettingsPage from "./routes/settings";
-import { AuthProvider } from "./context/AuthContext";
+import AnalyticsPage from "./routes/analytics";
+import { AuthProvider, useAuth } from "./context/AuthContext";
+
+function IndexRoute() {
+  const { user } = useAuth();
+  if (!user) return null;
+  if (["KITCHEN", "BARTENDER"].includes(user.role)) {
+    return <Navigate to="/kitchen" replace />;
+  }
+  return <DashboardPage />;
+}
 
 export default function App() {
   return (
     <AuthProvider>
       <Routes>
         <Route element={<AuthGate />}>
-          {/* Default routes for waiters, cashiers, owners, managers */}
-          <Route element={<RoleGate allowedRoles={["OWNER", "MANAGER", "WAITER", "CASHIER"]} />}>
-            <Route index element={<DashboardPage />} />
+          {/* Default routes based on role */}
+          <Route element={<RoleGate allowedRoles={["OWNER", "MANAGER", "WAITER", "CASHIER", "KITCHEN", "BARTENDER"]} />}>
+            <Route index element={<IndexRoute />} />
           </Route>
 
           {/* Kitchen / Bar orders */}
@@ -29,6 +39,11 @@ export default function App() {
             <Route path="/history" element={<HistoryPage />} />
             <Route path="/menu" element={<MenuPage />} />
             <Route path="/settings/*" element={<SettingsPage />} />
+          </Route>
+
+          {/* Owner only routes */}
+          <Route element={<RoleGate allowedRoles={["OWNER"]} />}>
+            <Route path="/analytics" element={<AnalyticsPage />} />
           </Route>
         </Route>
         <Route path="*" element={<Navigate to="/" replace />} />

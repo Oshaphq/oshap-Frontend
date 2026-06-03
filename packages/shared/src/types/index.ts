@@ -370,3 +370,45 @@ export interface RegisterDeviceRequest {
 export interface RegisterDeviceResponse {
   success: true;
 }
+
+export interface AnalyticsRevenuePoint {
+  date: string;
+  revenue: number;
+  orders: number;
+}
+
+export interface AnalyticsPopularItem {
+  name: string;
+  quantity: number;
+  revenue: number;
+}
+
+export interface AnalyticsPeakHour {
+  hour: string;
+  order_count: number;
+}
+
+export interface AnalyticsTablePerformance {
+  table_id: string;
+  order_count: number;
+  revenue: number;
+}
+
+export interface AnalyticsStaffActivity {
+  staff_name: string;
+  role: string;
+  actions_taken: number;
+}
+
+export interface AdminAnalyticsResponse {
+  summary: {
+    total_revenue: number;
+    total_orders: number;
+    avg_order_value: number;
+  };
+  revenue_over_time: AnalyticsRevenuePoint[];
+  popular_items: AnalyticsPopularItem[];
+  peak_hours: AnalyticsPeakHour[];
+  table_performance: AnalyticsTablePerformance[];
+  staff_activity: AnalyticsStaffActivity[];
+}

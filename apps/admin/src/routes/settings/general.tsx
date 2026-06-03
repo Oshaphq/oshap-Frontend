@@ -5,8 +5,11 @@ import {
   useAdminUploadSettingsImage 
 } from "@oshap/shared/hooks";
 import { PrimaryButton, toast } from "@oshap/shared/ui";
+import { useAuth } from "../../context/AuthContext";
 
 export default function GeneralSettings() {
+  const { user } = useAuth();
+  const isOwner = user?.role === "OWNER";
   const { data: settings, isLoading } = useAdminSettings();
   const updateSettings = useAdminUpdateSettings();
   const uploadImage = useAdminUploadSettingsImage();
@@ -90,7 +93,7 @@ export default function GeneralSettings() {
     );
   }
 
-  const inputClass = "w-full px-md py-s rounded-lg bg-surface-container-lowest border-[1.5px] border-outline-variant text-p2 text-primary-text placeholder:text-outline outline-none focus:border-primary transition-colors";
+  const inputClass = "w-full px-md py-s rounded-lg bg-surface-container-lowest border-[1.5px] border-outline-variant text-p2 text-primary-text placeholder:text-outline outline-none focus:border-primary transition-colors disabled:opacity-50 disabled:cursor-not-allowed";
   const labelClass = "block text-caption-md font-semibold text-primary-text mb-xs";
 
   return (
@@ -206,6 +209,7 @@ export default function GeneralSettings() {
               value={form.bank_name}
               onChange={handleChange}
               className={inputClass}
+              disabled={!isOwner}
             />
           </div>
           <div>
@@ -218,6 +222,7 @@ export default function GeneralSettings() {
               value={form.account_number}
               onChange={handleChange}
               className={inputClass}
+              disabled={!isOwner}
             />
           </div>
           <div className="sm:col-span-2">
@@ -230,6 +235,7 @@ export default function GeneralSettings() {
               value={form.account_name}
               onChange={handleChange}
               className={inputClass}
+              disabled={!isOwner}
             />
           </div>
         </div>

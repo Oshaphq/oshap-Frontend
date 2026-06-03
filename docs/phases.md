@@ -163,7 +163,7 @@
 ## Phase 7 — Analytics Dashboard
 
 **Goal:** Give owners data-driven visibility into operations.
-**Status:** ⬜ Not started
+**Status:** 🔄 In progress
 **Effort:** 2–3 weeks
 **Dependencies:** Phase 6 (owner-only gate)
 

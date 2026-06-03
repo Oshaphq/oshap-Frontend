@@ -138,6 +138,9 @@ export default function AuthGate() {
     tabs.push({ to: "/history", label: "History" });
     tabs.push({ to: "/settings", label: "Settings" });
   }
+  if (user.role === "OWNER") {
+    tabs.push({ to: "/analytics", label: "Analytics" });
+  }
 
   return (
     <div className="min-h-screen bg-surface-container-lowest flex flex-col">

@@ -1,4 +1,5 @@
 import type {
+  AdminAnalyticsResponse,
   AdminCloseRequest,
   AdminCloseResponse,
   AdminHistoryQuery,
@@ -178,6 +179,15 @@ export function adminGetHistory(
       table: query.table,
       date: query.date,
     },
+  });
+}
+
+// ---------- Analytics ----------
+
+export function adminAnalytics(query: { start_date: string; end_date: string }): Promise<AdminAnalyticsResponse> {
+  return request<AdminAnalyticsResponse>("/admin/analytics", {
+    admin: true,
+    query,
   });
 }
 

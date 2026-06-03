@@ -8,6 +8,7 @@ import {
   adminCloseTable,
   adminCreateMenuItem,
   adminDeleteMenuItem,
+  adminAnalytics,
   adminGetHistory,
   adminGetKitchen,
   adminGetSettings,
@@ -196,6 +197,15 @@ export function useAdminHistory(query: AdminHistoryQuery = {}) {
   return useQuery({
     queryKey: queryKeys.admin.history(page, perPage, query.table, query.date),
     queryFn: () => adminGetHistory({ ...query, page, per_page: perPage }),
+  });
+}
+
+// ---------- Analytics ----------
+
+export function useAdminAnalytics(startDate: string, endDate: string) {
+  return useQuery({
+    queryKey: ["admin", "analytics", startDate, endDate],
+    queryFn: () => adminAnalytics({ start_date: startDate, end_date: endDate }),
   });
 }
 

@@ -416,6 +416,72 @@ components:
         summary:
           $ref: "#/components/schemas/AdminHistorySummary"
 
+    AnalyticsRevenuePoint:
+      type: object
+      properties:
+        date: { type: string }
+        revenue: { type: integer }
+        orders: { type: integer }
+      required: [date, revenue, orders]
+
+    AnalyticsPopularItem:
+      type: object
+      properties:
+        name: { type: string }
+        quantity: { type: integer }
+        revenue: { type: integer }
+      required: [name, quantity, revenue]
+
+    AnalyticsPeakHour:
+      type: object
+      properties:
+        hour: { type: string }
+        order_count: { type: integer }
+      required: [hour, order_count]
+
+    AnalyticsTablePerformance:
+      type: object
+      properties:
+        table_id: { type: string }
+        order_count: { type: integer }
+        revenue: { type: integer }
+      required: [table_id, order_count, revenue]
+
+    AnalyticsStaffActivity:
+      type: object
+      properties:
+        staff_name: { type: string }
+        role: { type: string }
+        actions_taken: { type: integer }
+      required: [staff_name, role, actions_taken]
+
+    AdminAnalyticsResponse:
+      type: object
+      properties:
+        summary:
+          type: object
+          properties:
+            total_revenue: { type: integer }
+            total_orders: { type: integer }
+            avg_order_value: { type: integer }
+          required: [total_revenue, total_orders, avg_order_value]
+        revenue_over_time:
+          type: array
+          items: { $ref: "#/components/schemas/AnalyticsRevenuePoint" }
+        popular_items:
+          type: array
+          items: { $ref: "#/components/schemas/AnalyticsPopularItem" }
+        peak_hours:
+          type: array
+          items: { $ref: "#/components/schemas/AnalyticsPeakHour" }
+        table_performance:
+          type: array
+          items: { $ref: "#/components/schemas/AnalyticsTablePerformance" }
+        staff_activity:
+          type: array
+          items: { $ref: "#/components/schemas/AnalyticsStaffActivity" }
+      required: [summary, revenue_over_time, popular_items, peak_hours, table_performance, staff_activity]
+
     UploadResponse:
       type: object
       properties:
@@ -933,6 +999,32 @@ paths:
           content:
             application/json:
               schema: { $ref: "#/components/schemas/AdminHistoryResponse" }
+
+  # -----------------------------------------------------------------------
+  # ADMIN — Analytics
+  # -----------------------------------------------------------------------
+  /admin/analytics:
+    get:
+      tags: [Admin]
+      summary: Aggregated metrics for dashboard charts
+      security: [{ adminPin: [] }]
+      parameters:
+        - name: start_date
+          in: query
+          required: true
+          schema: { type: string, format: date }
+          description: Start date for aggregation (YYYY-MM-DD).
+        - name: end_date
+          in: query
+          required: true
+          schema: { type: string, format: date }
+          description: End date for aggregation (YYYY-MM-DD).
+      responses:
+        "200":
+          description: Analytics data
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/AdminAnalyticsResponse" }
 
   # -----------------------------------------------------------------------
   # ADMIN — Menu Management
