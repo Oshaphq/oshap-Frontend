@@ -1,3 +1,4 @@
+import { createPortal } from "react-dom";
 import { useNotifications } from "../context/NotificationContext";
 import { useDragToDismiss } from "../hooks/useDragToDismiss";
 
@@ -13,7 +14,7 @@ export default function NotificationSheet({
 
   if (!isOpen) return null;
 
-  return (
+  return createPortal(
     <>
       <div
         className="fixed inset-0 bg-scrim z-[90] animate-[fade-in_0.2s_ease]"
@@ -99,6 +100,7 @@ export default function NotificationSheet({
           </div>
         )}
       </div>
-    </>
+    </>,
+    document.body
   );
 }
