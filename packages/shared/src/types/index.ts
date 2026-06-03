@@ -23,6 +23,8 @@ export type SessionStatus = "ACTIVE" | "CLOSED";
 
 export type CloseReason = "paid" | "abandoned";
 
+export type Role = "OWNER" | "MANAGER" | "CASHIER" | "WAITER" | "KITCHEN" | "BARTENDER";
+
 // ---------------------------------------------------------------------------
 // Entities
 // ---------------------------------------------------------------------------
@@ -37,6 +39,14 @@ export interface Restaurant {
   account_number?: string | null;
   account_name?: string | null;
   whatsapp_number?: string | null;
+}
+
+export interface StaffMember {
+  id: string;
+  name: string;
+  email: string;
+  role: Role;
+  created_at: string;
 }
 
 export interface MenuItem {
@@ -219,6 +229,32 @@ export interface RequestPosResponse {
 
 export interface AdminMeResponse {
   restaurant: Restaurant;
+  user: StaffMember;
+}
+
+export interface AdminLoginRequest {
+  email: string;
+  password?: string;
+}
+
+export interface AdminLoginResponse {
+  token: string;
+  user: StaffMember;
+  restaurant: Restaurant;
+}
+
+export interface CreateStaffRequest {
+  name: string;
+  email: string;
+  role: Role;
+  password?: string;
+}
+
+export interface UpdateStaffRequest {
+  name?: string;
+  email?: string;
+  role?: Role;
+  password?: string;
 }
 
 export interface CreateMenuItemRequest {

@@ -2,10 +2,12 @@ import {
   useAdminKitchen,
   useAdminUpdateKitchenStatus,
   formatCurrency,
+  useAdminMenu,
 } from "@oshap/shared";
 import type { OrderWithItems } from "@oshap/shared";
 import { PrimaryButton } from "@oshap/shared/ui";
 import QueryError from "../components/QueryError";
+import { useAuth } from "../context/AuthContext";
 
 function timeAgo(dateStr: string): string {
   const diff = Date.now() - new Date(dateStr).getTime();
@@ -21,7 +23,9 @@ function stripRef(ref: string) {
 }
 
 export default function KitchenPage() {
+  const { user } = useAuth();
   const kitchenQuery = useAdminKitchen(5000);
+  const menuQuery = useAdminMenu();
   const updateStatus = useAdminUpdateKitchenStatus();
 
   const handleUpdateStatus = async (
@@ -34,7 +38,7 @@ export default function KitchenPage() {
     });
   };
 
-  if (kitchenQuery.isLoading) {
+  if (kitchenQuery.isLoading || menuQuery.isLoading) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[60vh] gap-md text-secondary-text">
         <div className="oshap-spinner" />
@@ -43,11 +47,44 @@ export default function KitchenPage() {
     );
   }
 
-  if (kitchenQuery.isError) {
-    return <QueryError onRetry={() => kitchenQuery.refetch()} />;
+  if (kitchenQuery.isError || menuQuery.isError) {
+    return <QueryError onRetry={() => { kitchenQuery.refetch(); menuQuery.refetch(); }} />;
   }
 
-  const orders = kitchenQuery.data ?? [];
+  const menuItems = menuQuery.data ?? [];
+  const menuLookup = new Map(menuItems.map((m) => [m.name, m.category]));
+
+  const filterOrder = (o: OrderWithItems): boolean => {
+    if (!user) return true;
+    if (user.role === "BARTENDER") {
+      return o.order_items.some((i) => menuLookup.get(i.name) === "Drinks");
+    }
+    if (user.role === "KITCHEN") {
+      return o.order_items.some((i) => menuLookup.get(i.name) !== "Drinks");
+    }
+    return true;
+  };
+
+  const mapOrderItems = (o: OrderWithItems): OrderWithItems => {
+    if (!user) return o;
+    if (user.role === "BARTENDER") {
+      return {
+        ...o,
+        order_items: o.order_items.filter((i) => menuLookup.get(i.name) === "Drinks"),
+      };
+    }
+    if (user.role === "KITCHEN") {
+      return {
+        ...o,
+        order_items: o.order_items.filter((i) => menuLookup.get(i.name) !== "Drinks"),
+      };
+    }
+    return o;
+  };
+
+  const rawOrders = kitchenQuery.data ?? [];
+  const orders = rawOrders.filter(filterOrder).map(mapOrderItems);
+  
   const newOrders = orders.filter((o) => o.status === "CREATED");
   const inProgress = orders.filter((o) => o.status === "PREPARING");
   const ready = orders.filter((o) => o.status === "READY");
@@ -56,7 +93,7 @@ export default function KitchenPage() {
     <main className="h-[calc(100vh-56px)] flex flex-col">
       <header className="flex items-center justify-between px-md py-s bg-surface-container-lowest border-b border-surface-container-high shrink-0 min-h-[56px]">
         <h1 className="font-display text-display-h2 font-semibold text-primary-text">
-          Kitchen Display
+          {user?.role === "BARTENDER" ? "Bar Orders" : "Kitchen Display"}
         </h1>
         <div className="flex items-center gap-s">
           <span className="px-s py-xs rounded-4xl font-bold text-caption-sm bg-error-container text-on-error-container">

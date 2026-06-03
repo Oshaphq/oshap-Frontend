@@ -38,6 +38,11 @@ import type {
   UpdateMenuItemRequest,
   UploadResponse,
   Restaurant,
+  StaffMember,
+  AdminLoginRequest,
+  AdminLoginResponse,
+  CreateStaffRequest,
+  UpdateStaffRequest,
 } from "../types/index";
 
 // ---------------------------------------------------------------------------
@@ -103,6 +108,7 @@ let _menu: MenuItem[] = [...SEED_MENU];
 const _orders: Map<string, StoredOrder> = new Map();
 const _payments: Map<string, Payment> = new Map();
 const _sessions: Map<string, TableSession> = new Map();
+const _staff: Map<string, StaffMember> = new Map();
 let _orderCounter = 0;
 
 const STORAGE_KEY = "oshap-mock-state";
@@ -113,6 +119,7 @@ interface PersistedState {
   orders?: Array<[string, StoredOrder]>;
   payments?: Array<[string, Payment]>;
   sessions?: Array<[string, TableSession]>;
+  staff?: Array<[string, StaffMember]>;
   orderCounter?: number;
 }
 
@@ -135,11 +142,26 @@ function syncFromStorage(): void {
     _sessions.clear();
     for (const [k, v] of saved.sessions ?? []) _sessions.set(k, v);
 
+    _staff.clear();
+    for (const [k, v] of saved.staff ?? []) _staff.set(k, v);
+
     if (typeof saved.orderCounter === "number") {
       _orderCounter = saved.orderCounter;
     }
   } catch {
     // Corrupt JSON — fall back to in-memory defaults.
+  }
+
+  // Ensure there's an owner account
+  if (_staff.size === 0) {
+    const ownerId = uid();
+    _staff.set(ownerId, {
+      id: ownerId,
+      name: "Owner",
+      email: "owner@oshap.com",
+      role: "OWNER",
+      created_at: now(),
+    });
   }
 }
 
@@ -152,6 +174,7 @@ function syncToStorage(): void {
       orders: Array.from(_orders.entries()),
       payments: Array.from(_payments.entries()),
       sessions: Array.from(_sessions.entries()),
+      staff: Array.from(_staff.entries()),
       orderCounter: _orderCounter,
     };
     localStorage.setItem(STORAGE_KEY, JSON.stringify(payload));
@@ -574,8 +597,28 @@ route("POST", /^\/payment\/confirm$/, ({ body }) => {
 // Admin endpoints — used by admin app
 // ---------------------------------------------------------------------------
 
-route("GET", /^\/admin\/me$/, () => {
-  return json(200, { restaurant: _restaurant } satisfies AdminMeResponse);
+route("POST", /^\/admin\/login$/, ({ body }) => {
+  const b = body as AdminLoginRequest;
+  const staff = [..._staff.values()].find((s) => s.email === b.email);
+  if (!staff || (b.password && b.password !== "password")) {
+    return json(401, { error: "Invalid credentials" });
+  }
+  return json(200, {
+    token: staff.id, // For mock, token is just staff ID
+    user: staff,
+    restaurant: _restaurant,
+  } satisfies AdminLoginResponse);
+});
+
+route("GET", /^\/admin\/me$/, ({ admin }) => {
+  if (!admin) return json(401, { error: "Unauthorized" });
+  // In mock request dispatcher, we don't have access to the actual headers.
+  // We'll rely on the client passing the token. Actually, we don't pass the token to `mockRequest` directly.
+  // Let's assume the client will fetch the token from localStorage here.
+  const token = typeof window !== "undefined" ? window.sessionStorage.getItem("oshap-admin-pin") : null;
+  const user = _staff.get(token || "") || [..._staff.values()].find((s) => s.role === "OWNER")!;
+  
+  return json(200, { restaurant: _restaurant, user } satisfies AdminMeResponse);
 });
 
 route("GET", /^\/admin\/settings$/, () => {
@@ -786,6 +829,53 @@ route("POST", /^\/admin\/verify$/, ({ body }) => {
     verified_count: pendingOrders.length,
     auto_closed: autoClosed,
   } satisfies AdminVerifyResponse);
+});
+
+// -------------------- Admin: Staff --------------------
+
+route("GET", /^\/admin\/staff$/, () => {
+  return json(200, [..._staff.values()]);
+});
+
+route("POST", /^\/admin\/staff$/, ({ body }) => {
+  const b = body as CreateStaffRequest;
+  if (!b.name || !b.email || !b.role) {
+    return json(400, { error: "Missing required fields" });
+  }
+  if ([..._staff.values()].some((s) => s.email === b.email)) {
+    return json(400, { error: "Email already exists" });
+  }
+
+  const staff: StaffMember = {
+    id: uid(),
+    name: b.name,
+    email: b.email,
+    role: b.role,
+    created_at: now(),
+  };
+  _staff.set(staff.id, staff);
+  return json(201, staff);
+});
+
+route("PATCH", /^\/admin\/staff\/(.+)$/, ({ path, body }) => {
+  const id = path.split("/admin/staff/")[1]!;
+  const b = body as UpdateStaffRequest;
+  const staff = _staff.get(id);
+  if (!staff) return json(404, { error: "Staff not found" });
+
+  if (b.name) staff.name = b.name;
+  if (b.email) staff.email = b.email;
+  if (b.role) staff.role = b.role;
+  return json(200, staff);
+});
+
+route("DELETE", /^\/admin\/staff\/(.+)$/, ({ path }) => {
+  const id = path.split("/admin/staff/")[1]!;
+  if (_staff.get(id)?.role === "OWNER" && [..._staff.values()].filter((s) => s.role === "OWNER").length === 1) {
+    return json(400, { error: "Cannot delete the last owner" });
+  }
+  _staff.delete(id);
+  return json(200, { success: true as const });
 });
 
 route("POST", /^\/admin\/close$/, ({ body }) => {

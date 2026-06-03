@@ -3,26 +3,67 @@ import type {
   AdminCloseResponse,
   AdminHistoryQuery,
   AdminHistoryResponse,
+  AdminLoginRequest,
+  AdminLoginResponse,
   AdminMeResponse,
   AdminTablesResponse,
   AdminUpdateSettingsRequest,
   AdminVerifyRequest,
   AdminVerifyResponse,
   CreateMenuItemRequest,
+  CreateStaffRequest,
   KitchenUpdateRequest,
   MenuItem,
   Order,
   OrderWithItems,
   Restaurant,
+  StaffMember,
   UpdateMenuItemRequest,
+  UpdateStaffRequest,
   UploadResponse,
 } from "../types/index";
 import { request } from "./client";
 
 // ---------- Identity ----------
 
+export function adminLoginEmail(payload: AdminLoginRequest): Promise<AdminLoginResponse> {
+  return request<AdminLoginResponse>("/admin/login", {
+    method: "POST",
+    body: payload,
+  });
+}
+
 export function adminGetMe(): Promise<AdminMeResponse> {
   return request<AdminMeResponse>("/admin/me", { admin: true });
+}
+
+// ---------- Staff Management ----------
+
+export function adminGetStaff(): Promise<StaffMember[]> {
+  return request<StaffMember[]>("/admin/staff", { admin: true });
+}
+
+export function adminCreateStaff(payload: CreateStaffRequest): Promise<StaffMember> {
+  return request<StaffMember>("/admin/staff", {
+    method: "POST",
+    body: payload,
+    admin: true,
+  });
+}
+
+export function adminUpdateStaff(id: string, payload: UpdateStaffRequest): Promise<StaffMember> {
+  return request<StaffMember>(`/admin/staff/${encodeURIComponent(id)}`, {
+    method: "PATCH",
+    body: payload,
+    admin: true,
+  });
+}
+
+export function adminDeleteStaff(id: string): Promise<{ success: true }> {
+  return request<{ success: true }>(`/admin/staff/${encodeURIComponent(id)}`, {
+    method: "DELETE",
+    admin: true,
+  });
 }
 
 // ---------- Settings ----------

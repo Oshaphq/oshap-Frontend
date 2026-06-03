@@ -20,12 +20,18 @@ import {
   adminUploadImage,
   adminUploadSettingsImage,
   adminVerifyPayment,
+  adminGetStaff,
+  adminCreateStaff,
+  adminUpdateStaff,
+  adminDeleteStaff,
 } from "../api/admin";
 import type {
   AdminHistoryQuery,
   AdminUpdateSettingsRequest,
   CreateMenuItemRequest,
   UpdateMenuItemRequest,
+  CreateStaffRequest,
+  UpdateStaffRequest,
 } from "../types/index";
 
 // ---------- Settings ----------
@@ -51,6 +57,46 @@ export function useAdminUpdateSettings() {
 export function useAdminUploadSettingsImage() {
   return useMutation({
     mutationFn: (file: File) => adminUploadSettingsImage(file),
+  });
+}
+
+// ---------- Staff Management ----------
+
+export function useAdminStaff() {
+  return useQuery({
+    queryKey: ["admin", "staff"],
+    queryFn: adminGetStaff,
+  });
+}
+
+export function useAdminCreateStaff() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (payload: CreateStaffRequest) => adminCreateStaff(payload),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["admin", "staff"] });
+    },
+  });
+}
+
+export function useAdminUpdateStaff() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, payload }: { id: string; payload: UpdateStaffRequest }) =>
+      adminUpdateStaff(id, payload),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["admin", "staff"] });
+    },
+  });
+}
+
+export function useAdminDeleteStaff() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (id: string) => adminDeleteStaff(id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["admin", "staff"] });
+    },
   });
 }
 

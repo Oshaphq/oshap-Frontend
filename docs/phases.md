@@ -138,7 +138,7 @@
 
 ---
 
-## Phase 6 — Per-user Accounts + RBAC
+### [x] Phase 6: Per-user Accounts + RBAC
 
 **Goal:** Replace the shared PIN with individual staff accounts and role-separated access.
 **Status:** ⬜ Not started
