@@ -80,6 +80,8 @@ function PlatformLogin({ onLogin }: { onLogin: () => void }) {
 }
 
 function PlatformLayout() {
+  const [menuOpen, setMenuOpen] = useState(false);
+
   const handleLogout = () => {
     try {
       sessionStorage.removeItem(AUTH_KEY);
@@ -99,40 +101,78 @@ function PlatformLayout() {
 
   return (
     <div className="min-h-screen bg-surface flex flex-col">
-      <nav className="flex items-center justify-between gap-s px-s sm:px-md py-s bg-surface border-b border-outline-variant">
-        <div className="flex items-center gap-0.5 overflow-x-auto scrollbar-none shrink min-w-0">
+      <header className="bg-surface border-b border-outline-variant">
+        <nav className="flex items-center justify-between gap-s px-s sm:px-md py-s">
+          {/* Hamburger — mobile & tablet only */}
+          <button
+            className="md:hidden w-9 h-9 flex items-center justify-center rounded-lg text-secondary-text hover:bg-surface-container-high transition-colors shrink-0"
+            onClick={() => setMenuOpen((o) => !o)}
+            aria-label={menuOpen ? "Close menu" : "Open menu"}
+          >
+            <i className={menuOpen ? "mgc_close_line text-xl" : "mgc_menu_line text-xl"} aria-hidden />
+          </button>
+
+          {/* Logo */}
           <span className="font-display font-bold text-primary mr-s shrink-0">
             Oshap Platform
           </span>
-          {navLinks.map((link) => (
-            <NavLink
-              key={link.to}
-              to={link.to}
-              end={link.end}
-              className={({ isActive }) =>
-                `px-s sm:px-md py-s rounded-lg text-label-l4 font-semibold font-display whitespace-nowrap transition-colors no-underline shrink-0 ${
-                  isActive
-                    ? "bg-primary text-on-primary"
-                    : "text-secondary-text hover:bg-surface-container-high"
-                }`
-              }
-            >
-              {link.label}
-            </NavLink>
-          ))}
-        </div>
 
-        <div className="flex items-center gap-s shrink-0">
-          <ThemeToggle />
-          <button
-            onClick={handleLogout}
-            className="w-9 h-9 flex items-center justify-center rounded-4xl bg-surface-container-high text-on-surface-variant border border-transparent hover:bg-error-container hover:text-on-error-container transition-colors"
-            title="Logout"
-          >
-            <i className="mgc_exit_line text-lg" />
-          </button>
-        </div>
-      </nav>
+          {/* Desktop tab bar — hidden below md */}
+          <div className="hidden md:flex items-center gap-0.5 shrink min-w-0">
+            {navLinks.map((link) => (
+              <NavLink
+                key={link.to}
+                to={link.to}
+                end={link.end}
+                className={({ isActive }) =>
+                  `px-md py-s rounded-lg text-label-l4 font-semibold font-display whitespace-nowrap transition-colors no-underline shrink-0 ${
+                    isActive
+                      ? "bg-primary text-on-primary"
+                      : "text-secondary-text hover:bg-surface-container-high"
+                  }`
+                }
+              >
+                {link.label}
+              </NavLink>
+            ))}
+          </div>
+
+          {/* Right controls — always visible */}
+          <div className="flex items-center gap-s shrink-0 ml-auto md:ml-0">
+            <ThemeToggle />
+            <button
+              onClick={handleLogout}
+              className="w-9 h-9 flex items-center justify-center rounded-4xl bg-surface-container-high text-on-surface-variant border border-transparent hover:bg-error-container hover:text-on-error-container transition-colors"
+              title="Logout"
+            >
+              <i className="mgc_exit_line text-lg" />
+            </button>
+          </div>
+        </nav>
+
+        {/* Mobile / tablet drawer */}
+        {menuOpen && (
+          <div className="md:hidden px-s pb-s flex flex-col gap-xs">
+            {navLinks.map((link) => (
+              <NavLink
+                key={link.to}
+                to={link.to}
+                end={link.end}
+                onClick={() => setMenuOpen(false)}
+                className={({ isActive }) =>
+                  `px-md py-s rounded-lg text-label-l4 font-semibold font-display transition-colors no-underline ${
+                    isActive
+                      ? "bg-primary text-on-primary"
+                      : "text-secondary-text hover:bg-surface-container-high"
+                  }`
+                }
+              >
+                {link.label}
+              </NavLink>
+            ))}
+          </div>
+        )}
+      </header>
 
       <div className="flex-1 overflow-y-auto">
         <Outlet />
