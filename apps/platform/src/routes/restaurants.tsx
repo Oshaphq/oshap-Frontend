@@ -40,7 +40,7 @@ export default function RestaurantsPage() {
         </h1>
         <Link
           to="/restaurants/new"
-          className="inline-flex items-center gap-s px-md py-s rounded-xl font-bold text-caption-md font-display bg-primary text-on-primary no-underline hover:opacity-90 transition-opacity"
+          className="inline-flex items-center justify-center gap-xs py-3 px-l rounded-lg bg-primary text-on-primary text-label-l4 leading-4 tracking-normal font-semibold font-display no-underline transition-opacity hover:opacity-90 active:scale-[0.99]"
         >
           <i className="mgc_add_line" />
           Onboard New
@@ -55,14 +55,14 @@ export default function RestaurantsPage() {
           placeholder="Search name or email..."
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          className="px-md py-s rounded-lg border border-outline-variant bg-surface-container text-p2 text-primary-text placeholder:text-outline outline-none focus:border-primary transition-colors flex-1 min-w-[180px] max-w-[320px]"
+          className="px-md py-s rounded-lg border border-outline-variant bg-surface-container-low text-p2 text-primary-text placeholder:text-outline outline-none focus:border-primary transition-colors flex-1 min-w-[180px] max-w-[320px]"
         />
         <div className="relative">
           <select
             aria-label="Filter by subscription tier"
             value={tierFilter}
             onChange={(e) => setTierFilter(e.target.value as SubscriptionTier | "ALL")}
-            className="pl-s pr-xl py-s rounded-lg border border-outline-variant bg-surface-container text-p2 text-primary-text outline-none focus:border-primary appearance-none cursor-pointer"
+            className="pl-s pr-xl py-s rounded-lg border border-outline-variant bg-surface-container-low text-p2 text-primary-text outline-none focus:border-primary appearance-none cursor-pointer"
           >
             <option value="ALL">All Tiers</option>
             {TIER_ORDER.map((t) => (
@@ -76,7 +76,7 @@ export default function RestaurantsPage() {
             aria-label="Filter by status"
             value={statusFilter}
             onChange={(e) => setStatusFilter(e.target.value as "ALL" | "ACTIVE" | "INACTIVE")}
-            className="pl-s pr-xl py-s rounded-lg border border-outline-variant bg-surface-container text-p2 text-primary-text outline-none focus:border-primary appearance-none cursor-pointer"
+            className="pl-s pr-xl py-s rounded-lg border border-outline-variant bg-surface-container-low text-p2 text-primary-text outline-none focus:border-primary appearance-none cursor-pointer"
           >
             <option value="ALL">All Status</option>
             <option value="ACTIVE">Active</option>
@@ -104,7 +104,7 @@ export default function RestaurantsPage() {
           <Link
             key={r.id}
             to={`/restaurants/${r.id}`}
-            className="bg-surface-container rounded-md p-md flex items-center justify-between gap-md no-underline hover:bg-surface-container-high transition-colors"
+            className="bg-surface-container-low rounded-md p-md flex items-center justify-between gap-md no-underline hover:bg-surface-container-high transition-colors"
           >
             <div className="flex items-center gap-md min-w-0 flex-1">
               <div className="w-10 h-10 rounded-lg bg-primary-container flex items-center justify-center shrink-0">

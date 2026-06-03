@@ -31,7 +31,7 @@ export default function DashboardPage() {
 
       {/* KPI row */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-md">
-        <div className="bg-surface-container rounded-md p-md flex flex-col gap-xs">
+        <div className="bg-surface-container-low rounded-md p-md flex flex-col gap-xs">
           <span className="text-label-l4 font-semibold text-secondary-text uppercase tracking-wider">
             Total Restaurants
           </span>
@@ -39,7 +39,7 @@ export default function DashboardPage() {
             {restaurantsQuery.isLoading ? "—" : restaurants.length}
           </span>
         </div>
-        <div className="bg-surface-container rounded-md p-md flex flex-col gap-xs">
+        <div className="bg-surface-container-low rounded-md p-md flex flex-col gap-xs">
           <span className="text-label-l4 font-semibold text-secondary-text uppercase tracking-wider">
             Active
           </span>
@@ -47,7 +47,7 @@ export default function DashboardPage() {
             {restaurantsQuery.isLoading ? "—" : active}
           </span>
         </div>
-        <div className="bg-surface-container rounded-md p-md flex flex-col gap-xs">
+        <div className="bg-surface-container-low rounded-md p-md flex flex-col gap-xs">
           <span className="text-label-l4 font-semibold text-secondary-text uppercase tracking-wider">
             Est. MRR
           </span>
@@ -89,7 +89,7 @@ export default function DashboardPage() {
         </Link>
         <Link
           to="/restaurants"
-          className="bg-surface-container text-primary-text rounded-md p-md flex items-center gap-md no-underline hover:bg-surface-container-high transition-colors border border-transparent hover:border-outline-variant"
+          className="bg-surface-container-low text-primary-text rounded-md p-md flex items-center gap-md no-underline hover:bg-surface-container-high transition-colors border border-transparent hover:border-outline-variant"
         >
           <i className="mgc_fork_spoon_line text-2xl text-primary" />
           <div>
@@ -99,7 +99,7 @@ export default function DashboardPage() {
         </Link>
         <Link
           to="/health"
-          className="bg-surface-container text-primary-text rounded-md p-md flex items-center gap-md no-underline hover:bg-surface-container-high transition-colors border border-transparent hover:border-outline-variant"
+          className="bg-surface-container-low text-primary-text rounded-md p-md flex items-center gap-md no-underline hover:bg-surface-container-high transition-colors border border-transparent hover:border-outline-variant"
         >
           <i className="mgc_heartbeat_line text-2xl text-primary" />
           <div>
@@ -123,7 +123,7 @@ export default function DashboardPage() {
                 <Link
                   key={r.id}
                   to={`/restaurants/${r.id}`}
-                  className="bg-surface-container rounded-md p-md flex items-center justify-between gap-md no-underline hover:bg-surface-container-high transition-colors"
+                  className="bg-surface-container-low rounded-md p-md flex items-center justify-between gap-md no-underline hover:bg-surface-container-high transition-colors"
                 >
                   <div className="flex items-center gap-md min-w-0">
                     <div className="w-9 h-9 rounded-lg bg-primary-container flex items-center justify-center shrink-0">

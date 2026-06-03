@@ -26,7 +26,7 @@ export default function CustomerHeader({ tableId, leftSlot, rightSlot, title, su
   const restaurantName = tableQuery.data?.restaurant?.name ?? "";
 
   return (
-    <header className="sticky top-0 z-40 flex items-center justify-between p-md bg-surface-container-low border-b border-outline-variant">
+    <header className="sticky top-0 z-40 flex items-center justify-between p-md bg-surface border-b border-outline-variant">
       <div className="flex items-center gap-s">
         {leftSlot}
         <div className="flex flex-col gap-0.5">

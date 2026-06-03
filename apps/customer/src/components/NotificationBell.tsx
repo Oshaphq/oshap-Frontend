@@ -12,7 +12,7 @@ export default function NotificationBell() {
         type="button"
         aria-label="Notifications"
         onClick={() => setSheetOpen(true)}
-        className="relative w-10 h-10 flex items-center justify-center rounded-4xl bg-surface-container text-on-surface-variant text-xl transition-colors hover:bg-surface-container-high"
+        className="relative w-10 h-10 flex items-center justify-center rounded-4xl bg-surface-container-high text-on-surface-variant text-xl transition-colors hover:bg-surface-container-highest"
       >
         <i className="mgc_notification_line" />
         {unreadCount > 0 && (

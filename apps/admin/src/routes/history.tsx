@@ -78,7 +78,7 @@ export default function HistoryPage() {
             setTableFilter(e.target.value.toUpperCase());
             setPage(1);
           }}
-          className="flex-1 px-md py-md rounded-lg bg-surface-container border border-outline-variant text-caption-md text-primary-text placeholder:text-outline outline-none focus:border-primary transition-colors"
+          className="flex-1 px-md py-md rounded-lg bg-surface-container-low border border-outline-variant text-caption-md text-primary-text placeholder:text-outline outline-none focus:border-primary transition-colors"
         />
         <input
           type="date"
@@ -87,7 +87,7 @@ export default function HistoryPage() {
             setDateFilter(e.target.value);
             setPage(1);
           }}
-          className="flex-1 px-md py-md rounded-lg bg-surface-container border border-outline-variant text-caption-md text-primary-text outline-none focus:border-primary transition-colors"
+          className="flex-1 px-md py-md rounded-lg bg-surface-container-low border border-outline-variant text-caption-md text-primary-text outline-none focus:border-primary transition-colors"
         />
       </div>
 
@@ -135,7 +135,7 @@ export default function HistoryPage() {
                 onClick={() =>
                   setExpandedOrder(isExpanded ? null : order.id)
                 }
-                className={`text-left rounded-md p-md flex flex-col gap-md bg-surface-container border border-transparent transition-colors hover:border-outline-variant cursor-pointer ${
+                className={`text-left rounded-md p-md flex flex-col gap-md bg-surface-container-low border border-transparent transition-colors hover:border-outline-variant cursor-pointer ${
                   order.status === "CANCELLED" ? "opacity-55" : ""
                 }`}
               >
@@ -255,7 +255,7 @@ function SummaryCard({
   tone?: keyof typeof SUMMARY_TONE_CLS;
 }) {
   return (
-    <div className="flex-1 bg-surface-container rounded-md px-s py-md flex flex-col items-center gap-xs">
+    <div className="flex-1 bg-surface-container-low rounded-md px-s py-md flex flex-col items-center gap-xs">
       <span
         className={`font-display text-display-h2 font-semibold block ${SUMMARY_TONE_CLS[tone]}`}
       >

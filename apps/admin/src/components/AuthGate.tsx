@@ -54,7 +54,7 @@ export default function AuthGate() {
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center min-h-screen bg-surface-container-lowest">
+      <div className="flex items-center justify-center min-h-screen bg-surface">
         <div className="oshap-spinner" />
       </div>
     );
@@ -62,8 +62,8 @@ export default function AuthGate() {
 
   if (!isAuthenticated || !user) {
     return (
-      <div className="flex items-center justify-center min-h-screen bg-surface-container-lowest p-md">
-        <form onSubmit={handleLogin} className="w-full max-w-[384px] bg-surface-container rounded-xl p-xl flex flex-col items-center gap-md">
+      <div className="flex items-center justify-center min-h-screen bg-surface p-md">
+        <form onSubmit={handleLogin} className="w-full max-w-[384px] bg-surface-container-low rounded-xl p-xl flex flex-col items-center gap-md">
           <div className="w-16 h-16 rounded-full bg-primary-container flex items-center justify-center text-2xl text-on-primary-container">
             <i className="mgc_lock_fill" />
           </div>
@@ -75,7 +75,7 @@ export default function AuthGate() {
           </p>
 
           <input
-            className={`w-full px-md py-md rounded-lg bg-surface-container-lowest border-2 text-p text-primary-text placeholder:text-outline outline-none transition-colors ${error ? "border-error" : "border-outline-variant focus:border-primary"}`}
+            className={`w-full px-md py-md rounded-lg bg-surface-container-low border-2 text-p text-primary-text placeholder:text-outline outline-none transition-colors ${error ? "border-error" : "border-outline-variant focus:border-primary"}`}
             type="email"
             aria-label="Email address"
             placeholder="Email address"
@@ -98,7 +98,7 @@ export default function AuthGate() {
                 setPassword(e.target.value);
                 setError("");
               }}
-              className={`w-full px-md py-md rounded-lg bg-surface-container-lowest border-2 text-p text-primary-text placeholder:text-outline outline-none transition-colors pr-12 ${error ? "border-error" : "border-outline-variant focus:border-primary"}`}
+              className={`w-full px-md py-md rounded-lg bg-surface-container-low border-2 text-p text-primary-text placeholder:text-outline outline-none transition-colors pr-12 ${error ? "border-error" : "border-outline-variant focus:border-primary"}`}
               required
             />
             <button
@@ -153,8 +153,8 @@ export default function AuthGate() {
   }
 
   return (
-    <div className="min-h-screen bg-surface-container-lowest flex flex-col">
-      <header className="bg-surface-container-lowest border-b border-surface-container-high">
+    <div className="min-h-screen bg-surface flex flex-col">
+      <header className="bg-surface border-b border-outline-variant">
         <nav className="flex items-center justify-between gap-s px-s sm:px-md py-s">
           {/* Hamburger — mobile & tablet only */}
           <button
@@ -192,7 +192,7 @@ export default function AuthGate() {
                   aria-label="Active branch"
                   value={activeBranchId}
                   onChange={(e) => setActiveBranch(e.target.value)}
-                  className="pl-s pr-xl py-xs rounded-lg border border-outline-variant bg-surface-container text-caption-md text-primary-text font-semibold outline-none focus:border-primary appearance-none cursor-pointer max-w-[160px]"
+                  className="pl-s pr-xl py-xs rounded-lg border border-outline-variant bg-surface-container-low text-caption-md text-primary-text font-semibold outline-none focus:border-primary appearance-none cursor-pointer max-w-[160px]"
                 >
                   <option value="">All Branches</option>
                   {group.branches.map((b) => (
@@ -219,7 +219,7 @@ export default function AuthGate() {
             )}
             <button
               onClick={handleLogout}
-              className="w-9 h-9 flex items-center justify-center rounded-4xl bg-surface-container text-secondary-text border border-transparent hover:bg-error-container hover:text-on-error-container transition-colors"
+              className="w-9 h-9 flex items-center justify-center rounded-4xl bg-surface-container-high text-on-surface-variant border border-transparent hover:bg-error-container hover:text-on-error-container transition-colors"
               title="Logout"
             >
               <i className="mgc_exit_line text-lg" />

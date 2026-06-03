@@ -94,7 +94,7 @@ export default function StaffSettings() {
     );
   }
 
-  const inputClass = "w-full px-md py-s rounded-lg bg-surface-container-lowest border border-outline-variant text-p2 text-primary-text placeholder:text-outline outline-none focus:border-primary transition-colors";
+  const inputClass = "w-full px-md py-s rounded-lg bg-surface-container-low border border-outline-variant text-p2 text-primary-text placeholder:text-outline outline-none focus:border-primary transition-colors";
   const labelClass = "block text-caption-md font-semibold text-primary-text mb-xs";
 
   return (
@@ -111,7 +111,7 @@ export default function StaffSettings() {
         )}
       </div>
 
-      <div className="bg-surface-container rounded-md border border-transparent hover:border-outline-variant transition-colors overflow-hidden">
+      <div className="bg-surface-container-low rounded-md border border-transparent hover:border-outline-variant transition-colors overflow-hidden">
         <table className="w-full text-left border-collapse">
           <thead>
             <tr className="bg-surface-container-high border-b border-surface-container-highest">
@@ -167,7 +167,7 @@ export default function StaffSettings() {
 
       {isModalOpen && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center bg-scrim backdrop-blur-sm p-md">
-          <div className="w-full max-w-[448px] rounded-md bg-surface-container p-l flex flex-col gap-md border border-primary shadow-xl">
+          <div className="w-full max-w-[448px] rounded-md bg-surface-container-high p-l flex flex-col gap-md border border-primary shadow-xl">
             <h3 className="font-bold text-primary-text">
               {editingId ? "Edit Staff" : "Add Staff"}
             </h3>

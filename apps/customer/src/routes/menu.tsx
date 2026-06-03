@@ -69,7 +69,7 @@ function MenuView({ tableId }: { tableId: string }) {
     <div className="min-h-screen bg-surface pb-20">
       <CustomerHeader tableId={tableId} />
 
-      <div className="px-md bg-surface-container-low border-b border-outline-variant">
+      <div className="px-md bg-surface border-b border-outline-variant">
         <CategoryTabs
           categories={categories}
           activeCategory={activeCategory}
@@ -89,14 +89,14 @@ function MenuView({ tableId }: { tableId: string }) {
               setSearchOpen((open) => !open);
               if (searchOpen) setSearchQuery("");
             }}
-            className="w-10 h-10 flex items-center justify-center rounded-full bg-surface-container-lowest text-on-surface-variant text-xl transition-colors hover:bg-surface-container-high shadow-sm"
+            className="w-10 h-10 flex items-center justify-center rounded-full bg-surface-container-high text-on-surface-variant text-xl transition-colors hover:bg-surface-container-highest shadow-sm"
           >
             <i className={searchOpen ? "mgc_close_line" : "mgc_search_line"} />
           </button>
         </div>
 
         {searchOpen && (
-          <div className="flex items-center gap-s px-md py-s rounded-lg bg-surface border border-outline-variant">
+          <div className="flex items-center gap-s px-md py-s rounded-lg bg-surface-container-low border border-outline-variant">
             <i className="mgc_search_line text-lg text-on-surface-variant" />
             <input
               type="text"

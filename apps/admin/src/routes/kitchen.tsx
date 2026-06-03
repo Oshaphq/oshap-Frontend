@@ -91,7 +91,7 @@ export default function KitchenPage() {
 
   return (
     <main className="h-[calc(100vh-56px)] flex flex-col">
-      <header className="flex items-center justify-between px-md py-s bg-surface-container-lowest border-b border-surface-container-high shrink-0 min-h-[56px]">
+      <header className="flex items-center justify-between px-md py-s bg-surface border-b border-outline-variant shrink-0 min-h-[56px]">
         <h1 className="font-display text-display-h2 font-semibold text-primary-text">
           {user?.role === "BARTENDER" ? "Bar Orders" : "Kitchen Display"}
         </h1>
@@ -217,7 +217,7 @@ function KitchenColumn({
             return (
               <div
                 key={order.id}
-                className={`rounded-md p-md flex flex-col gap-s bg-surface-container transition-shadow hover:shadow-md border-l-4 ${cls.cardBorder}`}
+                className={`rounded-md p-md flex flex-col gap-s bg-surface-container-low transition-shadow hover:shadow-md border-l-4 ${cls.cardBorder}`}
               >
                 <div className="flex items-center justify-between gap-s">
                   <div className="flex items-center gap-s">

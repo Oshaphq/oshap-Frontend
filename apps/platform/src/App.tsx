@@ -42,10 +42,10 @@ function PlatformLogin({ onLogin }: { onLogin: () => void }) {
   };
 
   return (
-    <div className="min-h-screen bg-surface-container-lowest flex items-center justify-center p-md">
+    <div className="min-h-screen bg-surface flex items-center justify-center p-md">
       <form
         onSubmit={handleSubmit}
-        className="w-full max-w-[360px] bg-surface-container rounded-xl p-xl flex flex-col items-center gap-md"
+        className="w-full max-w-[360px] bg-surface-container-low rounded-xl p-xl flex flex-col items-center gap-md"
       >
         <div className="w-14 h-14 rounded-full bg-primary-container flex items-center justify-center text-2xl text-on-primary-container">
           <i className="mgc_shield_keyhole_line" />
@@ -66,7 +66,7 @@ function PlatformLogin({ onLogin }: { onLogin: () => void }) {
             setToken(e.target.value);
             setError("");
           }}
-          className={`w-full px-md py-md rounded-lg bg-surface-container-lowest border-2 text-p text-primary-text placeholder:text-outline outline-none transition-colors ${
+          className={`w-full px-md py-md rounded-lg bg-surface-container-low border-2 text-p text-primary-text placeholder:text-outline outline-none transition-colors ${
             error ? "border-error" : "border-outline-variant focus:border-primary"
           }`}
         />
@@ -98,8 +98,8 @@ function PlatformLayout() {
   ];
 
   return (
-    <div className="min-h-screen bg-surface-container-lowest flex flex-col">
-      <nav className="flex items-center justify-between gap-s px-s sm:px-md py-s bg-surface-container-lowest border-b border-surface-container-high">
+    <div className="min-h-screen bg-surface flex flex-col">
+      <nav className="flex items-center justify-between gap-s px-s sm:px-md py-s bg-surface border-b border-outline-variant">
         <div className="flex items-center gap-0.5 overflow-x-auto scrollbar-none shrink min-w-0">
           <span className="font-display font-bold text-primary mr-s shrink-0">
             Oshap Platform
@@ -126,7 +126,7 @@ function PlatformLayout() {
           <ThemeToggle />
           <button
             onClick={handleLogout}
-            className="w-9 h-9 flex items-center justify-center rounded-4xl bg-surface-container text-secondary-text border border-transparent hover:bg-error-container hover:text-on-error-container transition-colors"
+            className="w-9 h-9 flex items-center justify-center rounded-4xl bg-surface-container-high text-on-surface-variant border border-transparent hover:bg-error-container hover:text-on-error-container transition-colors"
             title="Logout"
           >
             <i className="mgc_exit_line text-lg" />

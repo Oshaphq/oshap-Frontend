@@ -33,6 +33,7 @@ Design system:
 - All styling is Tailwind utilities. Do not write CSS Modules or `style={...}` unless there's no utility for it.
 - Semantic color utilities (`bg-primary`, `text-on-surface-variant`, etc.) auto-swap on dark mode via `[data-theme="dark"]`. No `dark:` prefix needed.
 - Color ramp also exposed (`bg-primary-50`, `text-secondary-30`).
+- **Color usage rule (mandatory — every new UI must conform): see [`docs/color-usage.md`](docs/color-usage.md).** In short — page & top nav: `bg-surface`; card/sheet/drawer/input: `bg-surface-container-low`; modal/dialog: `bg-surface-container-high`; nested block inside a card: `bg-surface-container`; icon-bg / inactive pill / chip on a `surface` bg: `bg-surface-container-high`; hover: `bg-surface-container-high` → `-highest`. Never hardcode hex or use a raw ramp step for a surface.
 - Spacing scale: `xs`, `s`, `md`, `l`, `xl`, `2xl`, `3xl`, `4xl`, `5xl`, `7xl`, `8xl`, `9xl`, `10xl`, `11xl`.
 - Radius scale: `xs`, `s`, `md`, `l`, `xl`, `2xl`, `3xl`, `4xl`.
 - Typography: `text-h1` through `text-h6`, `text-p`, `text-caption-md/sm/xs`, plus Figma aliases `text-p1/p2/p3`, `text-label-l1` through `l5`, `text-display-h1` through `h4`, `text-emphasized-lg/md/sm`.

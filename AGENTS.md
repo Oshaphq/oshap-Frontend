@@ -5,3 +5,4 @@
 - Backend is FastAPI in a separate repo. The contract is [`docs/openapi.yaml`](docs/openapi.yaml). When you change request/response shapes in `packages/shared/src/types/`, update the spec in the same change.
 - Customer app must stay unauthenticated. Admin app uses an `x-admin-pin` header and the platform app an `x-platform-token` header, both attached by the shared `client.ts` — there is no JWT or session cookie.
 - FCM is admin-only. Do not import Firebase into `apps/customer`.
+- Color usage is governed by [`docs/color-usage.md`](docs/color-usage.md) — the canonical surface/elevation rule for all three apps. Every new UI or element must conform: page & top nav `bg-surface`, cards/sheets/drawers/inputs `bg-surface-container-low`, modals `bg-surface-container-high`, nested-in-card `bg-surface-container`, icon-bg/inactive-pill/chip on a surface bg `bg-surface-container-high`, hover `-high`→`-highest`. Never hardcode hex or use a raw ramp step for a surface.

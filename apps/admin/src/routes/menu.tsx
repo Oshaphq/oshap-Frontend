@@ -251,7 +251,7 @@ function MenuItemRow({ item, isStockEditing, stockInput, onStockEditStart, onSto
 
   return (
     <div
-      className={`rounded-md bg-surface-container border border-transparent transition-all hover:border-outline-variant overflow-hidden ${
+      className={`rounded-md bg-surface-container-low border border-transparent transition-all hover:border-outline-variant overflow-hidden ${
         !item.available ? "opacity-55" : ""
       }`}
     >
@@ -394,10 +394,10 @@ function MenuItemForm({
   };
 
   const inputClass =
-    "px-md py-s rounded-lg bg-surface-container-lowest border border-outline-variant text-p2 text-primary-text placeholder:text-outline outline-none focus:border-primary transition-colors";
+    "px-md py-s rounded-lg bg-surface-container-low border border-outline-variant text-p2 text-primary-text placeholder:text-outline outline-none focus:border-primary transition-colors";
 
   return (
-    <div className="rounded-md bg-surface-container p-l flex flex-col gap-md border border-primary">
+    <div className="rounded-md bg-surface-container-low p-l flex flex-col gap-md border border-primary">
       <h3 className="font-bold text-primary-text">{heading}</h3>
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-s">
         <input

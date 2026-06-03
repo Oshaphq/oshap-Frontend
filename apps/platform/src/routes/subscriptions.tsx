@@ -55,21 +55,21 @@ export default function SubscriptionsPage() {
 
       {/* Revenue summary */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-md">
-        <div className="bg-surface-container rounded-md p-md flex flex-col gap-xs">
+        <div className="bg-surface-container-low rounded-md p-md flex flex-col gap-xs">
           <span className="text-label-l4 font-semibold text-secondary-text uppercase tracking-wider">MRR (est.)</span>
           <span className="font-display text-display-h3 font-semibold text-primary-text">{formatCurrency(mrr)}</span>
         </div>
-        <div className="bg-surface-container rounded-md p-md flex flex-col gap-xs">
+        <div className="bg-surface-container-low rounded-md p-md flex flex-col gap-xs">
           <span className="text-label-l4 font-semibold text-secondary-text uppercase tracking-wider">ARR (est.)</span>
           <span className="font-display text-display-h3 font-semibold text-primary-text">{formatCurrency(arr)}</span>
         </div>
-        <div className="bg-surface-container rounded-md p-md flex flex-col gap-xs">
+        <div className="bg-surface-container-low rounded-md p-md flex flex-col gap-xs">
           <span className="text-label-l4 font-semibold text-secondary-text uppercase tracking-wider">Paying</span>
           <span className="font-display text-display-h3 font-semibold text-primary-text">
             {restaurants.filter((r) => r.is_active && r.subscription_tier !== "FREE").length}
           </span>
         </div>
-        <div className="bg-surface-container rounded-md p-md flex flex-col gap-xs">
+        <div className="bg-surface-container-low rounded-md p-md flex flex-col gap-xs">
           <span className="text-label-l4 font-semibold text-secondary-text uppercase tracking-wider">Free Tier</span>
           <span className="font-display text-display-h3 font-semibold text-secondary-text">
             {byTier.FREE.length}
@@ -118,7 +118,7 @@ export default function SubscriptionsPage() {
 
       {/* All restaurants in a table */}
       {restaurants.length > 0 && (
-        <div className="bg-surface-container rounded-md overflow-hidden">
+        <div className="bg-surface-container-low rounded-md overflow-hidden">
           <table className="w-full text-left border-collapse">
             <thead>
               <tr className="bg-surface-container-high border-b border-surface-container-highest">

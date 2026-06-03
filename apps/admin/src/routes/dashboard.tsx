@@ -82,7 +82,7 @@ export default function DashboardPage() {
       </header>
 
       <div className="flex gap-md flex-wrap">
-        <div className="flex-1 min-w-[120px] bg-surface-container rounded-md p-md flex flex-col items-center gap-xs">
+        <div className="flex-1 min-w-[120px] bg-surface-container-low rounded-md p-md flex flex-col items-center gap-xs">
           <span className="font-display text-display-h2 font-semibold text-primary block">
             {activeTablesCount}
           </span>
@@ -94,7 +94,7 @@ export default function DashboardPage() {
           className={`flex-1 min-w-[120px] rounded-md p-md flex flex-col items-center gap-xs border ${
             hasPending
               ? "bg-warning-container border-warning"
-              : "bg-surface-container border-transparent"
+              : "bg-surface-container-low border-transparent"
           }`}
         >
           <span
@@ -117,7 +117,7 @@ export default function DashboardPage() {
           className={`flex-1 min-w-[120px] rounded-md p-md flex flex-col items-center gap-xs border no-underline transition-colors ${
             hasLowStock
               ? "bg-error-container border-error hover:opacity-90"
-              : "bg-surface-container border-transparent hover:border-outline-variant"
+              : "bg-surface-container-low border-transparent hover:border-outline-variant"
           }`}
         >
           <span
@@ -150,8 +150,8 @@ export default function DashboardPage() {
           const cardCls = isPending
             ? "bg-warning-container border-warning"
             : !isEmpty
-              ? "bg-surface-container border-outline-variant"
-              : "bg-surface-container border-transparent";
+              ? "bg-surface-container-low border-outline-variant"
+              : "bg-surface-container-low border-transparent";
 
           return (
             <div

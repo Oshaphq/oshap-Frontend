@@ -66,7 +66,7 @@ export default function RestaurantDetailPage() {
   };
 
   return (
-    <main className="p-md flex flex-col gap-l max-w-2xl">
+    <main className="p-md flex flex-col gap-l max-w-[42rem]">
       <header className="flex items-center gap-md">
         <Link
           to="/restaurants"
@@ -84,7 +84,7 @@ export default function RestaurantDetailPage() {
           type="button"
           onClick={handleToggleActive}
           disabled={update.isPending}
-          className={`px-md py-s rounded-xl font-bold text-caption-md transition-all hover:opacity-90 active:scale-[0.98] disabled:opacity-50 ${
+          className={`px-md py-s rounded-lg font-bold text-caption-md transition-all hover:opacity-90 active:scale-[0.98] disabled:opacity-50 ${
             r.is_active
               ? "bg-error-container text-on-error-container"
               : "bg-success-container text-on-success-container"
@@ -96,7 +96,7 @@ export default function RestaurantDetailPage() {
 
       {/* Info cards */}
       <div className="grid grid-cols-2 gap-md">
-        <div className="bg-surface-container rounded-md p-md flex flex-col gap-xs">
+        <div className="bg-surface-container-low rounded-md p-md flex flex-col gap-xs">
           <span className="text-label-l4 font-semibold text-secondary-text uppercase tracking-wider">
             Status
           </span>
@@ -104,19 +104,19 @@ export default function RestaurantDetailPage() {
             {r.is_active ? "Active" : "Inactive"}
           </span>
         </div>
-        <div className="bg-surface-container rounded-md p-md flex flex-col gap-xs">
+        <div className="bg-surface-container-low rounded-md p-md flex flex-col gap-xs">
           <span className="text-label-l4 font-semibold text-secondary-text uppercase tracking-wider">
             Tables
           </span>
           <span className="font-bold text-p text-primary-text">{r.table_count}</span>
         </div>
-        <div className="bg-surface-container rounded-md p-md flex flex-col gap-xs">
+        <div className="bg-surface-container-low rounded-md p-md flex flex-col gap-xs">
           <span className="text-label-l4 font-semibold text-secondary-text uppercase tracking-wider">
             Monthly Orders
           </span>
           <span className="font-bold text-p text-primary-text">{r.monthly_orders}</span>
         </div>
-        <div className="bg-surface-container rounded-md p-md flex flex-col gap-xs">
+        <div className="bg-surface-container-low rounded-md p-md flex flex-col gap-xs">
           <span className="text-label-l4 font-semibold text-secondary-text uppercase tracking-wider">
             Onboarded
           </span>
@@ -127,7 +127,7 @@ export default function RestaurantDetailPage() {
       </div>
 
       {/* Subscription tier */}
-      <div className="bg-surface-container rounded-md p-md flex flex-col gap-md">
+      <div className="bg-surface-container-low rounded-md p-md flex flex-col gap-md">
         <div className="flex items-center justify-between">
           <h2 className="text-label-l2 font-semibold text-primary-text">Subscription</h2>
           {!editTier && (
@@ -192,7 +192,7 @@ export default function RestaurantDetailPage() {
 
       {/* Bank details */}
       {(r.bank_name || r.account_number) && (
-        <div className="bg-surface-container rounded-md p-md flex flex-col gap-s">
+        <div className="bg-surface-container-low rounded-md p-md flex flex-col gap-s">
           <h2 className="text-label-l2 font-semibold text-primary-text">Bank Details</h2>
           {r.bank_name && (
             <p className="text-p2 text-secondary-text">

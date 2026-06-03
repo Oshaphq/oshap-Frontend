@@ -67,7 +67,7 @@ export default function GroupAnalyticsPage() {
 
       {/* Summary KPIs */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-md">
-        <div className="bg-surface-container rounded-md p-md flex flex-col gap-xs">
+        <div className="bg-surface-container-low rounded-md p-md flex flex-col gap-xs">
           <span className="text-label-l4 font-semibold text-secondary-text uppercase tracking-wider">
             Total Revenue
           </span>
@@ -75,7 +75,7 @@ export default function GroupAnalyticsPage() {
             {formatCurrency(analytics.total_revenue)}
           </span>
         </div>
-        <div className="bg-surface-container rounded-md p-md flex flex-col gap-xs">
+        <div className="bg-surface-container-low rounded-md p-md flex flex-col gap-xs">
           <span className="text-label-l4 font-semibold text-secondary-text uppercase tracking-wider">
             Total Orders
           </span>
@@ -83,7 +83,7 @@ export default function GroupAnalyticsPage() {
             {analytics.total_orders.toLocaleString()}
           </span>
         </div>
-        <div className="bg-surface-container rounded-md p-md flex flex-col gap-xs">
+        <div className="bg-surface-container-low rounded-md p-md flex flex-col gap-xs">
           <span className="text-label-l4 font-semibold text-secondary-text uppercase tracking-wider">
             Branches
           </span>
@@ -94,7 +94,7 @@ export default function GroupAnalyticsPage() {
       </div>
 
       {/* Bar chart */}
-      <div className="bg-surface-container rounded-md p-md">
+      <div className="bg-surface-container-low rounded-md p-md">
         <h2 className="text-label-l2 font-semibold text-primary-text mb-md">
           Revenue by Branch
         </h2>
@@ -143,7 +143,7 @@ export default function GroupAnalyticsPage() {
           return (
             <div
               key={branch.branch_id}
-              className="bg-surface-container rounded-md p-md flex flex-col gap-s"
+              className="bg-surface-container-low rounded-md p-md flex flex-col gap-s"
             >
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-s">

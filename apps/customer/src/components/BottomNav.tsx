@@ -16,7 +16,7 @@ export default function BottomNav({ tableId }: BottomNavProps) {
   return (
     <nav
       aria-label="Main navigation"
-      className="fixed left-0 right-0 bottom-0 flex justify-between items-center h-16 px-l bg-surface-container-low border-t border-outline-variant z-50 pb-[env(safe-area-inset-bottom,0)]"
+      className="fixed left-0 right-0 bottom-0 flex justify-between items-center h-16 px-l bg-surface border-t border-outline-variant z-50 pb-[env(safe-area-inset-bottom,0)]"
     >
       {NAV_ITEMS.map(({ path, label, icon }) => {
         const active = location.pathname.startsWith(path);

@@ -7,7 +7,7 @@ import { useAuth } from "../context/AuthContext";
 const tabCls = ({ isActive }: { isActive: boolean }) =>
   `px-md py-s rounded-lg font-semibold text-caption-md transition-all border ${
     isActive
-      ? "bg-surface-container text-primary border-outline-variant"
+      ? "bg-surface-container-high text-primary border-outline-variant"
       : "text-secondary-text hover:bg-surface-container-high border-transparent"
   }`;
 

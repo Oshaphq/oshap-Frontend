@@ -16,7 +16,7 @@ function Metric({
       ? "bg-error-container border-error text-on-error-container"
       : status === "warn"
       ? "bg-warning-container border-warning text-on-warning-container"
-      : "bg-surface-container border-transparent";
+      : "bg-surface-container-low border-transparent";
 
   return (
     <div className={`rounded-md p-md flex flex-col gap-xs border ${statusCls}`}>
@@ -113,7 +113,7 @@ export default function HealthPage() {
             />
           </div>
 
-          <div className="bg-surface-container rounded-md p-md flex flex-col gap-s">
+          <div className="bg-surface-container-low rounded-md p-md flex flex-col gap-s">
             <h2 className="text-label-l2 font-semibold text-primary-text">Thresholds</h2>
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-md text-caption-sm text-secondary-text">
               <div>

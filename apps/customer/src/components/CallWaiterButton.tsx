@@ -45,7 +45,7 @@ export default function CallWaiterButton({ tableId }: { tableId: string }) {
         disabled={callWaiter.isPending}
         aria-label="Call waiter"
         title="Call waiter"
-        className="w-10 h-10 flex items-center justify-center rounded-4xl text-xl transition-colors bg-surface-container text-on-surface-variant hover:bg-surface-container-high disabled:cursor-wait"
+        className="w-10 h-10 flex items-center justify-center rounded-4xl text-xl transition-colors bg-surface-container-high text-on-surface-variant hover:bg-surface-container-highest disabled:cursor-wait"
       >
         {callWaiter.isPending ? (
           <i className="mgc_loading_line animate-spin" />

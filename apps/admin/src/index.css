@@ -11,7 +11,7 @@ body,
 
 body {
   font-family: "Inter", system-ui, -apple-system, sans-serif;
-  background: var(--ds-surface-container-low);
+  background: var(--ds-surface);
   color: var(--ds-on-surface);
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;

@@ -74,10 +74,10 @@ export default function RestaurantNewPage() {
   };
 
   const inputClass =
-    "w-full px-md py-s rounded-lg bg-surface-container-lowest border border-outline-variant text-p2 text-primary-text placeholder:text-outline outline-none focus:border-primary transition-colors";
+    "w-full px-md py-s rounded-lg bg-surface-container-low border border-outline-variant text-p2 text-primary-text placeholder:text-outline outline-none focus:border-primary transition-colors";
 
   return (
-    <main className="p-md flex flex-col gap-l max-w-xl">
+    <main className="p-md flex flex-col gap-l max-w-[36rem]">
       <header>
         <h1 className="font-display text-display-h2 font-semibold text-primary-text">
           Onboard Restaurant
@@ -105,14 +105,14 @@ export default function RestaurantNewPage() {
 
       {step === 1 && (
         <form onSubmit={handleNext} className="flex flex-col gap-md">
-          <div className="bg-surface-container rounded-md p-md flex flex-col gap-md">
+          <div className="bg-surface-container-low rounded-md p-md flex flex-col gap-md">
             <h2 className="text-label-l2 font-semibold text-primary-text">Restaurant Details</h2>
             <input className={inputClass} aria-label="Restaurant name" placeholder="Restaurant name *" value={form.name} onChange={set("name")} />
             <input className={inputClass} aria-label="Owner full name" placeholder="Owner full name *" value={form.owner_name} onChange={set("owner_name")} />
             <input className={inputClass} type="email" aria-label="Owner email" placeholder="Owner email *" value={form.owner_email} onChange={set("owner_email")} />
           </div>
 
-          <div className="bg-surface-container rounded-md p-md flex flex-col gap-md">
+          <div className="bg-surface-container-low rounded-md p-md flex flex-col gap-md">
             <h2 className="text-label-l2 font-semibold text-primary-text">Subscription Tier</h2>
             <div className="grid grid-cols-2 gap-s">
               {TIERS.map((tier) => (
@@ -139,7 +139,7 @@ export default function RestaurantNewPage() {
 
       {step === 2 && (
         <form onSubmit={handleCreate} className="flex flex-col gap-md">
-          <div className="bg-surface-container rounded-md p-md flex flex-col gap-md">
+          <div className="bg-surface-container-low rounded-md p-md flex flex-col gap-md">
             <h2 className="text-label-l2 font-semibold text-primary-text">Tables</h2>
             <input
               className={inputClass}
@@ -152,7 +152,7 @@ export default function RestaurantNewPage() {
             />
           </div>
 
-          <div className="bg-surface-container rounded-md p-md flex flex-col gap-md">
+          <div className="bg-surface-container-low rounded-md p-md flex flex-col gap-md">
             <h2 className="text-label-l2 font-semibold text-primary-text">Bank Details (optional)</h2>
             <input className={inputClass} aria-label="Bank name" placeholder="Bank name" value={form.bank_name} onChange={set("bank_name")} />
             <input className={inputClass} aria-label="Account number" placeholder="Account number" value={form.account_number} onChange={set("account_number")} />

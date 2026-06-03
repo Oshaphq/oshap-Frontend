@@ -109,7 +109,7 @@ export default function Analytics() {
               aria-label="Start date"
               value={startDate}
               onChange={(e) => setStartDate(e.target.value)}
-              className="px-s py-s rounded-md bg-surface-container border border-outline-variant text-p2 text-primary-text outline-none focus:border-primary"
+              className="px-s py-s rounded-md bg-surface-container-low border border-outline-variant text-p2 text-primary-text outline-none focus:border-primary"
             />
             <span className="text-secondary-text shrink-0">to</span>
             <input
@@ -117,7 +117,7 @@ export default function Analytics() {
               aria-label="End date"
               value={endDate}
               onChange={(e) => setEndDate(e.target.value)}
-              className="px-s py-s rounded-md bg-surface-container border border-outline-variant text-p2 text-primary-text outline-none focus:border-primary"
+              className="px-s py-s rounded-md bg-surface-container-low border border-outline-variant text-p2 text-primary-text outline-none focus:border-primary"
             />
           </div>
 
@@ -125,7 +125,7 @@ export default function Analytics() {
             <div className="relative">
               <select
                 aria-label="Date range preset"
-                className="px-md py-s rounded-md bg-surface-container border border-outline-variant text-p2 text-primary-text outline-none focus:border-primary appearance-none pr-10"
+                className="px-md py-s rounded-md bg-surface-container-low border border-outline-variant text-p2 text-primary-text outline-none focus:border-primary appearance-none pr-10"
                 onChange={(e) => {
                   const days = parseInt(e.target.value, 10);
                   if (isNaN(days)) return;
@@ -177,7 +177,7 @@ export default function Analytics() {
         <div className="flex flex-col gap-l">
           {/* Summary Cards */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-md">
-            <div className="bg-surface-container rounded-md p-md border border-transparent">
+            <div className="bg-surface-container-low rounded-md p-md border border-transparent">
               <h3 className="text-label-l4 font-semibold text-secondary-text mb-xs">
                 Total Revenue
               </h3>
@@ -185,7 +185,7 @@ export default function Analytics() {
                 ₦{data.summary.total_revenue.toLocaleString()}
               </p>
             </div>
-            <div className="bg-surface-container rounded-md p-md border border-transparent">
+            <div className="bg-surface-container-low rounded-md p-md border border-transparent">
               <h3 className="text-label-l4 font-semibold text-secondary-text mb-xs">
                 Total Orders
               </h3>
@@ -193,7 +193,7 @@ export default function Analytics() {
                 {data.summary.total_orders.toLocaleString()}
               </p>
             </div>
-            <div className="bg-surface-container rounded-md p-md border border-transparent">
+            <div className="bg-surface-container-low rounded-md p-md border border-transparent">
               <h3 className="text-label-l4 font-semibold text-secondary-text mb-xs">
                 Avg Order Value
               </h3>
@@ -205,7 +205,7 @@ export default function Analytics() {
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-md">
             {/* Revenue Over Time Chart */}
-            <div className="bg-surface-container rounded-md p-md border border-transparent flex flex-col">
+            <div className="bg-surface-container-low rounded-md p-md border border-transparent flex flex-col">
               <h3 className="text-label-l2 font-semibold text-primary-text mb-md">
                 Revenue Over Time
               </h3>
@@ -229,7 +229,7 @@ export default function Analytics() {
             </div>
 
             {/* Popular Items Chart */}
-            <div className="bg-surface-container rounded-md p-md border border-transparent flex flex-col">
+            <div className="bg-surface-container-low rounded-md p-md border border-transparent flex flex-col">
               <h3 className="text-label-l2 font-semibold text-primary-text mb-md">
                 Popular Items
               </h3>
@@ -256,7 +256,7 @@ export default function Analytics() {
             </div>
 
             {/* Peak Hours Chart */}
-            <div className="bg-surface-container rounded-md p-md border border-transparent flex flex-col">
+            <div className="bg-surface-container-low rounded-md p-md border border-transparent flex flex-col">
               <h3 className="text-label-l2 font-semibold text-primary-text mb-md">
                 Peak Hours (Orders)
               </h3>
@@ -274,7 +274,7 @@ export default function Analytics() {
             </div>
 
             {/* Table Performance */}
-            <div className="bg-surface-container rounded-md p-md border border-transparent flex flex-col">
+            <div className="bg-surface-container-low rounded-md p-md border border-transparent flex flex-col">
               <h3 className="text-label-l2 font-semibold text-primary-text mb-md">
                 Table Performance
               </h3>
