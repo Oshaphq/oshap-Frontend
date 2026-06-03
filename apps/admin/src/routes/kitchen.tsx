@@ -24,7 +24,7 @@ function stripRef(ref: string) {
 
 export default function KitchenPage() {
   const { user } = useAuth();
-  const kitchenQuery = useAdminKitchen(5000);
+  const kitchenQuery = useAdminKitchen();
   const menuQuery = useAdminMenu();
   const updateStatus = useAdminUpdateKitchenStatus();
 
@@ -96,7 +96,7 @@ export default function KitchenPage() {
           {user?.role === "BARTENDER" ? "Bar Orders" : "Kitchen Display"}
         </h1>
         <div className="flex items-center gap-s">
-          <span className="px-s py-xs rounded-4xl font-bold text-caption-sm bg-error-container text-on-error-container">
+          <span className="px-s py-xs rounded-4xl font-bold text-caption-sm bg-primary-container text-on-primary-container">
             {newOrders.length} new
           </span>
           <span className="px-s py-xs rounded-4xl font-bold text-caption-sm bg-warning-container text-on-warning-container">
@@ -123,7 +123,7 @@ export default function KitchenPage() {
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-md items-start">
             <KitchenColumn
               title="New"
-              accent="error"
+              accent="primary"
               orders={newOrders}
               ctaLabel="Start"
               ctaDisabledLabel="..."
@@ -134,7 +134,7 @@ export default function KitchenPage() {
             />
             <KitchenColumn
               title="Cooking"
-              accent="amber"
+              accent="warning"
               orders={inProgress}
               ctaLabel="Ready"
               ctaDisabledLabel="..."
@@ -161,7 +161,7 @@ export default function KitchenPage() {
 
 interface ColumnProps {
   title: string;
-  accent: "error" | "amber" | "success";
+  accent: "primary" | "warning" | "success";
   orders: OrderWithItems[];
   ctaLabel: string | null;
   ctaDisabledLabel: string | null;
@@ -173,12 +173,12 @@ const ACCENT_CLS: Record<
   ColumnProps["accent"],
   { headerBorder: string; cardBorder: string; qty: string }
 > = {
-  error: {
-    headerBorder: "border-b-error",
-    cardBorder: "border-l-error",
-    qty: "text-error",
+  primary: {
+    headerBorder: "border-b-primary",
+    cardBorder: "border-l-primary",
+    qty: "text-primary",
   },
-  amber: {
+  warning: {
     headerBorder: "border-b-warning",
     cardBorder: "border-l-warning",
     qty: "text-warning",
@@ -232,17 +232,17 @@ function KitchenColumn({
                     #{stripRef(order.reference)}
                   </span>
                 </div>
-                <ul className="flex flex-col gap-1">
+                <ul className="flex flex-col gap-xs">
                   {order.order_items.map((item) => (
                     <li key={item.id} className="flex items-center gap-s">
-                      <span className={`font-bold min-w-6 ${cls.qty}`}>
+                      <span className={`font-bold min-w-l ${cls.qty}`}>
                         {item.quantity}x
                       </span>
                       <span className="text-primary-text">{item.name}</span>
                     </li>
                   ))}
                 </ul>
-                <div className="flex items-center justify-between pt-s border-t border-surface-container-high">
+                <div className="flex flex-col gap-xl pt-s border-t border-surface-container-high">
                   <span className="text-caption-md font-bold text-secondary-text">
                     {formatCurrency(order.total)}
                   </span>

@@ -49,12 +49,7 @@ function OrdersView({ tableId }: { tableId: string }) {
     deviceToken,
   });
 
-  // Poll every 5s so newly-joined customers' orders appear without a manual refresh.
-  useEffect(() => {
-    const id = setInterval(() => sessionOrdersQuery.refetch(), 5000);
-    return () => clearInterval(id);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [sessionOrdersQuery.refetch]);
+
 
   const orders = useMemo(() => {
     const list = sessionOrdersQuery.data?.orders ?? [];

@@ -9,7 +9,7 @@ import { PrimaryButton, SecondaryButton, toast } from "@oshap/shared/ui";
 import QueryError from "../components/QueryError";
 
 export default function DashboardPage() {
-  const tablesQuery = useAdminTables(5000);
+  const tablesQuery = useAdminTables();
   const verifyPayment = useAdminVerifyPayment();
   const closeTable = useAdminCloseTable();
 

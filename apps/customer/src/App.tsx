@@ -7,6 +7,12 @@ import OrdersPage from "./routes/orders";
 
 import { useSearchParams } from "react-router";
 import { NotificationProvider } from "./context/NotificationContext";
+import { useGlobalSSE } from "@oshap/shared";
+
+function GlobalSSE() {
+  useGlobalSSE();
+  return null;
+}
 
 function AppContent() {
   const [params] = useSearchParams();
@@ -14,6 +20,7 @@ function AppContent() {
 
   return (
     <NotificationProvider tableId={tableId}>
+      <GlobalSSE />
       <Routes>
         <Route path="/" element={<Navigate to={`/menu?table=${tableId}`} replace />} />
         <Route path="/menu" element={<MenuPage />} />

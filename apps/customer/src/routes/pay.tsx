@@ -26,12 +26,7 @@ export default function PayPage() {
     sessionId: session?.id,
   });
 
-  // Poll every 5s so a merchant verification is reflected without a manual refresh.
-  useEffect(() => {
-    const id = setInterval(() => tableQuery.refetch(), 5000);
-    return () => clearInterval(id);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [tableQuery.refetch]);
+
 
   const claimPayment = useClaimPayment();
   const requestPos = useRequestPos();

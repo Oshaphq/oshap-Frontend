@@ -46,6 +46,93 @@ import type {
 } from "../types/index";
 
 // ---------------------------------------------------------------------------
+// Mock EventSource for SSE
+// ---------------------------------------------------------------------------
+
+type SSEListener = (event: MessageEvent) => void;
+
+class MockEventSource {
+  url: string;
+  onmessage: SSEListener | null = null;
+  onerror: ((event: Event) => void) | null = null;
+  
+  constructor(url: string) {
+    this.url = url;
+    const global: any = typeof window !== "undefined" ? window : globalThis;
+    global.__MOCK_SSE_INSTANCES__ = global.__MOCK_SSE_INSTANCES__ || [];
+    global.__MOCK_SSE_INSTANCES__.push(this);
+  }
+  
+  close() {
+    const global: any = typeof window !== "undefined" ? window : globalThis;
+    if (global.__MOCK_SSE_INSTANCES__) {
+      global.__MOCK_SSE_INSTANCES__ = global.__MOCK_SSE_INSTANCES__.filter((es: any) => es !== this);
+    }
+  }
+}
+
+const globalAny: any = typeof window !== "undefined" ? window : globalThis;
+globalAny.__MOCK_EVENT_SOURCE__ = MockEventSource;
+
+export function dispatchMockEvent(type: string, payload: any = {}) {
+  const global: any = typeof window !== "undefined" ? window : globalThis;
+  
+  // Dispatch locally
+  if (global.__MOCK_SSE_INSTANCES__) {
+    for (const es of global.__MOCK_SSE_INSTANCES__) {
+      if (es.onmessage) {
+        es.onmessage({
+          data: JSON.stringify({ type, ...payload })
+        } as MessageEvent);
+      }
+    }
+  }
+
+  // Notify other tabs locally
+  if (typeof window !== "undefined" && window.localStorage) {
+    const sseEvent = JSON.stringify({ type, payload, ts: Date.now() });
+    window.localStorage.setItem("oshap-mock-sse", sseEvent);
+  }
+
+  // Notify via WS relay if connected
+  const globalAny: any = window;
+  if (globalAny.__MOCK_WS__ && globalAny.__MOCK_WS__.readyState === 1) {
+    globalAny.__MOCK_WS__.send(JSON.stringify({ type, payload }));
+  }
+}
+
+// ---------------------------------------------------------------------------
+// WebSocket Relay for cross-port syncing
+// ---------------------------------------------------------------------------
+if (typeof window !== "undefined") {
+  const ws = new WebSocket("ws://localhost:5175");
+  (window as any).__MOCK_WS__ = ws;
+
+  ws.onmessage = (e) => {
+    try {
+      const data = JSON.parse(e.data);
+      if (data.type === "SYNC_STATE" || data.type === "UPDATE_STATE") {
+        window.localStorage.setItem("oshap-mock-state", JSON.stringify(data.payload));
+        syncFromStorage();
+      } else {
+        // It's an SSE event
+        syncFromStorage();
+        const global: any = window;
+        if (global.__MOCK_SSE_INSTANCES__) {
+          for (const es of global.__MOCK_SSE_INSTANCES__) {
+            if (es.onmessage) {
+              es.onmessage({ data: JSON.stringify(data) } as MessageEvent);
+            }
+          }
+        }
+      }
+    } catch {
+      // Ignore
+    }
+  };
+}
+
+// ---------------------------------------------------------------------------
 // Seed data
 // ---------------------------------------------------------------------------
 
@@ -178,6 +265,12 @@ function syncToStorage(): void {
       orderCounter: _orderCounter,
     };
     localStorage.setItem(STORAGE_KEY, JSON.stringify(payload));
+
+    // Broadcast state update to WS relay
+    const globalAny: any = window;
+    if (globalAny.__MOCK_WS__ && globalAny.__MOCK_WS__.readyState === 1) {
+      globalAny.__MOCK_WS__.send(JSON.stringify({ type: "UPDATE_STATE", payload }));
+    }
   } catch {
     // Quota / disabled storage — fall through, state stays in memory only.
   }
@@ -1023,7 +1116,15 @@ export async function mockRequest(
     if (r.methods.includes(method) && r.pattern.test(path)) {
       const result = await r.fn({ path, method, body, query: queryParams, admin });
       // Persist after mutations only; GET handlers don't change state.
-      if (method !== "GET") syncToStorage();
+      if (method !== "GET") {
+        syncToStorage();
+        if (path === "/order") dispatchMockEvent("ORDER_CREATED");
+        else if (path.startsWith("/admin/kitchen")) dispatchMockEvent("STATUS_CHANGED");
+        else if (path.includes("/request-pos") || path === "/payment/confirm") dispatchMockEvent("PAYMENT_PENDING");
+        else if (path === "/admin/verify") dispatchMockEvent("PAYMENT_VERIFIED");
+        else if (path === "/admin/close") dispatchMockEvent("TABLE_CLOSED");
+        else dispatchMockEvent("GENERIC_UPDATE");
+      }
       return result;
     }
   }

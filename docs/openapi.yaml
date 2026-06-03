@@ -1231,3 +1231,22 @@ paths:
           content:
             application/json:
               schema: { $ref: "#/components/schemas/RegisterDeviceResponse" }
+
+  # =========================================================================
+  # EVENTS — Server-Sent Events (SSE)
+  # =========================================================================
+  /events:
+    get:
+      tags: [Events]
+      summary: Global event stream (SSE)
+      description: >
+        Connect to this endpoint using EventSource to receive real-time updates.
+        Emits events like `ORDER_CREATED`, `STATUS_CHANGED`, `PAYMENT_PENDING`, etc.
+      responses:
+        "200":
+          description: SSE Stream
+          content:
+            text/event-stream:
+              schema:
+                type: string
+                description: Event payload (JSON stringified)

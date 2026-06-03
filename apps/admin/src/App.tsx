@@ -9,6 +9,12 @@ import MenuPage from "./routes/menu";
 import SettingsPage from "./routes/settings";
 import AnalyticsPage from "./routes/analytics";
 import { AuthProvider, useAuth } from "./context/AuthContext";
+import { useGlobalSSE } from "@oshap/shared";
+
+function GlobalSSE() {
+  useGlobalSSE();
+  return null;
+}
 
 function IndexRoute() {
   const { user } = useAuth();
@@ -22,6 +28,7 @@ function IndexRoute() {
 export default function App() {
   return (
     <AuthProvider>
+      <GlobalSSE />
       <Routes>
         <Route element={<AuthGate />}>
           {/* Default routes based on role */}

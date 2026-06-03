@@ -195,7 +195,7 @@
 ## Phase 9 — Real-Time Push (SSE)
 
 **Goal:** Replace 5-second polling with server-sent events for sub-second updates.
-**Status:** ⬜ Not started
+**Status:** 🔄 In progress
 **Effort:** 2–3 weeks
 **Dependencies:** Phase 1
 

@@ -28,7 +28,7 @@ const PRESETS = [
 function getFormattedDate(daysAgo = 0) {
   const d = new Date();
   d.setDate(d.getDate() - daysAgo);
-  return d.toISOString().split("T")[0];
+  return d.toISOString().split("T")[0]!;
 }
 
 const COLORS = ["#FF5722", "#4CAF50", "#2196F3", "#9C27B0", "#FFC107"];
@@ -101,11 +101,11 @@ export default function Analytics() {
                 if (days === 30) {
                   // This Month
                   const d = new Date();
-                  setStartDate(new Date(d.getFullYear(), d.getMonth(), 1).toISOString().split("T")[0]);
+                  setStartDate(new Date(d.getFullYear(), d.getMonth(), 1).toISOString().split("T")[0]!);
                 } else if (days === 365) {
                   // Year to date
                   const d = new Date();
-                  setStartDate(new Date(d.getFullYear(), 0, 1).toISOString().split("T")[0]);
+                  setStartDate(new Date(d.getFullYear(), 0, 1).toISOString().split("T")[0]!);
                 } else {
                   setStartDate(getFormattedDate(days));
                 }

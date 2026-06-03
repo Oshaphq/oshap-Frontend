@@ -170,11 +170,10 @@ export function useAdminUploadImage() {
 
 // ---------- Kitchen ----------
 
-export function useAdminKitchen(pollMs = 5000) {
+export function useAdminKitchen() {
   return useQuery({
     queryKey: queryKeys.admin.kitchen(),
     queryFn: adminGetKitchen,
-    refetchInterval: pollMs,
   });
 }
 
@@ -211,11 +210,10 @@ export function useAdminAnalytics(startDate: string, endDate: string) {
 
 // ---------- Tables / verify / close ----------
 
-export function useAdminTables(pollMs = 5000) {
+export function useAdminTables() {
   return useQuery({
     queryKey: queryKeys.admin.tables(),
     queryFn: adminGetTables,
-    refetchInterval: pollMs,
   });
 }
 

@@ -113,7 +113,7 @@ function isMockMode(): boolean {
 // Base URL
 // ---------------------------------------------------------------------------
 
-function getBaseUrl(): string {
+export function getBaseUrl(): string {
   if (isMockMode()) return "mock://api";
   const url = import.meta.env.VITE_API_BASE_URL;
   if (!url) {
