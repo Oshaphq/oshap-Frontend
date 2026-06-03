@@ -4,3 +4,5 @@ export * from "./useOrders";
 export * from "./useSession";
 export * from "./useAdmin";
 export * from "./useSSE";
+export * from "./useInventory";
+export * from "./usePlatform";

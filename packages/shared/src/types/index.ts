@@ -59,6 +59,9 @@ export interface MenuItem {
   image_url?: string | null;
   available: boolean;
   sort_order: number;
+  /** null = inventory tracking disabled for this item */
+  stock_count: number | null;
+  low_stock_threshold: number;
 }
 
 export interface OrderItem {
@@ -342,6 +345,20 @@ export interface AdminCloseResponse {
   reason: CloseReason;
 }
 
+export interface AdminCreateTableRequest {
+  id: string;
+}
+
+export interface AdminCreateTableResponse {
+  success: true;
+  table_id: string;
+}
+
+export interface AdminDeleteTableResponse {
+  success: true;
+  table_id: string;
+}
+
 export interface UploadResponse {
   url: string;
 }
@@ -411,4 +428,102 @@ export interface AdminAnalyticsResponse {
   peak_hours: AnalyticsPeakHour[];
   table_performance: AnalyticsTablePerformance[];
   staff_activity: AnalyticsStaffActivity[];
+}
+
+// ---------------------------------------------------------------------------
+// Inventory (Phase 12)
+// ---------------------------------------------------------------------------
+
+export interface LowStockAlert {
+  item_id: string;
+  name: string;
+  category: string;
+  stock_count: number;
+  threshold: number;
+}
+
+export interface InventoryUpdateRequest {
+  stock_count: number | null;
+  low_stock_threshold?: number;
+}
+
+export interface InventoryUpdateResponse {
+  success: true;
+  item: MenuItem;
+}
+
+export interface AdminInventoryAlertsResponse {
+  alerts: LowStockAlert[];
+}
+
+// ---------------------------------------------------------------------------
+// Multi-Branch (Phase 12)
+// ---------------------------------------------------------------------------
+
+export interface RestaurantBranch extends Restaurant {
+  is_active: boolean;
+  table_count: number;
+  staff_count: number;
+}
+
+export interface RestaurantGroup {
+  id: string;
+  name: string;
+  branches: RestaurantBranch[];
+}
+
+export interface GroupBranchAnalytics {
+  branch_id: string;
+  branch_name: string;
+  total_revenue: number;
+  total_orders: number;
+  avg_order_value: number;
+}
+
+export interface GroupAnalyticsResponse {
+  group_name: string;
+  total_revenue: number;
+  total_orders: number;
+  branches: GroupBranchAnalytics[];
+}
+
+// ---------------------------------------------------------------------------
+// Platform Admin (Phase 12)
+// ---------------------------------------------------------------------------
+
+export type SubscriptionTier = "FREE" | "STARTER" | "PRO" | "ENTERPRISE";
+
+export interface PlatformRestaurant extends Restaurant {
+  subscription_tier: SubscriptionTier;
+  is_active: boolean;
+  created_at: string;
+  owner_email: string;
+  table_count: number;
+  monthly_orders: number;
+}
+
+export interface PlatformSystemHealth {
+  api_uptime_pct: number;
+  avg_response_ms: number;
+  error_rate_pct: number;
+  active_sessions: number;
+  total_restaurants: number;
+  total_orders_today: number;
+}
+
+export interface PlatformCreateRestaurantRequest {
+  name: string;
+  owner_name: string;
+  owner_email: string;
+  subscription_tier: SubscriptionTier;
+  table_count: number;
+  bank_name?: string;
+  account_number?: string;
+  account_name?: string;
+}
+
+export interface PlatformUpdateRestaurantRequest {
+  name?: string;
+  subscription_tier?: SubscriptionTier;
+  is_active?: boolean;
 }

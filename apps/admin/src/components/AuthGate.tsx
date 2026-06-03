@@ -1,20 +1,33 @@
 import { useState, useEffect } from "react";
 import { Outlet, useNavigate, NavLink } from "react-router";
-import { adminApi, getAdminRestaurantId, getAdminRestaurantName } from "@oshap/shared";
+import { adminApi, getAdminRestaurantId, getAdminRestaurantName, useAdminGroup } from "@oshap/shared";
 import { PrimaryButton, ThemeToggle } from "@oshap/shared/ui";
 import { initFCM } from "../utils/fcm";
 import AlertCenter from "./AlertCenter";
 import { useAuth } from "../context/AuthContext";
 
+const BRANCH_KEY = "oshap-active-branch";
+
+function readStoredBranch(): string | null {
+  try {
+    return localStorage.getItem(BRANCH_KEY);
+  } catch {
+    return null;
+  }
+}
+
 export default function AuthGate() {
   const navigate = useNavigate();
   const { user, isAuthenticated, isLoading, login, logout } = useAuth();
-  
+  const groupQuery = useAdminGroup();
+
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState("");
   const [isLoggingIn, setIsLoggingIn] = useState(false);
+  const [activeBranchId, setActiveBranchId] = useState<string>(() => readStoredBranch() ?? "");
+  const [menuOpen, setMenuOpen] = useState(false);
 
   useEffect(() => {
     if (!isAuthenticated) return;
@@ -122,6 +135,16 @@ export default function AuthGate() {
   }
 
   const restaurantName = getAdminRestaurantName();
+  const group = groupQuery.data;
+  const showBranchSelector =
+    user?.role === "OWNER" && (group?.branches.length ?? 0) > 1;
+
+  const handleBranchChange = (id: string) => {
+    setActiveBranchId(id);
+    try {
+      localStorage.setItem(BRANCH_KEY, id);
+    } catch {}
+  };
 
   // Role-based tabs
   const tabs = [];
@@ -144,48 +167,101 @@ export default function AuthGate() {
 
   return (
     <div className="min-h-screen bg-surface-container-lowest flex flex-col">
-      <nav className="flex items-center justify-between gap-s px-s sm:px-md py-s bg-surface-container-lowest border-b border-surface-container-high">
-        <div className="flex items-center gap-0.5 overflow-x-auto scrollbar-none shrink min-w-0">
-          {tabs.map((tab) => (
-            <NavLink
-              key={tab.to}
-              to={tab.to}
-              end={tab.end}
-              className={({ isActive }) =>
-                `px-s sm:px-md py-s rounded-lg text-label-l4 font-semibold font-display whitespace-nowrap transition-colors no-underline shrink-0 ${isActive
-                  ? "bg-primary text-on-primary"
-                  : "text-secondary-text hover:bg-surface-container-high"
-                }`
-              }
-            >
-              {tab.label}
-            </NavLink>
-          ))}
-        </div>
-
-        <div className="flex items-center gap-s shrink-0">
-          <ThemeToggle />
-          <div className="hidden md:flex flex-col items-end mr-s">
-             <span className="text-label-l4 font-semibold text-primary-text">{user.name}</span>
-             <span className="text-caption-md text-secondary-text">{user.role}</span>
-          </div>
-          {restaurantName && (
-            <span
-              className="hidden lg:inline text-caption-md font-semibold text-secondary-text truncate max-w-[200px]"
-              title={restaurantName}
-            >
-              {restaurantName}
-            </span>
-          )}
+      <header className="bg-surface-container-lowest border-b border-surface-container-high">
+        <nav className="flex items-center justify-between gap-s px-s sm:px-md py-s">
+          {/* Hamburger — mobile & tablet only */}
           <button
-            onClick={handleLogout}
-            className="w-9 h-9 flex items-center justify-center rounded-4xl bg-surface-container text-secondary-text border-[1.5px] border-transparent hover:bg-error-container hover:text-on-error-container transition-colors"
-            title="Logout"
+            className="lg:hidden w-9 h-9 flex items-center justify-center rounded-lg text-secondary-text hover:bg-surface-container-high transition-colors shrink-0"
+            onClick={() => setMenuOpen((o) => !o)}
+            aria-label={menuOpen ? "Close menu" : "Open menu"}
           >
-            <i className="mgc_exit_line text-lg" />
+            <i className={menuOpen ? "mgc_close_line text-xl" : "mgc_menu_line text-xl"} aria-hidden />
           </button>
-        </div>
-      </nav>
+
+          {/* Desktop tab bar — hidden below lg */}
+          <div className="hidden lg:flex items-center gap-0.5 shrink min-w-0">
+            {tabs.map((tab) => (
+              <NavLink
+                key={tab.to}
+                to={tab.to}
+                end={tab.end}
+                className={({ isActive }) =>
+                  `px-md py-s rounded-lg text-label-l4 font-semibold font-display whitespace-nowrap transition-colors no-underline shrink-0 ${isActive
+                    ? "bg-primary text-on-primary"
+                    : "text-secondary-text hover:bg-surface-container-high"
+                  }`
+                }
+              >
+                {tab.label}
+              </NavLink>
+            ))}
+          </div>
+
+          {/* Right controls — always visible */}
+          <div className="flex items-center gap-s shrink-0 ml-auto lg:ml-0">
+            {showBranchSelector && group && (
+              <div className="relative">
+                <select
+                  value={activeBranchId}
+                  onChange={(e) => handleBranchChange(e.target.value)}
+                  className="pl-s pr-8 py-xs rounded-lg border border-outline-variant bg-surface-container text-caption-md text-primary-text font-semibold outline-none focus:border-primary appearance-none cursor-pointer max-w-[160px]"
+                >
+                  <option value="">All Branches</option>
+                  {group.branches.map((b) => (
+                    <option key={b.id} value={b.id}>
+                      {b.name}
+                    </option>
+                  ))}
+                </select>
+                <i className="mgc_down_line absolute right-s top-1/2 -translate-y-1/2 text-outline pointer-events-none text-sm" aria-hidden />
+              </div>
+            )}
+            <ThemeToggle />
+            <div className="hidden md:flex flex-col items-end mr-s">
+              <span className="text-label-l4 font-semibold text-primary-text">{user.name}</span>
+              <span className="text-caption-md text-secondary-text">{user.role}</span>
+            </div>
+            {restaurantName && (
+              <span
+                className="hidden lg:inline text-caption-md font-semibold text-secondary-text truncate max-w-[200px]"
+                title={restaurantName}
+              >
+                {restaurantName}
+              </span>
+            )}
+            <button
+              onClick={handleLogout}
+              className="w-9 h-9 flex items-center justify-center rounded-4xl bg-surface-container text-secondary-text border-[1.5px] border-transparent hover:bg-error-container hover:text-on-error-container transition-colors"
+              title="Logout"
+            >
+              <i className="mgc_exit_line text-lg" />
+            </button>
+          </div>
+        </nav>
+
+        {/* Mobile / tablet drawer */}
+        {menuOpen && (
+          <div className="lg:hidden px-s pb-s flex flex-col gap-xs">
+            {tabs.map((tab) => (
+              <NavLink
+                key={tab.to}
+                to={tab.to}
+                end={tab.end}
+                onClick={() => setMenuOpen(false)}
+                className={({ isActive }) =>
+                  `px-md py-s rounded-lg text-label-l4 font-semibold font-display transition-colors no-underline ${isActive
+                    ? "bg-primary text-on-primary"
+                    : "text-secondary-text hover:bg-surface-container-high"
+                  }`
+                }
+              >
+                {tab.label}
+              </NavLink>
+            ))}
+          </div>
+        )}
+      </header>
+
       <div className="flex-1 overflow-y-auto">
         <Outlet />
       </div>

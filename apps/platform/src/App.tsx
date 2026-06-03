@@ -1,0 +1,159 @@
+import { useState } from "react";
+import { NavLink, Outlet, Route, Routes, Navigate } from "react-router";
+import { ThemeToggle } from "@oshap/shared/ui";
+import DashboardPage from "./routes/dashboard";
+import RestaurantsPage from "./routes/restaurants";
+import RestaurantDetailPage from "./routes/restaurant-detail";
+import RestaurantNewPage from "./routes/restaurant-new";
+import SubscriptionsPage from "./routes/subscriptions";
+import HealthPage from "./routes/health";
+
+const AUTH_KEY = "oshap-platform-auth";
+
+function readAuth(): boolean {
+  try {
+    return sessionStorage.getItem(AUTH_KEY) === "1";
+  } catch {
+    return false;
+  }
+}
+
+function PlatformLogin({ onLogin }: { onLogin: () => void }) {
+  const [token, setToken] = useState("");
+  const [error, setError] = useState("");
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    const expected = import.meta.env.VITE_PLATFORM_TOKEN as string | undefined;
+    const valid = !expected || token === expected;
+    if (!valid) {
+      setError("Invalid access code.");
+      return;
+    }
+    try {
+      sessionStorage.setItem(AUTH_KEY, "1");
+    } catch {}
+    onLogin();
+  };
+
+  return (
+    <div className="min-h-screen bg-surface-container-lowest flex items-center justify-center p-md">
+      <form
+        onSubmit={handleSubmit}
+        className="w-full max-w-[360px] bg-surface-container rounded-xl p-xl flex flex-col items-center gap-md"
+      >
+        <div className="w-14 h-14 rounded-full bg-primary-container flex items-center justify-center text-2xl text-on-primary-container">
+          <i className="mgc_shield_keyhole_line" />
+        </div>
+        <h1 className="font-display text-display-h3 font-semibold text-primary-text">
+          Oshap Platform
+        </h1>
+        <p className="text-p2 text-secondary-text text-center">
+          Internal operator portal. Enter your platform access code to continue.
+        </p>
+        <input
+          type="password"
+          placeholder="Platform access code"
+          value={token}
+          autoFocus
+          onChange={(e) => {
+            setToken(e.target.value);
+            setError("");
+          }}
+          className={`w-full px-md py-md rounded-lg bg-surface-container-lowest border-2 text-p text-primary-text placeholder:text-outline outline-none transition-colors ${
+            error ? "border-error" : "border-outline-variant focus:border-primary"
+          }`}
+        />
+        {error && <p className="text-caption-md text-error self-start">{error}</p>}
+        <button
+          type="submit"
+          disabled={!token}
+          className="w-full py-md rounded-xl font-bold text-p font-display bg-primary text-on-primary transition-all hover:opacity-90 active:scale-[0.98] disabled:opacity-40 disabled:cursor-not-allowed"
+        >
+          Access Platform
+        </button>
+      </form>
+    </div>
+  );
+}
+
+function PlatformLayout() {
+  const handleLogout = () => {
+    try {
+      sessionStorage.removeItem(AUTH_KEY);
+    } catch {}
+    window.location.reload();
+  };
+
+  const navLinks = [
+    { to: "/", label: "Dashboard", end: true },
+    { to: "/restaurants", label: "Restaurants" },
+    { to: "/subscriptions", label: "Subscriptions" },
+    { to: "/health", label: "Health" },
+  ];
+
+  return (
+    <div className="min-h-screen bg-surface-container-lowest flex flex-col">
+      <nav className="flex items-center justify-between gap-s px-s sm:px-md py-s bg-surface-container-lowest border-b border-surface-container-high">
+        <div className="flex items-center gap-0.5 overflow-x-auto scrollbar-none shrink min-w-0">
+          <span className="font-display font-bold text-primary mr-s shrink-0">
+            Oshap Platform
+          </span>
+          {navLinks.map((link) => (
+            <NavLink
+              key={link.to}
+              to={link.to}
+              end={link.end}
+              className={({ isActive }) =>
+                `px-s sm:px-md py-s rounded-lg text-label-l4 font-semibold font-display whitespace-nowrap transition-colors no-underline shrink-0 ${
+                  isActive
+                    ? "bg-primary text-on-primary"
+                    : "text-secondary-text hover:bg-surface-container-high"
+                }`
+              }
+            >
+              {link.label}
+            </NavLink>
+          ))}
+        </div>
+
+        <div className="flex items-center gap-s shrink-0">
+          <ThemeToggle />
+          <button
+            onClick={handleLogout}
+            className="w-9 h-9 flex items-center justify-center rounded-4xl bg-surface-container text-secondary-text border-[1.5px] border-transparent hover:bg-error-container hover:text-on-error-container transition-colors"
+            title="Logout"
+          >
+            <i className="mgc_exit_line text-lg" />
+          </button>
+        </div>
+      </nav>
+
+      <div className="flex-1 overflow-y-auto">
+        <Outlet />
+      </div>
+    </div>
+  );
+}
+
+export default function App() {
+  const [isAuthed, setIsAuthed] = useState(readAuth);
+
+  if (!isAuthed) {
+    return <PlatformLogin onLogin={() => setIsAuthed(true)} />;
+  }
+
+  return (
+    <Routes>
+      <Route element={<PlatformLayout />}>
+        <Route index element={<DashboardPage />} />
+        <Route path="/restaurants" element={<RestaurantsPage />} />
+        <Route path="/restaurants/new" element={<RestaurantNewPage />} />
+        <Route path="/restaurants/:id" element={<RestaurantDetailPage />} />
+        <Route path="/subscriptions" element={<SubscriptionsPage />} />
+        <Route path="/health" element={<HealthPage />} />
+      </Route>
+      <Route path="*" element={<Navigate to="/" replace />} />
+    </Routes>
+  );
+}

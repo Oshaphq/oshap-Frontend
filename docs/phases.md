@@ -244,15 +244,32 @@
 ## Phase 12 — Inventory + Multi-Branch + Platform Admin
 
 **Goal:** Full restaurant OS for group operators and internal Oshap management.
-**Status:** ⬜ Not started
-**Effort:** 8+ weeks
-**Dependencies:** Phases 6, 7
+**Status:** ✅ Complete (frontend mock-first; real backend wiring deferred to Phase 1)
+**Effort:** 8+ weeks (estimated) — delivered as 3 pillars
 
-**Tasks:**
-- Inventory management: stock counts, low-stock alerts, auto-disable sold-out items
-- Multi-branch: group-level analytics rollup, branch selector in admin
-- Platform administration app (`apps/platform`): onboard restaurants, manage subscriptions, monitor system health
-- Subscription billing (Paystack subscriptions or Stripe)
+### Pillar 1 — Inventory Management ✅
+- `stock_count` + `low_stock_threshold` on `MenuItem` type and mock seed
+- `PATCH /admin/inventory/:id` + `GET /admin/inventory/alerts` mock routes
+- `useAdminInventoryAlerts()` + `useAdminUpdateStock()` hooks
+- Admin Menu page: stock count badge, inline editor, "Untracked" state
+- `LowStockBanner.tsx` on Menu page
+- Dashboard: Low Stock Items chip (links to /menu)
+
+### Pillar 2 — Multi-Branch ✅
+- `RestaurantGroup`, `GroupAnalyticsResponse` types
+- Mock routes: `GET /admin/group`, `GET /admin/group/analytics`
+- `useAdminGroup()` + `useAdminGroupAnalytics()` hooks
+- Branch selector dropdown in admin nav (Owner only, stores in `localStorage`)
+- `/analytics/group` route with revenue bar chart + per-branch breakdown
+- "Group View →" link from single-branch analytics page
+
+### Pillar 3 — Platform Admin App ✅
+- `apps/platform` — new Vite + React + Tailwind app (`npm run dev:platform`, port 5175)
+- `VITE_PLATFORM_TOKEN` gate (static token check, sessionStorage-backed)
+- Platform mock routes: `GET/POST/PATCH /platform/restaurants`, `GET /platform/health`
+- `usePlatformRestaurants()`, `usePlatformRestaurant()`, `usePlatformHealth()`, `usePlatformCreateRestaurant()`, `usePlatformUpdateRestaurant()` hooks
+- Routes: `/` (dashboard), `/restaurants`, `/restaurants/new` (2-step wizard), `/restaurants/:id`, `/subscriptions` (mock billing table), `/health` (uptime/latency/error metrics)
+- `apps/platform/vercel.json` for SPA rewrite
 
 ---
 
@@ -272,5 +289,5 @@ Phase 8    ⬜  Payment gateway + tip       ← after Phase 1
 Phase 9    ⬜  Real-time push (SSE)        ← after Phase 1
 Phase 10   ⬜  Loyalty + CRM              ← after Phase 6
 Phase 11   ⬜  Reservations + pre-ordering ← after Phase 6
-Phase 12   ⬜  Inventory + multi-branch + platform admin
+Phase 12   ✅  Inventory + multi-branch + platform admin
 ```

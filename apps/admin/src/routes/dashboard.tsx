@@ -1,8 +1,10 @@
 import { useState } from "react";
+import { Link } from "react-router";
 import {
   useAdminTables,
   useAdminVerifyPayment,
   useAdminCloseTable,
+  useAdminInventoryAlerts,
   formatCurrency,
 } from "@oshap/shared";
 import { PrimaryButton, SecondaryButton, toast } from "@oshap/shared/ui";
@@ -12,6 +14,7 @@ export default function DashboardPage() {
   const tablesQuery = useAdminTables();
   const verifyPayment = useAdminVerifyPayment();
   const closeTable = useAdminCloseTable();
+  const alertsQuery = useAdminInventoryAlerts();
 
   const [clearPromptTable, setClearPromptTable] = useState<string | null>(null);
 
@@ -53,6 +56,8 @@ export default function DashboardPage() {
   };
 
   const hasPending = pendingCount > 0;
+  const lowStockCount = alertsQuery.data?.alerts.length ?? 0;
+  const hasLowStock = lowStockCount > 0;
 
   return (
     <main className="p-md flex flex-col gap-l">
@@ -76,8 +81,8 @@ export default function DashboardPage() {
         </SecondaryButton>
       </header>
 
-      <div className="flex gap-md">
-        <div className="flex-1 bg-surface-container rounded-md p-md flex flex-col items-center gap-xs">
+      <div className="flex gap-md flex-wrap">
+        <div className="flex-1 min-w-[120px] bg-surface-container rounded-md p-md flex flex-col items-center gap-xs">
           <span className="font-display text-display-h2 font-semibold text-primary block">
             {activeTablesCount}
           </span>
@@ -86,7 +91,7 @@ export default function DashboardPage() {
           </span>
         </div>
         <div
-          className={`flex-1 rounded-md p-md flex flex-col items-center gap-xs border-[1.5px] ${
+          className={`flex-1 min-w-[120px] rounded-md p-md flex flex-col items-center gap-xs border ${
             hasPending
               ? "bg-warning-container border-warning"
               : "bg-surface-container border-transparent"
@@ -107,6 +112,29 @@ export default function DashboardPage() {
             Payments to Verify
           </span>
         </div>
+        <Link
+          to="/menu"
+          className={`flex-1 min-w-[120px] rounded-md p-md flex flex-col items-center gap-xs border no-underline transition-colors ${
+            hasLowStock
+              ? "bg-error-container border-error hover:opacity-90"
+              : "bg-surface-container border-transparent hover:border-outline-variant"
+          }`}
+        >
+          <span
+            className={`font-display text-display-h2 font-semibold block ${
+              hasLowStock ? "text-on-error-container" : "text-primary"
+            }`}
+          >
+            {lowStockCount}
+          </span>
+          <span
+            className={`text-caption-sm font-medium uppercase tracking-wider ${
+              hasLowStock ? "text-on-error-container" : "text-secondary-text"
+            }`}
+          >
+            Low Stock Items
+          </span>
+        </Link>
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-md">

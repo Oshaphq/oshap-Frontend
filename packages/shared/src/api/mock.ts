@@ -149,29 +149,30 @@ let _restaurant: Restaurant = {
 };
 
 const SEED_MENU: MenuItem[] = [
-  { id: "m-001", restaurant_id: _restaurant.id, name: "Chicken Shawarma", price: 2500, category: "Meals", description: "Grilled chicken wrap with garlic sauce, pickles and fries", image_url: "https://www.simplyquinoa.com/wp-content/uploads/2023/05/chicken-shawarma-gyros-9.jpg", available: true, sort_order: 1 },
-  { id: "m-002", restaurant_id: _restaurant.id, name: "Beef Shawarma", price: 3000, category: "Meals", description: "Tender beef strips with tahini sauce and fresh vegetables", image_url: "https://live.staticflickr.com/65535/51249894956_3d8a1b8b2b_h.jpg", available: true, sort_order: 2 },
-  { id: "m-003", restaurant_id: _restaurant.id, name: "Jollof Rice & Chicken", price: 3500, category: "Meals", description: "Party-style jollof rice with a perfectly grilled chicken thigh", image_url: "https://cdn.guardian.ng/wp-content/uploads/2023/12/Photo-Credit-Jollof-Festival-.jpg", available: true, sort_order: 3 },
-  { id: "m-004", restaurant_id: _restaurant.id, name: "Fried Rice & Turkey", price: 4000, category: "Meals", description: "Vegetable fried rice served with peppered turkey", image_url: "https://opensharaton.com/wp-content/uploads/2023/02/Fried_Rice_with_Turkey.jpeg", available: true, sort_order: 4 },
-  { id: "m-005", restaurant_id: _restaurant.id, name: "Peppered Chicken", price: 2000, category: "Meals", description: "Spicy fried chicken in a pepper sauce", image_url: "https://flavorquotient.com/wp-content/uploads/2025/04/Pepper-Chicken-Dry-FQ-8-2.webp", available: true, sort_order: 5 },
-  { id: "m-006", restaurant_id: _restaurant.id, name: "Suya Platter", price: 3000, category: "Grills", description: "Grilled beef skewers with yaji spice, onions and tomatoes", image_url: "https://cheflolaskitchen.com/wp-content/uploads/2025/07/Suya-960x960.jpg.webp", available: true, sort_order: 1 },
-  { id: "m-007", restaurant_id: _restaurant.id, name: "Grilled Fish", price: 5000, category: "Grills", description: "Whole catfish grilled with pepper sauce and plantain", image_url: "https://simshomekitchen.com/wp-content/uploads/2025/08/Two-whole-grilled-tilapia-in-a-tray-with-plantain-lettuce-and-pepper-sauce.jpg", available: true, sort_order: 2 },
-  { id: "m-008", restaurant_id: _restaurant.id, name: "Asun", price: 3500, category: "Grills", description: "Spicy smoked goat meat with peppers and onions", image_url: "https://lowcarbafrica.com/wp-content/uploads/2019/09/Asun-recipe-IG-1.jpg", available: true, sort_order: 3 },
-  { id: "m-009", restaurant_id: _restaurant.id, name: "Chapman", price: 1500, category: "Drinks", description: "Classic Nigerian cocktail with Fanta, Sprite and bitters", image_url: "https://www.africanrecipes.com.ng/wp-content/uploads/2025/08/chapman-drink-featured.png.webp", available: true, sort_order: 1 },
-  { id: "m-010", restaurant_id: _restaurant.id, name: "Zobo", price: 800, category: "Drinks", description: "Refreshing hibiscus drink with ginger and pineapple", image_url: "https://lowcarbafrica.com/wp-content/uploads/2020/07/Sorrel-drink-sobolo-zobo-Drink-blog-1a.jpg", available: true, sort_order: 2 },
-  { id: "m-011", restaurant_id: _restaurant.id, name: "Fresh Orange Juice", price: 1200, category: "Drinks", description: "Freshly squeezed orange juice, no sugar added", image_url: "https://images.unsplash.com/photo-1600271886742-f049cd451bba?w=400&q=80", available: true, sort_order: 3 },
-  { id: "m-012", restaurant_id: _restaurant.id, name: "Coca-Cola", price: 500, category: "Drinks", description: "Classic Coca-Cola 50cl bottle", image_url: "https://images.unsplash.com/photo-1622483767028-3f66f32aef97?w=400&q=80", available: true, sort_order: 4 },
-  { id: "m-013", restaurant_id: _restaurant.id, name: "Malt", price: 600, category: "Drinks", description: "Amstel Malt 50cl bottle", image_url: "https://m.media-amazon.com/images/I/71LH6-Oi6iL.jpg", available: true, sort_order: 5 },
-  { id: "m-014", restaurant_id: _restaurant.id, name: "Puff Puff", price: 500, category: "Sides", description: "6 pieces of fluffy Nigerian doughnuts", image_url: "https://allnigerianfoods.com/wp-content/uploads/puff_puff_recipe.jpg", available: true, sort_order: 1 },
-  { id: "m-015", restaurant_id: _restaurant.id, name: "Plantain Chips", price: 800, category: "Sides", description: "Crunchy plantain chips with a spicy dip", image_url: "https://foreignfork.com/wp-content/uploads/2022/02/SweetPlantainChipsFEATURE-500x500.jpg", available: true, sort_order: 2 },
-  { id: "m-016", restaurant_id: _restaurant.id, name: "French Fries", price: 1000, category: "Sides", description: "Golden crispy fries with ketchup", image_url: "https://images.unsplash.com/photo-1573080496219-bb080dd4f877?w=400&q=80", available: true, sort_order: 3 },
-  { id: "m-017", restaurant_id: _restaurant.id, name: "Coleslaw", price: 500, category: "Sides", description: "Fresh coleslaw with creamy dressing", image_url: "https://www.inspiredtaste.net/wp-content/uploads/2015/01/Coleslaw-Recipe-1-1200.jpg", available: true, sort_order: 4 },
+  { id: "m-001", restaurant_id: _restaurant.id, name: "Chicken Shawarma", price: 2500, category: "Meals", description: "Grilled chicken wrap with garlic sauce, pickles and fries", image_url: "https://www.simplyquinoa.com/wp-content/uploads/2023/05/chicken-shawarma-gyros-9.jpg", available: true, sort_order: 1, stock_count: 20, low_stock_threshold: 5 },
+  { id: "m-002", restaurant_id: _restaurant.id, name: "Beef Shawarma", price: 3000, category: "Meals", description: "Tender beef strips with tahini sauce and fresh vegetables", image_url: "https://live.staticflickr.com/65535/51249894956_3d8a1b8b2b_h.jpg", available: true, sort_order: 2, stock_count: 15, low_stock_threshold: 5 },
+  { id: "m-003", restaurant_id: _restaurant.id, name: "Jollof Rice & Chicken", price: 3500, category: "Meals", description: "Party-style jollof rice with a perfectly grilled chicken thigh", image_url: "https://cdn.guardian.ng/wp-content/uploads/2023/12/Photo-Credit-Jollof-Festival-.jpg", available: true, sort_order: 3, stock_count: 3, low_stock_threshold: 5 },
+  { id: "m-004", restaurant_id: _restaurant.id, name: "Fried Rice & Turkey", price: 4000, category: "Meals", description: "Vegetable fried rice served with peppered turkey", image_url: "https://opensharaton.com/wp-content/uploads/2023/02/Fried_Rice_with_Turkey.jpeg", available: true, sort_order: 4, stock_count: null, low_stock_threshold: 5 },
+  { id: "m-005", restaurant_id: _restaurant.id, name: "Peppered Chicken", price: 2000, category: "Meals", description: "Spicy fried chicken in a pepper sauce", image_url: "https://flavorquotient.com/wp-content/uploads/2025/04/Pepper-Chicken-Dry-FQ-8-2.webp", available: true, sort_order: 5, stock_count: 12, low_stock_threshold: 5 },
+  { id: "m-006", restaurant_id: _restaurant.id, name: "Suya Platter", price: 3000, category: "Grills", description: "Grilled beef skewers with yaji spice, onions and tomatoes", image_url: "https://cheflolaskitchen.com/wp-content/uploads/2025/07/Suya-960x960.jpg.webp", available: true, sort_order: 1, stock_count: 8, low_stock_threshold: 5 },
+  { id: "m-007", restaurant_id: _restaurant.id, name: "Grilled Fish", price: 5000, category: "Grills", description: "Whole catfish grilled with pepper sauce and plantain", image_url: "https://simshomekitchen.com/wp-content/uploads/2025/08/Two-whole-grilled-tilapia-in-a-tray-with-plantain-lettuce-and-pepper-sauce.jpg", available: true, sort_order: 2, stock_count: 2, low_stock_threshold: 3 },
+  { id: "m-008", restaurant_id: _restaurant.id, name: "Asun", price: 3500, category: "Grills", description: "Spicy smoked goat meat with peppers and onions", image_url: "https://lowcarbafrica.com/wp-content/uploads/2019/09/Asun-recipe-IG-1.jpg", available: true, sort_order: 3, stock_count: null, low_stock_threshold: 5 },
+  { id: "m-009", restaurant_id: _restaurant.id, name: "Chapman", price: 1500, category: "Drinks", description: "Classic Nigerian cocktail with Fanta, Sprite and bitters", image_url: "https://www.africanrecipes.com.ng/wp-content/uploads/2025/08/chapman-drink-featured.png.webp", available: true, sort_order: 1, stock_count: null, low_stock_threshold: 5 },
+  { id: "m-010", restaurant_id: _restaurant.id, name: "Zobo", price: 800, category: "Drinks", description: "Refreshing hibiscus drink with ginger and pineapple", image_url: "https://lowcarbafrica.com/wp-content/uploads/2020/07/Sorrel-drink-sobolo-zobo-Drink-blog-1a.jpg", available: true, sort_order: 2, stock_count: null, low_stock_threshold: 5 },
+  { id: "m-011", restaurant_id: _restaurant.id, name: "Fresh Orange Juice", price: 1200, category: "Drinks", description: "Freshly squeezed orange juice, no sugar added", image_url: "https://images.unsplash.com/photo-1600271886742-f049cd451bba?w=400&q=80", available: true, sort_order: 3, stock_count: null, low_stock_threshold: 5 },
+  { id: "m-012", restaurant_id: _restaurant.id, name: "Coca-Cola", price: 500, category: "Drinks", description: "Classic Coca-Cola 50cl bottle", image_url: "https://images.unsplash.com/photo-1622483767028-3f66f32aef97?w=400&q=80", available: true, sort_order: 4, stock_count: null, low_stock_threshold: 5 },
+  { id: "m-013", restaurant_id: _restaurant.id, name: "Malt", price: 600, category: "Drinks", description: "Amstel Malt 50cl bottle", image_url: "https://m.media-amazon.com/images/I/71LH6-Oi6iL.jpg", available: true, sort_order: 5, stock_count: null, low_stock_threshold: 5 },
+  { id: "m-014", restaurant_id: _restaurant.id, name: "Puff Puff", price: 500, category: "Sides", description: "6 pieces of fluffy Nigerian doughnuts", image_url: "https://allnigerianfoods.com/wp-content/uploads/puff_puff_recipe.jpg", available: true, sort_order: 1, stock_count: 30, low_stock_threshold: 10 },
+  { id: "m-015", restaurant_id: _restaurant.id, name: "Plantain Chips", price: 800, category: "Sides", description: "Crunchy plantain chips with a spicy dip", image_url: "https://foreignfork.com/wp-content/uploads/2022/02/SweetPlantainChipsFEATURE-500x500.jpg", available: true, sort_order: 2, stock_count: null, low_stock_threshold: 5 },
+  { id: "m-016", restaurant_id: _restaurant.id, name: "French Fries", price: 1000, category: "Sides", description: "Golden crispy fries with ketchup", image_url: "https://images.unsplash.com/photo-1573080496219-bb080dd4f877?w=400&q=80", available: true, sort_order: 3, stock_count: null, low_stock_threshold: 5 },
+  { id: "m-017", restaurant_id: _restaurant.id, name: "Coleslaw", price: 500, category: "Sides", description: "Fresh coleslaw with creamy dressing", image_url: "https://www.inspiredtaste.net/wp-content/uploads/2015/01/Coleslaw-Recipe-1-1200.jpg", available: true, sort_order: 4, stock_count: null, low_stock_threshold: 5 },
 ];
 
-const SEED_TABLES = [
+const INITIAL_TABLES = [
   "T1", "T2", "T3", "T4", "T5", "T6",
   "T7", "T8", "T9", "T10", "T11", "T12", "T-G37",
 ];
+let _tables: string[] = [...INITIAL_TABLES];
 
 // ---------------------------------------------------------------------------
 // State — persisted to localStorage so it survives page refresh AND so tabs
@@ -203,6 +204,7 @@ const STORAGE_KEY = "oshap-mock-state";
 interface PersistedState {
   restaurant?: Restaurant;
   menu?: MenuItem[];
+  tables?: string[];
   orders?: Array<[string, StoredOrder]>;
   payments?: Array<[string, Payment]>;
   sessions?: Array<[string, TableSession]>;
@@ -219,6 +221,7 @@ function syncFromStorage(): void {
 
     if (saved.restaurant) _restaurant = saved.restaurant;
     if (Array.isArray(saved.menu)) _menu = saved.menu;
+    if (Array.isArray(saved.tables)) _tables = saved.tables;
 
     _orders.clear();
     for (const [k, v] of saved.orders ?? []) _orders.set(k, v);
@@ -258,6 +261,7 @@ function syncToStorage(): void {
     const payload: PersistedState = {
       restaurant: _restaurant,
       menu: _menu,
+      tables: _tables,
       orders: Array.from(_orders.entries()),
       payments: Array.from(_payments.entries()),
       sessions: Array.from(_sessions.entries()),
@@ -358,7 +362,7 @@ route("GET", /^\/table\/(.+)$/, ({ path, query }) => {
   const deviceToken = query.get("device_token") ?? undefined;
   const sessionId = query.get("session_id") ?? undefined;
 
-  if (!SEED_TABLES.includes(tableId)) {
+  if (!_tables.includes(tableId)) {
     return json(404, { error: "Table not found" });
   }
 
@@ -419,7 +423,7 @@ route("GET", /^\/table\/(.+)$/, ({ path, query }) => {
 
 route("POST", /^\/table\/(.+)\/call-waiter$/, ({ path }) => {
   const tableId = decodeURIComponent(path.split("/table/")[1]!.replace(/\/call-waiter$/, ""));
-  if (!SEED_TABLES.includes(tableId)) {
+  if (!_tables.includes(tableId)) {
     return json(404, { error: "Table not found" });
   }
   return json(200, { success: true as const });
@@ -431,7 +435,7 @@ route("POST", /^\/table\/(.+)\/request-pos$/, ({ path, body }) => {
   const tableId = decodeURIComponent(
     path.split("/table/")[1]!.replace(/\/request-pos$/, ""),
   );
-  if (!SEED_TABLES.includes(tableId)) {
+  if (!_tables.includes(tableId)) {
     return json(404, { error: "Table not found" });
   }
 
@@ -507,6 +511,19 @@ route("POST", /^\/order$/, ({ body }) => {
 
   _orders.set(id, order);
 
+  // Decrement stock counts for tracked items
+  for (const item of b.items) {
+    const menuItem = _menu.find((m) => m.name === item.name);
+    if (menuItem && menuItem.stock_count !== null) {
+      menuItem.stock_count = Math.max(0, menuItem.stock_count - item.qty);
+      if (menuItem.stock_count === 0) {
+        menuItem.available = false;
+      }
+    }
+  }
+
+  syncToStorage();
+
   return json(200, {
     success: true as const,
     order_id: id,
@@ -514,6 +531,7 @@ route("POST", /^\/order$/, ({ body }) => {
     total,
   } satisfies CreateOrderResponse);
 });
+
 
 // -------------------- Customer: Get Order Detail --------------------
 
@@ -744,7 +762,7 @@ route("GET", /^\/admin\/tables$/, () => {
     ["CREATED", "PREPARING", "READY", "PAYMENT_PENDING"].includes(o.status),
   );
 
-  const tables = SEED_TABLES.map((tableId) => {
+  const tables = _tables.map((tableId: string) => {
     const tOrders = allOrders.filter((o) => o.table_id === tableId);
     const unpaid = tOrders.filter((o) => ["CREATED", "PREPARING", "READY"].includes(o.status));
     const pending = tOrders.filter((o) => o.status === "PAYMENT_PENDING");
@@ -760,6 +778,28 @@ route("GET", /^\/admin\/tables$/, () => {
   });
 
   return json(200, { tables } satisfies AdminTablesResponse);
+});
+
+route("POST", /^\/admin\/tables$/, ({ body }) => {
+  const b = body as { id?: string };
+  const tableId = (b.id ?? "").trim();
+  if (!tableId) return json(400, { error: "Table ID is required" });
+  if (_tables.includes(tableId)) return json(409, { error: "Table already exists" });
+  _tables.push(tableId);
+  syncToStorage();
+  return json(201, { success: true as const, table_id: tableId });
+});
+
+route("DELETE", /^\/admin\/tables\/(.+)$/, ({ path }) => {
+  const tableId = decodeURIComponent(path.replace(/^\/admin\/tables\//, ""));
+  if (!_tables.includes(tableId)) return json(404, { error: "Table not found" });
+  const activeOrders = [..._orders.values()].filter(
+    (o) => o.table_id === tableId && ["CREATED", "PREPARING", "READY", "PAYMENT_PENDING"].includes(o.status),
+  );
+  if (activeOrders.length > 0) return json(409, { error: "Cannot delete a table with active orders" });
+  _tables = _tables.filter((t) => t !== tableId);
+  syncToStorage();
+  return json(200, { success: true as const, table_id: tableId });
 });
 
 route("GET", /^\/admin\/kitchen$/, () => {
@@ -846,6 +886,8 @@ route("POST", /^\/admin\/menu$/, ({ body }) => {
     image_url: b.image_url ?? null,
     available: true,
     sort_order: 99,
+    stock_count: null,
+    low_stock_threshold: 5,
   };
   _menu.push(item);
   return json(201, item);
@@ -886,6 +928,134 @@ route("POST", /^\/admin\/menu\/upload$/, () => {
   return json(200, {
     url: "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=400&q=80",
   } satisfies UploadResponse);
+});
+
+// -------------------- Admin: Inventory --------------------
+
+route("PATCH", /^\/admin\/inventory\/(.+)$/, ({ path, body }) => {
+  const id = path.split("/admin/inventory/")[1]!;
+  const b = body as import("../types/index").InventoryUpdateRequest;
+  const item = _menu.find((i) => i.id === id);
+  if (!item) return json(404, { error: "Item not found" });
+
+  item.stock_count = b.stock_count;
+  if (b.low_stock_threshold !== undefined) {
+    item.low_stock_threshold = b.low_stock_threshold;
+  }
+  // Re-enable item if stock was restocked
+  if (item.stock_count !== null && item.stock_count > 0) {
+    item.available = true;
+  }
+
+  syncToStorage();
+  return json(200, { success: true as const, item } satisfies import("../types/index").InventoryUpdateResponse);
+});
+
+route("GET", /^\/admin\/inventory\/alerts$/, () => {
+  const alerts = _menu
+    .filter((i) => i.stock_count !== null && i.stock_count <= i.low_stock_threshold)
+    .map((i) => ({
+      item_id: i.id,
+      name: i.name,
+      category: i.category,
+      stock_count: i.stock_count as number,
+      threshold: i.low_stock_threshold,
+    }));
+  return json(200, { alerts } satisfies import("../types/index").AdminInventoryAlertsResponse);
+});
+
+// -------------------- Admin: Multi-Branch Group --------------------
+
+const _mockGroup: import("../types/index").RestaurantGroup = {
+  id: "grp-001",
+  name: "Oshap Restaurant Group",
+  branches: [
+    { ..._restaurant, id: _restaurant.id, is_active: true, table_count: 13, staff_count: 8 },
+    { id: "rest-002", name: "Oshap VI", description: "Victoria Island Branch", logo_url: null, operating_hours: "10:00 - 23:00", bank_name: "GTBank", account_number: "0123456789", account_name: "Oshap VI Ltd", whatsapp_number: null, is_active: true, table_count: 10, staff_count: 5 },
+    { id: "rest-003", name: "Oshap Ikeja", description: "Ikeja Branch", logo_url: null, operating_hours: "09:00 - 22:00", bank_name: "Access Bank", account_number: "9876543210", account_name: "Oshap Ikeja Ltd", whatsapp_number: null, is_active: false, table_count: 8, staff_count: 4 },
+  ],
+};
+
+route("GET", /^\/admin\/group$/, () => {
+  return json(200, _mockGroup);
+});
+
+route("GET", /^\/admin\/group\/analytics$/, () => {
+  const revenueByBranch = [
+    { branch_id: _restaurant.id, branch_name: _restaurant.name, total_revenue: 485000, total_orders: 142, avg_order_value: 3415 },
+    { branch_id: "rest-002", branch_name: "Oshap VI", total_revenue: 312000, total_orders: 87, avg_order_value: 3586 },
+    { branch_id: "rest-003", branch_name: "Oshap Ikeja", total_revenue: 198000, total_orders: 63, avg_order_value: 3143 },
+  ];
+  return json(200, {
+    group_name: _mockGroup.name,
+    total_revenue: revenueByBranch.reduce((s, b) => s + b.total_revenue, 0),
+    total_orders: revenueByBranch.reduce((s, b) => s + b.total_orders, 0),
+    branches: revenueByBranch,
+  } satisfies import("../types/index").GroupAnalyticsResponse);
+});
+
+// -------------------- Platform Admin --------------------
+
+const _platformRestaurants: import("../types/index").PlatformRestaurant[] = [
+  { ..._restaurant, subscription_tier: "PRO", is_active: true, created_at: "2025-01-15T09:00:00Z", owner_email: "owner@oshap.com", table_count: 13, monthly_orders: 142 },
+  { id: "rest-002", name: "Oshap VI", description: "Victoria Island Branch", logo_url: null, operating_hours: "10:00 - 23:00", bank_name: "GTBank", account_number: "0123456789", account_name: "Oshap VI Ltd", whatsapp_number: null, subscription_tier: "STARTER", is_active: true, created_at: "2025-03-20T10:00:00Z", owner_email: "vi@oshap.com", table_count: 10, monthly_orders: 87 },
+  { id: "rest-003", name: "Oshap Ikeja", description: "Ikeja Branch", logo_url: null, operating_hours: "09:00 - 22:00", bank_name: "Access Bank", account_number: "9876543210", account_name: "Oshap Ikeja Ltd", whatsapp_number: null, subscription_tier: "FREE", is_active: false, created_at: "2025-06-01T08:00:00Z", owner_email: "ikeja@oshap.com", table_count: 8, monthly_orders: 0 },
+];
+
+route("GET", /^\/platform\/restaurants$/, () => {
+  return json(200, { restaurants: _platformRestaurants });
+});
+
+route("GET", /^\/platform\/restaurants\/(.+)$/, ({ path }) => {
+  const id = path.split("/platform/restaurants/")[1]!;
+  const r = _platformRestaurants.find((r) => r.id === id);
+  if (!r) return json(404, { error: "Restaurant not found" });
+  return json(200, r);
+});
+
+route("POST", /^\/platform\/restaurants$/, ({ body }) => {
+  const b = body as import("../types/index").PlatformCreateRestaurantRequest;
+  const newRest: import("../types/index").PlatformRestaurant = {
+    id: uid(),
+    name: b.name,
+    description: null,
+    logo_url: null,
+    operating_hours: null,
+    bank_name: b.bank_name ?? null,
+    account_number: b.account_number ?? null,
+    account_name: b.account_name ?? null,
+    whatsapp_number: null,
+    subscription_tier: b.subscription_tier,
+    is_active: true,
+    created_at: now(),
+    owner_email: b.owner_email,
+    table_count: b.table_count,
+    monthly_orders: 0,
+  };
+  _platformRestaurants.push(newRest);
+  return json(201, newRest);
+});
+
+route("PATCH", /^\/platform\/restaurants\/(.+)$/, ({ path, body }) => {
+  const id = path.split("/platform/restaurants/")[1]!;
+  const r = _platformRestaurants.find((r) => r.id === id);
+  if (!r) return json(404, { error: "Not found" });
+  const b = body as import("../types/index").PlatformUpdateRestaurantRequest;
+  if (b.name !== undefined) r.name = b.name;
+  if (b.subscription_tier !== undefined) r.subscription_tier = b.subscription_tier;
+  if (b.is_active !== undefined) r.is_active = b.is_active;
+  return json(200, r);
+});
+
+route("GET", /^\/platform\/health$/, () => {
+  return json(200, {
+    api_uptime_pct: 99.7,
+    avg_response_ms: 142,
+    error_rate_pct: 0.3,
+    active_sessions: _sessions.size,
+    total_restaurants: _platformRestaurants.length,
+    total_orders_today: [..._orders.values()].filter((o) => o.created_at.startsWith(new Date().toISOString().slice(0, 10))).length,
+  } satisfies import("../types/index").PlatformSystemHealth);
 });
 
 route("POST", /^\/admin\/verify$/, ({ body }) => {
@@ -944,7 +1114,7 @@ route("POST", /^\/admin\/close$/, ({ body }) => {
   for (const o of activeOrders) {
     o.status = newStatus;
     const p = _payments.get(o.id);
-    if (p) p.status = b.reason === "paid" ? "VERIFIED" : "FAILED";
+    if (p) p.status = b.reason === "paid" ? "VERIFIED" : "CONFIRMED";
   }
 
   // Clear the table session

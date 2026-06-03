@@ -4,19 +4,19 @@ import { dismiss, subscribe, type Toast } from "./toast";
 
 const VARIANT_META: Record<
   Toast["variant"],
-  { icon: string; iconColorClass: string }
+  { icon: string; wrapperClass: string }
 > = {
   success: {
     icon: "mgc_check_circle_line",
-    iconColorClass: "text-success",
+    wrapperClass: "bg-success-container text-on-success-container",
   },
   error: {
     icon: "mgc_alert_diamond_line",
-    iconColorClass: "text-error",
+    wrapperClass: "bg-error-container text-on-error-container",
   },
   info: {
     icon: "mgc_information_line",
-    iconColorClass: "text-primary",
+    wrapperClass: "bg-primary-container text-on-primary-container",
   },
 };
 
@@ -39,10 +39,10 @@ export default function Toaster() {
             key={t.id}
             type="button"
             onClick={() => dismiss(t.id)}
-            className="pointer-events-auto flex items-start gap-s p-md rounded-lg bg-inverse-surface text-inverse-on-surface shadow-lg text-left"
+            className={`pointer-events-auto flex items-start gap-s p-md rounded-lg shadow-lg text-left ${meta.wrapperClass}`}
             style={{ animation: "slide-down 220ms ease-out" }}
           >
-            <i className={`${meta.icon} text-xl shrink-0 ${meta.iconColorClass}`} />
+            <i className={`${meta.icon} text-xl shrink-0`} />
             <span className="text-label-l4 font-medium flex-1">{t.message}</span>
           </button>
         );

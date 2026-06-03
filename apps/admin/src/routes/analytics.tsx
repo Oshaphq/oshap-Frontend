@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { Link } from "react-router";
 import { useAdminAnalytics } from "@oshap/shared/hooks";
 import { PrimaryButton } from "@oshap/shared/ui";
 import {
@@ -9,8 +10,6 @@ import {
   CartesianGrid,
   Tooltip,
   ResponsiveContainer,
-  BarChart,
-  Bar,
   LineChart,
   Line,
   PieChart,
@@ -31,7 +30,8 @@ function getFormattedDate(daysAgo = 0) {
   return d.toISOString().split("T")[0]!;
 }
 
-const COLORS = ["#FF5722", "#4CAF50", "#2196F3", "#9C27B0", "#FFC107"];
+// Hex values pulled directly from the design token ramp so charts stay on-brand
+const COLORS = ["#f56500", "#00cc88", "#7c30cf", "#fda602", "#b06e4f"];
 
 export default function Analytics() {
   const [startDate, setStartDate] = useState(getFormattedDate(7));
@@ -70,62 +70,74 @@ export default function Analytics() {
 
   return (
     <main className="p-md flex flex-col gap-l">
-      <header className="flex flex-col gap-md sm:flex-row sm:items-center sm:justify-between">
-        <h1 className="font-display text-display-h2 font-semibold text-primary-text">
-          Analytics Dashboard
-        </h1>
+      <header className="flex flex-col gap-md sm:flex-row sm:items-start sm:justify-between">
+        {/* Title + secondary link stacked */}
+        <div className="flex flex-col gap-0.5">
+          <h1 className="font-display text-display-h2 font-semibold text-primary-text">
+            Analytics Dashboard
+          </h1>
+          <Link
+            to="/analytics/group"
+            className="text-caption-md font-semibold text-primary hover:underline no-underline self-start"
+          >
+            Group View →
+          </Link>
+        </div>
 
-        <div className="flex flex-wrap gap-s items-center">
+        {/* Controls — two rows: date range | preset + export */}
+        <div className="flex flex-col gap-s sm:items-end">
           <div className="flex items-center gap-s flex-wrap">
             <input
               type="date"
               value={startDate}
               onChange={(e) => setStartDate(e.target.value)}
-              className="px-s sm:px-md py-s rounded-md bg-surface-container border border-outline-variant text-p2 text-primary-text outline-none focus:border-primary min-w-0"
+              className="px-s py-s rounded-md bg-surface-container border border-outline-variant text-p2 text-primary-text outline-none focus:border-primary"
             />
             <span className="text-secondary-text shrink-0">to</span>
             <input
               type="date"
               value={endDate}
               onChange={(e) => setEndDate(e.target.value)}
-              className="px-s sm:px-md py-s rounded-md bg-surface-container border border-outline-variant text-p2 text-primary-text outline-none focus:border-primary min-w-0"
+              className="px-s py-s rounded-md bg-surface-container border border-outline-variant text-p2 text-primary-text outline-none focus:border-primary"
             />
           </div>
 
-          <div className="relative shrink-0">
-            <select
-              className="px-md py-s rounded-md bg-surface-container border border-outline-variant text-p2 text-primary-text outline-none focus:border-primary appearance-none pr-10"
-              onChange={(e) => {
-                const days = parseInt(e.target.value, 10);
-                if (isNaN(days)) return;
-                if (days === 30) {
-                  const d = new Date();
-                  setStartDate(new Date(d.getFullYear(), d.getMonth(), 1).toISOString().split("T")[0]!);
-                } else if (days === 365) {
-                  const d = new Date();
-                  setStartDate(new Date(d.getFullYear(), 0, 1).toISOString().split("T")[0]!);
-                } else {
-                  setStartDate(getFormattedDate(days));
-                }
-                setEndDate(getFormattedDate(0));
-              }}
-            >
-              <option value="">Custom Range...</option>
-              {PRESETS.map((p) => (
-                <option key={p.label} value={p.days}>
-                  {p.label}
-                </option>
-              ))}
-            </select>
-            <i
-              className="mgc_down_line absolute right-md top-1/2 -translate-y-1/2 text-outline pointer-events-none"
-              aria-hidden="true"
-            />
-          </div>
+          <div className="flex items-center gap-s">
+            <div className="relative">
+              <select
+                className="px-md py-s rounded-md bg-surface-container border border-outline-variant text-p2 text-primary-text outline-none focus:border-primary appearance-none pr-10"
+                onChange={(e) => {
+                  const days = parseInt(e.target.value, 10);
+                  if (isNaN(days)) return;
+                  if (days === 30) {
+                    const d = new Date();
+                    setStartDate(new Date(d.getFullYear(), d.getMonth(), 1).toISOString().split("T")[0]!);
+                  } else if (days === 365) {
+                    const d = new Date();
+                    setStartDate(new Date(d.getFullYear(), 0, 1).toISOString().split("T")[0]!);
+                  } else {
+                    setStartDate(getFormattedDate(days));
+                  }
+                  setEndDate(getFormattedDate(0));
+                }}
+              >
+                <option value="">Custom Range...</option>
+                {PRESETS.map((p) => (
+                  <option key={p.label} value={p.days}>
+                    {p.label}
+                  </option>
+                ))}
+              </select>
+              <i
+                className="mgc_down_line absolute right-md top-1/2 -translate-y-1/2 text-outline pointer-events-none"
+                aria-hidden="true"
+              />
+            </div>
 
-          <PrimaryButton size="md" onClick={handleExportCSV} disabled={!data}>
-            Export CSV
-          </PrimaryButton>
+            <PrimaryButton size="md" onClick={handleExportCSV} disabled={!data}>
+              Export CSV
+            </PrimaryButton>
+          </div>
         </div>
       </header>
 
@@ -180,16 +192,16 @@ export default function Analytics() {
               <div className="h-[300px] w-full">
                 <ResponsiveContainer width="100%" height="100%">
                   <AreaChart data={data.revenue_over_time}>
-                    <CartesianGrid strokeDasharray="3 3" stroke="#333" />
-                    <XAxis dataKey="date" stroke="#888" />
-                    <YAxis stroke="#888" />
+                    <CartesianGrid strokeDasharray="3 3" stroke="var(--color-surface-container-highest)" />
+                    <XAxis dataKey="date" stroke="var(--color-outline)" tick={{ fontSize: 12 }} />
+                    <YAxis stroke="var(--color-outline)" tick={{ fontSize: 12 }} />
                     <Tooltip />
                     <Area
                       type="monotone"
                       dataKey="revenue"
-                      stroke="#FF5722"
-                      fill="#FF5722"
-                      fillOpacity={0.3}
+                      stroke="var(--color-primary)"
+                      fill="var(--color-primary)"
+                      fillOpacity={0.25}
                     />
                   </AreaChart>
                 </ResponsiveContainer>
@@ -213,7 +225,7 @@ export default function Analytics() {
                       outerRadius={100}
                       label
                     >
-                      {data.popular_items.map((entry, index) => (
+                      {data.popular_items.map((_, index) => (
                         <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                       ))}
                     </Pie>
@@ -231,11 +243,11 @@ export default function Analytics() {
               <div className="h-[300px] w-full">
                 <ResponsiveContainer width="100%" height="100%">
                   <LineChart data={data.peak_hours}>
-                    <CartesianGrid strokeDasharray="3 3" stroke="#333" />
-                    <XAxis dataKey="hour" stroke="#888" />
-                    <YAxis stroke="#888" />
+                    <CartesianGrid strokeDasharray="3 3" stroke="var(--color-surface-container-highest)" />
+                    <XAxis dataKey="hour" stroke="var(--color-outline)" tick={{ fontSize: 12 }} />
+                    <YAxis stroke="var(--color-outline)" tick={{ fontSize: 12 }} />
                     <Tooltip />
-                    <Line type="monotone" dataKey="order_count" stroke="#2196F3" strokeWidth={3} />
+                    <Line type="monotone" dataKey="order_count" stroke="#7c30cf" strokeWidth={3} />
                   </LineChart>
                 </ResponsiveContainer>
               </div>

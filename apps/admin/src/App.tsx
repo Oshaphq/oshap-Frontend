@@ -8,6 +8,7 @@ import HistoryPage from "./routes/history";
 import MenuPage from "./routes/menu";
 import SettingsPage from "./routes/settings";
 import AnalyticsPage from "./routes/analytics";
+import GroupAnalyticsPage from "./routes/group-analytics";
 import { AuthProvider, useAuth } from "./context/AuthContext";
 import { useGlobalSSE } from "@oshap/shared";
 
@@ -51,6 +52,7 @@ export default function App() {
           {/* Owner only routes */}
           <Route element={<RoleGate allowedRoles={["OWNER"]} />}>
             <Route path="/analytics" element={<AnalyticsPage />} />
+            <Route path="/analytics/group" element={<GroupAnalyticsPage />} />
           </Route>
         </Route>
         <Route path="*" element={<Navigate to="/" replace />} />

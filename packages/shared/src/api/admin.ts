@@ -2,6 +2,9 @@ import type {
   AdminAnalyticsResponse,
   AdminCloseRequest,
   AdminCloseResponse,
+  AdminCreateTableRequest,
+  AdminCreateTableResponse,
+  AdminDeleteTableResponse,
   AdminHistoryQuery,
   AdminHistoryResponse,
   AdminLoginRequest,
@@ -215,4 +218,23 @@ export function adminCloseTable(
     body: payload,
     admin: true,
   });
+}
+
+export function adminCreateTable(
+  payload: AdminCreateTableRequest,
+): Promise<AdminCreateTableResponse> {
+  return request<AdminCreateTableResponse>("/admin/tables", {
+    method: "POST",
+    body: payload,
+    admin: true,
+  });
+}
+
+export function adminDeleteTable(
+  tableId: string,
+): Promise<AdminDeleteTableResponse> {
+  return request<AdminDeleteTableResponse>(
+    `/admin/tables/${encodeURIComponent(tableId)}`,
+    { method: "DELETE", admin: true },
+  );
 }

@@ -25,10 +25,13 @@ import {
   adminCreateStaff,
   adminUpdateStaff,
   adminDeleteStaff,
+  adminCreateTable,
+  adminDeleteTable,
 } from "../api/admin";
 import type {
   AdminHistoryQuery,
   AdminUpdateSettingsRequest,
+  AdminCreateTableRequest,
   CreateMenuItemRequest,
   UpdateMenuItemRequest,
   CreateStaffRequest,
@@ -236,6 +239,26 @@ export function useAdminCloseTable() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: queryKeys.admin.tables() });
       queryClient.invalidateQueries({ queryKey: queryKeys.admin.all });
+    },
+  });
+}
+
+export function useAdminCreateTable() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (payload: AdminCreateTableRequest) => adminCreateTable(payload),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: queryKeys.admin.tables() });
+    },
+  });
+}
+
+export function useAdminDeleteTable() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (tableId: string) => adminDeleteTable(tableId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: queryKeys.admin.tables() });
     },
   });
 }

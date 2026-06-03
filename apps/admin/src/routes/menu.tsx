@@ -7,11 +7,14 @@ import {
   useAdminToggleMenuItem,
   useAdminDeleteMenuItem,
   useAdminUploadImage,
+  useAdminInventoryAlerts,
+  useAdminUpdateStock,
   formatCurrency,
 } from "@oshap/shared";
 import type { MenuItem } from "@oshap/shared";
 import { PrimaryButton, SecondaryButton, toast } from "@oshap/shared/ui";
 import QueryError from "../components/QueryError";
+import LowStockBanner from "../components/LowStockBanner";
 
 interface MenuFormState {
   name: string;
@@ -38,10 +41,13 @@ export default function MenuPage() {
   const toggleItem = useAdminToggleMenuItem();
   const deleteItem = useAdminDeleteMenuItem();
   const uploadImage = useAdminUploadImage();
+  const updateStock = useAdminUpdateStock();
 
   const [editingId, setEditingId] = useState<string | null>(null);
   const [showNewForm, setShowNewForm] = useState(false);
   const [form, setForm] = useState<MenuFormState>(EMPTY_FORM);
+  const [stockEditId, setStockEditId] = useState<string | null>(null);
+  const [stockInput, setStockInput] = useState<string>("");
 
   const handleCreate = async () => {
     if (!form.name || !form.price || !form.category) {
@@ -110,6 +116,17 @@ export default function MenuPage() {
     }
   };
 
+  const handleSaveStock = async (item: MenuItem) => {
+    const count = stockInput === "" ? null : parseInt(stockInput, 10);
+    try {
+      await updateStock.mutateAsync({ id: item.id, payload: { stock_count: count } });
+      setStockEditId(null);
+      toast.success(`Stock updated for ${item.name}`);
+    } catch {
+      toast.error("Failed to update stock");
+    }
+  };
+
   if (menuQuery.isLoading) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[60vh] gap-md text-secondary-text">
@@ -143,6 +160,8 @@ export default function MenuPage() {
           + Add Item
         </PrimaryButton>
       </header>
+
+      <LowStockBanner />
 
       <div className="flex flex-col gap-md">
         {showNewForm && (
@@ -184,6 +203,12 @@ export default function MenuPage() {
             <MenuItemRow
               key={item.id}
               item={item}
+              isStockEditing={stockEditId === item.id}
+              stockInput={stockInput}
+              onStockEditStart={() => { setStockEditId(item.id); setStockInput(item.stock_count !== null ? String(item.stock_count) : ""); }}
+              onStockInputChange={setStockInput}
+              onStockSave={() => handleSaveStock(item)}
+              onStockCancel={() => setStockEditId(null)}
               onToggle={() => handleToggleAvailable(item.id, item.available)}
               onEdit={() => handleEdit(item)}
               onDelete={() => handleDelete(item.id)}
@@ -209,15 +234,24 @@ export default function MenuPage() {
 
 interface ItemRowProps {
   item: MenuItem;
+  isStockEditing: boolean;
+  stockInput: string;
+  onStockEditStart: () => void;
+  onStockInputChange: (v: string) => void;
+  onStockSave: () => void;
+  onStockCancel: () => void;
   onToggle: () => void;
   onEdit: () => void;
   onDelete: () => void;
 }
 
-function MenuItemRow({ item, onToggle, onEdit, onDelete }: ItemRowProps) {
+function MenuItemRow({ item, isStockEditing, stockInput, onStockEditStart, onStockInputChange, onStockSave, onStockCancel, onToggle, onEdit, onDelete }: ItemRowProps) {
+  const isLow = item.stock_count !== null && item.stock_count <= item.low_stock_threshold;
+  const isOut = item.stock_count !== null && item.stock_count === 0;
+
   return (
     <div
-      className={`rounded-md bg-surface-container border-[1.5px] border-transparent transition-all hover:border-outline-variant overflow-hidden ${
+      className={`rounded-md bg-surface-container border border-transparent transition-all hover:border-outline-variant overflow-hidden ${
         !item.available ? "opacity-55" : ""
       }`}
     >
@@ -247,6 +281,43 @@ function MenuItemRow({ item, onToggle, onEdit, onDelete }: ItemRowProps) {
                   {item.description}
                 </span>
               )}
+              {/* Stock badge / inline editor */}
+              {isStockEditing ? (
+                <div className="flex items-center gap-s mt-xs">
+                  <input
+                    type="number"
+                    min={0}
+                    value={stockInput}
+                    placeholder="Count (blank = untracked)"
+                    onChange={(e) => onStockInputChange(e.target.value)}
+                    className="w-32 px-s py-xs rounded-md border border-outline-variant bg-surface-container-low text-caption-md text-primary-text outline-none focus:border-primary"
+                    autoFocus
+                  />
+                  <button type="button" onClick={onStockSave} className="text-caption-sm font-bold text-success hover:underline">Save</button>
+                  <button type="button" onClick={onStockCancel} className="text-caption-sm text-outline hover:underline">Cancel</button>
+                </div>
+              ) : (
+                <button
+                  type="button"
+                  onClick={onStockEditStart}
+                  className={`mt-xs w-fit px-s py-xs rounded-md text-caption-xs font-bold flex items-center gap-xs transition-colors ${
+                    isOut
+                      ? "bg-error-container text-on-error-container"
+                      : isLow
+                      ? "bg-warning-container text-on-warning-container"
+                      : item.stock_count === null
+                      ? "bg-surface-container-high text-outline"
+                      : "bg-success-container text-on-success-container"
+                  }`}
+                >
+                  <i className={`text-sm ${ isOut ? "mgc_box_3_line" : isLow ? "mgc_alert_line" : "mgc_inventory_line" }`} />
+                  {isOut
+                    ? "Out of stock"
+                    : item.stock_count === null
+                    ? "Untracked — click to set stock"
+                    : `${item.stock_count} in stock`}
+                </button>
+              )}
             </div>
           </div>
           <div className="flex items-center gap-s shrink-0">
@@ -264,21 +335,21 @@ function MenuItemRow({ item, onToggle, onEdit, onDelete }: ItemRowProps) {
           <button
             type="button"
             onClick={onToggle}
-            className="px-md py-s rounded-lg border-[1.5px] border-outline-variant bg-transparent text-secondary-text text-caption-sm font-semibold hover:border-primary-text hover:text-primary-text transition-all"
+            className="px-md py-s rounded-lg border border-outline-variant bg-transparent text-secondary-text text-caption-sm font-semibold hover:border-primary-text hover:text-primary-text transition-all"
           >
             {item.available ? "Mark Unavailable" : "Mark Available"}
           </button>
           <button
             type="button"
             onClick={onEdit}
-            className="px-md py-s rounded-lg border-[1.5px] border-primary bg-transparent text-primary text-caption-sm font-bold hover:bg-primary hover:text-on-primary transition-all"
+            className="px-md py-s rounded-lg border border-primary bg-transparent text-primary text-caption-sm font-bold hover:bg-primary hover:text-on-primary transition-all"
           >
             Edit
           </button>
           <button
             type="button"
             onClick={onDelete}
-            className="px-md py-s rounded-lg border-[1.5px] border-error bg-transparent text-error text-caption-sm font-bold hover:bg-error hover:text-on-error transition-all"
+            className="px-md py-s rounded-lg border border-error bg-transparent text-error text-caption-sm font-bold hover:bg-error hover:text-on-error transition-all"
           >
             Delete
           </button>
