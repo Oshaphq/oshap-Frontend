@@ -17,7 +17,7 @@ export default function CategoryTabs({
   return (
     <nav
       aria-label="Menu categories"
-      className="flex justify-between py-md gap-0 overflow-x-auto [scrollbar-width:none] [-webkit-overflow-scrolling:touch] [&::-webkit-scrollbar]:hidden"
+      className="flex justify-start py-md gap-s overflow-x-auto [scrollbar-width:none] [-webkit-overflow-scrolling:touch] [&::-webkit-scrollbar]:hidden"
     >
       {categories.map((cat) => {
         const active = cat.name === activeCategory;
