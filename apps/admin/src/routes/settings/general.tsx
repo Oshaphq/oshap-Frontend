@@ -90,17 +90,20 @@ export default function GeneralSettings() {
     );
   }
 
+  const inputClass = "w-full px-md py-s rounded-lg bg-surface-container-lowest border-[1.5px] border-outline-variant text-p2 text-primary-text placeholder:text-outline outline-none focus:border-primary transition-colors";
+  const labelClass = "block text-caption-md font-semibold text-primary-text mb-xs";
+
   return (
-    <div className="space-y-xl pb-32">
-      <div className="bg-surface-container rounded-xl p-md space-y-md">
-        <h2 className="text-display-h3 font-display font-semibold text-primary-text border-b border-surface-container-high pb-s">
+    <div className="flex flex-col gap-l pb-10">
+      <div className="bg-surface-container rounded-md p-l flex flex-col gap-md border-[1.5px] border-transparent hover:border-outline-variant transition-colors">
+        <h3 className="font-bold text-primary-text">
           General Info
-        </h2>
+        </h3>
         
-        <div className="flex gap-md items-start">
-          <div className="flex-1 space-y-md">
+        <div className="flex flex-col sm:flex-row gap-l items-start">
+          <div className="flex-1 flex flex-col gap-md w-full">
             <div>
-              <label className="block text-label-l4 font-semibold text-primary-text mb-xs">
+              <label className={labelClass}>
                 Restaurant Name
               </label>
               <input
@@ -108,12 +111,12 @@ export default function GeneralSettings() {
                 name="name"
                 value={form.name}
                 onChange={handleChange}
-                className="w-full bg-surface-container-lowest border-2 border-outline-variant focus:border-primary rounded-lg px-s py-xs text-p2 text-primary-text outline-none transition-colors"
+                className={inputClass}
               />
             </div>
             
             <div>
-              <label className="block text-label-l4 font-semibold text-primary-text mb-xs">
+              <label className={labelClass}>
                 Description
               </label>
               <textarea
@@ -121,12 +124,12 @@ export default function GeneralSettings() {
                 value={form.description}
                 onChange={handleChange}
                 rows={3}
-                className="w-full bg-surface-container-lowest border-2 border-outline-variant focus:border-primary rounded-lg px-s py-xs text-p2 text-primary-text outline-none transition-colors resize-none"
+                className={`${inputClass} resize-none`}
               />
             </div>
             
             <div>
-              <label className="block text-label-l4 font-semibold text-primary-text mb-xs">
+              <label className={labelClass}>
                 WhatsApp Number
               </label>
               <input
@@ -135,17 +138,17 @@ export default function GeneralSettings() {
                 value={form.whatsapp_number}
                 onChange={handleChange}
                 placeholder="+234..."
-                className="w-full bg-surface-container-lowest border-2 border-outline-variant focus:border-primary rounded-lg px-s py-xs text-p2 text-primary-text outline-none transition-colors"
+                className={inputClass}
               />
             </div>
           </div>
           
-          <div className="w-40 flex flex-col items-center gap-s">
-            <label className="text-label-l4 font-semibold text-primary-text self-start">
+          <div className="w-full sm:w-40 flex flex-col items-start gap-s">
+            <label className={labelClass}>
               Logo
             </label>
             <div 
-              className="w-32 h-32 rounded-xl bg-surface-container-lowest border-2 border-dashed border-outline-variant flex items-center justify-center overflow-hidden cursor-pointer hover:border-primary transition-colors"
+              className="w-32 h-32 rounded-xl bg-surface-container-lowest border-[1.5px] border-dashed border-outline-variant flex items-center justify-center overflow-hidden cursor-pointer hover:border-primary transition-colors"
               onClick={() => fileInputRef.current?.click()}
             >
               {form.logo_url ? (
@@ -170,12 +173,12 @@ export default function GeneralSettings() {
         </div>
       </div>
 
-      <div className="bg-surface-container rounded-xl p-md space-y-md">
-        <h2 className="text-display-h3 font-display font-semibold text-primary-text border-b border-surface-container-high pb-s">
+      <div className="bg-surface-container rounded-md p-l flex flex-col gap-md border-[1.5px] border-transparent hover:border-outline-variant transition-colors">
+        <h3 className="font-bold text-primary-text">
           Operating Hours
-        </h2>
+        </h3>
         <div>
-          <label className="block text-label-l4 font-semibold text-primary-text mb-xs">
+          <label className={labelClass}>
             Hours of Operation (e.g., 09:00 - 22:00)
           </label>
           <input
@@ -183,18 +186,18 @@ export default function GeneralSettings() {
             name="operating_hours"
             value={form.operating_hours}
             onChange={handleChange}
-            className="w-full bg-surface-container-lowest border-2 border-outline-variant focus:border-primary rounded-lg px-s py-xs text-p2 text-primary-text outline-none transition-colors"
+            className={inputClass}
           />
         </div>
       </div>
 
-      <div className="bg-surface-container rounded-xl p-md space-y-md">
-        <h2 className="text-display-h3 font-display font-semibold text-primary-text border-b border-surface-container-high pb-s">
+      <div className="bg-surface-container rounded-md p-l flex flex-col gap-md border-[1.5px] border-transparent hover:border-outline-variant transition-colors">
+        <h3 className="font-bold text-primary-text">
           Bank Details
-        </h2>
+        </h3>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-md">
           <div>
-            <label className="block text-label-l4 font-semibold text-primary-text mb-xs">
+            <label className={labelClass}>
               Bank Name
             </label>
             <input
@@ -202,11 +205,11 @@ export default function GeneralSettings() {
               name="bank_name"
               value={form.bank_name}
               onChange={handleChange}
-              className="w-full bg-surface-container-lowest border-2 border-outline-variant focus:border-primary rounded-lg px-s py-xs text-p2 text-primary-text outline-none transition-colors"
+              className={inputClass}
             />
           </div>
           <div>
-            <label className="block text-label-l4 font-semibold text-primary-text mb-xs">
+            <label className={labelClass}>
               Account Number
             </label>
             <input
@@ -214,11 +217,11 @@ export default function GeneralSettings() {
               name="account_number"
               value={form.account_number}
               onChange={handleChange}
-              className="w-full bg-surface-container-lowest border-2 border-outline-variant focus:border-primary rounded-lg px-s py-xs text-p2 text-primary-text outline-none transition-colors"
+              className={inputClass}
             />
           </div>
           <div className="sm:col-span-2">
-            <label className="block text-label-l4 font-semibold text-primary-text mb-xs">
+            <label className={labelClass}>
               Account Name
             </label>
             <input
@@ -226,14 +229,15 @@ export default function GeneralSettings() {
               name="account_name"
               value={form.account_name}
               onChange={handleChange}
-              className="w-full bg-surface-container-lowest border-2 border-outline-variant focus:border-primary rounded-lg px-s py-xs text-p2 text-primary-text outline-none transition-colors"
+              className={inputClass}
             />
           </div>
         </div>
       </div>
 
-      <div className="flex justify-end pt-md">
+      <div className="flex justify-end pt-s">
         <PrimaryButton 
+          size="md"
           onClick={handleSave} 
           disabled={updateSettings.isPending || !form.name}
           className="min-w-32"

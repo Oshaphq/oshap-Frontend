@@ -25,7 +25,7 @@ export default function RoleGate({ allowedRoles }: RoleGateProps) {
         <h2 className="font-display text-display-h2 font-semibold text-primary-text">
           Access Denied
         </h2>
-        <p className="text-p2 text-secondary-text max-w-sm">
+        <p className="text-p2 text-secondary-text max-w-[384px]">
           You do not have permission to view this page.
         </p>
       </div>

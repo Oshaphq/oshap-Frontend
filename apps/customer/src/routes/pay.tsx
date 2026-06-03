@@ -332,7 +332,7 @@ function EmptyState({
         <span className="font-display text-display-h4 font-semibold text-primary-text">
           {title}
         </span>
-        <p className="text-p2 text-secondary-text max-w-sm">{message}</p>
+        <p className="text-p2 text-secondary-text max-w-[384px]">{message}</p>
       </div>
       <PrimaryButton size="md" onClick={onCta}>
         {cta}

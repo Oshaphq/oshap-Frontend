@@ -4,42 +4,44 @@ import StaffSettings from "./settings/staff";
 
 export default function SettingsLayout() {
   return (
-    <div className="p-md max-w-4xl mx-auto space-y-md pb-32">
-      <div>
-        <h1 className="text-display-h2 font-display font-semibold text-primary-text mb-s">
-          Settings
-        </h1>
-        <p className="text-p2 text-secondary-text">
-          Manage your restaurant details and staff access.
-        </p>
-      </div>
+    <main className="p-md flex flex-col gap-l">
+      <header className="flex flex-col gap-md sm:flex-row sm:items-center justify-between">
+        <div>
+          <h1 className="font-display text-display-h2 font-semibold text-primary-text">
+            Settings
+          </h1>
+          <p className="text-p2 text-secondary-text mt-xs">
+            Manage your restaurant details and staff access.
+          </p>
+        </div>
+      </header>
 
-      <div className="flex items-center gap-md border-b border-surface-container-high pb-xs">
+      <div className="flex items-center gap-2 border-b border-surface-container-high pb-s">
         <NavLink 
-          to="general" 
+          to="/settings/general" 
           className={({ isActive }) => 
-            `pb-xs font-semibold text-label-l3 border-b-2 transition-colors ${isActive ? "border-primary text-primary" : "border-transparent text-secondary-text hover:text-primary-text"}`
+            `px-md py-s rounded-lg font-semibold text-caption-md transition-all ${isActive ? "bg-surface-container text-primary border-[1.5px] border-outline-variant" : "text-secondary-text hover:bg-surface-container-high border-[1.5px] border-transparent"}`
           }
         >
           General
         </NavLink>
         <NavLink 
-          to="staff" 
+          to="/settings/staff" 
           className={({ isActive }) => 
-            `pb-xs font-semibold text-label-l3 border-b-2 transition-colors ${isActive ? "border-primary text-primary" : "border-transparent text-secondary-text hover:text-primary-text"}`
+            `px-md py-s rounded-lg font-semibold text-caption-md transition-all ${isActive ? "bg-surface-container text-primary border-[1.5px] border-outline-variant" : "text-secondary-text hover:bg-surface-container-high border-[1.5px] border-transparent"}`
           }
         >
           Staff Management
         </NavLink>
       </div>
 
-      <div className="pt-md">
+      <div className="flex-1">
         <Routes>
           <Route path="general" element={<GeneralSettings />} />
           <Route path="staff" element={<StaffSettings />} />
           <Route path="*" element={<Navigate to="general" replace />} />
         </Routes>
       </div>
-    </div>
+    </main>
   );
 }

@@ -94,7 +94,7 @@ function CheckoutView({ tableId }: { tableId: string }) {
             <span className="font-display text-display-h4 font-semibold text-primary-text">
               No items yet
             </span>
-            <p className="text-p2 text-secondary-text max-w-sm">
+            <p className="text-p2 text-secondary-text max-w-[384px]">
               Add items from the menu to place your order.
             </p>
           </div>

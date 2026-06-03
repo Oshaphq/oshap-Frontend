@@ -30,7 +30,7 @@ export default function Toaster() {
   return createPortal(
     <div
       aria-live="polite"
-      className="fixed top-[calc(env(safe-area-inset-top,0px)+1rem)] left-1/2 -translate-x-1/2 z-[200] flex flex-col gap-s w-[calc(100vw-2rem)] max-w-md pointer-events-none"
+      className="fixed top-[calc(env(safe-area-inset-top,0px)+1rem)] left-1/2 -translate-x-1/2 z-[200] flex flex-col gap-s w-[calc(100vw-2rem)] max-w-[448px] pointer-events-none"
     >
       {toasts.map((t) => {
         const meta = VARIANT_META[t.variant];

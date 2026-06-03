@@ -12,6 +12,7 @@ export default function AuthGate() {
   
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState("");
   const [isLoggingIn, setIsLoggingIn] = useState(false);
 
@@ -60,7 +61,7 @@ export default function AuthGate() {
   if (!isAuthenticated || !user) {
     return (
       <div className="flex items-center justify-center min-h-screen bg-surface-container-lowest p-md">
-        <form onSubmit={handleLogin} className="w-full max-w-sm bg-surface-container rounded-xl p-xl flex flex-col items-center gap-md">
+        <form onSubmit={handleLogin} className="w-full max-w-[384px] bg-surface-container rounded-xl p-xl flex flex-col items-center gap-md">
           <div className="w-16 h-16 rounded-full bg-primary-container flex items-center justify-center text-2xl text-on-primary-container">
             <i className="mgc_lock_fill" />
           </div>
@@ -83,17 +84,29 @@ export default function AuthGate() {
             required
             autoFocus
           />
-          <input
-            className={`w-full px-md py-md rounded-lg bg-surface-container-lowest border-2 text-p text-primary-text placeholder:text-outline outline-none transition-colors ${error ? "border-error" : "border-outline-variant focus:border-primary"}`}
-            type="password"
-            placeholder="Password"
-            value={password}
-            onChange={(e) => {
-              setPassword(e.target.value);
-              setError("");
-            }}
-            required
-          />
+
+          <div className="w-full relative">
+            <input
+              type={showPassword ? "text" : "password"}
+              placeholder="Password"
+              value={password}
+              onChange={(e) => {
+                setPassword(e.target.value);
+                setError("");
+              }}
+              className={`w-full px-md py-md rounded-lg bg-surface-container-lowest border-2 text-p text-primary-text placeholder:text-outline outline-none transition-colors pr-12 ${error ? "border-error" : "border-outline-variant focus:border-primary"}`}
+              required
+            />
+            <button
+              type="button"
+              onClick={() => setShowPassword(!showPassword)}
+              className="absolute right-s top-1/2 -translate-y-1/2 w-10 h-10 flex items-center justify-center text-outline hover:text-primary-text transition-colors rounded-full"
+              tabIndex={-1}
+              aria-label={showPassword ? "Hide password" : "Show password"}
+            >
+              <i className={showPassword ? "mgc_eye_close_line text-xl" : "mgc_eye_line text-xl"} />
+            </button>
+          </div>
           {error && <p className="text-caption-md text-error">{error}</p>}
 
           <PrimaryButton
