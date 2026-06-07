@@ -102,17 +102,23 @@ export function dispatchMockEvent(type: string, payload: any = {}) {
 }
 
 // ---------------------------------------------------------------------------
-// WebSocket Relay for cross-port syncing.
+// WebSocket Relay for cross-origin syncing.
 //
-// The relay (ws-relay.js, port 5175) is an OPTIONAL dev convenience for syncing
-// mock state across the customer/admin tabs. It's frequently not running, so we
-// guard the connection: failures must not throw or surface as uncaught errors.
-// localStorage events still provide same-port cross-tab sync without it.
+// The relay (ws-relay.js) bridges mock state between the customer (:5173) and
+// admin (:5174) apps, which are different origins and don't share localStorage.
+// URL comes from VITE_MOCK_RELAY_URL (e.g. a hosted `wss://…` relay for a Vercel
+// mock demo), falling back to the local dev relay. It's frequently not running,
+// so we guard the connection: failures must not throw or surface as uncaught
+// errors. localStorage events still provide same-origin cross-tab sync without it.
 // ---------------------------------------------------------------------------
+const MOCK_RELAY_URL =
+  (import.meta.env.VITE_MOCK_RELAY_URL as string | undefined) ||
+  "ws://localhost:5175";
+
 if (typeof window !== "undefined") {
   let ws: WebSocket | null = null;
   try {
-    ws = new WebSocket("ws://localhost:5175");
+    ws = new WebSocket(MOCK_RELAY_URL);
     // Swallow connection errors — the relay is optional.
     ws.onerror = () => {};
     (window as any).__MOCK_WS__ = ws;

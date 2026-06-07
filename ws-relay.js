@@ -1,6 +1,7 @@
 import { WebSocketServer } from 'ws';
 
-const wss = new WebSocketServer({ port: 5175 });
+const port = process.env.PORT || 5175;
+const wss = new WebSocketServer({ port });
 
 let sharedState = null;
 
@@ -42,4 +43,4 @@ wss.on('connection', (ws) => {
   });
 });
 
-console.log('✅ Mock SSE + State Relay Server running on ws://localhost:5175');
+console.log(`✅ Mock SSE + State Relay Server running on port ${port}`);

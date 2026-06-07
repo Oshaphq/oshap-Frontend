@@ -53,7 +53,7 @@ npm run dev:admin      # http://localhost:5174 (login: owner@oshap.com / passwor
 npm run dev:platform   # http://localhost:5176 (operator portal; any access code in mock)
 ```
 
-> Optional: `node ws-relay.js` (port 5175) syncs mock state across the customer/admin tabs in one browser. Not required — same-port tabs already sync via `localStorage`.
+> **Cross-app mock sync:** customer (`:5173`) and admin (`:5174`) are different origins and **don't share `localStorage`**, so on the mock API a customer order won't reach the admin app on its own. Start the relay to bridge them: `npm run relay` (`ws-relay.js`, port 5175), then **refresh both tabs**. Tabs of the *same* app already sync via `localStorage` without it.
 
 To point at a real backend, set `VITE_API_BASE_URL` in a `.env.local` file (see `.env.example`). The mock API is tree-shaken when a real backend URL is configured.
 
