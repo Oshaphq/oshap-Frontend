@@ -7,6 +7,7 @@ import OrdersPage from "./routes/orders";
 
 import { useSearchParams } from "react-router";
 import { NotificationProvider } from "./context/NotificationContext";
+import CallWaiterFab from "./components/CallWaiterFab";
 import { useGlobalSSE } from "@oshap/shared";
 
 function GlobalSSE() {
@@ -29,6 +30,9 @@ function AppContent() {
         <Route path="/orders" element={<OrdersPage />} />
         <Route path="*" element={<Navigate to={`/menu?table=${tableId}`} replace />} />
       </Routes>
+      {/* App-wide rather than per route: the same action on every screen, and
+          pay.tsx alone has four return branches that would each need it. */}
+      <CallWaiterFab tableId={tableId} />
       <Toaster />
     </NotificationProvider>
   );
