@@ -247,8 +247,10 @@ Modules:
 
 # 10. Data Model & Lifecycles
 
-Full schema in [`docs/data-model.md`](docs/data-model.md), [`docs/ddl.sql`](docs/ddl.sql),
-and the contract in [`docs/openapi.yaml`](docs/openapi.yaml).
+The schema lives in the backend's SQLModel models — see
+[`docs/data-model.md`](docs/data-model.md) for where and why. The contract between the repos
+is [`docs/openapi.yaml`](docs/openapi.yaml); known divergences are tracked in
+[`docs/integration-reconciliation.md`](docs/integration-reconciliation.md).
 
 Entities: `Restaurant` (+ group/branch + platform fields: `subscription_tier`, `is_active`,
 `owner_email`, `table_count`, `monthly_orders`), `StaffMember` (+ `role`), `MenuItem`
@@ -378,7 +380,7 @@ Idempotent reference generation (no duplicate orders); server-side persistence.
 # 16. Remaining Work / Roadmap
 
 ## Immediate — Backend integration (current priority)
-- Implement FastAPI against [`docs/openapi.yaml`](docs/openapi.yaml); apply [`docs/ddl.sql`](docs/ddl.sql)
+- Reconcile the built backend against [`docs/openapi.yaml`](docs/openapi.yaml) per [`docs/integration-reconciliation.md`](docs/integration-reconciliation.md); generate the Alembic baseline from the SQLModel models
 - Wire Firebase Admin SDK for push; choose image storage (S3 + CloudFront recommended)
 - Enforce `x-admin-pin` (per-user tokens) and `x-platform-token` server-side
 - Real cross-device sessions + real SSE stream

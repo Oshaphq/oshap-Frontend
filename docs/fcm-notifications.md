@@ -173,7 +173,7 @@ Devices are registered through `POST /devices/register` and looked up by
 }
 ```
 
-**Android channel:** `service_requests` (high priority, sound on). Foreground admin app plays a chime via Web Audio API ([`apps/admin/src/utils/chime.ts`](apps/admin/src/utils/chime.ts)) and renders an in-app alert ([`apps/admin/src/components/AlertCenter.tsx`](apps/admin/src/components/AlertCenter.tsx)).
+**Android channel:** `service_requests` (high priority, sound on). Foreground admin app plays a chime via Web Audio API ([`apps/admin/src/utils/chime.ts`](../apps/admin/src/utils/chime.ts)) and renders an in-app alert ([`apps/admin/src/components/AlertCenter.tsx`](../apps/admin/src/components/AlertCenter.tsx)).
 
 **Follow-up flow:** The waiter brings the POS, the customer pays by card, then the waiter taps **Verify Payment** on the dashboard — the same handler used for bank-transfer verification — which moves the orders from `PAYMENT_PENDING` → `CONFIRMED`. No separate "mark POS paid" endpoint is needed.
 

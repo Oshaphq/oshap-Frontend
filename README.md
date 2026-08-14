@@ -33,8 +33,8 @@ oshap/
 │   └── shared/           Typed API client, TanStack hooks, design tokens, UI primitives
 ├── docs/
 │   ├── openapi.yaml          Source of truth for the backend contract
-│   ├── data-model.md         SQLModel-style entity definitions
-│   ├── ddl.sql               PostgreSQL 15 baseline schema
+│   ├── data-model.md         Where the schema lives (pointer — models are in the backend repo)
+│   ├── integration-reconciliation.md  Known frontend/backend divergences
 │   ├── fcm-notifications.md  Push-notification trigger points (7 types)
 │   └── jtbd.md               Jobs To Be Done — user-facing rationale
 ├── PRD.md                Product requirements (v1.1)
@@ -72,10 +72,15 @@ To point at a real backend, set `VITE_API_BASE_URL` in a `.env.local` file (see 
 
 The contract is [`docs/openapi.yaml`](docs/openapi.yaml). Recommended starting points:
 
-1. Read [`docs/data-model.md`](docs/data-model.md) for the entity shapes (SQLModel-friendly).
-2. Apply [`docs/ddl.sql`](docs/ddl.sql) as your initial Alembic migration.
-3. Stand up the FastAPI app against the OpenAPI spec — every endpoint in `apps/customer` and `apps/admin` is already typed against these schemas.
-4. Read [`docs/fcm-notifications.md`](docs/fcm-notifications.md) for the notification trigger points (order placed, payment claimed, payment verified, issue flagged).
+1. **Read [`docs/integration-reconciliation.md`](docs/integration-reconciliation.md) first.** The two repos disagree in three places — response envelope, paths, and the bank-accounts schema. It lists what to change on each side.
+2. **Generate the Alembic baseline from `app/connections/models.py`** in the backend repo. `migrations/versions/` is currently empty, so `alembic upgrade head` succeeds without creating any tables.
+
+   > There used to be a `docs/ddl.sql` here, described as the baseline to apply. It had gone stale — no `staff_members`, no `bank_accounts`, no `restaurant_groups`, no inventory fields — so it has been deleted rather than left as a trap. The SQLModel models are the source of truth; see [`docs/data-model.md`](docs/data-model.md).
+3. Seed a restaurant, an owner login, tables and menu items. Mirror the mock's dataset in [`packages/shared/src/api/mock.ts`](packages/shared/src/api/mock.ts) — [`docs/smoke-test.md`](docs/smoke-test.md) assumes those tables and items exist.
+4. Reconcile against the OpenAPI spec — every endpoint in the three apps is already typed against these schemas.
+5. Read [`docs/fcm-notifications.md`](docs/fcm-notifications.md) for the notification trigger points (order placed, payment claimed, payment verified, issue flagged).
+
+**Every response is wrapped** in `{ success, message, code, data }` by the backend's `app/responses.py`. The per-path schemas in `openapi.yaml` describe the `data` member; the shared client unwraps it. See the spec's `Envelope` schema.
 
 Auth surfaces:
 

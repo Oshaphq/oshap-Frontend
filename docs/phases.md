@@ -52,13 +52,22 @@
 ## Phase 1 — Backend Integration
 
 **Goal:** Real FastAPI backend replaces the mock. Everything that works in mock works against Postgres.
-**Status:** ⬜ Not started (blocked on backend team)
+**Status:** 🔄 In progress — the backend is largely built, but the two repos have never been run together
 **Effort:** 2–4 weeks (backend team primary)
-**Dependencies:** Backend team, Firebase project, image storage bucket
+**Dependencies:** Firebase project, image storage bucket
+
+> **Correction.** This phase was marked "not started, blocked on backend team" long after
+> that stopped being true. [`Oshaphq/Oshap-backend`](https://github.com/Bizsavvy/Oshap-backend)
+> implements essentially the whole contract — orders, kitchen, history, verify/close,
+> sessions, menu CRUD, inventory, staff, settings, analytics, platform, SSE, FCM, S3, Redis,
+> rate limiting. The remaining work is reconciliation, not construction:
+> [`integration-reconciliation.md`](integration-reconciliation.md) lists it with diffs for
+> both sides. Two frontend halves have landed (response-envelope unwrap, API versioning);
+> the path alignment and bank-accounts changes are open and pair with backend PRs.
 
 **Tasks:**
 - Backend implements all endpoints in [`docs/openapi.yaml`](openapi.yaml) (customer + admin)
-- Apply [`docs/ddl.sql`](ddl.sql) as initial Alembic migration
+- Generate the initial Alembic migration from the backend's SQLModel models (`migrations/versions/` is empty, so nothing creates a schema today) — see [`data-model.md`](data-model.md)
 - Set `VITE_API_BASE_URL` in each Vercel project's env vars — **origin only**, no `/api/v1` (the client supplies it via `API_PREFIX`)
 - Wire Firebase Admin SDK on backend for FCM push (7 trigger types in [`docs/fcm-notifications.md`](fcm-notifications.md))
 - Choose and configure image storage (S3 + CloudFront recommended)
