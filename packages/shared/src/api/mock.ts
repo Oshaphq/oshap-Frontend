@@ -158,7 +158,8 @@ let _restaurant: Restaurant = {
   id: "00000000-0000-0000-0000-000000000001",
   name: "Aji's Kitchen",
   description: "Authentic African cuisine",
-  // Seeded so the customer header's logo is demoable without a backend.
+  // Seeded so logo-consuming surfaces — the QR print sheet, admin settings,
+  // platform tenant detail — are demoable without a backend.
   logo_url:
     "https://images.unsplash.com/photo-1552566626-52f8b828add9?w=200&q=80",
   operating_hours: "09:00 - 22:00",
