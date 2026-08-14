@@ -39,19 +39,25 @@ export default function CallWaiterButton({ tableId }: { tableId: string }) {
 
   return (
     <>
+      {/* Labelled rather than icon-only: the pilot restaurant asked for a
+          visible call-out, and an unlabelled bell is not a control guests
+          reliably discover. `shrink-0` keeps the label intact on narrow
+          phones — the header title truncates instead. */}
       <button
         type="button"
         onClick={handleClick}
         disabled={callWaiter.isPending}
-        aria-label="Call waiter"
-        title="Call waiter"
-        className="w-10 h-10 flex items-center justify-center rounded-4xl text-xl transition-colors bg-surface-container-high text-on-surface-variant hover:bg-surface-container-highest disabled:cursor-wait"
+        title="Call a waiter"
+        className="shrink-0 h-10 flex items-center gap-xs px-s rounded-4xl text-lg transition-colors bg-surface-container-high text-on-surface-variant hover:bg-surface-container-highest disabled:cursor-wait"
       >
         {callWaiter.isPending ? (
           <i className="mgc_loading_line animate-spin" />
         ) : (
           <ServiceBellIcon />
         )}
+        <span className="text-label-l5 font-semibold whitespace-nowrap">
+          {callWaiter.isPending ? "Calling…" : "Call a waiter"}
+        </span>
       </button>
       {toastVisible &&
         typeof document !== "undefined" &&
