@@ -22,6 +22,18 @@ function stripRef(ref: string) {
   return ref.split("-").pop() || ref;
 }
 
+/**
+ * Station routing keys off this menu category by name. It is a real fragility:
+ * a restaurant that calls the category "Beverages" or "Bar" gets a bartender
+ * who sees nothing and a kitchen that sees everything, silently.
+ *
+ * Matching by `menu_item_id` would be robust — the backend's OrderItem already
+ * carries it — but the field isn't on our OrderItem contract yet. Until then
+ * `StationRoutingHint` below makes the misconfiguration visible instead of
+ * silent.
+ */
+const DRINKS_CATEGORY = "Drinks";
+
 export default function KitchenPage() {
   const { user } = useAuth();
   const kitchenQuery = useAdminKitchen();
@@ -57,10 +69,10 @@ export default function KitchenPage() {
   const filterOrder = (o: OrderWithItems): boolean => {
     if (!user) return true;
     if (user.role === "BARTENDER") {
-      return o.order_items.some((i) => menuLookup.get(i.name) === "Drinks");
+      return o.order_items.some((i) => menuLookup.get(i.name) === DRINKS_CATEGORY);
     }
     if (user.role === "KITCHEN") {
-      return o.order_items.some((i) => menuLookup.get(i.name) !== "Drinks");
+      return o.order_items.some((i) => menuLookup.get(i.name) !== DRINKS_CATEGORY);
     }
     return true;
   };
@@ -70,13 +82,13 @@ export default function KitchenPage() {
     if (user.role === "BARTENDER") {
       return {
         ...o,
-        order_items: o.order_items.filter((i) => menuLookup.get(i.name) === "Drinks"),
+        order_items: o.order_items.filter((i) => menuLookup.get(i.name) === DRINKS_CATEGORY),
       };
     }
     if (user.role === "KITCHEN") {
       return {
         ...o,
-        order_items: o.order_items.filter((i) => menuLookup.get(i.name) !== "Drinks"),
+        order_items: o.order_items.filter((i) => menuLookup.get(i.name) !== DRINKS_CATEGORY),
       };
     }
     return o;
@@ -84,6 +96,13 @@ export default function KitchenPage() {
 
   const rawOrders = kitchenQuery.data ?? [];
   const orders = rawOrders.filter(filterOrder).map(mapOrderItems);
+
+  const isStationRole = user?.role === "BARTENDER" || user?.role === "KITCHEN";
+  // Orders exist but this station sees none of them — usually a category-name
+  // mismatch rather than a quiet service.
+  const hiddenByStationFilter =
+    isStationRole && orders.length === 0 && rawOrders.length > 0;
+  const hasDrinksCategory = menuItems.some((m) => m.category === DRINKS_CATEGORY);
   
   const newOrders = orders.filter((o) => o.status === "CREATED");
   const inProgress = orders.filter((o) => o.status === "PREPARING");
@@ -116,8 +135,13 @@ export default function KitchenPage() {
               No orders yet
             </span>
             <p className="text-p2 text-secondary-text">
-              Waiting for new orders...
+              {hiddenByStationFilter
+                ? `${rawOrders.length} active order${rawOrders.length === 1 ? "" : "s"}, none for this station.`
+                : "Waiting for new orders..."}
             </p>
+            {hiddenByStationFilter && !hasDrinksCategory && (
+              <StationRoutingHint />
+            )}
           </div>
         ) : (
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-md items-start">
@@ -156,6 +180,27 @@ export default function KitchenPage() {
         )}
       </div>
     </main>
+  );
+}
+
+/**
+ * Shown when a station's board is empty while orders exist and no menu category
+ * is named "Drinks" — i.e. routing is misconfigured rather than the venue being
+ * quiet. Cheap to surface, and otherwise invisible until someone complains that
+ * the bar never gets tickets.
+ */
+function StationRoutingHint() {
+  return (
+    <div className="flex items-start gap-s p-md mt-s max-w-[480px] rounded-lg bg-warning-container text-on-warning-container text-left">
+      <i className="mgc_alert_line text-xl shrink-0 mt-0.5" />
+      <p className="text-label-l5">
+        Kitchen and bar orders are split by a menu category named{" "}
+        <span className="font-semibold">&ldquo;{DRINKS_CATEGORY}&rdquo;</span>, and
+        your menu has no such category. Rename your drinks category in{" "}
+        <span className="font-semibold">Menu</span> so tickets reach the right
+        station.
+      </p>
+    </div>
   );
 }
 
