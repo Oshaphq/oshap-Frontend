@@ -186,7 +186,7 @@ Put the version in code, where it's reviewable and can't be forgotten by a deplo
 + * VITE_API_BASE_URL so a misconfigured deploy can't silently 404 everything.
 + * Bumping to v2 is a one-line change, not an env-var migration.
 + */
-+const API_PREFIX = "/api/v1";
++export const API_PREFIX = "/api/v1";
 +
  function buildUrl(path: string, query: RequestOptions["query"]): string {
 -  const url = new URL(getBaseUrl() + path);
@@ -199,6 +199,15 @@ Put the version in code, where it's reviewable and can't be forgotten by a deplo
 
 `VITE_API_BASE_URL` becomes **origin only** — `http://localhost:8000`. Call sites stay bare
 (`request("/menu")`), so there's no churn across the ~48 of them.
+
+**Migration guard.** Every `.env.local` and Vercel env var written before this change still
+carries the suffix, and `origin/api` + `/api/v1` would produce `/api/api/v1/...` — failing
+exactly as invisibly as the bug this fixes. `getBaseUrl()` therefore strips a trailing `/api`
+or `/api/v{n}` and warns once, so stale configuration degrades to a console message instead
+of a dead deploy.
+
+> **Status: implemented.** Shipped ahead of the rest of section B, since it is frontend-only
+> and safe against the current backend. See PR #2.
 
 **The mock is unaffected.** `buildUrl` is only reached on the real-fetch path
 ([`client.ts:271`](../packages/shared/src/api/client.ts#L271)); the mock branch returns at
