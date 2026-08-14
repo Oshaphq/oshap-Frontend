@@ -129,3 +129,50 @@ describe("client request() — backend response envelope", () => {
     expect((err as ApiError).message).toBe("Bad Request");
   });
 });
+
+describe("client request() — API version prefix", () => {
+  afterEach(() => {
+    vi.unstubAllEnvs();
+    vi.unstubAllGlobals();
+    vi.restoreAllMocks();
+  });
+
+  function requestedUrl(fetchMock: ReturnType<typeof vi.fn>): string {
+    return String(fetchMock.mock.calls[0]![0]);
+  }
+
+  it("prepends API_PREFIX so call sites can stay bare", async () => {
+    const fetchMock = stubBackend(200, []);
+
+    await request("/menu");
+
+    expect(requestedUrl(fetchMock)).toBe("http://localhost:8000/api/v1/menu");
+  });
+
+  it("keeps query params after the prefixed path", async () => {
+    const fetchMock = stubBackend(200, []);
+
+    await request("/menu", { query: { restaurant_id: "r-1" } });
+
+    expect(requestedUrl(fetchMock)).toBe(
+      "http://localhost:8000/api/v1/menu?restaurant_id=r-1",
+    );
+  });
+
+  // Guards the migration: .env files predating API_PREFIX carried the suffix,
+  // and double-prefixing would 404 everything exactly as silently as before.
+  it.each([
+    ["http://localhost:8000/api", "legacy /api suffix"],
+    ["http://localhost:8000/api/v1", "legacy /api/v1 suffix"],
+    ["http://localhost:8000/api/v1/", "legacy suffix with trailing slash"],
+  ])("strips a %s from the configured base URL", async (baseUrl) => {
+    vi.spyOn(console, "warn").mockImplementation(() => {});
+    vi.stubEnv("VITE_API_BASE_URL", baseUrl);
+    const fetchMock = vi.fn(async () => jsonResponse(200, []));
+    vi.stubGlobal("fetch", fetchMock);
+
+    await request("/menu");
+
+    expect(requestedUrl(fetchMock)).toBe("http://localhost:8000/api/v1/menu");
+  });
+});

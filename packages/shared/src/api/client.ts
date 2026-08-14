@@ -168,8 +168,42 @@ function isMockMode(): boolean {
 }
 
 // ---------------------------------------------------------------------------
-// Base URL
+// Base URL + API version
 // ---------------------------------------------------------------------------
+
+/**
+ * API mount point and version, owned by the client rather than folded into
+ * `VITE_API_BASE_URL`.
+ *
+ * Keeping it here means a deploy that sets only the origin still works, instead
+ * of 404-ing every endpoint with nothing in the failure to explain why. Moving
+ * to v2 becomes a one-line change here rather than an env-var migration across
+ * three Vercel projects.
+ *
+ * `VITE_API_BASE_URL` is therefore the **origin only** — e.g. `http://localhost:8000`.
+ */
+export const API_PREFIX = "/api/v1";
+
+let warnedLegacyBaseUrl = false;
+
+/**
+ * Tolerates base URLs left over from when the prefix lived in the env var.
+ * Without this, a stale `…/api` value silently produces `/api/api/v1/...` —
+ * reintroducing exactly the invisible misconfiguration `API_PREFIX` exists to
+ * prevent.
+ */
+function stripLegacyApiSuffix(url: string): string {
+  const stripped = url.replace(/\/api(\/v\d+)?$/, "");
+  if (stripped !== url && !warnedLegacyBaseUrl) {
+    warnedLegacyBaseUrl = true;
+    console.warn(
+      `VITE_API_BASE_URL should be the origin only (e.g. "${stripped}"). ` +
+        `The "${url.slice(stripped.length)}" suffix is now supplied by the API ` +
+        `client as API_PREFIX and has been ignored.`,
+    );
+  }
+  return stripped;
+}
 
 export function getBaseUrl(): string {
   if (isMockMode()) return "mock://api";
@@ -179,7 +213,7 @@ export function getBaseUrl(): string {
       "VITE_API_BASE_URL is not set. Add it to your .env file (see .env.example).",
     );
   }
-  return url.replace(/\/$/, "");
+  return stripLegacyApiSuffix(url.replace(/\/$/, ""));
 }
 
 // ---------------------------------------------------------------------------
@@ -213,7 +247,7 @@ function buildSearchParams(
 }
 
 function buildUrl(path: string, query: RequestOptions["query"]): string {
-  const url = new URL(getBaseUrl() + path);
+  const url = new URL(getBaseUrl() + API_PREFIX + path);
   const sp = buildSearchParams(query);
   sp.forEach((v, k) => url.searchParams.set(k, v));
   return url.toString();

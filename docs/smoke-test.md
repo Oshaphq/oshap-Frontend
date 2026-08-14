@@ -10,7 +10,7 @@ Each test is **pass / fail** in the box. Mark a failure with `[F]` and a one-lin
 - One mobile (real device or Chrome dev-tools mobile emulation): customer flows
 - One desktop (Chrome and Safari/Firefox): admin flows + customer regression
 
-**Mode:** Set `VITE_API_BASE_URL` to the staging backend for a real run; leave unset for the mock-mode regression pass (a separate run with the same checklist).
+**Mode:** Set `VITE_API_BASE_URL` to the staging backend **origin** (no `/api/v1` — the client adds it) for a real run; leave unset for the mock-mode regression pass (a separate run with the same checklist).
 
 ---
 

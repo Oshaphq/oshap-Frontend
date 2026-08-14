@@ -59,7 +59,7 @@
 **Tasks:**
 - Backend implements all endpoints in [`docs/openapi.yaml`](openapi.yaml) (customer + admin)
 - Apply [`docs/ddl.sql`](ddl.sql) as initial Alembic migration
-- Set `VITE_API_BASE_URL` in each Vercel project's env vars
+- Set `VITE_API_BASE_URL` in each Vercel project's env vars — **origin only**, no `/api/v1` (the client supplies it via `API_PREFIX`)
 - Wire Firebase Admin SDK on backend for FCM push (7 trigger types in [`docs/fcm-notifications.md`](fcm-notifications.md))
 - Choose and configure image storage (S3 + CloudFront recommended)
 - Run full [`docs/smoke-test.md`](smoke-test.md) against staging — every path, mock and real
