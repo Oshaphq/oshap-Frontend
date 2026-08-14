@@ -106,6 +106,18 @@ Whichever — the response shape stays `{ url: string }`. No frontend change.
 
 See [`.env.example`](.env.example). Both apps consume Vite env vars (`VITE_*`). The admin app additionally needs FCM web push credentials.
 
+### Table QR codes
+
+Settings → Tables generates a QR code per table, encoding
+`{VITE_CUSTOMER_APP_URL}/menu?table={id}`. Per-table preview with PNG download,
+plus **Print QR Codes** for the whole set — the print dialog's "Save as PDF"
+covers PDF export, so there's no PDF dependency.
+
+The sheet is rendered into a hidden portal (`#oshap-print-root`) and is
+deliberately not theme-aware: paper is white, and a dark-theme admin hitting
+Print should not produce an unreadable page. If `VITE_CUSTOMER_APP_URL` points
+at localhost, the UI warns before you print codes no guest can scan.
+
 ## Design system
 
 Tokens live in [`packages/shared/src/tokens/tokens.css`](packages/shared/src/tokens/tokens.css) as a Tailwind v4 `@theme` block. Both apps `@import` it.
@@ -137,6 +149,7 @@ Each app is its own Vercel project pointing at `apps/customer`, `apps/admin`, or
 
 Per-project env vars (set in Vercel dashboard, **not** committed):
 - `VITE_API_BASE_URL` — the FastAPI backend URL. If unset, the app runs in mock mode (great for previews, not for production).
+- Admin only: `VITE_CUSTOMER_APP_URL` — public origin of the **customer** app. Table QR codes encode `{VITE_CUSTOMER_APP_URL}/menu?table={id}`, so this must be a URL a guest's phone can reach. The admin app warns before you print anything pointing at `localhost`.
 - Admin only: `VITE_FCM_API_KEY`, `VITE_FCM_AUTH_DOMAIN`, `VITE_FCM_PROJECT_ID`, `VITE_FCM_STORAGE_BUCKET`, `VITE_FCM_MESSAGING_SENDER_ID`, `VITE_FCM_APP_ID`, `VITE_FCM_VAPID_KEY`.
 - Platform only: `VITE_PLATFORM_TOKEN` — the operator access code (must match the backend's `PLATFORM_TOKEN`). **Always set this in production** — if unset, the client-side gate is open.
 
