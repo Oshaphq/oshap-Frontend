@@ -5,7 +5,19 @@ import { useSession } from "../context/SessionContext";
 
 const TOAST_VISIBLE_MS = 3_500;
 
-export default function CallWaiterButton({ tableId }: { tableId: string }) {
+/**
+ * Floating action button, bottom-right, above the nav bar.
+ *
+ * Was an icon in the header, which meant it scrolled out of reach on a long
+ * menu — exactly when a guest is most likely to want someone. A FAB keeps it
+ * thumb-reachable on every screen, and the label is there because the pilot
+ * restaurant asked for the call-out: an unlabelled bell is not a control
+ * guests discover.
+ *
+ * Sits at z-40 so drawers and sheets (z-90/100) cover it, and offset above the
+ * 4rem BottomNav plus the iOS home-indicator inset.
+ */
+export default function CallWaiterFab({ tableId }: { tableId: string }) {
   const { session } = useSession();
   const callWaiter = useCallWaiter();
   const [toastKey, setToastKey] = useState(0);
@@ -48,14 +60,14 @@ export default function CallWaiterButton({ tableId }: { tableId: string }) {
         onClick={handleClick}
         disabled={callWaiter.isPending}
         title="Call a waiter"
-        className="shrink-0 h-10 flex items-center gap-xs px-s rounded-4xl text-lg transition-colors bg-surface-container-high text-on-surface-variant hover:bg-surface-container-highest disabled:cursor-wait"
+        className="fixed right-4 bottom-[calc(4rem+1rem+env(safe-area-inset-bottom,0px))] z-40 flex items-center gap-xs h-12 px-md rounded-4xl text-xl shadow-lg bg-primary text-on-primary font-display transition-opacity hover:opacity-90 active:scale-[0.99] disabled:opacity-50 disabled:cursor-wait"
       >
         {callWaiter.isPending ? (
           <i className="mgc_loading_line animate-spin" />
         ) : (
           <ServiceBellIcon />
         )}
-        <span className="text-label-l5 font-semibold whitespace-nowrap">
+        <span className="text-label-l4 font-semibold whitespace-nowrap">
           {callWaiter.isPending ? "Calling…" : "Call a waiter"}
         </span>
       </button>

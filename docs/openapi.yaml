@@ -82,6 +82,13 @@ components:
         name: { type: string }
         description: { type: string, nullable: true }
         logo_url: { type: string, nullable: true }
+        address:
+          type: string
+          nullable: true
+          description: >
+            Street address. Shown to guests in the customer app header as
+            "You're sitting at …", so it should read as a place a person
+            recognises rather than a postal-formatted line.
         operating_hours: { type: string, nullable: true }
         bank_name: { type: string, nullable: true }
         account_number: { type: string, nullable: true }
@@ -95,6 +102,7 @@ components:
         name: { type: string }
         description: { type: string, nullable: true }
         logo_url: { type: string, nullable: true }
+        address: { type: string, nullable: true }
         operating_hours: { type: string, nullable: true }
         bank_name: { type: string, nullable: true }
         account_number: { type: string, nullable: true }

@@ -18,6 +18,7 @@ export default function GeneralSettings() {
     name: "",
     description: "",
     logo_url: "",
+    address: "",
     operating_hours: "",
     bank_name: "",
     account_number: "",
@@ -33,6 +34,7 @@ export default function GeneralSettings() {
         name: settings.name || "",
         description: settings.description || "",
         logo_url: settings.logo_url || "",
+        address: settings.address || "",
         operating_hours: settings.operating_hours || "",
         bank_name: settings.bank_name || "",
         account_number: settings.account_number || "",
@@ -53,6 +55,7 @@ export default function GeneralSettings() {
         name: form.name,
         description: form.description || null,
         logo_url: form.logo_url || null,
+        address: form.address || null,
         operating_hours: form.operating_hours || null,
         bank_name: form.bank_name || null,
         account_number: form.account_number || null,
@@ -131,6 +134,24 @@ export default function GeneralSettings() {
               />
             </div>
             
+            <div>
+              <label className={labelClass}>
+                Address
+              </label>
+              <input
+                type="text"
+                name="address"
+                value={form.address}
+                onChange={handleChange}
+                placeholder="12 Adeola Odeku Street, Victoria Island, Lagos"
+                className={inputClass}
+              />
+              <p className="text-caption-xs text-secondary-text mt-xs">
+                Shown to guests as &ldquo;You&rsquo;re sitting at&hellip;&rdquo;. Write it the
+                way a person would say it, not the way a courier would.
+              </p>
+            </div>
+
             <div>
               <label className={labelClass}>
                 WhatsApp Number

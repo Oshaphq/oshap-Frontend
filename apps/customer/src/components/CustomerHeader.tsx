@@ -1,6 +1,7 @@
 import { ReactNode } from "react";
-import CallWaiterButton from "./CallWaiterButton";
+import { getDeviceToken, useTable } from "@oshap/shared";
 import NotificationBell from "./NotificationBell";
+import { useSession } from "../context/SessionContext";
 
 interface CustomerHeaderProps {
   tableId: string;
@@ -11,16 +12,18 @@ interface CustomerHeaderProps {
 }
 
 /**
- * Deliberately carries no restaurant branding.
+ * Two layouts sharing one bar.
  *
- * The guest already knows whose restaurant they're in — they're sitting in it,
- * and the QR card they scanned carries the logo and name. Repeating it here
- * spent the width that the actions need, and on a 360px phone it pushed the
- * name into an ellipsis and wrapped the table badge onto two lines. Branding
- * belongs on the QR sheet and on receipts, not in a sticky action bar.
+ * Without a `title` (the menu) it's a place-setting header: brand mark, where
+ * you are, which table. "You're sitting at …" reads as orientation rather than
+ * branding, which is the honest job — a guest scanned a code and wants to know
+ * the app is talking about the right room and the right table before they order.
  *
- * So the heading is the table: the one piece of context a guest actually needs
- * to confirm before ordering.
+ * With a `title` (Pay Bill, Confirm Order, My Orders) the page takes over the
+ * heading, and the table pill stays for continuity.
+ *
+ * The call-waiter action deliberately isn't here — it's a FAB, so it stays
+ * reachable while scrolling a long menu instead of scrolling away.
  */
 export default function CustomerHeader({
   tableId,
@@ -29,24 +32,63 @@ export default function CustomerHeader({
   title,
   subtitle,
 }: CustomerHeaderProps) {
+  const { session } = useSession();
+  const deviceToken = getDeviceToken();
+
+  const tableQuery = useTable({
+    tableId,
+    deviceToken,
+    sessionId: session?.id,
+  });
+
+  const address = tableQuery.data?.restaurant?.address;
+
   return (
     <header className="sticky top-0 z-40 flex items-center justify-between gap-s p-md bg-surface border-b border-outline-variant">
       <div className="flex items-center gap-s min-w-0">
         {leftSlot}
-        <div className="flex flex-col gap-0.5 min-w-0">
-          <h1 className="font-display text-display-h1 font-bold text-primary-text truncate">
-            {title || `Table ${tableId}`}
-          </h1>
-          {subtitle && (
-            <span className="text-label-l5 text-secondary-text truncate">
-              {subtitle}
-            </span>
+
+        {!title && (
+          <img
+            src="/oshap.png"
+            alt=""
+            aria-hidden="true"
+            className="w-8 h-8 shrink-0 rounded-lg object-contain"
+          />
+        )}
+
+        <div className="flex flex-col min-w-0">
+          {title ? (
+            <>
+              <h1 className="font-display text-display-h1 font-bold text-primary-text truncate">
+                {title}
+              </h1>
+              {subtitle && (
+                <span className="text-label-l5 text-secondary-text truncate">
+                  {subtitle}
+                </span>
+              )}
+            </>
+          ) : (
+            <>
+              <span className="text-caption-xs text-secondary-text leading-tight">
+                You&rsquo;re sitting at
+              </span>
+              {/* Falls back to the app name rather than an empty bar while the
+                  table request is in flight, or if no address is configured. */}
+              <h1 className="text-label-l3 font-semibold text-primary-text truncate leading-tight">
+                {address || "Oshap"}
+              </h1>
+            </>
           )}
         </div>
       </div>
+
       <div className="flex items-center gap-s shrink-0">
+        <span className="px-s py-xs rounded-4xl border border-primary text-primary text-caption-md font-semibold whitespace-nowrap">
+          Table {tableId}
+        </span>
         <NotificationBell />
-        <CallWaiterButton tableId={tableId} />
         {rightSlot}
       </div>
     </header>

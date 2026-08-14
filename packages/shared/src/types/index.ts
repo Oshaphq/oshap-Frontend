@@ -34,6 +34,8 @@ export interface Restaurant {
   name: string;
   description?: string | null;
   logo_url?: string | null;
+  /** Street address, shown to guests as "You're sitting at …". */
+  address?: string | null;
   operating_hours?: string | null;
   bank_name?: string | null;
   account_number?: string | null;
@@ -367,6 +369,7 @@ export interface AdminUpdateSettingsRequest {
   name?: string;
   description?: string | null;
   logo_url?: string | null;
+  address?: string | null;
   operating_hours?: string | null;
   bank_name?: string | null;
   account_number?: string | null;

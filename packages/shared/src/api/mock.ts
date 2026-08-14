@@ -158,6 +158,7 @@ let _restaurant: Restaurant = {
   id: "00000000-0000-0000-0000-000000000001",
   name: "Aji's Kitchen",
   description: "Authentic African cuisine",
+  address: "12 Adeola Odeku Street, Victoria Island, Lagos",
   // Seeded so logo-consuming surfaces — the QR print sheet, admin settings,
   // platform tenant detail — are demoable without a backend.
   logo_url:
@@ -779,6 +780,7 @@ route("PATCH", /^\/admin\/settings$/, ({ body }) => {
   if (b.name !== undefined) _restaurant.name = b.name;
   if (b.description !== undefined) _restaurant.description = b.description;
   if (b.logo_url !== undefined) _restaurant.logo_url = b.logo_url;
+  if (b.address !== undefined) _restaurant.address = b.address;
   if (b.operating_hours !== undefined) _restaurant.operating_hours = b.operating_hours;
   if (b.bank_name !== undefined) _restaurant.bank_name = b.bank_name;
   if (b.account_number !== undefined) _restaurant.account_number = b.account_number;
