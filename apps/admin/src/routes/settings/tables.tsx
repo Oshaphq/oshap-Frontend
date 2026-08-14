@@ -3,18 +3,34 @@ import {
   useAdminTables,
   useAdminCreateTable,
   useAdminDeleteTable,
+  useAdminSettings,
 } from "@oshap/shared/hooks";
 import { PrimaryButton, SecondaryButton, toast } from "@oshap/shared/ui";
+import TableQrDialog from "../../components/TableQrDialog";
+import QrPrintSheet, { type QrPrintRequest } from "../../components/QrPrintSheet";
+import { isLocalOrigin } from "../../utils/qr";
 
 export default function TablesSettings() {
   const tablesQuery = useAdminTables();
+  const settingsQuery = useAdminSettings();
   const createTable = useAdminCreateTable();
   const deleteTable = useAdminDeleteTable();
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [tableId, setTableId] = useState("");
+  const [qrTableId, setQrTableId] = useState<string | null>(null);
+  const [printRequest, setPrintRequest] = useState<QrPrintRequest | null>(null);
 
   const tables = tablesQuery.data?.tables ?? [];
+
+  const requestPrint = (tableIds: string[]) => {
+    if (tableIds.length === 0) return;
+    setPrintRequest({
+      tableIds,
+      restaurantName: settingsQuery.data?.name ?? "Oshap",
+      logoUrl: settingsQuery.data?.logo_url,
+    });
+  };
 
   const handleAdd = () => {
     const id = tableId.trim();
@@ -67,10 +83,31 @@ export default function TablesSettings() {
             {tables.length} table{tables.length !== 1 ? "s" : ""} configured
           </p>
         </div>
-        <PrimaryButton size="md" onClick={() => setIsModalOpen(true)}>
-          <i className="mgc_add_line" /> Add Table
-        </PrimaryButton>
+        <div className="flex items-center gap-s">
+          <SecondaryButton
+            size="md"
+            onClick={() => requestPrint(tables.map((t) => t.id))}
+            disabled={tables.length === 0}
+          >
+            <i className="mgc_print_line" /> Print QR Codes
+          </SecondaryButton>
+          <PrimaryButton size="md" onClick={() => setIsModalOpen(true)}>
+            <i className="mgc_add_line" /> Add Table
+          </PrimaryButton>
+        </div>
       </div>
+
+      {isLocalOrigin() && tables.length > 0 && (
+        <div className="flex items-start gap-s p-md rounded-lg bg-warning-container text-on-warning-container">
+          <i className="mgc_alert_line text-xl shrink-0 mt-0.5" />
+          <p className="text-p2">
+            QR codes currently point at <span className="font-semibold">localhost</span>,
+            which guests&apos; phones can&apos;t reach. Set{" "}
+            <span className="font-semibold">VITE_CUSTOMER_APP_URL</span> to your public
+            customer URL before printing.
+          </p>
+        </div>
+      )}
 
       <div className="bg-surface-container-low rounded-md border border-transparent hover:border-outline-variant transition-colors overflow-hidden">
         <table className="w-full text-left border-collapse">
@@ -120,6 +157,14 @@ export default function TablesSettings() {
                     )}
                   </td>
                   <td className="py-s px-md text-right">
+                    <button
+                      onClick={() => setQrTableId(table.id)}
+                      title={`Show QR code for ${table.id}`}
+                      aria-label={`Show QR code for ${table.id}`}
+                      className="p-xs text-secondary-text hover:text-primary transition-colors"
+                    >
+                      <i className="mgc_qrcode_line text-lg" />
+                    </button>
                     <button
                       onClick={() => handleDelete(table.id)}
                       disabled={!isEmpty || isDeleting}
@@ -192,6 +237,19 @@ export default function TablesSettings() {
           </div>
         </div>
       )}
+
+      {qrTableId && (
+        <TableQrDialog
+          tableId={qrTableId}
+          onClose={() => setQrTableId(null)}
+          onPrint={() => {
+            requestPrint([qrTableId]);
+            setQrTableId(null);
+          }}
+        />
+      )}
+
+      <QrPrintSheet request={printRequest} onDone={() => setPrintRequest(null)} />
     </div>
   );
 }

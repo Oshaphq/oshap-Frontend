@@ -2,6 +2,7 @@
 
 interface ImportMetaEnv {
   readonly VITE_API_BASE_URL: string;
+  readonly VITE_CUSTOMER_APP_URL: string;
   readonly VITE_FCM_API_KEY: string;
   readonly VITE_FCM_AUTH_DOMAIN: string;
   readonly VITE_FCM_PROJECT_ID: string;

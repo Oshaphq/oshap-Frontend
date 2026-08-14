@@ -106,6 +106,18 @@ Whichever — the response shape stays `{ url: string }`. No frontend change.
 
 See [`.env.example`](.env.example). Both apps consume Vite env vars (`VITE_*`). The admin app additionally needs FCM web push credentials.
 
+### Table QR codes
+
+Settings → Tables generates a QR code per table, encoding
+`{VITE_CUSTOMER_APP_URL}/menu?table={id}`. Per-table preview with PNG download,
+plus **Print QR Codes** for the whole set — the print dialog's "Save as PDF"
+covers PDF export, so there's no PDF dependency.
+
+The sheet is rendered into a hidden portal (`#oshap-print-root`) and is
+deliberately not theme-aware: paper is white, and a dark-theme admin hitting
+Print should not produce an unreadable page. If `VITE_CUSTOMER_APP_URL` points
+at localhost, the UI warns before you print codes no guest can scan.
+
 ## Design system
 
 Tokens live in [`packages/shared/src/tokens/tokens.css`](packages/shared/src/tokens/tokens.css) as a Tailwind v4 `@theme` block. Both apps `@import` it.

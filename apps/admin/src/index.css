@@ -47,3 +47,37 @@ body {
 [class*="mgc_"]::before {
   color: inherit !important;
 }
+
+/* ---------------------------------------------------------------------------
+ * Table QR print sheet
+ *
+ * The sheet lives in a portal on <body> and is hidden on screen — printing is
+ * the only way to see it. Deliberately NOT theme-aware: paper is white, and a
+ * dark-theme admin hitting Print should not produce an unreadable ink-soaked
+ * page. Hence literal colors here rather than surface tokens.
+ * ------------------------------------------------------------------------- */
+#oshap-print-root {
+  display: none;
+}
+
+@media print {
+  body > *:not(#oshap-print-root) {
+    display: none !important;
+  }
+
+  #oshap-print-root {
+    display: block !important;
+    background: #ffffff;
+    color: #000000;
+  }
+
+  @page {
+    margin: 12mm;
+  }
+
+  .oshap-qr-card {
+    /* Never split a table's code across two sheets of paper. */
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+}
