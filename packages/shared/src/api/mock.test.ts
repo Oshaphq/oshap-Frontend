@@ -88,3 +88,33 @@ describe("mock API — multi-branch scoping", () => {
     expect((res.body as { tables: unknown[] }).tables.length).toBeGreaterThan(0);
   });
 });
+
+describe("mock API — restaurant seed resilience", () => {
+  // Persisted mock state is written by whatever version of the seed was live at
+  // the time. A wholesale restore permanently hides fields added later, because
+  // JSON simply has no key for them — that shipped twice (logo_url, address)
+  // before the merge went in.
+  it("serves seed fields that predate the persisted state", async () => {
+    const stale = {
+      restaurant: {
+        id: "00000000-0000-0000-0000-000000000001",
+        name: "Aji's Kitchen",
+        // no address, no logo_url — as if written before those existed
+      },
+    };
+    localStorage.setItem("oshap-mock-state", JSON.stringify(stale));
+
+    const { syncFromStorage } = await import("./mock");
+    syncFromStorage();
+
+    const res = await mockRequest("/table/T1", "GET", null, q(), false);
+    const restaurant = (res.body as {
+      restaurant: { address?: string | null; logo_url?: string | null };
+    }).restaurant;
+
+    expect(restaurant.address).toBeTruthy();
+    expect(restaurant.logo_url).toBeTruthy();
+
+    localStorage.removeItem("oshap-mock-state");
+  });
+});

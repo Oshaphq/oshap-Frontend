@@ -154,7 +154,12 @@ if (typeof window !== "undefined") {
 // Seed data
 // ---------------------------------------------------------------------------
 
-let _restaurant: Restaurant = {
+/**
+ * Frozen defaults. Persisted state is merged *over* this rather than replacing
+ * it — see syncFromStorage — so a field added to the seed still appears for
+ * anyone carrying mock state written before that field existed.
+ */
+const SEED_RESTAURANT: Restaurant = {
   id: "00000000-0000-0000-0000-000000000001",
   name: "Aji's Kitchen",
   description: "Authentic African cuisine",
@@ -169,6 +174,8 @@ let _restaurant: Restaurant = {
   account_name: "Aji's Kitchen Ltd",
   whatsapp_number: "+2348012345678",
 };
+
+let _restaurant: Restaurant = { ...SEED_RESTAURANT };
 
 const SEED_MENU: MenuItem[] = [
   { id: "m-001", restaurant_id: _restaurant.id, name: "Chicken Shawarma", price: 2500, category: "Meals", description: "Grilled chicken wrap with garlic sauce, pickles and fries", image_url: "https://www.simplyquinoa.com/wp-content/uploads/2023/05/chicken-shawarma-gyros-9.jpg", available: true, sort_order: 1, stock_count: 20, low_stock_threshold: 5 },
@@ -234,14 +241,20 @@ interface PersistedState {
   orderCounter?: number;
 }
 
-function syncFromStorage(): void {
+export function syncFromStorage(): void {
   if (typeof localStorage === "undefined") return;
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
     if (!raw) return;
     const saved = JSON.parse(raw) as PersistedState;
 
-    if (saved.restaurant) _restaurant = saved.restaurant;
+    // Merged, not replaced. JSON drops absent keys, so a wholesale restore
+    // permanently hides any field added to the seed later — that has already
+    // caught logo_url and address. Merchant edits still win, since anything
+    // they changed is present in `saved`.
+    if (saved.restaurant) {
+      _restaurant = { ...SEED_RESTAURANT, ...saved.restaurant };
+    }
     if (Array.isArray(saved.menu)) _menu = saved.menu;
     if (Array.isArray(saved.tables)) _tables = saved.tables;
 
