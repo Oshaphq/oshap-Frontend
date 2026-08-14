@@ -219,6 +219,42 @@ function buildUrl(path: string, query: RequestOptions["query"]): string {
   return url.toString();
 }
 
+// ---------------------------------------------------------------------------
+// Response envelope
+//
+// The FastAPI backend wraps every response as:
+//   { success: boolean, message: string, code: number, data: <payload> }
+// The in-memory mock returns bare payloads. Unwrap tolerantly so both work —
+// callers stay typed against the inner payload either way.
+// ---------------------------------------------------------------------------
+
+function unwrapEnvelope(payload: unknown): unknown {
+  if (
+    typeof payload === "object" &&
+    payload !== null &&
+    "success" in payload &&
+    "code" in payload &&
+    "data" in payload
+  ) {
+    return (payload as { data: unknown }).data;
+  }
+  return payload;
+}
+
+/**
+ * Server error messages arrive under different keys depending on the source:
+ * `message` from the backend envelope, `error` from the mock, `detail` from
+ * FastAPI's own validation errors.
+ */
+function extractErrorMessage(payload: unknown): string | null {
+  if (typeof payload !== "object" || payload === null) return null;
+  for (const key of ["message", "error", "detail"] as const) {
+    const value = (payload as Record<string, unknown>)[key];
+    if (typeof value === "string" && value.length > 0) return value;
+  }
+  return null;
+}
+
 export async function request<T>(
   path: string,
   options: RequestOptions = {},
@@ -286,18 +322,13 @@ export async function request<T>(
       handleAdminUnauthorized();
     }
     const message =
-      (isJson &&
-        typeof payload === "object" &&
-        payload !== null &&
-        "error" in payload &&
-        typeof (payload as { error: unknown }).error === "string" &&
-        (payload as { error: string }).error) ||
+      (isJson ? extractErrorMessage(payload) : null) ||
       response.statusText ||
       `Request failed with status ${response.status}`;
     throw new ApiError(response.status, message, payload);
   }
 
-  return payload as T;
+  return unwrapEnvelope(payload) as T;
 }
 
 function handleAdminUnauthorized(): void {
