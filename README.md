@@ -55,7 +55,7 @@ npm run dev:platform   # http://localhost:5176 (operator portal; any access code
 
 > **Cross-app mock sync:** customer (`:5173`) and admin (`:5174`) are different origins and **don't share `localStorage`**, so on the mock API a customer order won't reach the admin app on its own. Start the relay to bridge them: `npm run relay` (`ws-relay.js`, port 5175), then **refresh both tabs**. Tabs of the *same* app already sync via `localStorage` without it.
 
-To point at a real backend, set `VITE_API_BASE_URL` in a `.env.local` file (see `.env.example`). The mock API is tree-shaken when a real backend URL is configured.
+To point at a real backend, set `VITE_API_BASE_URL` in a `.env.local` file (see `.env.example`). It is the backend **origin only** — `http://localhost:8000`, not `.../api/v1`. The `/api/v1` prefix is owned by the shared client (`API_PREFIX` in [`packages/shared/src/api/client.ts`](packages/shared/src/api/client.ts)), so it can't be lost to a mistyped env var. The mock API is tree-shaken when a real backend URL is configured.
 
 ## Scripts
 
@@ -148,8 +148,7 @@ Use `toast.success(msg)`, `toast.error(msg)`, `toast.info(msg)` from `@oshap/sha
 Each app is its own Vercel project pointing at `apps/customer`, `apps/admin`, or `apps/platform` as the Root Directory. Each directory contains a `vercel.json` with an SPA rewrite — required so client-side routes survive page refresh and direct URL hits.
 
 Per-project env vars (set in Vercel dashboard, **not** committed):
-- `VITE_API_BASE_URL` — the FastAPI backend URL. If unset, the app runs in mock mode (great for previews, not for production).
-- Admin only: `VITE_CUSTOMER_APP_URL` — public origin of the **customer** app. Table QR codes encode `{VITE_CUSTOMER_APP_URL}/menu?table={id}`, so this must be a URL a guest's phone can reach. The admin app warns before you print anything pointing at `localhost`.
+- `VITE_API_BASE_URL` — the FastAPI backend **origin only** (e.g. `https://api.oshap.app`). Do not append `/api/v1`; the client adds it. If unset, the app runs in mock mode (great for previews, not for production).
 - Admin only: `VITE_FCM_API_KEY`, `VITE_FCM_AUTH_DOMAIN`, `VITE_FCM_PROJECT_ID`, `VITE_FCM_STORAGE_BUCKET`, `VITE_FCM_MESSAGING_SENDER_ID`, `VITE_FCM_APP_ID`, `VITE_FCM_VAPID_KEY`.
 - Platform only: `VITE_PLATFORM_TOKEN` — the operator access code (must match the backend's `PLATFORM_TOKEN`). **Always set this in production** — if unset, the client-side gate is open.
 
