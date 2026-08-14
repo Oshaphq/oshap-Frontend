@@ -129,7 +129,7 @@ account. Pre-session orders on a single device are scoped by an anonymous `devic
 - Add, remove, change quantity; running total; persists per browser tab
 
 ## 7.3 Order Placement
-- Review summary in cart drawer → `POST /order`
+- Review summary in cart drawer → `POST /orders`
 - Reference `OSHAP-{tableId}-{4-digit random}`
 - Order enters the kitchen workflow as `CREATED`
 
@@ -173,9 +173,9 @@ mark-as-read, and clear-all. Every toast also pushes an entry into the feed.
 # 8. Admin Application
 
 ## 8.1 Authentication & RBAC
-- Staff log in with **email + password** (`POST /admin/login`)
+- Staff log in with **email + password** (`POST /auth/login`)
 - The returned `token` is sent as the `x-admin-pin` header on every admin request
-- `GET /admin/me` resolves the staff member (with `role`) and their restaurant; the
+- `GET /auth/me` resolves the staff member (with `role`) and their restaurant; the
   frontend stores the restaurant in `sessionStorage` and uses `restaurant.id` for FCM
   device registration
 - `user.role` gates which tabs/routes render (`RoleGate`). Roles: `OWNER`, `MANAGER`,

@@ -10,7 +10,7 @@ import { request } from "./client";
 export function createOrder(
   payload: CreateOrderRequest,
 ): Promise<CreateOrderResponse> {
-  return request<CreateOrderResponse>("/order", {
+  return request<CreateOrderResponse>("/orders", {
     method: "POST",
     body: payload,
   });

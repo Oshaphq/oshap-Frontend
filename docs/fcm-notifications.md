@@ -10,7 +10,7 @@ Devices are registered through `POST /devices/register` and looked up by
 ## Trigger Points
 
 ### 1. Order Placed
-**When:** `POST /order` succeeds (new order with status `CREATED`).
+**When:** `POST /orders` succeeds (new order with status `CREATED`).
 
 **FCM target:** All devices registered for the order's `restaurant_id`.
 

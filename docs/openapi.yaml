@@ -906,7 +906,7 @@ paths:
   # -----------------------------------------------------------------------
   # CUSTOMER — Orders
   # -----------------------------------------------------------------------
-  /order:
+  /orders:
     post:
       tags: [Orders]
       summary: Place a new order
@@ -1066,7 +1066,7 @@ paths:
   # =========================================================================
   # ADMIN — Identity
   # =========================================================================
-  /admin/login:
+  /auth/login:
     post:
       tags: [Admin]
       summary: Authenticate a staff member by email + password
@@ -1091,7 +1091,7 @@ paths:
             application/json:
               schema: { $ref: "#/components/schemas/Error" }
 
-  /admin/me:
+  /auth/me:
     get:
       tags: [Admin]
       summary: Return the restaurant and staff member scoped to the current PIN
