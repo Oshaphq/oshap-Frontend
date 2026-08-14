@@ -17,6 +17,7 @@ import type {
   AdminTablesResponse,
   AdminVerifyRequest,
   AdminVerifyResponse,
+  BankAccount,
   ClaimPaymentRequest,
   ClaimPaymentResponse,
   ConfirmOrdersRequest,
@@ -43,6 +44,8 @@ import type {
   AdminLoginResponse,
   CreateStaffRequest,
   UpdateStaffRequest,
+  CreateBankAccountRequest,
+  UpdateBankAccountRequest,
 } from "../types/index";
 
 // ---------------------------------------------------------------------------
@@ -160,11 +163,25 @@ let _restaurant: Restaurant = {
   description: "Authentic African cuisine",
   logo_url: null,
   operating_hours: "09:00 - 22:00",
-  bank_name: "Access Bank",
-  account_number: "0123456789",
-  account_name: "Aji's Kitchen Ltd",
   whatsapp_number: "+2348012345678",
 };
+
+// Mirrors the backend's bank_accounts table. The active one is denormalized
+// onto _restaurant so GET /table/{id} can serve it to the customer app.
+let _bankAccounts: BankAccount[] = [
+  {
+    id: "bank-001",
+    bank_name: "Access Bank",
+    account_number: "0123456789",
+    account_name: "Aji's Kitchen Ltd",
+    is_active: true,
+  },
+];
+
+function syncActiveBankAccount(): void {
+  _restaurant.bank_account = _bankAccounts.find((a) => a.is_active) ?? null;
+}
+syncActiveBankAccount();
 
 const SEED_MENU: MenuItem[] = [
   { id: "m-001", restaurant_id: _restaurant.id, name: "Chicken Shawarma", price: 2500, category: "Meals", description: "Grilled chicken wrap with garlic sauce, pickles and fries", image_url: "https://www.simplyquinoa.com/wp-content/uploads/2023/05/chicken-shawarma-gyros-9.jpg", available: true, sort_order: 1, stock_count: 20, low_stock_threshold: 5 },
@@ -221,6 +238,7 @@ const STORAGE_KEY = "oshap-mock-state";
 
 interface PersistedState {
   restaurant?: Restaurant;
+  bankAccounts?: BankAccount[];
   menu?: MenuItem[];
   tables?: string[];
   orders?: Array<[string, StoredOrder]>;
@@ -238,6 +256,7 @@ function syncFromStorage(): void {
     const saved = JSON.parse(raw) as PersistedState;
 
     if (saved.restaurant) _restaurant = saved.restaurant;
+    if (Array.isArray(saved.bankAccounts)) _bankAccounts = saved.bankAccounts;
     if (Array.isArray(saved.menu)) _menu = saved.menu;
     if (Array.isArray(saved.tables)) _tables = saved.tables;
 
@@ -260,6 +279,8 @@ function syncFromStorage(): void {
     // Corrupt JSON — fall back to in-memory defaults.
   }
 
+  syncActiveBankAccount();
+
   // Ensure there's an owner account
   if (_staff.size === 0) {
     const ownerId = uid();
@@ -278,6 +299,7 @@ function syncToStorage(): void {
   try {
     const payload: PersistedState = {
       restaurant: _restaurant,
+      bankAccounts: _bankAccounts,
       menu: _menu,
       tables: _tables,
       orders: Array.from(_orders.entries()),
@@ -777,9 +799,6 @@ route("PATCH", /^\/admin\/settings$/, ({ body }) => {
   if (b.description !== undefined) _restaurant.description = b.description;
   if (b.logo_url !== undefined) _restaurant.logo_url = b.logo_url;
   if (b.operating_hours !== undefined) _restaurant.operating_hours = b.operating_hours;
-  if (b.bank_name !== undefined) _restaurant.bank_name = b.bank_name;
-  if (b.account_number !== undefined) _restaurant.account_number = b.account_number;
-  if (b.account_name !== undefined) _restaurant.account_name = b.account_name;
   if (b.whatsapp_number !== undefined) _restaurant.whatsapp_number = b.whatsapp_number;
   
   syncToStorage();
@@ -790,6 +809,71 @@ route("POST", /^\/admin\/settings\/upload$/, () => {
   return json(200, {
     url: "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=400&q=80",
   } satisfies UploadResponse);
+});
+
+// -------------------- Admin: Bank accounts --------------------
+
+route("GET", /^\/admin\/settings\/bank-accounts$/, () => {
+  return json(200, _bankAccounts);
+});
+
+route("POST", /^\/admin\/settings\/bank-accounts$/, ({ body }) => {
+  const b = body as CreateBankAccountRequest;
+  if (!b.bank_name || !b.account_number || !b.account_name) {
+    return json(400, { error: "Missing required fields" });
+  }
+  const account: BankAccount = {
+    id: `bank-${String(_bankAccounts.length + 1).padStart(3, "0")}`,
+    bank_name: b.bank_name,
+    account_number: b.account_number,
+    account_name: b.account_name,
+    is_active: b.is_active ?? _bankAccounts.length === 0,
+  };
+  // One active account at a time, matching the server-side invariant.
+  if (account.is_active) {
+    _bankAccounts = _bankAccounts.map((a) => ({ ...a, is_active: false }));
+  }
+  _bankAccounts.push(account);
+  syncActiveBankAccount();
+  syncToStorage();
+  return json(200, account);
+});
+
+route("PATCH", /^\/admin\/settings\/bank-accounts\/(.+)$/, ({ path, body }) => {
+  const id = path.split("/bank-accounts/")[1]!;
+  const account = _bankAccounts.find((a) => a.id === id);
+  if (!account) return json(404, { error: "Bank account not found" });
+
+  const b = body as UpdateBankAccountRequest;
+  if (b.bank_name !== undefined) account.bank_name = b.bank_name;
+  if (b.account_number !== undefined) account.account_number = b.account_number;
+  if (b.account_name !== undefined) account.account_name = b.account_name;
+  if (b.is_active) {
+    _bankAccounts = _bankAccounts.map((a) => ({
+      ...a,
+      is_active: a.id === id,
+    }));
+  }
+  syncActiveBankAccount();
+  syncToStorage();
+  return json(200, _bankAccounts.find((a) => a.id === id)!);
+});
+
+route("DELETE", /^\/admin\/settings\/bank-accounts\/(.+)$/, ({ path }) => {
+  const id = path.split("/bank-accounts/")[1]!;
+  const before = _bankAccounts.length;
+  _bankAccounts = _bankAccounts.filter((a) => a.id !== id);
+  if (_bankAccounts.length === before) {
+    return json(404, { error: "Bank account not found" });
+  }
+  // Removing the active account promotes the next one, so customers are never
+  // left with a payable bill and no account to pay into.
+  if (!_bankAccounts.some((a) => a.is_active) && _bankAccounts[0]) {
+    _bankAccounts[0].is_active = true;
+  }
+  syncActiveBankAccount();
+  syncToStorage();
+  return json(200, { success: true });
 });
 
 route("GET", /^\/admin\/tables$/, ({ query }) => {
@@ -1018,8 +1102,8 @@ const _mockGroup: import("../types/index").RestaurantGroup = {
   name: "Oshap Restaurant Group",
   branches: [
     { ..._restaurant, id: _restaurant.id, is_active: true, table_count: 13, staff_count: 8 },
-    { id: "rest-002", name: "Oshap VI", description: "Victoria Island Branch", logo_url: null, operating_hours: "10:00 - 23:00", bank_name: "GTBank", account_number: "0123456789", account_name: "Oshap VI Ltd", whatsapp_number: null, is_active: true, table_count: 10, staff_count: 5 },
-    { id: "rest-003", name: "Oshap Ikeja", description: "Ikeja Branch", logo_url: null, operating_hours: "09:00 - 22:00", bank_name: "Access Bank", account_number: "9876543210", account_name: "Oshap Ikeja Ltd", whatsapp_number: null, is_active: false, table_count: 8, staff_count: 4 },
+    { id: "rest-002", name: "Oshap VI", description: "Victoria Island Branch", logo_url: null, operating_hours: "10:00 - 23:00", bank_account: { id: "bank-gtbank", bank_name: "GTBank", account_number: "0123456789", account_name: "Oshap VI Ltd", is_active: true }, whatsapp_number: null, is_active: true, table_count: 10, staff_count: 5 },
+    { id: "rest-003", name: "Oshap Ikeja", description: "Ikeja Branch", logo_url: null, operating_hours: "09:00 - 22:00", bank_account: { id: "bank-access-bank", bank_name: "Access Bank", account_number: "9876543210", account_name: "Oshap Ikeja Ltd", is_active: true }, whatsapp_number: null, is_active: false, table_count: 8, staff_count: 4 },
   ],
 };
 
@@ -1045,8 +1129,8 @@ route("GET", /^\/admin\/group\/analytics$/, () => {
 
 const _platformRestaurants: import("../types/index").PlatformRestaurant[] = [
   { ..._restaurant, subscription_tier: "PRO", is_active: true, created_at: "2025-01-15T09:00:00Z", owner_email: "owner@oshap.com", table_count: 13, monthly_orders: 142 },
-  { id: "rest-002", name: "Oshap VI", description: "Victoria Island Branch", logo_url: null, operating_hours: "10:00 - 23:00", bank_name: "GTBank", account_number: "0123456789", account_name: "Oshap VI Ltd", whatsapp_number: null, subscription_tier: "STARTER", is_active: true, created_at: "2025-03-20T10:00:00Z", owner_email: "vi@oshap.com", table_count: 10, monthly_orders: 87 },
-  { id: "rest-003", name: "Oshap Ikeja", description: "Ikeja Branch", logo_url: null, operating_hours: "09:00 - 22:00", bank_name: "Access Bank", account_number: "9876543210", account_name: "Oshap Ikeja Ltd", whatsapp_number: null, subscription_tier: "FREE", is_active: false, created_at: "2025-06-01T08:00:00Z", owner_email: "ikeja@oshap.com", table_count: 8, monthly_orders: 0 },
+  { id: "rest-002", name: "Oshap VI", description: "Victoria Island Branch", logo_url: null, operating_hours: "10:00 - 23:00", bank_account: { id: "bank-gtbank", bank_name: "GTBank", account_number: "0123456789", account_name: "Oshap VI Ltd", is_active: true }, whatsapp_number: null, subscription_tier: "STARTER", is_active: true, created_at: "2025-03-20T10:00:00Z", owner_email: "vi@oshap.com", table_count: 10, monthly_orders: 87 },
+  { id: "rest-003", name: "Oshap Ikeja", description: "Ikeja Branch", logo_url: null, operating_hours: "09:00 - 22:00", bank_account: { id: "bank-access-bank", bank_name: "Access Bank", account_number: "9876543210", account_name: "Oshap Ikeja Ltd", is_active: true }, whatsapp_number: null, subscription_tier: "FREE", is_active: false, created_at: "2025-06-01T08:00:00Z", owner_email: "ikeja@oshap.com", table_count: 8, monthly_orders: 0 },
 ];
 
 route("GET", /^\/platform\/restaurants$/, () => {
@@ -1071,9 +1155,18 @@ route("POST", /^\/platform\/restaurants$/, ({ body }) => {
     description: null,
     logo_url: null,
     operating_hours: null,
-    bank_name: b.bank_name ?? null,
-    account_number: b.account_number ?? null,
-    account_name: b.account_name ?? null,
+    // Onboarding still collects flat bank fields; the backend turns them into
+    // a BankAccount row. Mirror that here so the shapes match.
+    bank_account:
+      b.bank_name && b.account_number && b.account_name
+        ? {
+            id: `bank-${Date.now()}`,
+            bank_name: b.bank_name,
+            account_number: b.account_number,
+            account_name: b.account_name,
+            is_active: true,
+          }
+        : null,
     whatsapp_number: null,
     subscription_tier: b.subscription_tier,
     is_active: true,

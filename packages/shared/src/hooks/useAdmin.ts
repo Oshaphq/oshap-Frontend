@@ -27,6 +27,10 @@ import {
   adminDeleteStaff,
   adminCreateTable,
   adminDeleteTable,
+  adminGetBankAccounts,
+  adminCreateBankAccount,
+  adminUpdateBankAccount,
+  adminDeleteBankAccount,
 } from "../api/admin";
 import type {
   AdminHistoryQuery,
@@ -36,6 +40,8 @@ import type {
   UpdateMenuItemRequest,
   CreateStaffRequest,
   UpdateStaffRequest,
+  CreateBankAccountRequest,
+  UpdateBankAccountRequest,
 } from "../types/index";
 
 // ---------- Settings ----------
@@ -62,6 +68,50 @@ export function useAdminUploadSettingsImage() {
   return useMutation({
     mutationFn: (file: File) => adminUploadSettingsImage(file),
   });
+}
+
+// ---------- Bank accounts ----------
+
+/**
+ * Mutations invalidate `settings` as well as `bankAccounts`: the active account
+ * is denormalized onto the restaurant, so changing which one is active changes
+ * what the customer pay screen will be told to display.
+ */
+function useBankAccountMutation<TArgs>(
+  mutationFn: (args: TArgs) => Promise<unknown>,
+) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: queryKeys.admin.bankAccounts() });
+      queryClient.invalidateQueries({ queryKey: queryKeys.admin.settings() });
+    },
+  });
+}
+
+export function useAdminBankAccounts() {
+  return useQuery({
+    queryKey: queryKeys.admin.bankAccounts(),
+    queryFn: adminGetBankAccounts,
+  });
+}
+
+export function useAdminCreateBankAccount() {
+  return useBankAccountMutation((payload: CreateBankAccountRequest) =>
+    adminCreateBankAccount(payload),
+  );
+}
+
+export function useAdminUpdateBankAccount() {
+  return useBankAccountMutation(
+    ({ id, payload }: { id: string; payload: UpdateBankAccountRequest }) =>
+      adminUpdateBankAccount(id, payload),
+  );
+}
+
+export function useAdminDeleteBankAccount() {
+  return useBankAccountMutation((id: string) => adminDeleteBankAccount(id));
 }
 
 // ---------- Staff Management ----------

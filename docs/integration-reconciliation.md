@@ -290,6 +290,9 @@ the availability toggle, matching `adminUpdateMenuItem` and `adminToggleMenuItem
 
 ### C1 — Bank accounts (breaks a live screen)
 
+> **Status: frontend implemented** (PR #4). Still needs the backend to serve
+> `bank_account` on `GET /table/{id}` and to enforce the single-active invariant.
+
 The backend moved bank details into a `bank_accounts` table with full CRUD
 (`GET/POST/PATCH/DELETE /admin/settings/bank-accounts`). `Restaurant` no longer carries
 `bank_name`, `account_number` or `account_name`.

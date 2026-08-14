@@ -14,6 +14,8 @@ import type {
   AdminUpdateSettingsRequest,
   AdminVerifyRequest,
   AdminVerifyResponse,
+  BankAccount,
+  CreateBankAccountRequest,
   CreateMenuItemRequest,
   CreateStaffRequest,
   KitchenUpdateRequest,
@@ -22,6 +24,7 @@ import type {
   OrderWithItems,
   Restaurant,
   StaffMember,
+  UpdateBankAccountRequest,
   UpdateMenuItemRequest,
   UpdateStaffRequest,
   UploadResponse,
@@ -96,6 +99,39 @@ export function adminUploadSettingsImage(file: File): Promise<UploadResponse> {
     formData,
     admin: true,
   });
+}
+
+// ---------- Bank accounts ----------
+
+export function adminGetBankAccounts(): Promise<BankAccount[]> {
+  return request<BankAccount[]>("/admin/settings/bank-accounts", { admin: true });
+}
+
+export function adminCreateBankAccount(
+  payload: CreateBankAccountRequest,
+): Promise<BankAccount> {
+  return request<BankAccount>("/admin/settings/bank-accounts", {
+    method: "POST",
+    body: payload,
+    admin: true,
+  });
+}
+
+export function adminUpdateBankAccount(
+  id: string,
+  payload: UpdateBankAccountRequest,
+): Promise<BankAccount> {
+  return request<BankAccount>(
+    `/admin/settings/bank-accounts/${encodeURIComponent(id)}`,
+    { method: "PATCH", body: payload, admin: true },
+  );
+}
+
+export function adminDeleteBankAccount(id: string): Promise<{ success: true }> {
+  return request<{ success: true }>(
+    `/admin/settings/bank-accounts/${encodeURIComponent(id)}`,
+    { method: "DELETE", admin: true },
+  );
 }
 
 // ---------- Menu management ----------

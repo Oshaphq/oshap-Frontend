@@ -34,6 +34,7 @@ export const queryKeys = {
       ["admin", "history", page, perPage, table, date] as const,
     tables: () => ["admin", "tables"] as const,
     settings: () => ["admin", "settings"] as const,
+    bankAccounts: () => ["admin", "settings", "bank-accounts"] as const,
     staff: () => ["admin", "staff"] as const,
     analytics: (startDate: string, endDate: string) =>
       ["admin", "analytics", startDate, endDate] as const,

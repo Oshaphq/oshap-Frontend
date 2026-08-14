@@ -6,6 +6,7 @@ import {
 } from "@oshap/shared/hooks";
 import { PrimaryButton, toast } from "@oshap/shared/ui";
 import { useAuth } from "../../context/AuthContext";
+import BankAccountsSection from "../../components/BankAccountsSection";
 
 export default function GeneralSettings() {
   const { user } = useAuth();
@@ -19,9 +20,6 @@ export default function GeneralSettings() {
     description: "",
     logo_url: "",
     operating_hours: "",
-    bank_name: "",
-    account_number: "",
-    account_name: "",
     whatsapp_number: "",
   });
 
@@ -34,9 +32,6 @@ export default function GeneralSettings() {
         description: settings.description || "",
         logo_url: settings.logo_url || "",
         operating_hours: settings.operating_hours || "",
-        bank_name: settings.bank_name || "",
-        account_number: settings.account_number || "",
-        account_name: settings.account_name || "",
         whatsapp_number: settings.whatsapp_number || "",
       });
     }
@@ -54,9 +49,6 @@ export default function GeneralSettings() {
         description: form.description || null,
         logo_url: form.logo_url || null,
         operating_hours: form.operating_hours || null,
-        bank_name: form.bank_name || null,
-        account_number: form.account_number || null,
-        account_name: form.account_name || null,
         whatsapp_number: form.whatsapp_number || null,
       },
       {
@@ -194,52 +186,7 @@ export default function GeneralSettings() {
         </div>
       </div>
 
-      <div className="bg-surface-container-low rounded-md p-l flex flex-col gap-md border border-transparent hover:border-outline-variant transition-colors">
-        <h3 className="font-bold text-primary-text">
-          Bank Details
-        </h3>
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-md">
-          <div>
-            <label className={labelClass}>
-              Bank Name
-            </label>
-            <input
-              type="text"
-              name="bank_name"
-              value={form.bank_name}
-              onChange={handleChange}
-              className={inputClass}
-              disabled={!isOwner}
-            />
-          </div>
-          <div>
-            <label className={labelClass}>
-              Account Number
-            </label>
-            <input
-              type="text"
-              name="account_number"
-              value={form.account_number}
-              onChange={handleChange}
-              className={inputClass}
-              disabled={!isOwner}
-            />
-          </div>
-          <div className="sm:col-span-2">
-            <label className={labelClass}>
-              Account Name
-            </label>
-            <input
-              type="text"
-              name="account_name"
-              value={form.account_name}
-              onChange={handleChange}
-              className={inputClass}
-              disabled={!isOwner}
-            />
-          </div>
-        </div>
-      </div>
+      <BankAccountsSection canEdit={isOwner} />
 
       <div className="flex justify-end pt-s">
         <PrimaryButton 

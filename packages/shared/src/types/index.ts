@@ -29,15 +29,30 @@ export type Role = "OWNER" | "MANAGER" | "CASHIER" | "WAITER" | "KITCHEN" | "BAR
 // Entities
 // ---------------------------------------------------------------------------
 
+/**
+ * A restaurant's payout account. Restaurants may hold several; exactly one is
+ * active at a time and it's the one customers are told to transfer to.
+ */
+export interface BankAccount {
+  id: string;
+  bank_name: string;
+  account_number: string;
+  account_name: string;
+  is_active: boolean;
+}
+
 export interface Restaurant {
   id: string;
   name: string;
   description?: string | null;
   logo_url?: string | null;
   operating_hours?: string | null;
-  bank_name?: string | null;
-  account_number?: string | null;
-  account_name?: string | null;
+  /**
+   * The active payout account, denormalized onto the restaurant so the
+   * unauthenticated customer app gets it from `GET /table/{id}` without a
+   * second (admin-scoped) call. Manage the full set via `/admin/settings/bank-accounts`.
+   */
+  bank_account?: BankAccount | null;
   whatsapp_number?: string | null;
 }
 
@@ -363,16 +378,24 @@ export interface UploadResponse {
   url: string;
 }
 
+/** Bank details are NOT here — they're managed via `/admin/settings/bank-accounts`. */
 export interface AdminUpdateSettingsRequest {
   name?: string;
   description?: string | null;
   logo_url?: string | null;
   operating_hours?: string | null;
-  bank_name?: string | null;
-  account_number?: string | null;
-  account_name?: string | null;
   whatsapp_number?: string | null;
 }
+
+export interface CreateBankAccountRequest {
+  bank_name: string;
+  account_number: string;
+  account_name: string;
+  /** Activating an account deactivates the others — one active account per restaurant. */
+  is_active?: boolean;
+}
+
+export type UpdateBankAccountRequest = Partial<CreateBankAccountRequest>;
 
 // ---------------------------------------------------------------------------
 // FCM (Phase 6)

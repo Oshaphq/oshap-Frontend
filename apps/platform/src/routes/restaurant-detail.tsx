@@ -190,25 +190,19 @@ export default function RestaurantDetailPage() {
         )}
       </div>
 
-      {/* Bank details */}
-      {(r.bank_name || r.account_number) && (
+      {/* Bank details — the active payout account, managed by the merchant in admin. */}
+      {r.bank_account && (
         <div className="bg-surface-container-low rounded-md p-md flex flex-col gap-s">
           <h2 className="text-label-l2 font-semibold text-primary-text">Bank Details</h2>
-          {r.bank_name && (
-            <p className="text-p2 text-secondary-text">
-              Bank: <span className="text-primary-text font-medium">{r.bank_name}</span>
-            </p>
-          )}
-          {r.account_number && (
-            <p className="text-p2 text-secondary-text">
-              Account: <span className="text-primary-text font-medium">{r.account_number}</span>
-            </p>
-          )}
-          {r.account_name && (
-            <p className="text-p2 text-secondary-text">
-              Name: <span className="text-primary-text font-medium">{r.account_name}</span>
-            </p>
-          )}
+          <p className="text-p2 text-secondary-text">
+            Bank: <span className="text-primary-text font-medium">{r.bank_account.bank_name}</span>
+          </p>
+          <p className="text-p2 text-secondary-text">
+            Account: <span className="text-primary-text font-medium">{r.bank_account.account_number}</span>
+          </p>
+          <p className="text-p2 text-secondary-text">
+            Name: <span className="text-primary-text font-medium">{r.bank_account.account_name}</span>
+          </p>
         </div>
       )}
     </main>

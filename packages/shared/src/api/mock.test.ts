@@ -88,3 +88,67 @@ describe("mock API — multi-branch scoping", () => {
     expect((res.body as { tables: unknown[] }).tables.length).toBeGreaterThan(0);
   });
 });
+
+describe("mock API — bank accounts", () => {
+  const BANK_URL = "/admin/settings/bank-accounts";
+
+  it("exposes the active account on the public table payload", async () => {
+    const res = await mockRequest("/table/T1", "GET", null, q(), false);
+    const restaurant = (res.body as { restaurant: { bank_account: unknown } })
+      .restaurant;
+    expect(restaurant.bank_account).toMatchObject({
+      account_number: expect.any(String),
+      is_active: true,
+    });
+  });
+
+  it("keeps exactly one account active when a new one is activated", async () => {
+    const created = await mockRequest(
+      BANK_URL,
+      "POST",
+      {
+        bank_name: "Vitest Bank",
+        account_number: "9999999999",
+        account_name: "Vitest Ltd",
+        is_active: true,
+      },
+      q(),
+      true,
+    );
+    expect(created.status).toBe(200);
+    const newId = (created.body as { id: string }).id;
+
+    const list = await mockRequest(BANK_URL, "GET", null, q(), true);
+    const accounts = list.body as Array<{ id: string; is_active: boolean }>;
+    expect(accounts.filter((a) => a.is_active)).toHaveLength(1);
+    expect(accounts.find((a) => a.is_active)?.id).toBe(newId);
+  });
+
+  it("re-denormalizes the newly active account onto the restaurant", async () => {
+    const res = await mockRequest("/table/T1", "GET", null, q(), false);
+    const restaurant = (res.body as {
+      restaurant: { bank_account: { bank_name: string } | null };
+    }).restaurant;
+    expect(restaurant.bank_account?.bank_name).toBe("Vitest Bank");
+  });
+
+  it("promotes another account when the active one is removed", async () => {
+    const before = await mockRequest(BANK_URL, "GET", null, q(), true);
+    const active = (before.body as Array<{ id: string; is_active: boolean }>).find(
+      (a) => a.is_active,
+    )!;
+
+    const del = await mockRequest(`${BANK_URL}/${active.id}`, "DELETE", null, q(), true);
+    expect(del.status).toBe(200);
+
+    const after = await mockRequest(BANK_URL, "GET", null, q(), true);
+    const remaining = after.body as Array<{ is_active: boolean }>;
+    expect(remaining.length).toBeGreaterThan(0);
+    expect(remaining.filter((a) => a.is_active)).toHaveLength(1);
+  });
+
+  it("404s on an unknown account id", async () => {
+    const res = await mockRequest(`${BANK_URL}/nope`, "PATCH", { bank_name: "x" }, q(), true);
+    expect(res.status).toBe(404);
+  });
+});

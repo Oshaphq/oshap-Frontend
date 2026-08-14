@@ -75,6 +75,32 @@ components:
   # Schemas
   # -----------------------------------------------------------------------
   schemas:
+    BankAccount:
+      type: object
+      description: >
+        A restaurant payout account. A restaurant may hold several; exactly one
+        is active, and that is the account customers are told to transfer to.
+      properties:
+        id: { type: string, format: uuid }
+        bank_name: { type: string }
+        account_number: { type: string }
+        account_name: { type: string }
+        is_active: { type: boolean }
+      required: [id, bank_name, account_number, account_name, is_active]
+
+    BankAccountRequest:
+      type: object
+      properties:
+        bank_name: { type: string }
+        account_number: { type: string }
+        account_name: { type: string }
+        is_active:
+          type: boolean
+          description: >
+            Activating an account deactivates every other account belonging to
+            the same restaurant. Enforce the single-active invariant server-side.
+      required: [bank_name, account_number, account_name]
+
     Restaurant:
       type: object
       properties:
@@ -83,22 +109,27 @@ components:
         description: { type: string, nullable: true }
         logo_url: { type: string, nullable: true }
         operating_hours: { type: string, nullable: true }
-        bank_name: { type: string, nullable: true }
-        account_number: { type: string, nullable: true }
-        account_name: { type: string, nullable: true }
+        bank_account:
+          allOf: [{ $ref: "#/components/schemas/BankAccount" }]
+          nullable: true
+          description: >
+            The active payout account, denormalized onto the restaurant so the
+            unauthenticated customer app receives it from `GET /table/{id}`
+            without an admin-scoped call. Null when none is configured — the
+            pay screen then offers POS only.
         whatsapp_number: { type: string, nullable: true }
       required: [id, name]
 
     AdminUpdateSettingsRequest:
       type: object
+      description: >
+        Bank details are NOT settable here — manage them through
+        `/admin/settings/bank-accounts`.
       properties:
         name: { type: string }
         description: { type: string, nullable: true }
         logo_url: { type: string, nullable: true }
         operating_hours: { type: string, nullable: true }
-        bank_name: { type: string, nullable: true }
-        account_number: { type: string, nullable: true }
-        account_name: { type: string, nullable: true }
         whatsapp_number: { type: string, nullable: true }
 
     MenuItem:
@@ -1259,6 +1290,113 @@ paths:
               schema: { $ref: "#/components/schemas/UploadResponse" }
         "401":
           description: Invalid PIN
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+
+  /admin/settings/bank-accounts:
+    get:
+      tags: [Admin]
+      summary: List the restaurant's payout accounts
+      security: [{ adminPin: [] }]
+      responses:
+        "200":
+          description: Bank accounts
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/BankAccount" }
+        "401":
+          description: Invalid PIN
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+    post:
+      tags: [Admin]
+      summary: Add a payout account
+      description: >
+        The first account added for a restaurant is active by default.
+        Passing `is_active: true` deactivates the others.
+      security: [{ adminPin: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/BankAccountRequest" }
+      responses:
+        "200":
+          description: Account created
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/BankAccount" }
+        "400":
+          description: Missing or invalid fields
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+        "401":
+          description: Invalid PIN
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+
+  /admin/settings/bank-accounts/{id}:
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema: { type: string, format: uuid }
+    patch:
+      tags: [Admin]
+      summary: Update a payout account, or make it the active one
+      security: [{ adminPin: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              allOf: [{ $ref: "#/components/schemas/BankAccountRequest" }]
+              description: All fields optional on PATCH.
+      responses:
+        "200":
+          description: Account updated
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/BankAccount" }
+        "401":
+          description: Invalid PIN
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+        "404":
+          description: Account not found
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+    delete:
+      tags: [Admin]
+      summary: Remove a payout account
+      description: >
+        Removing the active account promotes another, so a restaurant with any
+        remaining account always has one customers can pay into.
+      security: [{ adminPin: [] }]
+      responses:
+        "200":
+          description: Account removed
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success: { type: boolean, example: true }
+        "401":
+          description: Invalid PIN
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+        "404":
+          description: Account not found
           content:
             application/json:
               schema: { $ref: "#/components/schemas/Error" }

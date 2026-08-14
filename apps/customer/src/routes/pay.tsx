@@ -109,11 +109,7 @@ export default function PayPage() {
   }
 
   const restaurant = tableQuery.data?.restaurant;
-  const bank = {
-    bankName: restaurant?.bank_name ?? "",
-    accountNumber: restaurant?.account_number ?? "",
-    accountName: restaurant?.account_name ?? "",
-  };
+  const bankAccount = restaurant?.bank_account ?? null;
 
   const unpaidOrder = tableQuery.data?.unpaid_order ?? null;
   const pendingPayments = tableQuery.data?.pending_payments ?? null;
@@ -257,23 +253,42 @@ export default function PayPage() {
             Bank Transfer
           </h2>
           <p className="text-p2 text-secondary-text">
-            Transfer the exact amount above using the details below.
+            {bankAccount
+              ? "Transfer the exact amount above using the details below."
+              : "This restaurant hasn't set up bank transfers yet."}
           </p>
         </div>
 
         <div className="flex flex-col">
-          <DetailRow label="Bank" value={bank.bankName} />
-          <Divider />
-          <DetailRow
-            label="Account Number"
-            value={bank.accountNumber}
-            copyable
-            copied={copiedField === "account"}
-            onCopy={() => copyToClipboard(bank.accountNumber, "account")}
-          />
-          <Divider />
-          <DetailRow label="Account Name" value={bank.accountName} />
-          <Divider />
+          {bankAccount ? (
+            <>
+              <DetailRow label="Bank" value={bankAccount.bank_name} />
+              <Divider />
+              <DetailRow
+                label="Account Number"
+                value={bankAccount.account_number}
+                copyable
+                copied={copiedField === "account"}
+                onCopy={() =>
+                  copyToClipboard(bankAccount.account_number, "account")
+                }
+              />
+              <Divider />
+              <DetailRow label="Account Name" value={bankAccount.account_name} />
+              <Divider />
+            </>
+          ) : (
+            <>
+              <div className="flex items-start gap-s p-md rounded-lg bg-surface-container text-on-surface-variant">
+                <i className="mgc_card_pay_line text-xl shrink-0 mt-0.5" />
+                <p className="text-label-l5">
+                  Tap <span className="font-semibold">Request a POS</span> below and
+                  a waiter will bring a card terminal to your table.
+                </p>
+              </div>
+              <Divider />
+            </>
+          )}
           <DetailRow
             label="Reference"
             value={reference}
@@ -286,18 +301,30 @@ export default function PayPage() {
       </section>
 
       <section className="py-l px-md bg-surface-container-low flex flex-col gap-md">
-        <PrimaryButton
-          onClick={handleClaimPayment}
-          disabled={claimPayment.isPending || requestPos.isPending}
-        >
-          {claimPayment.isPending ? "Sending…" : "I've Sent the Money"}
-        </PrimaryButton>
-        <SecondaryButton
-          onClick={handleRequestPos}
-          disabled={requestPos.isPending || claimPayment.isPending}
-        >
-          {requestPos.isPending ? "Requesting…" : "Request a POS"}
-        </SecondaryButton>
+        {/* Claiming a transfer makes no sense with no account to transfer to. */}
+        {bankAccount && (
+          <PrimaryButton
+            onClick={handleClaimPayment}
+            disabled={claimPayment.isPending || requestPos.isPending}
+          >
+            {claimPayment.isPending ? "Sending…" : "I've Sent the Money"}
+          </PrimaryButton>
+        )}
+        {bankAccount ? (
+          <SecondaryButton
+            onClick={handleRequestPos}
+            disabled={requestPos.isPending || claimPayment.isPending}
+          >
+            {requestPos.isPending ? "Requesting…" : "Request a POS"}
+          </SecondaryButton>
+        ) : (
+          <PrimaryButton
+            onClick={handleRequestPos}
+            disabled={requestPos.isPending || claimPayment.isPending}
+          >
+            {requestPos.isPending ? "Requesting…" : "Request a POS"}
+          </PrimaryButton>
+        )}
       </section>
 
       <BottomNav tableId={tableId} />
