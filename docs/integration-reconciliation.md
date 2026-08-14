@@ -362,10 +362,15 @@ ready"), so the rule may be the thing that's wrong.
 - **No Alembic migrations exist.** `migrations/versions/` is empty, so the schema has never
   been migrated and there is no repeatable deploy. Generate the baseline before any of this
   is tested against a shared environment.
-- **[`ddl.sql`](ddl.sql) and [`data-model.md`](data-model.md) are stale** — no staff table,
-  no `stock_count`, no groups. They contradict the live models. Regenerate from SQLModel or
-  delete them; right now they actively mislead.
-- **[`phases.md`](phases.md) claims Phase 1 has not started.** It has. Correct it.
+- ~~**`ddl.sql` and [`data-model.md`](data-model.md) are stale**~~ — **resolved.** `ddl.sql`
+  is deleted and `data-model.md` is now a pointer to the SQLModel models. The README told
+  backend devs to apply that DDL as their initial Alembic migration, and it was missing
+  `staff_members`, `bank_accounts`, `restaurant_groups` and the inventory fields — a trap
+  sitting directly in front of the baseline-migration task above.
+- ~~**[`phases.md`](phases.md) claims Phase 1 has not started.**~~ — **resolved**, now marked
+  in progress with a correction note.
+- ~~**The spec doesn't document the response envelope.**~~ — **resolved**, see the `Envelope`
+  schema and the `info.description` note in [`openapi.yaml`](openapi.yaml).
 
 ---
 

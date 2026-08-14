@@ -2,14 +2,35 @@ openapi: "3.1.0"
 info:
   title: Oshap API
   version: "1.0.0"
-  description: >
+  description: |
     QR-based table ordering and payment API for restaurants.
+
     All admin endpoints require an `x-admin-pin` header (set via `ADMIN_PIN`
-    environment variable, default `"0000"`).
-    Customer endpoints are public (no auth).
+    environment variable, default `"0000"`). Customer endpoints are public
+    (no auth).
+
+    ## Response envelope
+
+    **Every response is wrapped.** The backend returns all payloads through a
+    common envelope:
+
+    ```json
+    { "success": true, "message": "OK", "code": 200, "data": <payload> }
+    ```
+
+    The schemas declared per path below describe the **`data` member**, not the
+    whole body — repeating the wrapper on every operation would bury the part
+    that actually differs. See the `Envelope` schema for the wrapper itself.
+
+    Clients are expected to unwrap. The shared TypeScript client does this
+    centrally in `packages/shared/src/api/client.ts`, so callers stay typed
+    against the inner payload.
+
+    Errors use the same envelope with `success: false` and a human-readable
+    `message`; the HTTP status is authoritative.
 
 servers:
-  - url: http://localhost:8000/api
+  - url: http://localhost:8000/api/v1
     description: Local FastAPI dev server
 
 tags:
@@ -75,6 +96,20 @@ components:
   # Schemas
   # -----------------------------------------------------------------------
   schemas:
+    Envelope:
+      type: object
+      description: >
+        The wrapper applied to every response. Per-path schemas describe the
+        `data` member. Documented once here rather than repeated across every
+        operation.
+      properties:
+        success: { type: boolean }
+        message: { type: string, example: "OK" }
+        code: { type: integer, example: 200 }
+        data:
+          description: The payload described by the operation's own schema.
+      required: [success, message, code, data]
+
     Restaurant:
       type: object
       properties:
