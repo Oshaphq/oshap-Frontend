@@ -27,6 +27,11 @@ import {
   adminDeleteStaff,
   adminCreateTable,
   adminDeleteTable,
+  adminGetBankAccounts,
+  adminCreateBankAccount,
+  adminUpdateBankAccount,
+  adminDeleteBankAccount,
+  adminRejectPayment,
 } from "../api/admin";
 import type {
   AdminHistoryQuery,
@@ -36,6 +41,8 @@ import type {
   UpdateMenuItemRequest,
   CreateStaffRequest,
   UpdateStaffRequest,
+  CreateBankAccountRequest,
+  UpdateBankAccountRequest,
 } from "../types/index";
 
 // ---------- Settings ----------
@@ -62,6 +69,48 @@ export function useAdminUploadSettingsImage() {
   return useMutation({
     mutationFn: (file: File) => adminUploadSettingsImage(file),
   });
+}
+
+// ---------- Bank accounts ----------
+
+/**
+ * Mutations invalidate the customer-facing table caches too. Changing which
+ * account is default changes what every guest at every table is told to pay
+ * into, so leaving `tables` stale would show them the old account.
+ */
+function useBankAccountMutation<TArgs>(mutationFn: (args: TArgs) => Promise<unknown>) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: queryKeys.admin.bankAccounts() });
+      queryClient.invalidateQueries({ queryKey: queryKeys.tables.all });
+    },
+  });
+}
+
+export function useAdminBankAccounts() {
+  return useQuery({
+    queryKey: queryKeys.admin.bankAccounts(),
+    queryFn: adminGetBankAccounts,
+  });
+}
+
+export function useAdminCreateBankAccount() {
+  return useBankAccountMutation((payload: CreateBankAccountRequest) =>
+    adminCreateBankAccount(payload),
+  );
+}
+
+export function useAdminUpdateBankAccount() {
+  return useBankAccountMutation(
+    ({ id, payload }: { id: string; payload: UpdateBankAccountRequest }) =>
+      adminUpdateBankAccount(id, payload),
+  );
+}
+
+export function useAdminDeleteBankAccount() {
+  return useBankAccountMutation((id: string) => adminDeleteBankAccount(id));
 }
 
 // ---------- Staff Management ----------
@@ -228,6 +277,18 @@ export function useAdminVerifyPayment() {
       queryClient.invalidateQueries({ queryKey: queryKeys.admin.tables() });
       queryClient.invalidateQueries({ queryKey: queryKeys.admin.kitchen() });
       queryClient.invalidateQueries({ queryKey: queryKeys.admin.all });
+    },
+  });
+}
+
+export function useAdminRejectPayment() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: adminRejectPayment,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: queryKeys.admin.tables() });
+      queryClient.invalidateQueries({ queryKey: queryKeys.tables.all });
+      queryClient.invalidateQueries({ queryKey: queryKeys.admin.bankAccounts() });
     },
   });
 }

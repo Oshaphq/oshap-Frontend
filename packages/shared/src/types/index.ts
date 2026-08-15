@@ -21,7 +21,13 @@ export type OrderStatus =
   | "CONFIRMED"
   | "CANCELLED";
 
-export type PaymentStatus = "NOT_PAID" | "CLAIMED" | "CONFIRMED" | "VERIFIED";
+/** FAILED = staff rejected a claimed payment; the order returns to unpaid. */
+export type PaymentStatus =
+  | "NOT_PAID"
+  | "CLAIMED"
+  | "CONFIRMED"
+  | "VERIFIED"
+  | "FAILED";
 
 export type TableStatus = "OPEN" | "CLOSED";
 
@@ -35,6 +41,30 @@ export type Role = "OWNER" | "MANAGER" | "CASHIER" | "WAITER" | "KITCHEN" | "BAR
 // Entities
 // ---------------------------------------------------------------------------
 
+/**
+ * A restaurant payout account.
+ *
+ * Restaurants hold several because Nigerian bank transfers fail often enough
+ * that a single account is a single point of failure. The backend ranks the
+ * active ones — default first, then by observed success rate — and the customer
+ * pay screen offers the top-ranked with the rest as fallbacks.
+ *
+ * `is_default` is the exclusive flag (setting it unsets the others).
+ * `is_active` is independent: an inactive account is simply not offered.
+ */
+export interface BankAccount {
+  id: string;
+  bank_name: string;
+  account_number: string;
+  account_name: string;
+  is_active: boolean;
+  is_default: boolean;
+  /** Verified payments into this account. Feeds the ranking. */
+  success_count?: number;
+  /** Rejected payments claimed against this account. Feeds the ranking. */
+  failure_count?: number;
+}
+
 export interface Restaurant {
   id: string;
   name: string;
@@ -43,9 +73,6 @@ export interface Restaurant {
   /** Street address, shown to guests as "You're sitting at …". */
   address?: string | null;
   operating_hours?: string | null;
-  bank_name?: string | null;
-  account_number?: string | null;
-  account_name?: string | null;
   whatsapp_number?: string | null;
 }
 
@@ -100,6 +127,8 @@ export interface Payment {
   amount: number;
   status: PaymentStatus;
   proof_url?: string | null;
+  /** Which account the customer claimed to pay into — credited on verify, penalised on reject. */
+  bank_account_id?: string | null;
   created_at: string;
 }
 
@@ -126,6 +155,12 @@ export interface TableInfo {
   table_id: string;
   status: TableStatus;
   restaurant: Restaurant;
+  /**
+   * Active accounts, already ranked by the backend — default first, then by
+   * success rate. Render `[0]` as the primary and offer the rest as fallbacks.
+   * Empty means the restaurant takes POS/cash only.
+   */
+  bank_accounts: BankAccount[];
   unpaid_order: ActiveOrderBundle | null;
   pending_payments: ActiveOrderBundle | null;
 }
@@ -171,6 +206,12 @@ export interface ClaimPaymentRequest {
   order_id?: string;
   combined_order_ids?: string[];
   proof_url?: string;
+  /**
+   * The account the customer says they paid into. Verifying increments its
+   * success count and rejecting increments its failure count, which is how the
+   * ranking improves — omitting it means the ranking never learns.
+   */
+  bank_account_id?: string;
 }
 
 export interface ClaimPaymentResponse {
@@ -356,6 +397,17 @@ export interface AdminVerifyRequest {
   table_id: string;
 }
 
+/** Rejects a claimed payment: orders return to unpaid, the account is penalised. */
+export interface AdminRejectRequest {
+  table_id: string;
+  reason?: string;
+}
+
+export interface AdminRejectResponse {
+  success: true;
+  rejected: number;
+}
+
 export interface AdminVerifyResponse {
   success: true;
   verified_count: number;
@@ -391,15 +443,24 @@ export interface UploadResponse {
   url: string;
 }
 
+export interface CreateBankAccountRequest {
+  bank_name: string;
+  account_number: string;
+  account_name: string;
+  /** Setting this true unsets the default on every other account. */
+  is_default?: boolean;
+}
+
+export type UpdateBankAccountRequest = Partial<CreateBankAccountRequest> & {
+  is_active?: boolean;
+};
+
 export interface AdminUpdateSettingsRequest {
   name?: string;
   description?: string | null;
   logo_url?: string | null;
   address?: string | null;
   operating_hours?: string | null;
-  bank_name?: string | null;
-  account_number?: string | null;
-  account_name?: string | null;
   whatsapp_number?: string | null;
 }
 
@@ -550,6 +611,11 @@ export interface PlatformCreateRestaurantRequest {
   owner_email: string;
   subscription_tier: SubscriptionTier;
   table_count: number;
+  /**
+   * Onboarding convenience: the backend converts these into the tenant's first
+   * BankAccount row. They are not fields on `Restaurant` — everything after
+   * onboarding goes through `/admin/settings/bank-accounts`.
+   */
   bank_name?: string;
   account_number?: string;
   account_name?: string;

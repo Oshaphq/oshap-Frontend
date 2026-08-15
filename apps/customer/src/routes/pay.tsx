@@ -31,6 +31,7 @@ export default function PayPage() {
   const claimPayment = useClaimPayment();
   const requestPos = useRequestPos();
   const [copiedField, setCopiedField] = useState<string | null>(null);
+  const [selectedAccountId, setSelectedAccountId] = useState<string | null>(null);
 
   const posFlagKey = `oshap-pos-requested-${tableId}`;
   const [posRequested, setPosRequested] = useState<boolean>(() => {
@@ -108,12 +109,12 @@ export default function PayPage() {
     );
   }
 
-  const restaurant = tableQuery.data?.restaurant;
-  const bank = {
-    bankName: restaurant?.bank_name ?? "",
-    accountNumber: restaurant?.account_number ?? "",
-    accountName: restaurant?.account_name ?? "",
-  };
+  // Already ranked by the backend: default first, then by success rate. The
+  // guest gets the top one, and the rest as fallbacks — transfers to a given
+  // bank fail often enough here that a single account is a dead end.
+  const bankAccounts = tableQuery.data?.bank_accounts ?? [];
+  const selectedAccount =
+    bankAccounts.find((a) => a.id === selectedAccountId) ?? bankAccounts[0] ?? null;
 
   const unpaidOrder = tableQuery.data?.unpaid_order ?? null;
   const pendingPayments = tableQuery.data?.pending_payments ?? null;
@@ -125,6 +126,9 @@ export default function PayPage() {
       await claimPayment.mutateAsync({
         order_id: unpaidOrder.id,
         combined_order_ids: unpaidOrder.combined_order_ids,
+        // Verifying credits this account, rejecting penalises it. Without it
+        // the ranking never learns which accounts actually work.
+        bank_account_id: selectedAccount?.id,
       });
     } catch (err) {
       console.error("Payment confirmation error:", err);
@@ -257,23 +261,42 @@ export default function PayPage() {
             Bank Transfer
           </h2>
           <p className="text-p2 text-secondary-text">
-            Transfer the exact amount above using the details below.
+            {selectedAccount
+              ? "Transfer the exact amount above using the details below."
+              : "This restaurant isn't taking bank transfers right now."}
           </p>
         </div>
 
         <div className="flex flex-col">
-          <DetailRow label="Bank" value={bank.bankName} />
-          <Divider />
-          <DetailRow
-            label="Account Number"
-            value={bank.accountNumber}
-            copyable
-            copied={copiedField === "account"}
-            onCopy={() => copyToClipboard(bank.accountNumber, "account")}
-          />
-          <Divider />
-          <DetailRow label="Account Name" value={bank.accountName} />
-          <Divider />
+          {selectedAccount ? (
+            <>
+              <DetailRow label="Bank" value={selectedAccount.bank_name} />
+              <Divider />
+              <DetailRow
+                label="Account Number"
+                value={selectedAccount.account_number}
+                copyable
+                copied={copiedField === "account"}
+                onCopy={() =>
+                  copyToClipboard(selectedAccount.account_number, "account")
+                }
+              />
+              <Divider />
+              <DetailRow label="Account Name" value={selectedAccount.account_name} />
+              <Divider />
+            </>
+          ) : (
+            <>
+              <div className="flex items-start gap-s p-md rounded-lg bg-surface-container text-on-surface-variant">
+                <i className="mgc_card_pay_line text-xl shrink-0 mt-0.5" />
+                <p className="text-label-l5">
+                  Tap <span className="font-semibold">Request a POS</span> below and
+                  a waiter will bring a card terminal to your table.
+                </p>
+              </div>
+              <Divider />
+            </>
+          )}
           <DetailRow
             label="Reference"
             value={reference}
@@ -283,15 +306,48 @@ export default function PayPage() {
             mono
           />
         </div>
+
+        {/* Transfers to a given bank fail often enough that the fallback is the
+            point of holding several accounts. Only worth showing when there is
+            somewhere else to go. */}
+        {bankAccounts.length > 1 && (
+          <div className="flex flex-col gap-s">
+            <span className="text-caption-xs font-semibold uppercase tracking-wider text-secondary-text">
+              Trouble with this bank?
+            </span>
+            <div className="flex flex-wrap gap-s">
+              {bankAccounts.map((account) => {
+                const isSelected = account.id === selectedAccount?.id;
+                return (
+                  <button
+                    key={account.id}
+                    type="button"
+                    onClick={() => setSelectedAccountId(account.id)}
+                    aria-pressed={isSelected}
+                    className={`px-md py-s rounded-4xl text-label-l5 font-semibold transition-colors ${
+                      isSelected
+                        ? "bg-primary text-on-primary"
+                        : "bg-surface-container text-on-surface-variant hover:bg-surface-container-high"
+                    }`}
+                  >
+                    {account.bank_name}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        )}
       </section>
 
       <section className="py-l px-md bg-surface-container-low flex flex-col gap-md">
-        <PrimaryButton
-          onClick={handleClaimPayment}
-          disabled={claimPayment.isPending || requestPos.isPending}
-        >
-          {claimPayment.isPending ? "Sending…" : "I've Sent the Money"}
-        </PrimaryButton>
+        {selectedAccount && (
+          <PrimaryButton
+            onClick={handleClaimPayment}
+            disabled={claimPayment.isPending || requestPos.isPending}
+          >
+            {claimPayment.isPending ? "Sending…" : "I've Sent the Money"}
+          </PrimaryButton>
+        )}
         <SecondaryButton
           onClick={handleRequestPos}
           disabled={requestPos.isPending || claimPayment.isPending}

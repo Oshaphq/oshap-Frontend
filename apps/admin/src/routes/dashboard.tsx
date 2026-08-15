@@ -3,6 +3,7 @@ import { Link } from "react-router";
 import {
   useAdminTables,
   useAdminVerifyPayment,
+  useAdminRejectPayment,
   useAdminCloseTable,
   useAdminInventoryAlerts,
   formatCurrency,
@@ -13,10 +14,14 @@ import QueryError from "../components/QueryError";
 export default function DashboardPage() {
   const tablesQuery = useAdminTables();
   const verifyPayment = useAdminVerifyPayment();
+  const rejectPayment = useAdminRejectPayment();
   const closeTable = useAdminCloseTable();
   const alertsQuery = useAdminInventoryAlerts();
 
   const [clearPromptTable, setClearPromptTable] = useState<string | null>(null);
+  // Two-step, because rejecting is destructive from the guest's side: their
+  // bill returns to unpaid and the account they used is marked down.
+  const [rejectingTableId, setRejectingTableId] = useState<string | null>(null);
 
   if (tablesQuery.isLoading) {
     return (
@@ -34,6 +39,16 @@ export default function DashboardPage() {
   const tables = tablesQuery.data?.tables ?? [];
   const activeTablesCount = tables.filter((t) => t.hasPending || t.hasUnpaid).length;
   const pendingCount = tables.filter((t) => t.hasPending).length;
+
+  const handleReject = async (tableId: string) => {
+    try {
+      await rejectPayment.mutateAsync({ table_id: tableId });
+      setRejectingTableId(null);
+      toast.success("Payment rejected — the bill is unpaid again");
+    } catch {
+      toast.error("Failed to reject payment. Please try again.");
+    }
+  };
 
   const handleVerify = async (tableId: string) => {
     try {
@@ -202,14 +217,46 @@ export default function DashboardPage() {
                 )}
               </div>
 
-              {isPending && (
-                <PrimaryButton
-                  onClick={() => handleVerify(table.id)}
-                  disabled={isVerifying}
-                >
-                  {isVerifying ? "Verifying..." : "Verify Payment"}
-                </PrimaryButton>
-              )}
+              {isPending &&
+                (rejectingTableId === table.id ? (
+                  <div className="flex flex-col gap-s">
+                    <p className="text-caption-md text-secondary-text">
+                      Reject this payment? The bill goes back to unpaid and this
+                      account is marked down.
+                    </p>
+                    <div className="flex gap-s">
+                      <SecondaryButton
+                        className="flex-1"
+                        onClick={() => setRejectingTableId(null)}
+                      >
+                        Cancel
+                      </SecondaryButton>
+                      <PrimaryButton
+                        className="flex-1"
+                        onClick={() => handleReject(table.id)}
+                        disabled={rejectPayment.isPending}
+                      >
+                        {rejectPayment.isPending ? "Rejecting…" : "Confirm Reject"}
+                      </PrimaryButton>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="flex gap-s">
+                    <PrimaryButton
+                      className="flex-1"
+                      onClick={() => handleVerify(table.id)}
+                      disabled={isVerifying}
+                    >
+                      {isVerifying ? "Verifying..." : "Verify Payment"}
+                    </PrimaryButton>
+                    <SecondaryButton
+                      onClick={() => setRejectingTableId(table.id)}
+                      disabled={isVerifying}
+                    >
+                      Reject
+                    </SecondaryButton>
+                  </div>
+                ))}
 
               {!isEmpty && isClosing && (
                 <div className="py-s text-center text-caption-md font-semibold text-secondary-text">

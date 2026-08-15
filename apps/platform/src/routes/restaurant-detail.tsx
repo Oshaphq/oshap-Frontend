@@ -190,27 +190,9 @@ export default function RestaurantDetailPage() {
         )}
       </div>
 
-      {/* Bank details */}
-      {(r.bank_name || r.account_number) && (
-        <div className="bg-surface-container-low rounded-md p-md flex flex-col gap-s">
-          <h2 className="text-label-l2 font-semibold text-primary-text">Bank Details</h2>
-          {r.bank_name && (
-            <p className="text-p2 text-secondary-text">
-              Bank: <span className="text-primary-text font-medium">{r.bank_name}</span>
-            </p>
-          )}
-          {r.account_number && (
-            <p className="text-p2 text-secondary-text">
-              Account: <span className="text-primary-text font-medium">{r.account_number}</span>
-            </p>
-          )}
-          {r.account_name && (
-            <p className="text-p2 text-secondary-text">
-              Name: <span className="text-primary-text font-medium">{r.account_name}</span>
-            </p>
-          )}
-        </div>
-      )}
+      {/* Bank details deliberately absent: they live in the tenant's own
+          bank_accounts, not on the restaurant, and the platform portal has no
+          endpoint for them. Operators manage accounts from the admin app. */}
     </main>
   );
 }

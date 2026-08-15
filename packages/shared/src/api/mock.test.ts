@@ -153,3 +153,122 @@ describe("mock API — money is kobo", () => {
     expect((res.body as { total: number }).total).toBe(item.price * 2);
   });
 });
+
+describe("mock API — bank accounts", () => {
+  const URL = "/admin/settings/bank-accounts";
+
+  it("serves ranked active accounts on the public table payload", async () => {
+    const res = await mockRequest("/table/T1", "GET", null, q(), false);
+    const accounts = (res.body as { bank_accounts: Array<{ is_default: boolean }> })
+      .bank_accounts;
+
+    expect(accounts.length).toBeGreaterThan(1);
+    // Default first — the whole point of the ordering.
+    expect(accounts[0]!.is_default).toBe(true);
+  });
+
+  it("keeps is_default exclusive", async () => {
+    const before = await mockRequest(URL, "GET", null, q(), true);
+    const target = (before.body as Array<{ id: string; is_default: boolean }>).find(
+      (a) => !a.is_default,
+    )!;
+
+    await mockRequest(`${URL}/${target.id}`, "PATCH", { is_default: true }, q(), true);
+
+    const after = await mockRequest(URL, "GET", null, q(), true);
+    const defaults = (after.body as Array<{ id: string; is_default: boolean }>).filter(
+      (a) => a.is_default,
+    );
+    expect(defaults).toHaveLength(1);
+    expect(defaults[0]!.id).toBe(target.id);
+  });
+
+  it("hides inactive accounts from guests but keeps them in admin", async () => {
+    const list = await mockRequest(URL, "GET", null, q(), true);
+    const target = (list.body as Array<{ id: string; is_default: boolean }>).find(
+      (a) => !a.is_default,
+    )!;
+
+    await mockRequest(`${URL}/${target.id}`, "PATCH", { is_active: false }, q(), true);
+
+    const table = await mockRequest("/table/T1", "GET", null, q(), false);
+    const guestIds = (table.body as { bank_accounts: Array<{ id: string }> }).bank_accounts.map(
+      (a) => a.id,
+    );
+    expect(guestIds).not.toContain(target.id);
+
+    const admin = await mockRequest(URL, "GET", null, q(), true);
+    expect((admin.body as Array<{ id: string }>).map((a) => a.id)).toContain(target.id);
+
+    await mockRequest(`${URL}/${target.id}`, "PATCH", { is_active: true }, q(), true);
+  });
+
+  it("404s on an unknown account", async () => {
+    const res = await mockRequest(`${URL}/nope`, "PATCH", { bank_name: "x" }, q(), true);
+    expect(res.status).toBe(404);
+  });
+});
+
+describe("mock API — payment feedback loop", () => {
+  // The ranking only improves if verify/reject actually move the counters, and
+  // that only works if the claim recorded which account was used.
+  async function claimAgainst(accountId: string) {
+    const menu = await mockRequest("/menu", "GET", null, q(), false);
+    const item = (menu.body as Array<{ name: string; price: number }>)[0]!;
+    const order = await mockRequest(
+      "/orders",
+      "POST",
+      {
+        table: "T7",
+        restaurant_id: HOME_RESTAURANT,
+        items: [{ name: item.name, qty: 1, price: item.price }],
+      },
+      q(),
+      false,
+    );
+    const orderId = (order.body as { order_id: string }).order_id;
+    await mockRequest(
+      "/payment/confirm",
+      "POST",
+      { order_id: orderId, bank_account_id: accountId },
+      q(),
+      false,
+    );
+  }
+
+  async function accountById(id: string) {
+    const res = await mockRequest("/admin/settings/bank-accounts", "GET", null, q(), true);
+    return (res.body as Array<{ id: string; success_count?: number; failure_count?: number }>)
+      .find((a) => a.id === id)!;
+  }
+
+  it("credits the account a verified payment went into", async () => {
+    const before = await accountById("bank-002");
+    await claimAgainst("bank-002");
+    await mockRequest("/admin/verify", "POST", { table_id: "T7" }, q(), true);
+
+    const after = await accountById("bank-002");
+    expect(after.success_count).toBe((before.success_count ?? 0) + 1);
+  });
+
+  it("penalises the account when the payment is rejected, and unpays the order", async () => {
+    const before = await accountById("bank-002");
+    await claimAgainst("bank-002");
+
+    const res = await mockRequest("/admin/reject", "POST", { table_id: "T7" }, q(), true);
+    expect(res.status).toBe(200);
+    expect((res.body as { rejected: number }).rejected).toBeGreaterThan(0);
+
+    const after = await accountById("bank-002");
+    expect(after.failure_count).toBe((before.failure_count ?? 0) + 1);
+
+    // The food was served, so the order returns to unpaid rather than to the kitchen.
+    const table = await mockRequest("/table/T7", "GET", null, q(), false);
+    expect((table.body as { unpaid_order: unknown }).unpaid_order).toBeTruthy();
+  });
+
+  it("404s rejecting a table with nothing pending", async () => {
+    const res = await mockRequest("/admin/reject", "POST", { table_id: "T9" }, q(), true);
+    expect(res.status).toBe(404);
+  });
+});
