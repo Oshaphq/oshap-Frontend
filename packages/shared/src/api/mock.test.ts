@@ -272,3 +272,117 @@ describe("mock API — payment feedback loop", () => {
     expect(res.status).toBe(404);
   });
 });
+
+describe("mock API — bulk menu import/export", () => {
+  function csvFile(body: string): File {
+    return new File([body], "menu.csv", { type: "text/csv" });
+  }
+
+  async function importCsv(body: string, dryRun: boolean) {
+    const form = new FormData();
+    form.append("file", csvFile(body));
+    return mockRequest(
+      "/admin/menu/import",
+      "POST",
+      form,
+      q(dryRun ? "dry_run=true" : ""),
+      true,
+    );
+  }
+
+  it("exports a header plus one row per item, with external_id populated", async () => {
+    const res = await mockRequest("/admin/menu/export", "GET", null, q(), true);
+    const lines = (res.body as string).split("\n");
+
+    expect(lines[0]).toContain("external_id");
+    expect(lines.length).toBeGreaterThan(1);
+    // Every row must carry an id, or re-importing duplicates instead of updating.
+    expect(lines[1]!.split(",")[0]).toBeTruthy();
+  });
+
+  it("dry run reports what would happen without writing anything", async () => {
+    const before = await mockRequest("/admin/menu", "GET", null, q(), true);
+    const countBefore = (before.body as unknown[]).length;
+
+    const res = await importCsv(
+      "name,category,price\nDry Run Dish,Meals,250000",
+      true,
+    );
+
+    expect((res.body as { created: number }).created).toBe(1);
+
+    const after = await mockRequest("/admin/menu", "GET", null, q(), true);
+    expect((after.body as unknown[]).length).toBe(countBefore);
+  });
+
+  it("creates rows without an external_id and updates rows with one", async () => {
+    const created = await importCsv(
+      "name,category,price\nImported Dish,Grills,300000",
+      false,
+    );
+    expect((created.body as { created: number }).created).toBe(1);
+
+    const list = await mockRequest("/admin/menu", "GET", null, q(), true);
+    const item = (list.body as Array<{ id: string; name: string; price: number }>).find(
+      (m) => m.name === "Imported Dish",
+    )!;
+    expect(item.price).toBe(300_000);
+
+    const updated = await importCsv(
+      `external_id,name,category,price\n${item.id},Imported Dish,Grills,350000`,
+      false,
+    );
+    expect((updated.body as { updated: number }).updated).toBe(1);
+
+    const after = await mockRequest("/admin/menu", "GET", null, q(), true);
+    const changed = (after.body as Array<{ id: string; price: number }>).find(
+      (m) => m.id === item.id,
+    )!;
+    expect(changed.price).toBe(350_000);
+  });
+
+  // Partial success is the point: one bad row must not reject the other 79.
+  it("reports per-row errors while still importing the good rows", async () => {
+    const res = await importCsv(
+      [
+        "name,category,price",
+        "Good Dish,Sides,50000",
+        "Bad Price Dish,Sides,not-a-number",
+        ",Sides,50000",
+      ].join("\n"),
+      true,
+    );
+
+    const body = res.body as {
+      created: number;
+      errors: Array<{ row: number; field?: string; message: string }>;
+    };
+
+    expect(body.created).toBe(1);
+    expect(body.errors).toHaveLength(2);
+    // Row numbers count the header, so they match the spreadsheet.
+    expect(body.errors[0]!.row).toBe(3);
+    expect(body.errors[0]!.field).toBe("price");
+    expect(body.errors[1]!.row).toBe(4);
+  });
+
+  it("rejects an external_id that matches nothing rather than silently creating", async () => {
+    const res = await importCsv(
+      "external_id,name,category,price\nnope-123,Ghost,Meals,10000",
+      true,
+    );
+    const body = res.body as { created: number; errors: Array<{ field?: string }> };
+
+    expect(body.created).toBe(0);
+    expect(body.errors[0]!.field).toBe("external_id");
+  });
+
+  it("survives quoted fields containing commas", async () => {
+    const res = await importCsv(
+      'name,category,price,description\n"Rice, Chicken & Plantain",Meals,400000,"Served hot, with sauce"',
+      true,
+    );
+    expect((res.body as { created: number; errors: unknown[] }).created).toBe(1);
+    expect((res.body as { errors: unknown[] }).errors).toHaveLength(0);
+  });
+});

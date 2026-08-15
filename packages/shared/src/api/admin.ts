@@ -24,6 +24,7 @@ import type {
   RefreshTokenResponse,
   CreateStaffRequest,
   KitchenUpdateRequest,
+  MenuImportResponse,
   MenuItem,
   Order,
   OrderWithItems,
@@ -161,6 +162,34 @@ export function adminDeleteMenuItem(id: string): Promise<{ success: true }> {
   return request<{ success: true }>(`/admin/menu/${encodeURIComponent(id)}`, {
     method: "DELETE",
     admin: true,
+  });
+}
+
+// ---------- Bulk menu import / export ----------
+
+/**
+ * Returns raw CSV, not JSON. `request()` falls back to `response.text()` for
+ * non-JSON content types, so the string arrives intact.
+ */
+export function adminExportMenu(): Promise<string> {
+  return request<string>("/admin/menu/export", { admin: true });
+}
+
+/**
+ * `dryRun` validates and reports without writing — the whole file is checked,
+ * so a failure at row 60 doesn't leave a half-imported menu.
+ */
+export function adminImportMenu(
+  file: File,
+  dryRun = false,
+): Promise<MenuImportResponse> {
+  const formData = new FormData();
+  formData.append("file", file);
+  return request<MenuImportResponse>("/admin/menu/import", {
+    method: "POST",
+    formData,
+    admin: true,
+    query: dryRun ? { dry_run: true } : undefined,
   });
 }
 

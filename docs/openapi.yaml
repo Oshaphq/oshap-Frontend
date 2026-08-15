@@ -1892,6 +1892,83 @@ paths:
                 properties:
                   success: { type: boolean, enum: [true] }
 
+  /admin/menu/export:
+    get:
+      tags: [Admin]
+      summary: Export the menu as CSV
+      description: >
+        Always populates `external_id`, so the exported file can be edited in a
+        spreadsheet and re-imported as updates rather than duplicates.
+      security: [{ adminPin: [] }]
+      responses:
+        "200":
+          description: CSV body
+          content:
+            text/csv:
+              schema: { type: string }
+
+  /admin/menu/import:
+    post:
+      tags: [Admin]
+      summary: Bulk create/update menu items from CSV
+      description: |
+        Columns: `external_id?, name, category, price, description?, available?,
+        image_url?, stock_count?, low_stock_threshold?`. Only `name`, `category`
+        and `price` are required. `price` is in **kobo**, like every money field.
+
+        **`external_id` is the upsert key.** Present means update that item;
+        absent means create. Matching on `name` instead would turn a typo fix
+        into a duplicate, which is why export always fills it in.
+
+        Partial success is the normal outcome, not an error: a bad row is
+        reported with its row number and the rest still import. Row numbers
+        count the header, so they match what the merchant sees in their
+        spreadsheet.
+
+        The whole file is validated before any row is written, so a failure at
+        row 60 cannot leave a half-imported menu.
+      security: [{ adminPin: [] }]
+      parameters:
+        - name: dry_run
+          in: query
+          schema: { type: boolean }
+          description: Validate and report without writing. Used to preview before committing.
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                file: { type: string, format: binary }
+              required: [file]
+      responses:
+        "200":
+          description: Import result — the same shape for a dry run and a real import
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  created: { type: integer }
+                  updated: { type: integer }
+                  skipped: { type: integer }
+                  errors:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        row: { type: integer, description: 1-indexed, counting the header }
+                        field: { type: string }
+                        message: { type: string }
+                      required: [row, message]
+                required: [created, updated, skipped, errors]
+        "400":
+          description: Missing file, or no rows
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+
   /admin/menu/upload:
     post:
       tags: [Admin]

@@ -9,6 +9,7 @@ import {
   useAdminUploadImage,
   useAdminInventoryAlerts,
   useAdminUpdateStock,
+  useAdminExportMenu,
   formatCurrency,
   nairaToKobo,
   koboToNaira,
@@ -17,6 +18,7 @@ import type { MenuItem } from "@oshap/shared";
 import { PrimaryButton, SecondaryButton, toast } from "@oshap/shared/ui";
 import QueryError from "../components/QueryError";
 import LowStockBanner from "../components/LowStockBanner";
+import MenuImportDialog from "../components/MenuImportDialog";
 
 interface MenuFormState {
   name: string;
@@ -44,12 +46,33 @@ export default function MenuPage() {
   const deleteItem = useAdminDeleteMenuItem();
   const uploadImage = useAdminUploadImage();
   const updateStock = useAdminUpdateStock();
+  const exportMenu = useAdminExportMenu();
 
   const [editingId, setEditingId] = useState<string | null>(null);
   const [showNewForm, setShowNewForm] = useState(false);
   const [form, setForm] = useState<MenuFormState>(EMPTY_FORM);
   const [stockEditId, setStockEditId] = useState<string | null>(null);
   const [stockInput, setStockInput] = useState<string>("");
+  const [showImport, setShowImport] = useState(false);
+
+  const handleExport = () => {
+    exportMenu.mutate(undefined, {
+      onSuccess: (csv) => {
+        // Served as a CSV body rather than a file URL, so the download is
+        // assembled here.
+        const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement("a");
+        link.href = url;
+        link.download = `menu-${new Date().toISOString().slice(0, 10)}.csv`;
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+        URL.revokeObjectURL(url);
+      },
+      onError: () => toast.error("Could not export the menu"),
+    });
+  };
 
   const handleCreate = async () => {
     if (!form.name || !form.price || !form.category) {
@@ -151,16 +174,29 @@ export default function MenuPage() {
         <h1 className="font-display text-display-h2 font-semibold text-primary-text">
           Menu Management
         </h1>
-        <PrimaryButton
-          size="md"
-          onClick={() => {
-            setShowNewForm(true);
-            setEditingId(null);
-            setForm(EMPTY_FORM);
-          }}
-        >
-          + Add Item
-        </PrimaryButton>
+        <div className="flex items-center gap-s">
+          <SecondaryButton
+            size="md"
+            onClick={handleExport}
+            disabled={exportMenu.isPending || items.length === 0}
+          >
+            <i className="mgc_download_2_line" />
+            {exportMenu.isPending ? "Exporting…" : "Export"}
+          </SecondaryButton>
+          <SecondaryButton size="md" onClick={() => setShowImport(true)}>
+            <i className="mgc_file_upload_line" /> Import
+          </SecondaryButton>
+          <PrimaryButton
+            size="md"
+            onClick={() => {
+              setShowNewForm(true);
+              setEditingId(null);
+              setForm(EMPTY_FORM);
+            }}
+          >
+            + Add Item
+          </PrimaryButton>
+        </div>
       </header>
 
       <LowStockBanner />
@@ -230,6 +266,8 @@ export default function MenuPage() {
           </div>
         )}
       </div>
+
+      {showImport && <MenuImportDialog onClose={() => setShowImport(false)} />}
     </main>
   );
 }

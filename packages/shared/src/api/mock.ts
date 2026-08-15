@@ -28,6 +28,8 @@ import type {
   CreateOrderRequest,
   CreateOrderResponse,
   KitchenUpdateRequest,
+  MenuImportError,
+  MenuImportResponse,
   MenuItem,
   Order,
   OrderDetail,
@@ -1168,6 +1170,165 @@ route("DELETE", /^\/admin\/menu\/(.+)$/, ({ path }) => {
   const id = path.split("/admin/menu/")[1]!;
   _menu = _menu.filter((i) => i.id !== id);
   return json(200, { success: true as const });
+});
+
+// -------------------- Admin: Bulk menu import / export --------------------
+
+const IMPORT_COLUMNS = [
+  "external_id",
+  "name",
+  "category",
+  "price",
+  "description",
+  "available",
+  "image_url",
+  "stock_count",
+  "low_stock_threshold",
+] as const;
+
+function csvEscape(value: unknown): string {
+  const text = value == null ? "" : String(value);
+  return /[",\n]/.test(text) ? `"${text.replace(/"/g, '""')}"` : text;
+}
+
+route("GET", /^\/admin\/menu\/export$/, () => {
+  // external_id is always populated so the round-trip updates rather than
+  // duplicating — matching on name would turn a typo fix into a new item.
+  const rows = _menu.map((item) =>
+    [
+      item.id,
+      item.name,
+      item.category,
+      item.price,
+      item.description ?? "",
+      item.available,
+      item.image_url ?? "",
+      item.stock_count ?? "",
+      item.low_stock_threshold,
+    ]
+      .map(csvEscape)
+      .join(","),
+  );
+  return json(200, [IMPORT_COLUMNS.join(","), ...rows].join("\n"));
+});
+
+/** Splits a CSV line, honouring quoted fields containing commas. */
+function splitCsvLine(line: string): string[] {
+  const out: string[] = [];
+  let current = "";
+  let quoted = false;
+  for (let i = 0; i < line.length; i++) {
+    const ch = line[i]!;
+    if (quoted) {
+      if (ch === '"' && line[i + 1] === '"') {
+        current += '"';
+        i++;
+      } else if (ch === '"') {
+        quoted = false;
+      } else {
+        current += ch;
+      }
+    } else if (ch === '"') {
+      quoted = true;
+    } else if (ch === ",") {
+      out.push(current);
+      current = "";
+    } else {
+      current += ch;
+    }
+  }
+  out.push(current);
+  return out.map((v) => v.trim());
+}
+
+route("POST", /^\/admin\/menu\/import$/, async ({ body, query }) => {
+  const form = body as FormData | null;
+  const file = form instanceof FormData ? (form.get("file") as File | null) : null;
+  if (!file) return json(400, { error: "No file uploaded" });
+
+  const dryRun = query.get("dry_run") === "true";
+  const text = await file.text();
+  const lines = text.split(/\r?\n/).filter((l) => l.trim() !== "");
+  if (lines.length < 2) return json(400, { error: "File has no rows" });
+
+  const header = splitCsvLine(lines[0]!).map((h) => h.toLowerCase());
+  const errors: MenuImportError[] = [];
+  const staged: Array<{ existing?: MenuItem; item: MenuItem }> = [];
+  let skipped = 0;
+
+  // Row numbers are 1-indexed and count the header, so they match what the
+  // merchant sees in their spreadsheet.
+  lines.slice(1).forEach((line, i) => {
+    const rowNumber = i + 2;
+    const cells = splitCsvLine(line);
+    const get = (column: string) => {
+      const at = header.indexOf(column);
+      return at === -1 ? "" : (cells[at] ?? "");
+    };
+
+    const name = get("name");
+    const category = get("category");
+    const rawPrice = get("price");
+
+    if (!name || !category || !rawPrice) {
+      errors.push({ row: rowNumber, message: "name, category and price are required" });
+      return;
+    }
+
+    const price = Number(rawPrice);
+    if (!Number.isFinite(price) || price < 0) {
+      errors.push({ row: rowNumber, field: "price", message: `not a number: '${rawPrice}'` });
+      return;
+    }
+
+    const externalId = get("external_id");
+    const existing = externalId ? _menu.find((m) => m.id === externalId) : undefined;
+    if (externalId && !existing) {
+      errors.push({
+        row: rowNumber,
+        field: "external_id",
+        message: `no item with id '${externalId}'`,
+      });
+      return;
+    }
+
+    const stockRaw = get("stock_count");
+    const item: MenuItem = {
+      id: existing?.id ?? uid(),
+      restaurant_id: _restaurant.id,
+      name,
+      category,
+      price,
+      description: get("description") || null,
+      image_url: get("image_url") || null,
+      available: get("available").toLowerCase() !== "false",
+      sort_order: existing?.sort_order ?? _menu.length + staged.length + 1,
+      stock_count: stockRaw === "" ? (existing?.stock_count ?? null) : Number(stockRaw),
+      low_stock_threshold:
+        Number(get("low_stock_threshold")) || existing?.low_stock_threshold || 5,
+    };
+
+    if (existing && JSON.stringify(existing) === JSON.stringify(item)) {
+      skipped++;
+      return;
+    }
+    staged.push({ existing, item });
+  });
+
+  const created = staged.filter((s) => !s.existing).length;
+  const updated = staged.filter((s) => s.existing).length;
+
+  // Validated in full before anything is written, so a failure at row 60
+  // cannot leave a half-imported menu.
+  if (!dryRun) {
+    for (const { existing, item } of staged) {
+      if (existing) Object.assign(existing, item);
+      else _menu.push(item);
+    }
+    syncToStorage();
+  }
+
+  return json(200, { created, updated, skipped, errors } satisfies MenuImportResponse);
 });
 
 route("POST", /^\/admin\/menu\/upload$/, () => {
