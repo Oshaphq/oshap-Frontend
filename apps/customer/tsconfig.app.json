@@ -18,5 +18,10 @@
     "allowImportingTsExtensions": false,
     "types": ["vite/client"]
   },
-  "include": ["src/**/*.ts", "src/**/*.tsx"]
+  "include": ["src/**/*.ts", "src/**/*.tsx"],
+  // Tests are compiled by Vitest, not by the app build. Vitest is a root-only
+  // devDependency, and Vercel installs each app workspace in isolation — so
+  // leaving tests in here fails the production build on `Cannot find module
+  // 'vitest'`. Typechecked separately via tsconfig.test.json.
+  "exclude": ["src/**/*.test.ts", "src/**/*.test.tsx"]
 }
