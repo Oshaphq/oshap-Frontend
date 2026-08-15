@@ -19,6 +19,8 @@ import type {
   AdminVerifyResponse,
   AdminRejectRequest,
   AdminRejectResponse,
+  RecordCashRequest,
+  RecordCashResponse,
   BankAccount,
   ClaimPaymentRequest,
   ClaimPaymentResponse,
@@ -809,6 +811,7 @@ route("POST", /^\/payment\/confirm$/, ({ body }) => {
       order_id: oid,
       amount: order.total,
       status: "CLAIMED",
+      method: "MANUAL_TRANSFER",
       proof_url: b.proof_url ?? null,
       // Falls back to the default so the ranking still learns when an older
       // client omits it.
@@ -1481,6 +1484,39 @@ function creditAccount(
   else account.failure_count = (account.failure_count ?? 0) + 1;
 }
 
+// -------------------- Admin: Cash payment --------------------
+
+route("POST", /^\/admin\/orders\/cash$/, ({ body }) => {
+  const b = body as RecordCashRequest;
+  if (!b.order_ids?.length) return json(400, { error: "No orders specified" });
+
+  let confirmed = 0;
+  for (const oid of b.order_ids) {
+    const order = _orders.get(oid);
+    if (!order || order.status === "CONFIRMED") continue;
+
+    // Cash settles outright — a staff member is holding the money, so there is
+    // no claim to verify afterwards.
+    order.status = "CONFIRMED";
+    _payments.set(oid, {
+      id: uid(),
+      order_id: oid,
+      amount: order.total,
+      status: "VERIFIED",
+      proof_url: null,
+      bank_account_id: null,
+      method: "CASH",
+      created_at: now(),
+    });
+    confirmed++;
+  }
+
+  if (confirmed === 0) return json(404, { error: "No unpaid orders found" });
+
+  syncToStorage();
+  return json(200, { success: true as const, confirmed } satisfies RecordCashResponse);
+});
+
 route("POST", /^\/admin\/reject$/, ({ body }) => {
   const b = body as AdminRejectRequest;
   const pendingOrders = [..._orders.values()].filter(
@@ -1773,6 +1809,7 @@ function sseEventFor(path: string, body: unknown): string {
   if (path.includes("/call-waiter")) return "waiter_called";
   if (path.includes("/request-pos")) return "pos_requested";
   if (path === "/payment/confirm") return "payment_claimed";
+  if (path === "/admin/orders/cash") return "payment_confirmed";
   if (path === "/admin/verify") return "payment_verified";
   if (path === "/admin/reject") return "payment_rejected";
   if (path === "/admin/close") return "table_closed";

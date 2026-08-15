@@ -386,3 +386,87 @@ describe("mock API — bulk menu import/export", () => {
     expect((res.body as { errors: unknown[] }).errors).toHaveLength(0);
   });
 });
+
+describe("mock API — cash payments", () => {
+  async function unpaidOrderAt(tableId: string) {
+    const menu = await mockRequest("/menu", "GET", null, q(), false);
+    const item = (menu.body as Array<{ name: string; price: number }>)[0]!;
+    const res = await mockRequest(
+      "/orders",
+      "POST",
+      {
+        table: tableId,
+        restaurant_id: HOME_RESTAURANT,
+        items: [{ name: item.name, qty: 2, price: item.price }],
+      },
+      q(),
+      false,
+    );
+    return res.body as { order_id: string; total: number };
+  }
+
+  it("settles the bill outright — no claim left to verify", async () => {
+    const order = await unpaidOrderAt("T11");
+
+    const res = await mockRequest(
+      "/admin/orders/cash",
+      "POST",
+      { order_ids: [order.order_id] },
+      q(),
+      true,
+    );
+
+    expect(res.status).toBe(200);
+    expect((res.body as { confirmed: number }).confirmed).toBe(1);
+
+    const detail = await mockRequest(
+      `/orders/${order.order_id}`,
+      "GET",
+      null,
+      q(),
+      false,
+    );
+    const body = detail.body as {
+      status: string;
+      payment: { status: string; method: string } | null;
+    };
+    expect(body.status).toBe("CONFIRMED");
+    // VERIFIED, not CLAIMED — a staff member was holding the money.
+    expect(body.payment?.status).toBe("VERIFIED");
+    expect(body.payment?.method).toBe("CASH");
+  });
+
+  it("clears the table's unpaid bill", async () => {
+    const order = await unpaidOrderAt("T12");
+    await mockRequest(
+      "/admin/orders/cash",
+      "POST",
+      { order_ids: [order.order_id] },
+      q(),
+      true,
+    );
+
+    const table = await mockRequest("/table/T12", "GET", null, q(), false);
+    expect((table.body as { unpaid_order: unknown }).unpaid_order).toBeNull();
+  });
+
+  it("is idempotent — recording twice does not double-confirm", async () => {
+    const order = await unpaidOrderAt("T2");
+    await mockRequest("/admin/orders/cash", "POST", { order_ids: [order.order_id] }, q(), true);
+
+    const again = await mockRequest(
+      "/admin/orders/cash",
+      "POST",
+      { order_ids: [order.order_id] },
+      q(),
+      true,
+    );
+
+    expect(again.status).toBe(404);
+  });
+
+  it("400s when no orders are given", async () => {
+    const res = await mockRequest("/admin/orders/cash", "POST", { order_ids: [] }, q(), true);
+    expect(res.status).toBe(400);
+  });
+});

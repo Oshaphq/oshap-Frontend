@@ -10,6 +10,7 @@ import {
 } from "@oshap/shared";
 import { PrimaryButton, SecondaryButton, toast } from "@oshap/shared/ui";
 import QueryError from "../components/QueryError";
+import CashPaymentDialog from "../components/CashPaymentDialog";
 
 export default function DashboardPage() {
   const tablesQuery = useAdminTables();
@@ -22,6 +23,7 @@ export default function DashboardPage() {
   // Two-step, because rejecting is destructive from the guest's side: their
   // bill returns to unpaid and the account they used is marked down.
   const [rejectingTableId, setRejectingTableId] = useState<string | null>(null);
+  const [cashTableId, setCashTableId] = useState<string | null>(null);
 
   if (tablesQuery.isLoading) {
     return (
@@ -217,6 +219,15 @@ export default function DashboardPage() {
                 )}
               </div>
 
+              {isUnpaid && !isPending && (
+                <SecondaryButton
+                  className="w-full"
+                  onClick={() => setCashTableId(table.id)}
+                >
+                  <i className="mgc_cash_line" /> Take Cash
+                </SecondaryButton>
+              )}
+
               {isPending &&
                 (rejectingTableId === table.id ? (
                   <div className="flex flex-col gap-s">
@@ -319,6 +330,13 @@ export default function DashboardPage() {
             Add tables in your restaurant settings to get started.
           </p>
         </div>
+      )}
+
+      {cashTableId && (
+        <CashPaymentDialog
+          tableId={cashTableId}
+          onClose={() => setCashTableId(null)}
+        />
       )}
     </main>
   );
