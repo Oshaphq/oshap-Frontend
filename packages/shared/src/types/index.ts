@@ -35,6 +35,9 @@ export type SessionStatus = "ACTIVE" | "CLOSED";
 
 export type CloseReason = "paid" | "abandoned";
 
+/** How the money actually arrived. Stored server-side, not inferred. */
+export type PaymentMethod = "CASH" | "MANUAL_TRANSFER" | "POS";
+
 export type Role = "OWNER" | "MANAGER" | "CASHIER" | "WAITER" | "KITCHEN" | "BARTENDER";
 
 // ---------------------------------------------------------------------------
@@ -129,6 +132,7 @@ export interface Payment {
   proof_url?: string | null;
   /** Which account the customer claimed to pay into — credited on verify, penalised on reject. */
   bank_account_id?: string | null;
+  method?: PaymentMethod;
   created_at: string;
 }
 
@@ -410,6 +414,19 @@ export interface AdminHistoryResponse {
     cancelled_count: number;
     page_revenue: number;
   };
+}
+
+/**
+ * Records cash taken at the table. Settles the orders outright — there is no
+ * claim to verify, because a staff member is standing there with the money.
+ */
+export interface RecordCashRequest {
+  order_ids: string[];
+}
+
+export interface RecordCashResponse {
+  success: true;
+  confirmed: number;
 }
 
 export interface AdminVerifyRequest {

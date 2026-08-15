@@ -260,6 +260,13 @@ components:
         status:
           $ref: "#/components/schemas/PaymentStatus"
         proof_url: { type: string, nullable: true }
+        method:
+          type: string
+          enum: [CASH, MANUAL_TRANSFER, POS]
+          description: >
+            How the money arrived. Previously inferred client-side from a flag on
+            the customer's phone, so the server could not distinguish transfer
+            from POS — which made reconciliation and analytics wrong.
         created_at: { type: string, format: date-time }
       required: [id, order_id, amount, status, created_at]
 
@@ -1499,6 +1506,52 @@ paths:
                   success: { type: boolean, example: true }
         "404":
           description: Account not found
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+
+  /admin/orders/cash:
+    post:
+      tags: [Admin]
+      summary: Record a cash payment
+      description: >
+        Settles the given orders outright. Unlike a transfer there is nothing to
+        verify afterwards — a staff member is standing at the table with the
+        money — so orders go straight to `CONFIRMED` with a `VERIFIED` payment
+        recorded against `method: CASH`.
+
+
+        Cash was previously unrecordable, which meant a restaurant taking cash
+        had no way to close a bill in Oshap at all.
+      security: [{ adminPin: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                order_ids:
+                  type: array
+                  items: { type: string, format: uuid }
+              required: [order_ids]
+      responses:
+        "200":
+          description: Cash recorded
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success: { type: boolean, example: true }
+                  confirmed: { type: integer }
+        "400":
+          description: No orders given
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+        "404":
+          description: None of those orders were unpaid
           content:
             application/json:
               schema: { $ref: "#/components/schemas/Error" }

@@ -34,6 +34,7 @@ import {
   adminUpdateBankAccount,
   adminDeleteBankAccount,
   adminRejectPayment,
+  adminRecordCash,
 } from "../api/admin";
 import type {
   AdminHistoryQuery,
@@ -299,6 +300,18 @@ export function useAdminVerifyPayment() {
       queryClient.invalidateQueries({ queryKey: queryKeys.admin.tables() });
       queryClient.invalidateQueries({ queryKey: queryKeys.admin.kitchen() });
       queryClient.invalidateQueries({ queryKey: queryKeys.admin.all });
+    },
+  });
+}
+
+export function useAdminRecordCash() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: adminRecordCash,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: queryKeys.admin.tables() });
+      queryClient.invalidateQueries({ queryKey: queryKeys.tables.all });
+      queryClient.invalidateQueries({ queryKey: queryKeys.orders.all });
     },
   });
 }

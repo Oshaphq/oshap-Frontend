@@ -26,6 +26,8 @@ import type {
   KitchenUpdateRequest,
   MenuImportResponse,
   MenuItem,
+  RecordCashRequest,
+  RecordCashResponse,
   Order,
   OrderWithItems,
   Restaurant,
@@ -300,6 +302,16 @@ export function adminRejectPayment(
   payload: AdminRejectRequest,
 ): Promise<AdminRejectResponse> {
   return request<AdminRejectResponse>("/admin/reject", {
+    method: "POST",
+    body: payload,
+    admin: true,
+  });
+}
+
+export function adminRecordCash(
+  payload: RecordCashRequest,
+): Promise<RecordCashResponse> {
+  return request<RecordCashResponse>("/admin/orders/cash", {
     method: "POST",
     body: payload,
     admin: true,
