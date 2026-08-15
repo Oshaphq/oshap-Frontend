@@ -32,7 +32,7 @@ Base: <https://oshap-frontend-customer.vercel.app> · No auth header. Screens ne
 
 ## Admin — merchant SPA
 
-Base: <https://oshap-frontend-admin.vercel.app> · Email/password login + `x-admin-pin` header + RBAC.
+Base: <https://oshap-frontend-admin.vercel.app> · Email/password login + `Authorization: Bearer` + RBAC.
 **Deep links redirect to login until you sign in** — `owner@oshap.com` / `password`. After login, `/` redirects `KITCHEN`/`BARTENDER` roles to `/kitchen`.
 
 | Screen | Route | Live | Endpoints hit | Roles | Figma |

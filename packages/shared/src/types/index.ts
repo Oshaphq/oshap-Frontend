@@ -243,15 +243,35 @@ export interface AdminMeResponse {
   user: StaffMember;
 }
 
+/** Staff authenticate with email + password, or a shared PIN. */
 export interface AdminLoginRequest {
-  email: string;
+  email?: string;
   password?: string;
+  pin?: string;
 }
 
-export interface AdminLoginResponse {
-  token: string;
+export interface AuthTokens {
+  access_token: string;
+  refresh_token: string;
+  token_type: "bearer";
+  /** Access-token lifetime in seconds (900 = 15 minutes). */
+  expires_in: number;
+}
+
+export interface AdminLoginResponse extends AuthTokens {
   user: StaffMember;
   restaurant: Restaurant;
+}
+
+export interface RefreshTokenRequest {
+  refresh_token: string;
+}
+
+/** Refresh returns a new access token only — the refresh token is unchanged. */
+export interface RefreshTokenResponse {
+  access_token: string;
+  token_type: "bearer";
+  expires_in: number;
 }
 
 export interface CreateStaffRequest {

@@ -139,7 +139,7 @@ describe("mock API — money is kobo", () => {
     const item = (menu.body as Array<{ name: string; price: number }>)[0]!;
 
     const res = await mockRequest(
-      "/order",
+      "/orders",
       "POST",
       {
         table: "T1",

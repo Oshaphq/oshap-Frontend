@@ -15,6 +15,8 @@ import type {
   AdminVerifyRequest,
   AdminVerifyResponse,
   CreateMenuItemRequest,
+  RefreshTokenRequest,
+  RefreshTokenResponse,
   CreateStaffRequest,
   KitchenUpdateRequest,
   MenuItem,
@@ -36,6 +38,20 @@ export function adminLoginEmail(payload: AdminLoginRequest): Promise<AdminLoginR
   return request<AdminLoginResponse>("/auth/login", {
     method: "POST",
     body: payload,
+  });
+}
+
+/**
+ * `skipAuthRefresh` so a failed refresh can't trigger another refresh — the
+ * client's retry path calls this endpoint directly for the same reason.
+ */
+export function adminRefreshToken(
+  payload: RefreshTokenRequest,
+): Promise<RefreshTokenResponse> {
+  return request<RefreshTokenResponse>("/auth/refresh", {
+    method: "POST",
+    body: payload,
+    skipAuthRefresh: true,
   });
 }
 

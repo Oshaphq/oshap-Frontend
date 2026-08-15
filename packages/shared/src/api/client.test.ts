@@ -1,5 +1,12 @@
 import { describe, it, expect, afterEach, vi } from "vitest";
-import { request, ApiError, setActiveBranchId, getActiveBranchId } from "./client";
+import {
+  request,
+  ApiError,
+  setActiveBranchId,
+  getActiveBranchId,
+  setAuthTokens,
+  getAccessToken,
+} from "./client";
 
 // With neither VITE_API_BASE_URL nor VITE_MOCK_API set, the client runs against
 // the in-memory mock — so these exercise the real request() path end to end.
@@ -174,5 +181,106 @@ describe("client request() — API version prefix", () => {
     await request("/menu");
 
     expect(requestedUrl(fetchMock)).toBe("http://localhost:8000/api/v1/menu");
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Token refresh. Access tokens last 15 minutes, so expiry mid-session is
+// routine — these cover the paths that decide whether a waiter keeps working
+// or gets bounced to the login screen mid-service.
+// ---------------------------------------------------------------------------
+
+describe("client request() — refresh on 401", () => {
+  afterEach(() => {
+    vi.unstubAllEnvs();
+    vi.unstubAllGlobals();
+    sessionStorage.clear();
+    setAuthTokens(null);
+  });
+
+  function signIn() {
+    setAuthTokens({ access_token: "expired", refresh_token: "refresh-ok" });
+  }
+
+  /** 401 once, then succeed — with the refresh call answered in between. */
+  function stubExpiredThenRefreshed(refreshOk = true) {
+    vi.stubEnv("VITE_API_BASE_URL", "http://localhost:8000");
+    const fetchMock = vi.fn(async (url: string, init?: RequestInit) => {
+      const target = String(url);
+      if (target.includes("/auth/refresh")) {
+        return refreshOk
+          ? jsonResponse(200, { access_token: "fresh", token_type: "bearer", expires_in: 900 })
+          : jsonResponse(401, { message: "Refresh token expired" });
+      }
+      const auth = (init?.headers as Record<string, string> | undefined)?.["Authorization"];
+      return auth === "Bearer fresh"
+        ? jsonResponse(200, [{ id: "m-001" }])
+        : jsonResponse(401, { message: "Token expired" });
+    });
+    vi.stubGlobal("fetch", fetchMock as unknown as typeof fetch);
+    return fetchMock;
+  }
+
+  it("refreshes and retries, so the caller never sees the 401", async () => {
+    signIn();
+    const fetchMock = stubExpiredThenRefreshed();
+
+    const res = await request<Array<{ id: string }>>("/admin/menu", { admin: true });
+
+    expect(res).toEqual([{ id: "m-001" }]);
+    // original 401 -> refresh -> retry
+    expect(fetchMock).toHaveBeenCalledTimes(3);
+    expect(getAccessToken()).toBe("fresh");
+  });
+
+  it("sends the NEW token on the retry, not the expired one", async () => {
+    signIn();
+    const fetchMock = stubExpiredThenRefreshed();
+
+    await request("/admin/menu", { admin: true });
+
+    const retry = fetchMock.mock.calls[2]!;
+    const headers = (retry[1] as RequestInit).headers as Record<string, string>;
+    expect(headers["Authorization"]).toBe("Bearer fresh");
+  });
+
+  // A dashboard mounts several queries at once, so an expired token produces a
+  // burst of simultaneous 401s. Without single-flight each would refresh, and
+  // every response after the first would race to overwrite the stored token.
+  it("refreshes once for concurrent 401s, not once per request", async () => {
+    signIn();
+    const fetchMock = stubExpiredThenRefreshed();
+
+    await Promise.all([
+      request("/admin/menu", { admin: true }),
+      request("/admin/tables", { admin: true }),
+      request("/admin/kitchen", { admin: true }),
+    ]);
+
+    const refreshCalls = fetchMock.mock.calls.filter(([url]) =>
+      String(url).includes("/auth/refresh"),
+    );
+    expect(refreshCalls).toHaveLength(1);
+  });
+
+  it("gives up and clears the session when the refresh token is also dead", async () => {
+    signIn();
+    stubExpiredThenRefreshed(false);
+
+    const err = await request("/admin/menu", { admin: true }).catch((e) => e);
+
+    expect(err).toBeInstanceOf(ApiError);
+    expect((err as ApiError).status).toBe(401);
+    expect(getAccessToken()).toBeNull();
+  });
+
+  it("does not attempt a refresh for unauthenticated customer calls", async () => {
+    const fetchMock = stubExpiredThenRefreshed();
+
+    await request("/menu").catch(() => {});
+
+    expect(
+      fetchMock.mock.calls.some(([url]) => String(url).includes("/auth/refresh")),
+    ).toBe(false);
   });
 });

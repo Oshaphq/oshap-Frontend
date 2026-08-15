@@ -5,11 +5,9 @@
  *   - Reads base URL from VITE_API_BASE_URL.
  *   - Serializes JSON requests and parses JSON responses.
  *   - Throws `ApiError` on non-2xx responses with the server's error message.
- *   - Attaches the admin PIN header for admin-scoped calls.
+ *   - Attaches `Authorization: Bearer` for admin-scoped calls, refreshing the
+ *     access token once on a 401 before giving up.
  *   - Falls back to mock API when VITE_MOCK_API=true or VITE_API_BASE_URL is not set.
- *
- * The backend dev (FastAPI) sees these requests as standard JSON, plus
- * `x-admin-pin` on admin endpoints.
  */
 
 import type { Restaurant } from "../types/index";
@@ -29,25 +27,37 @@ export class ApiError extends Error {
 export const ADMIN_UNAUTHORIZED_EVENT = "oshap:admin-unauthorized";
 
 // ---------------------------------------------------------------------------
-// Admin PIN + restaurant context — module-scoped + sessionStorage backed
+// Auth tokens + restaurant context — module-scoped + sessionStorage backed
+//
+// Staff auth is a short-lived JWT access token (15 min) plus a longer refresh
+// token (7 days), sent as `Authorization: Bearer`. sessionStorage rather than
+// localStorage so a closed tab ends the session; the refresh token is what
+// spares the user from re-entering a password every 15 minutes.
 // ---------------------------------------------------------------------------
 
-const PIN_STORAGE_KEY = "oshap-admin-pin";
+const ACCESS_TOKEN_STORAGE_KEY = "oshap-access-token";
+const REFRESH_TOKEN_STORAGE_KEY = "oshap-refresh-token";
 const RESTAURANT_STORAGE_KEY = "oshap-admin-restaurant";
 const PLATFORM_TOKEN_STORAGE_KEY = "oshap-platform-token";
 
-let adminPin: string | null = null;
+let accessToken: string | null = null;
+let refreshToken: string | null = null;
 let adminRestaurant: Restaurant | null = null;
 let platformToken: string | null = null;
 
-function readPinFromStorage(): string | null {
+function readSession(key: string): string | null {
   if (typeof window === "undefined") return null;
-  return window.sessionStorage.getItem(PIN_STORAGE_KEY);
+  return window.sessionStorage.getItem(key);
+}
+
+function writeSession(key: string, value: string | null): void {
+  if (typeof window === "undefined") return;
+  if (value) window.sessionStorage.setItem(key, value);
+  else window.sessionStorage.removeItem(key);
 }
 
 function readRestaurantFromStorage(): Restaurant | null {
-  if (typeof window === "undefined") return null;
-  const raw = window.sessionStorage.getItem(RESTAURANT_STORAGE_KEY);
+  const raw = readSession(RESTAURANT_STORAGE_KEY);
   if (!raw) return null;
   try {
     return JSON.parse(raw) as Restaurant;
@@ -56,21 +66,38 @@ function readRestaurantFromStorage(): Restaurant | null {
   }
 }
 
-export function setAdminPin(pin: string | null): void {
-  adminPin = pin;
-  if (typeof window === "undefined") return;
-  if (pin) {
-    window.sessionStorage.setItem(PIN_STORAGE_KEY, pin);
-  } else {
-    window.sessionStorage.removeItem(PIN_STORAGE_KEY);
-    setAdminRestaurant(null);
-  }
+/** Stores the pair returned by login. */
+export function setAuthTokens(tokens: {
+  access_token: string;
+  refresh_token: string;
+} | null): void {
+  accessToken = tokens?.access_token ?? null;
+  refreshToken = tokens?.refresh_token ?? null;
+  writeSession(ACCESS_TOKEN_STORAGE_KEY, accessToken);
+  writeSession(REFRESH_TOKEN_STORAGE_KEY, refreshToken);
+  if (!tokens) setAdminRestaurant(null);
 }
 
-export function getAdminPin(): string | null {
-  if (adminPin) return adminPin;
-  adminPin = readPinFromStorage();
-  return adminPin;
+/** Replaces just the access token, after a refresh. */
+export function setAccessToken(token: string | null): void {
+  accessToken = token;
+  writeSession(ACCESS_TOKEN_STORAGE_KEY, token);
+}
+
+export function getAccessToken(): string | null {
+  if (accessToken) return accessToken;
+  accessToken = readSession(ACCESS_TOKEN_STORAGE_KEY);
+  return accessToken;
+}
+
+export function getRefreshToken(): string | null {
+  if (refreshToken) return refreshToken;
+  refreshToken = readSession(REFRESH_TOKEN_STORAGE_KEY);
+  return refreshToken;
+}
+
+export function clearAuthTokens(): void {
+  setAuthTokens(null);
 }
 
 export function setAdminRestaurant(restaurant: Restaurant | null): void {
@@ -105,8 +132,7 @@ export function getAdminRestaurantName(): string | null {
 // ---------------------------------------------------------------------------
 
 function readPlatformTokenFromStorage(): string | null {
-  if (typeof window === "undefined") return null;
-  return window.sessionStorage.getItem(PLATFORM_TOKEN_STORAGE_KEY);
+  return readSession(PLATFORM_TOKEN_STORAGE_KEY);
 }
 
 export function setPlatformToken(token: string | null): void {
@@ -224,8 +250,10 @@ export interface RequestOptions {
   method?: "GET" | "POST" | "PUT" | "PATCH" | "DELETE";
   query?: Record<string, string | number | boolean | undefined | null>;
   body?: unknown;
-  /** Adds the `x-admin-pin` header. Throws if no PIN is set. */
+  /** Adds `Authorization: Bearer`. Throws if there is no access token. */
   admin?: boolean;
+  /** Skips the refresh-and-retry on 401. Used by auth calls themselves. */
+  skipAuthRefresh?: boolean;
   /** Adds the `x-platform-token` header. Throws if no token is set. */
   platform?: boolean;
   /** Pass FormData directly; skips JSON serialization. */
@@ -312,22 +340,14 @@ export async function request<T>(
     ) as Promise<T>;
   }
 
-  const headers: Record<string, string> = {};
   let body: BodyInit | undefined;
+  const baseHeaders: Record<string, string> = {};
 
   if (options.formData) {
     body = options.formData;
   } else if (options.body !== undefined) {
-    headers["Content-Type"] = "application/json";
+    baseHeaders["Content-Type"] = "application/json";
     body = JSON.stringify(options.body);
-  }
-
-  if (options.admin) {
-    const pin = getAdminPin();
-    if (!pin) {
-      throw new ApiError(401, "Admin PIN not set", null);
-    }
-    headers["x-admin-pin"] = pin;
   }
 
   if (options.platform) {
@@ -335,21 +355,49 @@ export async function request<T>(
     if (!token) {
       throw new ApiError(401, "Platform token not set", null);
     }
-    headers["x-platform-token"] = token;
+    baseHeaders["x-platform-token"] = token;
   }
 
-  const response = await fetch(buildUrl(path, query), {
-    method,
-    headers,
-    body,
-    signal: options.signal,
-  });
+  // Headers are rebuilt per attempt so a retry after refresh picks up the new
+  // access token rather than resending the expired one.
+  const send = async () => {
+    const headers = { ...baseHeaders };
 
-  const contentType = response.headers.get("content-type") ?? "";
-  const isJson = contentType.includes("application/json");
-  const payload: unknown = isJson
-    ? await response.json().catch(() => null)
-    : await response.text().catch(() => null);
+    if (options.admin) {
+      const token = getAccessToken();
+      if (!token) {
+        throw new ApiError(401, "Not signed in", null);
+      }
+      headers["Authorization"] = `Bearer ${token}`;
+    }
+
+    const response = await fetch(buildUrl(path, query), {
+      method,
+      headers,
+      body,
+      signal: options.signal,
+    });
+
+    const contentType = response.headers.get("content-type") ?? "";
+    const isJson = contentType.includes("application/json");
+    const payload: unknown = isJson
+      ? await response.json().catch(() => null)
+      : await response.text().catch(() => null);
+
+    return { response, payload, isJson };
+  };
+
+  let { response, payload, isJson } = await send();
+
+  // Access tokens last 15 minutes, so expiry during an ordinary session is
+  // normal rather than exceptional. Trade one silent refresh for kicking a
+  // waiter back to the login screen mid-service.
+  if (response.status === 401 && options.admin && !options.skipAuthRefresh) {
+    const refreshed = await refreshAccessToken();
+    if (refreshed) {
+      ({ response, payload, isJson } = await send());
+    }
+  }
 
   if (!response.ok) {
     if (response.status === 401 && options.admin) {
@@ -365,8 +413,61 @@ export async function request<T>(
   return unwrapEnvelope(payload) as T;
 }
 
+// ---------------------------------------------------------------------------
+// Token refresh
+// ---------------------------------------------------------------------------
+
+let refreshInFlight: Promise<string | null> | null = null;
+
+/**
+ * Exchanges the refresh token for a new access token.
+ *
+ * Single-flight on purpose: a dashboard mounts several queries at once, so an
+ * expired token produces a burst of simultaneous 401s. Without this they would
+ * each fire their own refresh, and every response after the first would be
+ * racing to overwrite the stored token.
+ *
+ * Uses `fetch` directly rather than `request()` — routing it back through would
+ * recurse on its own 401.
+ */
+async function refreshAccessToken(): Promise<string | null> {
+  if (refreshInFlight) return refreshInFlight;
+
+  const token = getRefreshToken();
+  if (!token) return null;
+
+  refreshInFlight = (async () => {
+    try {
+      const res = await fetch(buildUrl("/auth/refresh", undefined), {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ refresh_token: token }),
+      });
+      if (!res.ok) return null;
+
+      const parsed = unwrapEnvelope(await res.json().catch(() => null));
+      const next =
+        typeof parsed === "object" && parsed !== null
+          ? (parsed as { access_token?: unknown }).access_token
+          : null;
+
+      if (typeof next !== "string" || !next) return null;
+      setAccessToken(next);
+      return next;
+    } catch {
+      // Network failure — treated the same as a rejected refresh. The caller
+      // surfaces the original 401 and the user signs in again.
+      return null;
+    } finally {
+      refreshInFlight = null;
+    }
+  })();
+
+  return refreshInFlight;
+}
+
 function handleAdminUnauthorized(): void {
-  setAdminPin(null);
+  clearAuthTokens();
   setAdminRestaurant(null);
   if (typeof window !== "undefined") {
     window.dispatchEvent(new CustomEvent(ADMIN_UNAUTHORIZED_EVENT));
