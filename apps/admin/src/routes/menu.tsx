@@ -10,6 +10,8 @@ import {
   useAdminInventoryAlerts,
   useAdminUpdateStock,
   formatCurrency,
+  nairaToKobo,
+  koboToNaira,
 } from "@oshap/shared";
 import type { MenuItem } from "@oshap/shared";
 import { PrimaryButton, SecondaryButton, toast } from "@oshap/shared/ui";
@@ -57,7 +59,7 @@ export default function MenuPage() {
     try {
       await createItem.mutateAsync({
         name: form.name,
-        price: Number(form.price),
+        price: nairaToKobo(Number(form.price)),
         category: form.category,
         description: form.description || undefined,
         image_url: form.image_url || undefined,
@@ -75,7 +77,7 @@ export default function MenuPage() {
         id,
         payload: {
           name: form.name,
-          price: Number(form.price),
+          price: nairaToKobo(Number(form.price)),
           category: form.category,
           description: form.description || undefined,
           image_url: form.image_url || undefined,
@@ -92,7 +94,7 @@ export default function MenuPage() {
     setShowNewForm(false);
     setForm({
       name: item.name,
-      price: String(item.price),
+      price: String(koboToNaira(item.price)),
       category: item.category,
       description: item.description ?? "",
       image_url: item.image_url ?? "",
@@ -408,7 +410,7 @@ function MenuItemForm({
         />
         <input
           className={inputClass}
-          placeholder="Price (e.g. 2500)"
+          placeholder="Price in ₦ (e.g. 2500)"
           type="number"
           value={form.price}
           onChange={(e) => setForm({ ...form, price: e.target.value })}

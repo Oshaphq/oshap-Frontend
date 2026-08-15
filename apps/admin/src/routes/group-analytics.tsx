@@ -3,6 +3,7 @@ import {
   useAdminGroup,
   useAdminGroupAnalytics,
   formatCurrency,
+  koboToNaira,
 } from "@oshap/shared";
 import {
   BarChart,
@@ -116,7 +117,7 @@ export default function GroupAnalyticsPage() {
               <YAxis
                 stroke="var(--ds-outline)"
                 tick={{ fontSize: 12 }}
-                tickFormatter={(v: number) => `₦${(v / 1000).toFixed(0)}k`}
+                tickFormatter={(v: number) => `₦${(koboToNaira(v) / 1000).toFixed(0)}k`}
               />
               <Tooltip
                 formatter={(v) => [formatCurrency(Number(v ?? 0)), "Revenue"]}
