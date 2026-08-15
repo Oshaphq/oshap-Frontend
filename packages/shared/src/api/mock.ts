@@ -1426,6 +1426,31 @@ route("POST", /^\/devices\/register$/, () => {
   return json(200, { success: true as const });
 });
 
+/**
+ * Maps a mutating request to the SSE event the real backend would emit, using
+ * the same lower_snake vocabulary. Keeping the mock on the real names means
+ * mock mode exercises the same `useGlobalSSE` branches as production — the
+ * previous SCREAMING_CASE names existed only here.
+ */
+function sseEventFor(path: string, body: unknown): string {
+  if (path === "/orders") return "new_order";
+
+  if (path.startsWith("/admin/kitchen")) {
+    // The kitchen PATCH carries the status it is moving to.
+    const status = (body as { status?: string } | null)?.status;
+    return status === "READY" ? "order_ready" : "order_preparing";
+  }
+
+  if (path.includes("/call-waiter")) return "waiter_called";
+  if (path.includes("/request-pos")) return "pos_requested";
+  if (path === "/payment/confirm") return "payment_claimed";
+  if (path === "/admin/verify") return "payment_verified";
+  if (path === "/admin/close") return "table_closed";
+  if (path === "/session") return "session_started";
+
+  return "generic_update";
+}
+
 // ---------------------------------------------------------------------------
 // Dispatcher — called from client.ts when mock mode is active
 // ---------------------------------------------------------------------------
@@ -1437,6 +1462,7 @@ export async function mockRequest(
   queryParams: URLSearchParams,
   admin: boolean,
 ): Promise<MockRouteMatch> {
+
   // Pull latest state from localStorage so this tab sees writes made in
   // other tabs (e.g. PIN created by another customer at the same table).
   syncFromStorage();
@@ -1448,12 +1474,7 @@ export async function mockRequest(
       // Persist after mutations only; GET handlers don't change state.
       if (method !== "GET") {
         syncToStorage();
-        if (path === "/orders") dispatchMockEvent("ORDER_CREATED");
-        else if (path.startsWith("/admin/kitchen")) dispatchMockEvent("STATUS_CHANGED");
-        else if (path.includes("/request-pos") || path === "/payment/confirm") dispatchMockEvent("PAYMENT_PENDING");
-        else if (path === "/admin/verify") dispatchMockEvent("PAYMENT_VERIFIED");
-        else if (path === "/admin/close") dispatchMockEvent("TABLE_CLOSED");
-        else dispatchMockEvent("GENERIC_UPDATE");
+        dispatchMockEvent(sseEventFor(path, body));
       }
       return result;
     }

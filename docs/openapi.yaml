@@ -1932,9 +1932,38 @@ paths:
     get:
       tags: [Events]
       summary: Global event stream (SSE)
-      description: >
-        Connect to this endpoint using EventSource to receive real-time updates.
-        Emits events like `ORDER_CREATED`, `STATUS_CHANGED`, `PAYMENT_PENDING`, etc.
+      description: |
+        Connect with `EventSource` to receive real-time updates, scoped to the
+        authenticated staff member's restaurant. `EventSource` cannot send
+        headers, so the access token goes in the query string:
+        `GET /events?access_token=<token>`.
+
+        Emits `connected` on open and `heartbeat` every 30s.
+
+        Each message is a JSON string carrying a `type`:
+
+        | Event | Meaning |
+        |---|---|
+        | `new_order` | Order placed |
+        | `order_preparing` · `order_ready` | Kitchen advanced an order |
+        | `payment_claimed` | Customer says they have paid |
+        | `payment_confirmed` · `payment_verified` | Payment accepted |
+        | `payment_rejected` | Staff rejected a claimed payment |
+        | `pos_requested` | Customer asked for a card terminal |
+        | `table_closed` | Table cleared |
+        | `waiter_called` | Guest pressed call-a-waiter |
+        | `session_started` · `session_joined` | Shared-table session changed |
+        | `low_stock` | An item crossed its threshold |
+
+        Names are lower_snake. The frontend maps each to the query caches it
+        invalidates (`packages/shared/src/hooks/useSSE.ts`); unknown types fall
+        back to a broad invalidation so a new event is never silently ignored.
+      parameters:
+        - name: access_token
+          in: query
+          required: true
+          schema: { type: string }
+          description: Staff access token — EventSource cannot set an Authorization header.
       responses:
         "200":
           description: SSE Stream
