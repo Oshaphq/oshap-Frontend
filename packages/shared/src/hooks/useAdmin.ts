@@ -19,6 +19,8 @@ import {
   adminUpdateMenuItem,
   adminUpdateSettings,
   adminUploadImage,
+  adminExportMenu,
+  adminImportMenu,
   adminUploadSettingsImage,
   adminVerifyPayment,
   adminGetStaff,
@@ -210,6 +212,26 @@ export function useAdminDeleteMenuItem() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: queryKeys.admin.menu() });
       queryClient.invalidateQueries({ queryKey: queryKeys.menu.all });
+    },
+  });
+}
+
+export function useAdminExportMenu() {
+  return useMutation({ mutationFn: adminExportMenu });
+}
+
+export function useAdminImportMenu() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ file, dryRun }: { file: File; dryRun?: boolean }) =>
+      adminImportMenu(file, dryRun),
+    onSuccess: (_data, variables) => {
+      // A dry run writes nothing, so invalidating would just refetch an
+      // unchanged menu and hide the fact that nothing happened yet.
+      if (variables.dryRun) return;
+      queryClient.invalidateQueries({ queryKey: queryKeys.admin.menu() });
+      queryClient.invalidateQueries({ queryKey: queryKeys.menu.all });
+      queryClient.invalidateQueries({ queryKey: queryKeys.admin.inventoryAlerts() });
     },
   });
 }

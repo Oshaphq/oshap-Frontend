@@ -346,6 +346,25 @@ export interface UpdateMenuItemRequest {
   sort_order?: number;
 }
 
+/** One rejected row from a bulk import, addressed so a merchant can find it. */
+export interface MenuImportError {
+  row: number;
+  field?: string;
+  message: string;
+}
+
+/**
+ * Bulk import is partial-success by design: a typo in row 17 shouldn't reject
+ * the other 79 rows. `dry_run` returns this same shape without writing, so the
+ * merchant sees the outcome before committing.
+ */
+export interface MenuImportResponse {
+  created: number;
+  updated: number;
+  skipped: number;
+  errors: MenuImportError[];
+}
+
 export interface AdminTableStatus {
   id: string;
   status: TableStatus;
