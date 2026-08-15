@@ -35,7 +35,7 @@ export default function AuthGate() {
 
     try {
       const res = await adminApi.adminLoginEmail({ email, password });
-      login(res.user, res.token, res.restaurant);
+      login(res);
     } catch (err: unknown) {
       if (err && typeof err === "object" && "status" in err && err.status === 401) {
         setError("Invalid email or password.");

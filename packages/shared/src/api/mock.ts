@@ -41,6 +41,7 @@ import type {
   StaffMember,
   AdminLoginRequest,
   AdminLoginResponse,
+  RefreshTokenResponse,
   CreateStaffRequest,
   UpdateStaffRequest,
 } from "../types/index";
@@ -760,6 +761,27 @@ route("POST", /^\/payment\/confirm$/, ({ body }) => {
 // Admin endpoints — used by admin app
 // ---------------------------------------------------------------------------
 
+// Mock tokens encode the staff id so /admin/me can resolve the caller, and
+// carry an expiry so the refresh path is actually exercisable in mock mode.
+const ACCESS_TOKEN_TTL_MS = 15 * 60 * 1000;
+
+function issueAccessToken(staffId: string): string {
+  return `mock-access.${staffId}.${Date.now() + ACCESS_TOKEN_TTL_MS}`;
+}
+
+function issueRefreshToken(staffId: string): string {
+  return `mock-refresh.${staffId}`;
+}
+
+/** Returns the staff id if the access token is well-formed and unexpired. */
+export function staffIdFromAccessToken(token: string | null): string | null {
+  if (!token?.startsWith("mock-access.")) return null;
+  const [, staffId, expiresAt] = token.split(".");
+  if (!staffId || !expiresAt) return null;
+  if (Number(expiresAt) < Date.now()) return null;
+  return staffId;
+}
+
 route("POST", /^\/admin\/login$/, ({ body }) => {
   const b = body as AdminLoginRequest;
   const staff = [..._staff.values()].find((s) => s.email === b.email);
@@ -767,20 +789,47 @@ route("POST", /^\/admin\/login$/, ({ body }) => {
     return json(401, { error: "Invalid credentials" });
   }
   return json(200, {
-    token: staff.id, // For mock, token is just staff ID
+    access_token: issueAccessToken(staff.id),
+    refresh_token: issueRefreshToken(staff.id),
+    token_type: "bearer" as const,
+    expires_in: ACCESS_TOKEN_TTL_MS / 1000,
     user: staff,
     restaurant: _restaurant,
   } satisfies AdminLoginResponse);
 });
 
+route("POST", /^\/auth\/refresh$/, ({ body }) => {
+  const b = body as { refresh_token?: string };
+  const staffId = b.refresh_token?.startsWith("mock-refresh.")
+    ? b.refresh_token.slice("mock-refresh.".length)
+    : null;
+
+  if (!staffId || !_staff.has(staffId)) {
+    return json(401, { error: "Invalid refresh token" });
+  }
+
+  return json(200, {
+    access_token: issueAccessToken(staffId),
+    token_type: "bearer" as const,
+    expires_in: ACCESS_TOKEN_TTL_MS / 1000,
+  } satisfies RefreshTokenResponse);
+});
+
 route("GET", /^\/admin\/me$/, ({ admin }) => {
   if (!admin) return json(401, { error: "Unauthorized" });
-  // In mock request dispatcher, we don't have access to the actual headers.
-  // We'll rely on the client passing the token. Actually, we don't pass the token to `mockRequest` directly.
-  // Let's assume the client will fetch the token from localStorage here.
-  const token = typeof window !== "undefined" ? window.sessionStorage.getItem("oshap-admin-pin") : null;
-  const user = _staff.get(token || "") || [..._staff.values()].find((s) => s.role === "OWNER")!;
-  
+
+  // The mock dispatcher never sees request headers, so the caller is resolved
+  // from the stored access token instead. Falls back to the owner when there
+  // isn't one, which keeps mock-mode development usable without logging in.
+  const token =
+    typeof window !== "undefined"
+      ? window.sessionStorage.getItem("oshap-access-token")
+      : null;
+  const staffId = staffIdFromAccessToken(token);
+  const user =
+    (staffId ? _staff.get(staffId) : undefined) ??
+    [..._staff.values()].find((s) => s.role === "OWNER")!;
+
   return json(200, { restaurant: _restaurant, user } satisfies AdminMeResponse);
 });
 

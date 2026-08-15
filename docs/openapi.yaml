@@ -65,10 +65,16 @@ security: []   # public by default; admin endpoints add adminPin per-operation
 components:
   securitySchemes:
     adminPin:
-      type: apiKey
-      in: header
-      name: x-admin-pin
-      description: Admin PIN for merchant operations.
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: >
+        Staff access token from `POST /auth/login`, sent as
+        `Authorization: Bearer <access_token>`. Valid for 15 minutes; exchange
+        the refresh token at `POST /auth/refresh` when it expires. Role and
+        permissions are resolved server-side per request, not carried in the
+        token. (The scheme key is still `adminPin` for historical reasons — the
+        PIN header it replaced is gone.)
     platformToken:
       type: apiKey
       in: header
@@ -605,10 +611,35 @@ components:
     AdminLoginResponse:
       type: object
       properties:
-        token: { type: string, description: Admin PIN/token sent as x-admin-pin on subsequent calls. }
+        access_token:
+          type: string
+          description: "JWT sent as `Authorization: Bearer` on every admin call."
+        refresh_token:
+          type: string
+          description: "Exchanged at `POST /auth/refresh` for a new access token."
+        token_type: { type: string, enum: [bearer] }
+        expires_in:
+          type: integer
+          description: Access-token lifetime in seconds (900 = 15 minutes).
+          example: 900
         user: { $ref: "#/components/schemas/StaffMember" }
         restaurant: { $ref: "#/components/schemas/Restaurant" }
-      required: [token, user, restaurant]
+      required: [access_token, refresh_token, token_type, expires_in, user, restaurant]
+
+    RefreshTokenRequest:
+      type: object
+      properties:
+        refresh_token: { type: string }
+      required: [refresh_token]
+
+    RefreshTokenResponse:
+      type: object
+      description: Returns a new access token only — the refresh token is unchanged.
+      properties:
+        access_token: { type: string }
+        token_type: { type: string, enum: [bearer] }
+        expires_in: { type: integer, example: 900 }
+      required: [access_token, token_type, expires_in]
 
     AdminMeResponse:
       type: object
@@ -1134,15 +1165,46 @@ paths:
             application/json:
               schema: { $ref: "#/components/schemas/Error" }
 
+  /auth/refresh:
+    post:
+      tags: [Admin]
+      summary: Exchange a refresh token for a new access token
+      description: >
+        Access tokens last 15 minutes, so expiry during an ordinary shift is
+        routine. The shared client calls this automatically on a 401 and retries
+        the original request, so staff are only returned to the login screen
+        when the refresh token has also expired (7 days).
+
+
+        Concurrent 401s share a single refresh call — several dashboard queries
+        expiring together must not each mint a token and race to store it.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/RefreshTokenRequest" }
+      responses:
+        "200":
+          description: New access token
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/RefreshTokenResponse" }
+        "401":
+          description: Refresh token expired or invalid — the client signs the user out
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+
   /admin/me:
     get:
       tags: [Admin]
-      summary: Return the restaurant and staff member scoped to the current PIN
+      summary: Return the restaurant and staff member for the current token
       description: >
-        Called by the admin app right after login to discover which restaurant
-        this PIN manages and which staff member (and role) it belongs to. The
-        frontend stores `restaurant` in sessionStorage and uses `restaurant.id`
-        for FCM device registration, and `user.role` to gate RBAC tabs.
+        Called by the admin app right after login, and on reload to restore a
+        session, to discover which restaurant the caller manages and which staff
+        member (and role) they are. The frontend stores `restaurant` in
+        sessionStorage and uses `restaurant.id` for FCM device registration, and
+        `user.role` to gate RBAC tabs.
       security: [{ adminPin: [] }]
       responses:
         "200":
