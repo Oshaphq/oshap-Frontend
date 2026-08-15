@@ -6,7 +6,7 @@ import { request, ApiError, setActiveBranchId, getActiveBranchId } from "./clien
 
 describe("client request() — error envelope", () => {
   it("throws an ApiError carrying the status and server message on 4xx", async () => {
-    const err = await request("/order", {
+    const err = await request("/orders", {
       method: "POST",
       body: { table: "T1", restaurant_id: "x", items: [] },
     }).catch((e) => e);

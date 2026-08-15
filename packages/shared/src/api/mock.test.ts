@@ -23,7 +23,7 @@ describe("mock API — customer", () => {
         { name: "Test Item B", qty: 1, price: 500 },
       ],
     };
-    const res = await mockRequest("/order", "POST", body, q(), false);
+    const res = await mockRequest("/orders", "POST", body, q(), false);
     expect(res.status).toBe(200);
     const created = res.body as { success: boolean; order_id: string; total: number };
     expect(created.success).toBe(true);
@@ -40,7 +40,7 @@ describe("mock API — customer", () => {
 
   it("POST /order with no items returns a 400 error envelope", async () => {
     const res = await mockRequest(
-      "/order",
+      "/orders",
       "POST",
       { table: "T1", restaurant_id: HOME_RESTAURANT, items: [] },
       q(),

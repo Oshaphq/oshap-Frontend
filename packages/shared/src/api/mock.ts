@@ -531,7 +531,7 @@ route("POST", /^\/table\/(.+)\/request-pos$/, ({ path, body }) => {
 
 // -------------------- Customer: Create Order --------------------
 
-route("POST", /^\/order$/, ({ body }) => {
+route("POST", /^\/orders$/, ({ body }) => {
   const b = body as CreateOrderRequest;
   if (!b.table || !b.restaurant_id || !b.items?.length) {
     return json(400, { error: "Missing required fields" });
@@ -760,7 +760,7 @@ route("POST", /^\/payment\/confirm$/, ({ body }) => {
 // Admin endpoints — used by admin app
 // ---------------------------------------------------------------------------
 
-route("POST", /^\/admin\/login$/, ({ body }) => {
+route("POST", /^\/auth\/login$/, ({ body }) => {
   const b = body as AdminLoginRequest;
   const staff = [..._staff.values()].find((s) => s.email === b.email);
   if (!staff || (b.password && b.password !== "password")) {
@@ -773,7 +773,7 @@ route("POST", /^\/admin\/login$/, ({ body }) => {
   } satisfies AdminLoginResponse);
 });
 
-route("GET", /^\/admin\/me$/, ({ admin }) => {
+route("GET", /^\/auth\/me$/, ({ admin }) => {
   if (!admin) return json(401, { error: "Unauthorized" });
   // In mock request dispatcher, we don't have access to the actual headers.
   // We'll rely on the client passing the token. Actually, we don't pass the token to `mockRequest` directly.
@@ -1393,7 +1393,7 @@ export async function mockRequest(
       // Persist after mutations only; GET handlers don't change state.
       if (method !== "GET") {
         syncToStorage();
-        if (path === "/order") dispatchMockEvent("ORDER_CREATED");
+        if (path === "/orders") dispatchMockEvent("ORDER_CREATED");
         else if (path.startsWith("/admin/kitchen")) dispatchMockEvent("STATUS_CHANGED");
         else if (path.includes("/request-pos") || path === "/payment/confirm") dispatchMockEvent("PAYMENT_PENDING");
         else if (path === "/admin/verify") dispatchMockEvent("PAYMENT_VERIFIED");

@@ -30,15 +30,17 @@ import { request } from "./client";
 
 // ---------- Identity ----------
 
+// Identity lives under /auth, not /admin: it isn't admin-scoped, and the
+// platform app will eventually authenticate through the same endpoints.
 export function adminLoginEmail(payload: AdminLoginRequest): Promise<AdminLoginResponse> {
-  return request<AdminLoginResponse>("/admin/login", {
+  return request<AdminLoginResponse>("/auth/login", {
     method: "POST",
     body: payload,
   });
 }
 
 export function adminGetMe(): Promise<AdminMeResponse> {
-  return request<AdminMeResponse>("/admin/me", { admin: true });
+  return request<AdminMeResponse>("/auth/me", { admin: true });
 }
 
 // ---------- Staff Management ----------

@@ -85,7 +85,7 @@ The contract is [`docs/openapi.yaml`](docs/openapi.yaml). Recommended starting p
 Auth surfaces:
 
 - **Customer app** — unauthenticated.
-- **Admin app** — staff log in with email/password (`POST /admin/login`); the returned `token` is sent as the `x-admin-pin` header on every admin call. `GET /admin/me` resolves the staff member (its `role` drives RBAC tab gating) and their restaurant; `restaurant.id` is used for FCM device registration. Roles: `OWNER`, `MANAGER`, `CASHIER`, `WAITER`, `KITCHEN`, `BARTENDER`. Multi-branch owners can scope reads to one branch via the optional `branch_id` query param — the shared client appends it to admin GETs automatically when a branch is selected. There is no `VITE_RESTAURANT_ID` env var.
+- **Admin app** — staff log in with email/password (`POST /auth/login`); the returned `token` is sent as the `x-admin-pin` header on every admin call. `GET /auth/me` resolves the staff member (its `role` drives RBAC tab gating) and their restaurant; `restaurant.id` is used for FCM device registration. Roles: `OWNER`, `MANAGER`, `CASHIER`, `WAITER`, `KITCHEN`, `BARTENDER`. Multi-branch owners can scope reads to one branch via the optional `branch_id` query param — the shared client appends it to admin GETs automatically when a branch is selected. There is no `VITE_RESTAURANT_ID` env var.
 - **Platform app** — internal operators authenticate with a platform access code; the shared client sends it as the `x-platform-token` header (backend env `PLATFORM_TOKEN`) on all `/platform/*` calls. **Enforce this server-side — the client-side gate is UX only.**
 
 ### Admin push notifications (FCM)
