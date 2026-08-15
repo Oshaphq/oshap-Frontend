@@ -1,6 +1,12 @@
 /**
  * Oshap domain types — mirrors the FastAPI / Pydantic schemas defined in
  * docs/openapi.yaml. Keep this file in sync with that spec.
+ *
+ * MONEY: every money field below is an **integer number of kobo**
+ * (1 naira = 100 kobo). `price: 250000` is ₦2,500. The backend computes VAT and
+ * totals in integer kobo so they reconcile exactly, and we match it — values
+ * stay in kobo through state and arithmetic, converting only to render
+ * (`formatCurrency`) or to read a number a human typed (`nairaToKobo`).
  */
 
 // ---------------------------------------------------------------------------

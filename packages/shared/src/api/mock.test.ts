@@ -1,5 +1,6 @@
 import { describe, it, expect } from "vitest";
 import { mockRequest } from "./mock";
+import { formatCurrency } from "../utils/currency";
 
 const HOME_RESTAURANT = "00000000-0000-0000-0000-000000000001";
 const q = (s = "") => new URLSearchParams(s);
@@ -116,5 +117,39 @@ describe("mock API — restaurant seed resilience", () => {
     expect(restaurant.logo_url).toBeTruthy();
 
     localStorage.removeItem("oshap-mock-state");
+  });
+});
+
+describe("mock API — money is kobo", () => {
+  // The 100x bug is silent: kobo and naira are both plain numbers, and a menu
+  // seeded in naira renders as a plausible-looking price. Asserting the raw
+  // value AND the rendered string means reverting either half fails.
+  it("serves menu prices in kobo, and they render as the intended naira", async () => {
+    const res = await mockRequest("/menu", "GET", null, q(), false);
+    const items = res.body as Array<{ name: string; price: number }>;
+    const shawarma = items.find((i) => i.name === "Chicken Shawarma");
+
+    expect(shawarma).toBeDefined();
+    expect(shawarma!.price).toBe(250_000);
+    expect(formatCurrency(shawarma!.price)).toMatch(/2,500/);
+  });
+
+  it("keeps order totals in kobo", async () => {
+    const menu = await mockRequest("/menu", "GET", null, q(), false);
+    const item = (menu.body as Array<{ name: string; price: number }>)[0]!;
+
+    const res = await mockRequest(
+      "/order",
+      "POST",
+      {
+        table: "T1",
+        restaurant_id: HOME_RESTAURANT,
+        items: [{ name: item.name, qty: 2, price: item.price }],
+      },
+      q(),
+      false,
+    );
+
+    expect((res.body as { total: number }).total).toBe(item.price * 2);
   });
 });

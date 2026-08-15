@@ -9,6 +9,16 @@ info:
     environment variable, default `"0000"`). Customer endpoints are public
     (no auth).
 
+    ## Money
+
+    **Every money field is an integer number of kobo** (1 naira = 100 kobo), so
+    `price: 250000` means ₦2,500. No floats appear anywhere in the money path;
+    VAT and service charge are integer basis points (`750` = 7.5%) applied with
+    half-up rounding, so order totals reconcile exactly.
+
+    Applies to `price`, `total`, `subtotal`, `vat`, `discount`, `tip`,
+    `service_charge`, `cost_per_unit`, `price_delta` and `amount`.
+
     ## Response envelope
 
     **Every response is wrapped.** The backend returns all payloads through a
