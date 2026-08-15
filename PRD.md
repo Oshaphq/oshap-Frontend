@@ -116,6 +116,26 @@ The table ID resolves to its restaurant on the backend (`GET /table/:id`). No lo
 account. Pre-session orders on a single device are scoped by an anonymous `device_token`
 (UUID stored in `sessionStorage` per browser tab).
 
+### Unknown table &mdash; decided, not built
+
+**Decision:** an unrecognised table ID is a **hard stop**. The customer app should refuse to
+render the menu and show a dead end &mdash; *"This table doesn't exist. Check the code on your
+table, or ask a member of staff."* &mdash; with no path forward into ordering.
+
+**Why it needs deciding at all.** `GET /table/:id` already 404s for an unknown ID, but the app
+degrades silently instead of stopping. The table pill in the header reads from the URL query
+param rather than the API, so `?table=T13` renders a convincing `Table T13` badge beside an
+address that has quietly fallen back to the app name. The guest sees a working menu and can
+order against a table that does not exist.
+
+**How it happens.** Not from a printed code &mdash; the QR generator only emits codes for
+tables that exist in Settings &rarr; Tables. It happens from hand-typed URLs, shared links,
+and codes left on a table after that table was renamed or removed.
+
+**Scope when built:** applies to every customer route, not just the menu, since each reads
+`?table=` independently. Behaves identically against the mock and a real backend, because both
+404 the same way.
+
 ---
 
 # 7. Customer Features
@@ -390,6 +410,7 @@ Idempotent reference generation (no duplicate orders); server-side persistence.
 - Deploy to 1–2 venues; track scan-to-order conversion, verification latency, kitchen throughput
 
 ## Future enhancements (not built)
+- Hard stop on an unknown table ID (decided &mdash; see [&sect;6](#unknown-table--decided-not-built))
 - Payment-gateway card payments (Paystack, Flutterwave) + tip flow
 - Loyalty system, CRM, promotions, customer profiles
 - Reservations + pre-ordering
