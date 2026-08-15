@@ -1,5 +1,6 @@
 import { describe, it, expect } from "vitest";
 import { mockRequest } from "./mock";
+import { formatCurrency } from "../utils/currency";
 
 const HOME_RESTAURANT = "00000000-0000-0000-0000-000000000001";
 const q = (s = "") => new URLSearchParams(s);
@@ -23,7 +24,7 @@ describe("mock API — customer", () => {
         { name: "Test Item B", qty: 1, price: 500 },
       ],
     };
-    const res = await mockRequest("/order", "POST", body, q(), false);
+    const res = await mockRequest("/orders", "POST", body, q(), false);
     expect(res.status).toBe(200);
     const created = res.body as { success: boolean; order_id: string; total: number };
     expect(created.success).toBe(true);
@@ -40,7 +41,7 @@ describe("mock API — customer", () => {
 
   it("POST /order with no items returns a 400 error envelope", async () => {
     const res = await mockRequest(
-      "/order",
+      "/orders",
       "POST",
       { table: "T1", restaurant_id: HOME_RESTAURANT, items: [] },
       q(),
@@ -116,5 +117,39 @@ describe("mock API — restaurant seed resilience", () => {
     expect(restaurant.logo_url).toBeTruthy();
 
     localStorage.removeItem("oshap-mock-state");
+  });
+});
+
+describe("mock API — money is kobo", () => {
+  // The 100x bug is silent: kobo and naira are both plain numbers, and a menu
+  // seeded in naira renders as a plausible-looking price. Asserting the raw
+  // value AND the rendered string means reverting either half fails.
+  it("serves menu prices in kobo, and they render as the intended naira", async () => {
+    const res = await mockRequest("/menu", "GET", null, q(), false);
+    const items = res.body as Array<{ name: string; price: number }>;
+    const shawarma = items.find((i) => i.name === "Chicken Shawarma");
+
+    expect(shawarma).toBeDefined();
+    expect(shawarma!.price).toBe(250_000);
+    expect(formatCurrency(shawarma!.price)).toMatch(/2,500/);
+  });
+
+  it("keeps order totals in kobo", async () => {
+    const menu = await mockRequest("/menu", "GET", null, q(), false);
+    const item = (menu.body as Array<{ name: string; price: number }>)[0]!;
+
+    const res = await mockRequest(
+      "/orders",
+      "POST",
+      {
+        table: "T1",
+        restaurant_id: HOME_RESTAURANT,
+        items: [{ name: item.name, qty: 2, price: item.price }],
+      },
+      q(),
+      false,
+    );
+
+    expect((res.body as { total: number }).total).toBe(item.price * 2);
   });
 });

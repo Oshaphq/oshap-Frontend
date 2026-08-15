@@ -19,7 +19,7 @@ Base: <https://oshap-frontend-customer.vercel.app> · No auth header. Screens ne
 | Screen | Route | Live | Endpoints hit | Figma |
 |---|---|---|---|---|
 | Menu | `/menu?table=:id` | [open ↗][c-menu] | `GET /table/{id}`, `GET /menu?restaurant_id=` | ❓ |
-| Checkout | `/checkout?table=:id` | [open ↗][c-checkout] | `GET /table/{id}`, `POST /order` | ❓ |
+| Checkout | `/checkout?table=:id` | [open ↗][c-checkout] | `GET /table/{id}`, `POST /orders` | ❓ |
 | Orders | `/orders?table=:id` | [open ↗][c-orders] | `GET /session/orders`, `POST /session`, `POST /orders/confirm` | ❓ |
 | Pay | `/pay?table=:id` | [open ↗][c-pay] | `GET /table/{id}`, `POST /payment/confirm`, `POST /table/{id}/request-pos`, `POST /table/{id}/call-waiter` | ❓ |
 
@@ -32,12 +32,12 @@ Base: <https://oshap-frontend-customer.vercel.app> · No auth header. Screens ne
 
 ## Admin — merchant SPA
 
-Base: <https://oshap-frontend-admin.vercel.app> · Email/password login + `x-admin-pin` header + RBAC.
+Base: <https://oshap-frontend-admin.vercel.app> · Email/password login + `Authorization: Bearer` + RBAC.
 **Deep links redirect to login until you sign in** — `owner@oshap.com` / `password`. After login, `/` redirects `KITCHEN`/`BARTENDER` roles to `/kitchen`.
 
 | Screen | Route | Live | Endpoints hit | Roles | Figma |
 |---|---|---|---|---|---|
-| Login / auth gate | (gate) | [open ↗][a-root] | `POST /admin/login`, `GET /admin/me` | — | ❓ |
+| Login / auth gate | (gate) | [open ↗][a-root] | `POST /auth/login`, `GET /auth/me` | — | ❓ |
 | Dashboard | `/` | [open ↗][a-root] | `GET /admin/tables`, `POST /admin/verify`, `POST /admin/close`, `GET /admin/inventory/alerts` | all | ❓ |
 | Kitchen | `/kitchen` | [open ↗][a-kitchen] | `GET /admin/kitchen`, `PATCH /admin/kitchen`, `GET /admin/menu` | OWNER, MANAGER, KITCHEN, BARTENDER | ❓ |
 | History | `/history` | [open ↗][a-history] | `GET /admin/history` | OWNER, MANAGER | ❓ |

@@ -85,7 +85,7 @@ The contract is [`docs/openapi.yaml`](docs/openapi.yaml). Recommended starting p
 Auth surfaces:
 
 - **Customer app** — unauthenticated.
-- **Admin app** — staff log in with email/password (`POST /admin/login`); the returned `token` is sent as the `x-admin-pin` header on every admin call. `GET /admin/me` resolves the staff member (its `role` drives RBAC tab gating) and their restaurant; `restaurant.id` is used for FCM device registration. Roles: `OWNER`, `MANAGER`, `CASHIER`, `WAITER`, `KITCHEN`, `BARTENDER`. Multi-branch owners can scope reads to one branch via the optional `branch_id` query param — the shared client appends it to admin GETs automatically when a branch is selected. There is no `VITE_RESTAURANT_ID` env var.
+- **Admin app** — staff log in with email/password (`POST /auth/login`), which returns a short-lived JWT access token (15 min) plus a refresh token (7 days). The access token is sent as `Authorization: Bearer` on every admin call; the shared client refreshes it automatically on a 401 and retries, so staff are only returned to the login screen once the refresh token expires too. `GET /auth/me` resolves the staff member (its `role` drives RBAC tab gating) and their restaurant; `restaurant.id` is used for FCM device registration. Roles: `OWNER`, `MANAGER`, `CASHIER`, `WAITER`, `KITCHEN`, `BARTENDER`. Multi-branch owners can scope reads to one branch via the optional `branch_id` query param — the shared client appends it to admin GETs automatically when a branch is selected. There is no `VITE_RESTAURANT_ID` env var.
 - **Platform app** — internal operators authenticate with a platform access code; the shared client sends it as the `x-platform-token` header (backend env `PLATFORM_TOKEN`) on all `/platform/*` calls. **Enforce this server-side — the client-side gate is UX only.**
 
 ### Admin push notifications (FCM)
@@ -157,4 +157,4 @@ Per-project env vars (set in Vercel dashboard, **not** committed):
 - Admin only: `VITE_FCM_API_KEY`, `VITE_FCM_AUTH_DOMAIN`, `VITE_FCM_PROJECT_ID`, `VITE_FCM_STORAGE_BUCKET`, `VITE_FCM_MESSAGING_SENDER_ID`, `VITE_FCM_APP_ID`, `VITE_FCM_VAPID_KEY`.
 - Platform only: `VITE_PLATFORM_TOKEN` — the operator access code (must match the backend's `PLATFORM_TOKEN`). **Always set this in production** — if unset, the client-side gate is open.
 
-The customer app is unauthenticated; the admin app requires the `x-admin-pin` header on every request; the platform app requires `x-platform-token`.
+The customer app is unauthenticated; the admin app sends `Authorization: Bearer <access_token>` on every request; the platform app requires `x-platform-token`.

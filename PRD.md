@@ -149,7 +149,7 @@ and codes left on a table after that table was renamed or removed.
 - Add, remove, change quantity; running total; persists per browser tab
 
 ## 7.3 Order Placement
-- Review summary in cart drawer → `POST /order`
+- Review summary in cart drawer → `POST /orders`
 - Reference `OSHAP-{tableId}-{4-digit random}`
 - Order enters the kitchen workflow as `CREATED`
 
@@ -193,9 +193,9 @@ mark-as-read, and clear-all. Every toast also pushes an entry into the feed.
 # 8. Admin Application
 
 ## 8.1 Authentication & RBAC
-- Staff log in with **email + password** (`POST /admin/login`)
-- The returned `token` is sent as the `x-admin-pin` header on every admin request
-- `GET /admin/me` resolves the staff member (with `role`) and their restaurant; the
+- Staff log in with **email + password** (`POST /auth/login`)
+- Login returns a JWT access token (15 min) and a refresh token (7 days); the access token is sent as `Authorization: Bearer` on every admin request, and the shared client refreshes it on a 401 and retries
+- `GET /auth/me` resolves the staff member (with `role`) and their restaurant; the
   frontend stores the restaurant in `sessionStorage` and uses `restaurant.id` for FCM
   device registration
 - `user.role` gates which tabs/routes render (`RoleGate`). Roles: `OWNER`, `MANAGER`,
@@ -372,7 +372,7 @@ Idempotent reference generation (no duplicate orders); server-side persistence.
 
 ## Auth surface
 - Customer app: zero auth
-- Admin app: email/password login → `x-admin-pin` header; RBAC by role; `branch_id` scoping for multi-branch owners
+- Admin app: email/password login → JWT bearer token with silent refresh; RBAC by role; `branch_id` scoping for multi-branch owners
 - Platform app: `x-platform-token` header (enforce server-side)
 - 401 from a protected endpoint returns the user to login
 
@@ -402,7 +402,7 @@ Idempotent reference generation (no duplicate orders); server-side persistence.
 ## Immediate — Backend integration (current priority)
 - Reconcile the built backend against [`docs/openapi.yaml`](docs/openapi.yaml) per [`docs/integration-reconciliation.md`](docs/integration-reconciliation.md); generate the Alembic baseline from the SQLModel models
 - Wire Firebase Admin SDK for push; choose image storage (S3 + CloudFront recommended)
-- Enforce `x-admin-pin` (per-user tokens) and `x-platform-token` server-side
+- Enforce JWT bearer auth and `x-platform-token` server-side
 - Real cross-device sessions + real SSE stream
 - Run [`docs/smoke-test.md`](docs/smoke-test.md) against staging
 

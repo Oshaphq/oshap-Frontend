@@ -5,9 +5,20 @@ info:
   description: |
     QR-based table ordering and payment API for restaurants.
 
-    All admin endpoints require an `x-admin-pin` header (set via `ADMIN_PIN`
-    environment variable, default `"0000"`). Customer endpoints are public
-    (no auth).
+    Admin endpoints require a staff JWT sent as `Authorization: Bearer`,
+    obtained from `POST /auth/login` and refreshed at `POST /auth/refresh`.
+    Platform endpoints require `x-platform-token`. Customer endpoints are
+    public (no auth).
+
+    ## Money
+
+    **Every money field is an integer number of kobo** (1 naira = 100 kobo), so
+    `price: 250000` means ₦2,500. No floats appear anywhere in the money path;
+    VAT and service charge are integer basis points (`750` = 7.5%) applied with
+    half-up rounding, so order totals reconcile exactly.
+
+    Applies to `price`, `total`, `subtotal`, `vat`, `discount`, `tip`,
+    `service_charge`, `cost_per_unit`, `price_delta` and `amount`.
 
     ## Response envelope
 
@@ -980,7 +991,7 @@ paths:
   # -----------------------------------------------------------------------
   # CUSTOMER — Orders
   # -----------------------------------------------------------------------
-  /order:
+  /orders:
     post:
       tags: [Orders]
       summary: Place a new order
@@ -1140,14 +1151,14 @@ paths:
   # =========================================================================
   # ADMIN — Identity
   # =========================================================================
-  /admin/login:
+  /auth/login:
     post:
       tags: [Admin]
       summary: Authenticate a staff member by email + password
       description: >
-        Returns a `token` (used as the `x-admin-pin` header on subsequent
-        admin calls), the authenticated `user` (with role for RBAC), and the
-        `restaurant` they manage.
+        Returns an access token (sent as `Authorization: Bearer` on
+        subsequent admin calls), a refresh token, the authenticated `user`
+        (with role for RBAC), and the `restaurant` they manage.
       requestBody:
         required: true
         content:
@@ -1195,7 +1206,7 @@ paths:
             application/json:
               schema: { $ref: "#/components/schemas/Error" }
 
-  /admin/me:
+  /auth/me:
     get:
       tags: [Admin]
       summary: Return the restaurant and staff member for the current token

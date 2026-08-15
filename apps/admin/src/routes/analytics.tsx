@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Link } from "react-router";
 import { useAdminAnalytics, useAdminGroup } from "@oshap/shared/hooks";
+import { formatCurrency } from "@oshap/shared";
 import { PrimaryButton } from "@oshap/shared/ui";
 import {
   AreaChart,
@@ -182,7 +183,7 @@ export default function Analytics() {
                 Total Revenue
               </h3>
               <p className="text-display-h2 font-display font-semibold text-primary-text">
-                ₦{data.summary.total_revenue.toLocaleString()}
+                {formatCurrency(data.summary.total_revenue)}
               </p>
             </div>
             <div className="bg-surface-container-low rounded-md p-md border border-transparent">
@@ -198,7 +199,7 @@ export default function Analytics() {
                 Avg Order Value
               </h3>
               <p className="text-display-h2 font-display font-semibold text-primary-text">
-                ₦{data.summary.avg_order_value.toLocaleString()}
+                {formatCurrency(data.summary.avg_order_value)}
               </p>
             </div>
           </div>
@@ -292,7 +293,7 @@ export default function Analytics() {
                       <tr key={idx} className="border-b border-surface-container-highest last:border-none hover:bg-surface-container-low transition-colors">
                         <td className="py-s px-md text-p2 text-primary-text font-medium">{row.table_id}</td>
                         <td className="py-s px-md text-p2 text-primary-text text-right">{row.order_count}</td>
-                        <td className="py-s px-md text-p2 text-primary-text text-right">₦{row.revenue.toLocaleString()}</td>
+                        <td className="py-s px-md text-p2 text-primary-text text-right">{formatCurrency(row.revenue)}</td>
                       </tr>
                     ))}
                   </tbody>

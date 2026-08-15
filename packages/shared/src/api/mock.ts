@@ -178,24 +178,30 @@ const SEED_RESTAURANT: Restaurant = {
 
 let _restaurant: Restaurant = { ...SEED_RESTAURANT };
 
+/**
+ * Mock figures are authored in naira for readability; the API contract is kobo.
+ * Keeps the seed legible without letting a naira value reach a kobo field.
+ */
+const naira = (amount: number) => amount * 100;
+
 const SEED_MENU: MenuItem[] = [
-  { id: "m-001", restaurant_id: _restaurant.id, name: "Chicken Shawarma", price: 2500, category: "Meals", description: "Grilled chicken wrap with garlic sauce, pickles and fries", image_url: "https://www.simplyquinoa.com/wp-content/uploads/2023/05/chicken-shawarma-gyros-9.jpg", available: true, sort_order: 1, stock_count: 20, low_stock_threshold: 5 },
-  { id: "m-002", restaurant_id: _restaurant.id, name: "Beef Shawarma", price: 3000, category: "Meals", description: "Tender beef strips with tahini sauce and fresh vegetables", image_url: "https://live.staticflickr.com/65535/51249894956_3d8a1b8b2b_h.jpg", available: true, sort_order: 2, stock_count: 15, low_stock_threshold: 5 },
-  { id: "m-003", restaurant_id: _restaurant.id, name: "Jollof Rice & Chicken", price: 3500, category: "Meals", description: "Party-style jollof rice with a perfectly grilled chicken thigh", image_url: "https://cdn.guardian.ng/wp-content/uploads/2023/12/Photo-Credit-Jollof-Festival-.jpg", available: true, sort_order: 3, stock_count: 3, low_stock_threshold: 5 },
-  { id: "m-004", restaurant_id: _restaurant.id, name: "Fried Rice & Turkey", price: 4000, category: "Meals", description: "Vegetable fried rice served with peppered turkey", image_url: "https://opensharaton.com/wp-content/uploads/2023/02/Fried_Rice_with_Turkey.jpeg", available: true, sort_order: 4, stock_count: null, low_stock_threshold: 5 },
-  { id: "m-005", restaurant_id: _restaurant.id, name: "Peppered Chicken", price: 2000, category: "Meals", description: "Spicy fried chicken in a pepper sauce", image_url: "https://flavorquotient.com/wp-content/uploads/2025/04/Pepper-Chicken-Dry-FQ-8-2.webp", available: true, sort_order: 5, stock_count: 12, low_stock_threshold: 5 },
-  { id: "m-006", restaurant_id: _restaurant.id, name: "Suya Platter", price: 3000, category: "Grills", description: "Grilled beef skewers with yaji spice, onions and tomatoes", image_url: "https://cheflolaskitchen.com/wp-content/uploads/2025/07/Suya-960x960.jpg.webp", available: true, sort_order: 1, stock_count: 8, low_stock_threshold: 5 },
-  { id: "m-007", restaurant_id: _restaurant.id, name: "Grilled Fish", price: 5000, category: "Grills", description: "Whole catfish grilled with pepper sauce and plantain", image_url: "https://simshomekitchen.com/wp-content/uploads/2025/08/Two-whole-grilled-tilapia-in-a-tray-with-plantain-lettuce-and-pepper-sauce.jpg", available: true, sort_order: 2, stock_count: 2, low_stock_threshold: 3 },
-  { id: "m-008", restaurant_id: _restaurant.id, name: "Asun", price: 3500, category: "Grills", description: "Spicy smoked goat meat with peppers and onions", image_url: "https://lowcarbafrica.com/wp-content/uploads/2019/09/Asun-recipe-IG-1.jpg", available: true, sort_order: 3, stock_count: null, low_stock_threshold: 5 },
-  { id: "m-009", restaurant_id: _restaurant.id, name: "Chapman", price: 1500, category: "Drinks", description: "Classic Nigerian cocktail with Fanta, Sprite and bitters", image_url: "https://www.africanrecipes.com.ng/wp-content/uploads/2025/08/chapman-drink-featured.png.webp", available: true, sort_order: 1, stock_count: null, low_stock_threshold: 5 },
-  { id: "m-010", restaurant_id: _restaurant.id, name: "Zobo", price: 800, category: "Drinks", description: "Refreshing hibiscus drink with ginger and pineapple", image_url: "https://lowcarbafrica.com/wp-content/uploads/2020/07/Sorrel-drink-sobolo-zobo-Drink-blog-1a.jpg", available: true, sort_order: 2, stock_count: null, low_stock_threshold: 5 },
-  { id: "m-011", restaurant_id: _restaurant.id, name: "Fresh Orange Juice", price: 1200, category: "Drinks", description: "Freshly squeezed orange juice, no sugar added", image_url: "https://images.unsplash.com/photo-1600271886742-f049cd451bba?w=400&q=80", available: true, sort_order: 3, stock_count: null, low_stock_threshold: 5 },
-  { id: "m-012", restaurant_id: _restaurant.id, name: "Coca-Cola", price: 500, category: "Drinks", description: "Classic Coca-Cola 50cl bottle", image_url: "https://images.unsplash.com/photo-1622483767028-3f66f32aef97?w=400&q=80", available: true, sort_order: 4, stock_count: null, low_stock_threshold: 5 },
-  { id: "m-013", restaurant_id: _restaurant.id, name: "Malt", price: 600, category: "Drinks", description: "Amstel Malt 50cl bottle", image_url: "https://m.media-amazon.com/images/I/71LH6-Oi6iL.jpg", available: true, sort_order: 5, stock_count: null, low_stock_threshold: 5 },
-  { id: "m-014", restaurant_id: _restaurant.id, name: "Puff Puff", price: 500, category: "Sides", description: "6 pieces of fluffy Nigerian doughnuts", image_url: "https://allnigerianfoods.com/wp-content/uploads/puff_puff_recipe.jpg", available: true, sort_order: 1, stock_count: 30, low_stock_threshold: 10 },
-  { id: "m-015", restaurant_id: _restaurant.id, name: "Plantain Chips", price: 800, category: "Sides", description: "Crunchy plantain chips with a spicy dip", image_url: "https://foreignfork.com/wp-content/uploads/2022/02/SweetPlantainChipsFEATURE-500x500.jpg", available: true, sort_order: 2, stock_count: null, low_stock_threshold: 5 },
-  { id: "m-016", restaurant_id: _restaurant.id, name: "French Fries", price: 1000, category: "Sides", description: "Golden crispy fries with ketchup", image_url: "https://images.unsplash.com/photo-1573080496219-bb080dd4f877?w=400&q=80", available: true, sort_order: 3, stock_count: null, low_stock_threshold: 5 },
-  { id: "m-017", restaurant_id: _restaurant.id, name: "Coleslaw", price: 500, category: "Sides", description: "Fresh coleslaw with creamy dressing", image_url: "https://www.inspiredtaste.net/wp-content/uploads/2015/01/Coleslaw-Recipe-1-1200.jpg", available: true, sort_order: 4, stock_count: null, low_stock_threshold: 5 },
+  { id: "m-001", restaurant_id: _restaurant.id, name: "Chicken Shawarma", price: naira(2500), category: "Meals", description: "Grilled chicken wrap with garlic sauce, pickles and fries", image_url: "https://www.simplyquinoa.com/wp-content/uploads/2023/05/chicken-shawarma-gyros-9.jpg", available: true, sort_order: 1, stock_count: 20, low_stock_threshold: 5 },
+  { id: "m-002", restaurant_id: _restaurant.id, name: "Beef Shawarma", price: naira(3000), category: "Meals", description: "Tender beef strips with tahini sauce and fresh vegetables", image_url: "https://live.staticflickr.com/65535/51249894956_3d8a1b8b2b_h.jpg", available: true, sort_order: 2, stock_count: 15, low_stock_threshold: 5 },
+  { id: "m-003", restaurant_id: _restaurant.id, name: "Jollof Rice & Chicken", price: naira(3500), category: "Meals", description: "Party-style jollof rice with a perfectly grilled chicken thigh", image_url: "https://cdn.guardian.ng/wp-content/uploads/2023/12/Photo-Credit-Jollof-Festival-.jpg", available: true, sort_order: 3, stock_count: 3, low_stock_threshold: 5 },
+  { id: "m-004", restaurant_id: _restaurant.id, name: "Fried Rice & Turkey", price: naira(4000), category: "Meals", description: "Vegetable fried rice served with peppered turkey", image_url: "https://opensharaton.com/wp-content/uploads/2023/02/Fried_Rice_with_Turkey.jpeg", available: true, sort_order: 4, stock_count: null, low_stock_threshold: 5 },
+  { id: "m-005", restaurant_id: _restaurant.id, name: "Peppered Chicken", price: naira(2000), category: "Meals", description: "Spicy fried chicken in a pepper sauce", image_url: "https://flavorquotient.com/wp-content/uploads/2025/04/Pepper-Chicken-Dry-FQ-8-2.webp", available: true, sort_order: 5, stock_count: 12, low_stock_threshold: 5 },
+  { id: "m-006", restaurant_id: _restaurant.id, name: "Suya Platter", price: naira(3000), category: "Grills", description: "Grilled beef skewers with yaji spice, onions and tomatoes", image_url: "https://cheflolaskitchen.com/wp-content/uploads/2025/07/Suya-960x960.jpg.webp", available: true, sort_order: 1, stock_count: 8, low_stock_threshold: 5 },
+  { id: "m-007", restaurant_id: _restaurant.id, name: "Grilled Fish", price: naira(5000), category: "Grills", description: "Whole catfish grilled with pepper sauce and plantain", image_url: "https://simshomekitchen.com/wp-content/uploads/2025/08/Two-whole-grilled-tilapia-in-a-tray-with-plantain-lettuce-and-pepper-sauce.jpg", available: true, sort_order: 2, stock_count: 2, low_stock_threshold: 3 },
+  { id: "m-008", restaurant_id: _restaurant.id, name: "Asun", price: naira(3500), category: "Grills", description: "Spicy smoked goat meat with peppers and onions", image_url: "https://lowcarbafrica.com/wp-content/uploads/2019/09/Asun-recipe-IG-1.jpg", available: true, sort_order: 3, stock_count: null, low_stock_threshold: 5 },
+  { id: "m-009", restaurant_id: _restaurant.id, name: "Chapman", price: naira(1500), category: "Drinks", description: "Classic Nigerian cocktail with Fanta, Sprite and bitters", image_url: "https://www.africanrecipes.com.ng/wp-content/uploads/2025/08/chapman-drink-featured.png.webp", available: true, sort_order: 1, stock_count: null, low_stock_threshold: 5 },
+  { id: "m-010", restaurant_id: _restaurant.id, name: "Zobo", price: naira(800), category: "Drinks", description: "Refreshing hibiscus drink with ginger and pineapple", image_url: "https://lowcarbafrica.com/wp-content/uploads/2020/07/Sorrel-drink-sobolo-zobo-Drink-blog-1a.jpg", available: true, sort_order: 2, stock_count: null, low_stock_threshold: 5 },
+  { id: "m-011", restaurant_id: _restaurant.id, name: "Fresh Orange Juice", price: naira(1200), category: "Drinks", description: "Freshly squeezed orange juice, no sugar added", image_url: "https://images.unsplash.com/photo-1600271886742-f049cd451bba?w=400&q=80", available: true, sort_order: 3, stock_count: null, low_stock_threshold: 5 },
+  { id: "m-012", restaurant_id: _restaurant.id, name: "Coca-Cola", price: naira(500), category: "Drinks", description: "Classic Coca-Cola 50cl bottle", image_url: "https://images.unsplash.com/photo-1622483767028-3f66f32aef97?w=400&q=80", available: true, sort_order: 4, stock_count: null, low_stock_threshold: 5 },
+  { id: "m-013", restaurant_id: _restaurant.id, name: "Malt", price: naira(600), category: "Drinks", description: "Amstel Malt 50cl bottle", image_url: "https://m.media-amazon.com/images/I/71LH6-Oi6iL.jpg", available: true, sort_order: 5, stock_count: null, low_stock_threshold: 5 },
+  { id: "m-014", restaurant_id: _restaurant.id, name: "Puff Puff", price: naira(500), category: "Sides", description: "6 pieces of fluffy Nigerian doughnuts", image_url: "https://allnigerianfoods.com/wp-content/uploads/puff_puff_recipe.jpg", available: true, sort_order: 1, stock_count: 30, low_stock_threshold: 10 },
+  { id: "m-015", restaurant_id: _restaurant.id, name: "Plantain Chips", price: naira(800), category: "Sides", description: "Crunchy plantain chips with a spicy dip", image_url: "https://foreignfork.com/wp-content/uploads/2022/02/SweetPlantainChipsFEATURE-500x500.jpg", available: true, sort_order: 2, stock_count: null, low_stock_threshold: 5 },
+  { id: "m-016", restaurant_id: _restaurant.id, name: "French Fries", price: naira(1000), category: "Sides", description: "Golden crispy fries with ketchup", image_url: "https://images.unsplash.com/photo-1573080496219-bb080dd4f877?w=400&q=80", available: true, sort_order: 3, stock_count: null, low_stock_threshold: 5 },
+  { id: "m-017", restaurant_id: _restaurant.id, name: "Coleslaw", price: naira(500), category: "Sides", description: "Fresh coleslaw with creamy dressing", image_url: "https://www.inspiredtaste.net/wp-content/uploads/2015/01/Coleslaw-Recipe-1-1200.jpg", available: true, sort_order: 4, stock_count: null, low_stock_threshold: 5 },
 ];
 
 const INITIAL_TABLES = [
@@ -532,7 +538,7 @@ route("POST", /^\/table\/(.+)\/request-pos$/, ({ path, body }) => {
 
 // -------------------- Customer: Create Order --------------------
 
-route("POST", /^\/order$/, ({ body }) => {
+route("POST", /^\/orders$/, ({ body }) => {
   const b = body as CreateOrderRequest;
   if (!b.table || !b.restaurant_id || !b.items?.length) {
     return json(400, { error: "Missing required fields" });
@@ -761,7 +767,7 @@ route("POST", /^\/payment\/confirm$/, ({ body }) => {
 // Admin endpoints — used by admin app
 // ---------------------------------------------------------------------------
 
-// Mock tokens encode the staff id so /admin/me can resolve the caller, and
+// Mock tokens encode the staff id so /auth/me can resolve the caller, and
 // carry an expiry so the refresh path is actually exercisable in mock mode.
 const ACCESS_TOKEN_TTL_MS = 15 * 60 * 1000;
 
@@ -782,7 +788,7 @@ export function staffIdFromAccessToken(token: string | null): string | null {
   return staffId;
 }
 
-route("POST", /^\/admin\/login$/, ({ body }) => {
+route("POST", /^\/auth\/login$/, ({ body }) => {
   const b = body as AdminLoginRequest;
   const staff = [..._staff.values()].find((s) => s.email === b.email);
   if (!staff || (b.password && b.password !== "password")) {
@@ -815,7 +821,7 @@ route("POST", /^\/auth\/refresh$/, ({ body }) => {
   } satisfies RefreshTokenResponse);
 });
 
-route("GET", /^\/admin\/me$/, ({ admin }) => {
+route("GET", /^\/auth\/me$/, ({ admin }) => {
   if (!admin) return json(401, { error: "Unauthorized" });
 
   // The mock dispatcher never sees request headers, so the caller is resolved
@@ -1096,9 +1102,9 @@ route("GET", /^\/admin\/group$/, () => {
 
 route("GET", /^\/admin\/group\/analytics$/, () => {
   const revenueByBranch = [
-    { branch_id: _restaurant.id, branch_name: _restaurant.name, total_revenue: 485000, total_orders: 142, avg_order_value: 3415 },
-    { branch_id: "rest-002", branch_name: "Oshap VI", total_revenue: 312000, total_orders: 87, avg_order_value: 3586 },
-    { branch_id: "rest-003", branch_name: "Oshap Ikeja", total_revenue: 198000, total_orders: 63, avg_order_value: 3143 },
+    { branch_id: _restaurant.id, branch_name: _restaurant.name, total_revenue: naira(485000), total_orders: 142, avg_order_value: naira(3415) },
+    { branch_id: "rest-002", branch_name: "Oshap VI", total_revenue: naira(312000), total_orders: 87, avg_order_value: naira(3586) },
+    { branch_id: "rest-003", branch_name: "Oshap Ikeja", total_revenue: naira(198000), total_orders: 63, avg_order_value: naira(3143) },
   ];
   return json(200, {
     group_name: _mockGroup.name,
@@ -1264,7 +1270,7 @@ route("GET", /^\/admin\/analytics$/, ({ query }) => {
   
   const factor = branchFactor(query);
   for (let i = 0; i < 7; i++) {
-    const rev = Math.floor((Math.random() * 100000 + 20000) * factor);
+    const rev = naira(Math.floor((Math.random() * 100000 + 20000) * factor));
     const ords = Math.floor((Math.random() * 30 + 10) * factor);
     totalRevenue += rev;
     totalOrders += ords;
@@ -1276,11 +1282,11 @@ route("GET", /^\/admin\/analytics$/, ({ query }) => {
   }
 
   const popularItems = [
-    { name: "Jollof Rice & Chicken", quantity: 45, revenue: 157500 },
-    { name: "Chicken Shawarma", quantity: 38, revenue: 95000 },
-    { name: "Chapman", quantity: 52, revenue: 78000 },
-    { name: "Grilled Fish", quantity: 15, revenue: 75000 },
-    { name: "Puff Puff", quantity: 60, revenue: 30000 },
+    { name: "Jollof Rice & Chicken", quantity: 45, revenue: naira(157500) },
+    { name: "Chicken Shawarma", quantity: 38, revenue: naira(95000) },
+    { name: "Chapman", quantity: 52, revenue: naira(78000) },
+    { name: "Grilled Fish", quantity: 15, revenue: naira(75000) },
+    { name: "Puff Puff", quantity: 60, revenue: naira(30000) },
   ];
 
   const peakHours = [];
@@ -1295,11 +1301,11 @@ route("GET", /^\/admin\/analytics$/, ({ query }) => {
   }
 
   const tablePerformance = [
-    { table_id: "T1", order_count: 12, revenue: 45000 },
-    { table_id: "T2", order_count: 8, revenue: 32000 },
-    { table_id: "T3", order_count: 15, revenue: 85000 },
-    { table_id: "T4", order_count: 22, revenue: 115000 },
-    { table_id: "T5", order_count: 5, revenue: 15000 },
+    { table_id: "T1", order_count: 12, revenue: naira(45000) },
+    { table_id: "T2", order_count: 8, revenue: naira(32000) },
+    { table_id: "T3", order_count: 15, revenue: naira(85000) },
+    { table_id: "T4", order_count: 22, revenue: naira(115000) },
+    { table_id: "T5", order_count: 5, revenue: naira(15000) },
   ];
 
   const staffActivity = [
@@ -1442,7 +1448,7 @@ export async function mockRequest(
       // Persist after mutations only; GET handlers don't change state.
       if (method !== "GET") {
         syncToStorage();
-        if (path === "/order") dispatchMockEvent("ORDER_CREATED");
+        if (path === "/orders") dispatchMockEvent("ORDER_CREATED");
         else if (path.startsWith("/admin/kitchen")) dispatchMockEvent("STATUS_CHANGED");
         else if (path.includes("/request-pos") || path === "/payment/confirm") dispatchMockEvent("PAYMENT_PENDING");
         else if (path === "/admin/verify") dispatchMockEvent("PAYMENT_VERIFIED");
