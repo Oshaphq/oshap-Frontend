@@ -1,0 +1,8 @@
+{
+  // Typechecks the test files the app build deliberately excludes. Run by
+  // `npm run typecheck`, never by `npm run build` — it needs vitest, which only
+  // exists at the workspace root.
+  "extends": "./tsconfig.app.json",
+  "include": ["src/**/*.test.ts", "src/**/*.test.tsx"],
+  "exclude": []
+}
