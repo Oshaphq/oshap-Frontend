@@ -39,6 +39,7 @@ export const queryKeys = {
     analytics: (startDate: string, endDate: string) =>
       ["admin", "analytics", startDate, endDate] as const,
     inventoryAlerts: () => ["admin", "inventory", "alerts"] as const,
+    zReport: (date: string) => ["admin", "z-report", date] as const,
     group: () => ["admin", "group"] as const,
     groupAnalytics: () => ["admin", "group", "analytics"] as const,
   },

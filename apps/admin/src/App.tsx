@@ -8,6 +8,7 @@ import HistoryPage from "./routes/history";
 import MenuPage from "./routes/menu";
 import SettingsPage from "./routes/settings";
 import AnalyticsPage from "./routes/analytics";
+import ZReportPage from "./routes/z-report";
 import GroupAnalyticsPage from "./routes/group-analytics";
 import { AuthProvider, useAuth } from "./context/AuthContext";
 import { useGlobalSSE } from "@oshap/shared";
@@ -43,6 +44,11 @@ export default function App() {
           </Route>
 
           {/* Manager / Owner routes */}
+          {/* Cashiers close the till, so this isn't owner-only. */}
+          <Route element={<RoleGate allowedRoles={["OWNER", "MANAGER", "CASHIER"]} />}>
+            <Route path="/z-report" element={<ZReportPage />} />
+          </Route>
+
           <Route element={<RoleGate allowedRoles={["OWNER", "MANAGER"]} />}>
             <Route path="/history" element={<HistoryPage />} />
             <Route path="/menu" element={<MenuPage />} />

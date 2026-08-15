@@ -141,6 +141,9 @@ export default function AuthGate() {
   if (["OWNER", "MANAGER", "KITCHEN", "BARTENDER"].includes(user.role)) {
     tabs.push({ to: "/kitchen", label: "Orders" });
   }
+  if (["OWNER", "MANAGER", "CASHIER"].includes(user.role)) {
+    tabs.push({ to: "/z-report", label: "Close" });
+  }
   if (["OWNER", "MANAGER"].includes(user.role)) {
     tabs.push({ to: "/history", label: "History" });
     tabs.push({ to: "/settings", label: "Settings" });

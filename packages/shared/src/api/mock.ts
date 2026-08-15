@@ -21,6 +21,8 @@ import type {
   AdminRejectResponse,
   RecordCashRequest,
   RecordCashResponse,
+  PaymentMethod,
+  ZReportResponse,
   BankAccount,
   ClaimPaymentRequest,
   ClaimPaymentResponse,
@@ -179,6 +181,9 @@ const SEED_RESTAURANT: Restaurant = {
   logo_url:
     "https://images.unsplash.com/photo-1552566626-52f8b828add9?w=200&q=80",
   operating_hours: "09:00 - 22:00",
+  // Basis points: 750 = 7.5% VAT, 500 = 5% service charge.
+  vat_rate: 750,
+  service_charge_rate: 500,
   whatsapp_number: "+2348012345678",
 };
 
@@ -597,13 +602,36 @@ route("POST", /^\/table\/(.+)\/request-pos$/, ({ path, body }) => {
 
 // -------------------- Customer: Create Order --------------------
 
+/**
+ * Applies a basis-point rate with half-up rounding, in pure integer arithmetic —
+ * the same formula the backend uses, so totals reconcile exactly rather than
+ * drifting by a kobo per order.
+ */
+function applyRate(amount: number, basisPoints: number): number {
+  return Math.floor((amount * basisPoints + 5000) / 10000);
+}
+
+/** total = subtotal - discount + service_charge + vat + tip, exactly. */
+function priceOrder(subtotal: number, discount = 0, tip = 0) {
+  const serviceCharge = applyRate(subtotal, _restaurant.service_charge_rate ?? 0);
+  const vat = applyRate(subtotal - discount + serviceCharge, _restaurant.vat_rate ?? 0);
+  return {
+    subtotal,
+    discount,
+    service_charge: serviceCharge,
+    vat,
+    tip,
+    total: subtotal - discount + serviceCharge + vat + tip,
+  };
+}
+
 route("POST", /^\/orders$/, ({ body }) => {
   const b = body as CreateOrderRequest;
   if (!b.table || !b.restaurant_id || !b.items?.length) {
     return json(400, { error: "Missing required fields" });
   }
 
-  const total = b.items.reduce((s, i) => s + i.price * i.qty, 0);
+  const money = priceOrder(b.items.reduce((s, i) => s + i.price * i.qty, 0));
   _orderCounter++;
   const id = `ord-${_orderCounter.toString().padStart(3, "0")}`;
   const reference = ref(b.table);
@@ -613,7 +641,7 @@ route("POST", /^\/orders$/, ({ body }) => {
     table_id: b.table,
     restaurant_id: b.restaurant_id,
     status: "CREATED",
-    total,
+    ...money,
     reference,
     session_id: b.session_id ?? null,
     customer_name: b.customer_name ?? null,
@@ -646,7 +674,7 @@ route("POST", /^\/orders$/, ({ body }) => {
     success: true as const,
     order_id: id,
     reference,
-    total,
+    total: money.total,
   } satisfies CreateOrderResponse);
 });
 
@@ -662,6 +690,11 @@ route("GET", /^\/orders\/(.+)$/, ({ path }) => {
     id: order.id,
     table: order.table_id,
     items: order.order_items,
+    subtotal: order.subtotal,
+    discount: order.discount,
+    service_charge: order.service_charge,
+    vat: order.vat,
+    tip: order.tip,
     total: order.total,
     status: order.status,
     reference: order.reference,
@@ -1483,6 +1516,45 @@ function creditAccount(
   if (outcome === "success") account.success_count = (account.success_count ?? 0) + 1;
   else account.failure_count = (account.failure_count ?? 0) + 1;
 }
+
+// -------------------- Admin: Z-report --------------------
+
+route("GET", /^\/admin\/z-report$/, ({ query }) => {
+  const date = query.get("date") ?? new Date().toISOString().slice(0, 10);
+
+  // Only settled money counts — an unpaid bill is not takings, and including
+  // it would make the report disagree with the drawer.
+  const settled = [..._orders.values()].filter(
+    (o) => o.status === "CONFIRMED" && o.created_at.slice(0, 10) === date,
+  );
+
+  const sum = (pick: (o: (typeof settled)[number]) => number) =>
+    settled.reduce((acc, o) => acc + pick(o), 0);
+
+  const byMethod = new Map<PaymentMethod, { count: number; total: number }>();
+  for (const order of settled) {
+    const method = _payments.get(order.id)?.method ?? "MANUAL_TRANSFER";
+    const line = byMethod.get(method) ?? { count: 0, total: 0 };
+    line.count++;
+    line.total += order.total;
+    byMethod.set(method, line);
+  }
+
+  // Refunds aren't modelled in the mock yet; reported as zero rather than
+  // omitted, so the shape matches the real response.
+  return json(200, {
+    date,
+    order_count: settled.length,
+    gross_sales: sum((o) => o.subtotal ?? o.total),
+    discounts: sum((o) => o.discount ?? 0),
+    service_charge: sum((o) => o.service_charge ?? 0),
+    vat: sum((o) => o.vat ?? 0),
+    tips: sum((o) => o.tip ?? 0),
+    refunds: 0,
+    net_sales: sum((o) => o.total),
+    by_method: [...byMethod.entries()].map(([method, line]) => ({ method, ...line })),
+  } satisfies ZReportResponse);
+});
 
 // -------------------- Admin: Cash payment --------------------
 

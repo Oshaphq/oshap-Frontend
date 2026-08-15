@@ -28,14 +28,15 @@ describe("mock API — customer", () => {
     expect(res.status).toBe(200);
     const created = res.body as { success: boolean; order_id: string; total: number };
     expect(created.success).toBe(true);
-    expect(created.total).toBe(2500);
     expect(created.order_id).toBeTruthy();
+    // Subtotal is 2500; the total also carries service charge and VAT.
+    expect(created.total).toBeGreaterThan(2500);
 
     const detail = await mockRequest(`/orders/${created.order_id}`, "GET", null, q(), false);
     expect(detail.status).toBe(200);
     const order = detail.body as { id: string; total: number; status: string };
     expect(order.id).toBe(created.order_id);
-    expect(order.total).toBe(2500);
+    expect(order.total).toBe(created.total);
     expect(order.status).toBe("CREATED");
   });
 
@@ -150,7 +151,55 @@ describe("mock API — money is kobo", () => {
       false,
     );
 
-    expect((res.body as { total: number }).total).toBe(item.price * 2);
+    // The line total is kobo, and the order total builds on it — asserting the
+    // relationship rather than a magic number keeps this honest if rates change.
+    const total = (res.body as { total: number }).total;
+    expect(total).toBeGreaterThanOrEqual(item.price * 2);
+    expect(Number.isInteger(total)).toBe(true);
+  });
+});
+
+describe("mock API — order money breakdown", () => {
+  // The backend's stated invariant. Getting this wrong by a kobo per order is
+  // exactly the kind of drift that only surfaces in the Z-report.
+  it("satisfies total = subtotal - discount + service_charge + vat + tip", async () => {
+    const res = await mockRequest(
+      "/orders",
+      "POST",
+      {
+        table: "T3",
+        restaurant_id: HOME_RESTAURANT,
+        items: [{ name: "Invariant Dish", qty: 3, price: 133_333 }],
+      },
+      q(),
+      false,
+    );
+
+    const detail = await mockRequest(
+      `/orders/${(res.body as { order_id: string }).order_id}`,
+      "GET",
+      null,
+      q(),
+      false,
+    );
+    const o = detail.body as {
+      subtotal: number;
+      discount?: number;
+      service_charge: number;
+      vat: number;
+      tip?: number;
+      total: number;
+    };
+
+    expect(o.subtotal).toBe(399_999);
+    expect(
+      o.subtotal - (o.discount ?? 0) + o.service_charge + o.vat + (o.tip ?? 0),
+    ).toBe(o.total);
+
+    // Every component must be a whole kobo — no floats anywhere in the path.
+    for (const part of [o.subtotal, o.service_charge, o.vat, o.total]) {
+      expect(Number.isInteger(part)).toBe(true);
+    }
   });
 });
 
@@ -468,5 +517,103 @@ describe("mock API — cash payments", () => {
   it("400s when no orders are given", async () => {
     const res = await mockRequest("/admin/orders/cash", "POST", { order_ids: [] }, q(), true);
     expect(res.status).toBe(400);
+  });
+});
+
+describe("mock API — Z-report", () => {
+  const TODAY = new Date().toISOString().slice(0, 10);
+
+  async function orderAt(tableId: string) {
+    const menu = await mockRequest("/menu", "GET", null, q(), false);
+    const item = (menu.body as Array<{ name: string; price: number }>)[0]!;
+    const res = await mockRequest(
+      "/orders",
+      "POST",
+      {
+        table: tableId,
+        restaurant_id: HOME_RESTAURANT,
+        items: [{ name: item.name, qty: 1, price: item.price }],
+      },
+      q(),
+      false,
+    );
+    return res.body as { order_id: string; total: number };
+  }
+
+  async function report() {
+    const res = await mockRequest("/admin/z-report", "GET", null, q(`date=${TODAY}`), true);
+    return res.body as {
+      order_count: number;
+      gross_sales: number;
+      vat: number;
+      service_charge: number;
+      net_sales: number;
+      by_method: Array<{ method: string; count: number; total: number }>;
+    };
+  }
+
+  // An unpaid bill is not takings. Counting it would make the report disagree
+  // with the drawer, which is the one thing this screen exists to prevent.
+  it("ignores unsettled orders", async () => {
+    const before = await report();
+    await orderAt("T5");
+    const after = await report();
+
+    expect(after.order_count).toBe(before.order_count);
+    expect(after.net_sales).toBe(before.net_sales);
+  });
+
+  it("counts an order once it is settled, and attributes it to its method", async () => {
+    const before = await report();
+    const order = await orderAt("T6");
+    await mockRequest("/admin/orders/cash", "POST", { order_ids: [order.order_id] }, q(), true);
+
+    const after = await report();
+    expect(after.order_count).toBe(before.order_count + 1);
+    expect(after.net_sales).toBe(before.net_sales + order.total);
+
+    const cash = after.by_method.find((m) => m.method === "CASH");
+    expect(cash).toBeDefined();
+    expect(cash!.total).toBeGreaterThanOrEqual(order.total);
+  });
+
+  it("reconciles: the breakdown adds up to net takings", async () => {
+    const order = await orderAt("T8");
+    await mockRequest("/admin/orders/cash", "POST", { order_ids: [order.order_id] }, q(), true);
+
+    const r = (await mockRequest(
+      "/admin/z-report",
+      "GET",
+      null,
+      q(`date=${TODAY}`),
+      true,
+    )).body as {
+      gross_sales: number;
+      discounts: number;
+      service_charge: number;
+      vat: number;
+      tips: number;
+      refunds: number;
+      net_sales: number;
+    };
+
+    expect(
+      r.gross_sales - r.discounts + r.service_charge + r.vat + r.tips - r.refunds,
+    ).toBe(r.net_sales);
+  });
+
+  it("per-method totals sum to net takings", async () => {
+    const r = await report();
+    const summed = r.by_method.reduce((s, m) => s + m.total, 0);
+    expect(summed).toBe(r.net_sales);
+  });
+
+  it("returns an empty report for a day with no trade", async () => {
+    const res = await mockRequest("/admin/z-report", "GET", null, q("date=2020-01-01"), true);
+    const r = res.body as { order_count: number; net_sales: number; by_method: unknown[] };
+
+    expect(r.order_count).toBe(0);
+    expect(r.net_sales).toBe(0);
+    expect(r.by_method).toEqual([]);
   });
 });
