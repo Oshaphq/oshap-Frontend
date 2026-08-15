@@ -127,6 +127,40 @@ components:
           description: The payload described by the operation's own schema.
       required: [success, message, code, data]
 
+    BankAccount:
+      type: object
+      description: >
+        A restaurant payout account. Restaurants hold several because transfers
+        to any one bank fail often enough to be a single point of failure.
+        `is_default` is exclusive — setting it unsets every other account.
+        `is_active` is independent: an inactive account is simply not offered.
+      properties:
+        id: { type: string, format: uuid }
+        bank_name: { type: string }
+        account_number: { type: string }
+        account_name: { type: string }
+        is_active: { type: boolean }
+        is_default: { type: boolean }
+        success_count:
+          type: integer
+          description: Verified payments into this account. Feeds the ranking.
+        failure_count:
+          type: integer
+          description: Rejected payments claimed against it. Feeds the ranking.
+      required: [id, bank_name, account_number, account_name, is_active, is_default]
+
+    BankAccountRequest:
+      type: object
+      properties:
+        bank_name: { type: string }
+        account_number: { type: string }
+        account_name: { type: string }
+        is_active: { type: boolean }
+        is_default:
+          type: boolean
+          description: Exclusive — setting it true unsets the default on every other account.
+      required: [bank_name, account_number, account_name]
+
     Restaurant:
       type: object
       properties:
@@ -252,6 +286,13 @@ components:
     TableInfo:
       type: object
       properties:
+        bank_accounts:
+          type: array
+          description: >
+            Active accounts, already ranked — default first, then by success
+            rate. The pay screen shows `[0]` and offers the rest as fallbacks.
+            Empty means the restaurant takes POS/cash only.
+          items: { $ref: "#/components/schemas/BankAccount" }
         table_id: { type: string }
         status:
           $ref: "#/components/schemas/TableStatus"
@@ -1375,6 +1416,126 @@ paths:
               schema: { $ref: "#/components/schemas/UploadResponse" }
         "401":
           description: Invalid PIN
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+
+  /admin/settings/bank-accounts:
+    get:
+      tags: [Admin]
+      summary: List every payout account, default first
+      security: [{ adminPin: [] }]
+      responses:
+        "200":
+          description: Bank accounts, including inactive ones
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/BankAccount" }
+    post:
+      tags: [Admin]
+      summary: Add a payout account
+      description: The first account added is the default, or guests are offered nothing.
+      security: [{ adminPin: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/BankAccountRequest" }
+      responses:
+        "200":
+          description: Account created
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/BankAccount" }
+        "400":
+          description: Missing or invalid fields
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+
+  /admin/settings/bank-accounts/{id}:
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema: { type: string, format: uuid }
+    patch:
+      tags: [Admin]
+      summary: Update an account, change the default, or hide it from guests
+      security: [{ adminPin: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/BankAccountRequest" }
+      responses:
+        "200":
+          description: Account updated
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/BankAccount" }
+        "404":
+          description: Account not found
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+    delete:
+      tags: [Admin]
+      summary: Remove a payout account
+      description: >
+        Removing the default promotes the best remaining account, so a
+        restaurant with any account always has one guests can pay into.
+      security: [{ adminPin: [] }]
+      responses:
+        "200":
+          description: Account removed
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success: { type: boolean, example: true }
+        "404":
+          description: Account not found
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+
+  /admin/reject:
+    post:
+      tags: [Admin]
+      summary: Reject a claimed payment
+      description: >
+        The mirror of `/admin/verify`. Orders return to unpaid (not to the
+        kitchen — the food was served), the payment is marked `FAILED`, and the
+        account the customer claimed to have paid into has its failure count
+        incremented. That counter is what demotes an unreliable account in the
+        ranking guests are shown.
+      security: [{ adminPin: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                table_id: { type: string }
+                reason: { type: string }
+              required: [table_id]
+      responses:
+        "200":
+          description: Payment rejected
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success: { type: boolean, example: true }
+                  rejected: { type: integer }
+        "404":
+          description: No pending payments on that table
           content:
             application/json:
               schema: { $ref: "#/components/schemas/Error" }

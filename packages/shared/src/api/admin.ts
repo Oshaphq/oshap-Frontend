@@ -14,6 +14,11 @@ import type {
   AdminUpdateSettingsRequest,
   AdminVerifyRequest,
   AdminVerifyResponse,
+  AdminRejectRequest,
+  AdminRejectResponse,
+  BankAccount,
+  CreateBankAccountRequest,
+  UpdateBankAccountRequest,
   CreateMenuItemRequest,
   RefreshTokenRequest,
   RefreshTokenResponse,
@@ -222,6 +227,50 @@ export function adminVerifyPayment(
   payload: AdminVerifyRequest,
 ): Promise<AdminVerifyResponse> {
   return request<AdminVerifyResponse>("/admin/verify", {
+    method: "POST",
+    body: payload,
+    admin: true,
+  });
+}
+
+// ---------- Bank accounts ----------
+
+export function adminGetBankAccounts(): Promise<BankAccount[]> {
+  return request<BankAccount[]>("/admin/settings/bank-accounts", { admin: true });
+}
+
+export function adminCreateBankAccount(
+  payload: CreateBankAccountRequest,
+): Promise<BankAccount> {
+  return request<BankAccount>("/admin/settings/bank-accounts", {
+    method: "POST",
+    body: payload,
+    admin: true,
+  });
+}
+
+export function adminUpdateBankAccount(
+  id: string,
+  payload: UpdateBankAccountRequest,
+): Promise<BankAccount> {
+  return request<BankAccount>(
+    `/admin/settings/bank-accounts/${encodeURIComponent(id)}`,
+    { method: "PATCH", body: payload, admin: true },
+  );
+}
+
+export function adminDeleteBankAccount(id: string): Promise<{ success: true }> {
+  return request<{ success: true }>(
+    `/admin/settings/bank-accounts/${encodeURIComponent(id)}`,
+    { method: "DELETE", admin: true },
+  );
+}
+
+/** Rejects a claimed payment — orders return to unpaid and the account is penalised. */
+export function adminRejectPayment(
+  payload: AdminRejectRequest,
+): Promise<AdminRejectResponse> {
+  return request<AdminRejectResponse>("/admin/reject", {
     method: "POST",
     body: payload,
     admin: true,

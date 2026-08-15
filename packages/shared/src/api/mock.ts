@@ -17,6 +17,9 @@ import type {
   AdminTablesResponse,
   AdminVerifyRequest,
   AdminVerifyResponse,
+  AdminRejectRequest,
+  AdminRejectResponse,
+  BankAccount,
   ClaimPaymentRequest,
   ClaimPaymentResponse,
   ConfirmOrdersRequest,
@@ -44,6 +47,8 @@ import type {
   RefreshTokenResponse,
   CreateStaffRequest,
   UpdateStaffRequest,
+  CreateBankAccountRequest,
+  UpdateBankAccountRequest,
 } from "../types/index";
 
 // ---------------------------------------------------------------------------
@@ -170,13 +175,59 @@ const SEED_RESTAURANT: Restaurant = {
   logo_url:
     "https://images.unsplash.com/photo-1552566626-52f8b828add9?w=200&q=80",
   operating_hours: "09:00 - 22:00",
-  bank_name: "Access Bank",
-  account_number: "0123456789",
-  account_name: "Aji's Kitchen Ltd",
   whatsapp_number: "+2348012345678",
 };
 
 let _restaurant: Restaurant = { ...SEED_RESTAURANT };
+
+/**
+ * Mirrors the backend's `bank_accounts` table. Two seeded accounts so the
+ * customer pay screen's fallback path is demoable — a single account hides the
+ * whole reason ranking exists.
+ */
+const SEED_BANK_ACCOUNTS: BankAccount[] = [
+  {
+    id: "bank-001",
+    bank_name: "Access Bank",
+    account_number: "0123456789",
+    account_name: "Aji's Kitchen Ltd",
+    is_active: true,
+    is_default: true,
+    success_count: 42,
+    failure_count: 1,
+  },
+  {
+    id: "bank-002",
+    bank_name: "GTBank",
+    account_number: "0987654321",
+    account_name: "Aji's Kitchen Ltd",
+    is_active: true,
+    is_default: false,
+    success_count: 12,
+    failure_count: 6,
+  },
+];
+
+let _bankAccounts: BankAccount[] = SEED_BANK_ACCOUNTS.map((a) => ({ ...a }));
+
+/**
+ * The backend's ordering: default first, then by success rate. A brand-new
+ * account has no history, so it sorts as neutral rather than worst — otherwise
+ * a freshly added account could never earn its way up.
+ */
+function rankedActiveAccounts(): BankAccount[] {
+  const rate = (a: BankAccount) => {
+    const ok = a.success_count ?? 0;
+    const bad = a.failure_count ?? 0;
+    return ok + bad === 0 ? 0.5 : ok / (ok + bad);
+  };
+  return _bankAccounts
+    .filter((a) => a.is_active)
+    .sort((a, b) => {
+      if (a.is_default !== b.is_default) return a.is_default ? -1 : 1;
+      return rate(b) - rate(a);
+    });
+}
 
 /**
  * Mock figures are authored in naira for readability; the API contract is kobo.
@@ -239,6 +290,7 @@ const STORAGE_KEY = "oshap-mock-state";
 
 interface PersistedState {
   restaurant?: Restaurant;
+  bankAccounts?: BankAccount[];
   menu?: MenuItem[];
   tables?: string[];
   orders?: Array<[string, StoredOrder]>;
@@ -262,6 +314,7 @@ export function syncFromStorage(): void {
     if (saved.restaurant) {
       _restaurant = { ...SEED_RESTAURANT, ...saved.restaurant };
     }
+    if (Array.isArray(saved.bankAccounts)) _bankAccounts = saved.bankAccounts;
     if (Array.isArray(saved.menu)) _menu = saved.menu;
     if (Array.isArray(saved.tables)) _tables = saved.tables;
 
@@ -302,6 +355,7 @@ function syncToStorage(): void {
   try {
     const payload: PersistedState = {
       restaurant: _restaurant,
+      bankAccounts: _bankAccounts,
       menu: _menu,
       tables: _tables,
       orders: Array.from(_orders.entries()),
@@ -471,6 +525,7 @@ route("GET", /^\/table\/(.+)$/, ({ path, query }) => {
     table_id: tableId,
     status: "OPEN",
     restaurant: _restaurant,
+    bank_accounts: rankedActiveAccounts(),
     unpaid_order: unpaidOrder as TableInfo["unpaid_order"],
     pending_payments: pendingPayments as TableInfo["pending_payments"],
   };
@@ -753,6 +808,10 @@ route("POST", /^\/payment\/confirm$/, ({ body }) => {
       amount: order.total,
       status: "CLAIMED",
       proof_url: b.proof_url ?? null,
+      // Falls back to the default so the ranking still learns when an older
+      // client omits it.
+      bank_account_id:
+        b.bank_account_id ?? rankedActiveAccounts()[0]?.id ?? null,
       created_at: now(),
     });
   }
@@ -850,13 +909,80 @@ route("PATCH", /^\/admin\/settings$/, ({ body }) => {
   if (b.logo_url !== undefined) _restaurant.logo_url = b.logo_url;
   if (b.address !== undefined) _restaurant.address = b.address;
   if (b.operating_hours !== undefined) _restaurant.operating_hours = b.operating_hours;
-  if (b.bank_name !== undefined) _restaurant.bank_name = b.bank_name;
-  if (b.account_number !== undefined) _restaurant.account_number = b.account_number;
-  if (b.account_name !== undefined) _restaurant.account_name = b.account_name;
   if (b.whatsapp_number !== undefined) _restaurant.whatsapp_number = b.whatsapp_number;
   
   syncToStorage();
   return json(200, _restaurant);
+});
+
+// -------------------- Admin: Bank accounts --------------------
+
+route("GET", /^\/admin\/settings\/bank-accounts$/, () => {
+  // Admin sees every account, active or not, in rank order.
+  return json(200, [..._bankAccounts].sort((a, b) => Number(b.is_default) - Number(a.is_default)));
+});
+
+route("POST", /^\/admin\/settings\/bank-accounts$/, ({ body }) => {
+  const b = body as CreateBankAccountRequest;
+  if (!b.bank_name || !b.account_number || !b.account_name) {
+    return json(400, { error: "Bank name, account number and account name are required" });
+  }
+
+  // The first account has to be the default, or nothing is offered to guests.
+  const makeDefault = b.is_default ?? _bankAccounts.length === 0;
+  if (makeDefault) _bankAccounts = _bankAccounts.map((a) => ({ ...a, is_default: false }));
+
+  const account: BankAccount = {
+    id: `bank-${String(_bankAccounts.length + 1).padStart(3, "0")}`,
+    bank_name: b.bank_name,
+    account_number: b.account_number,
+    account_name: b.account_name,
+    is_active: true,
+    is_default: makeDefault,
+    success_count: 0,
+    failure_count: 0,
+  };
+  _bankAccounts.push(account);
+  syncToStorage();
+  return json(200, account);
+});
+
+route("PATCH", /^\/admin\/settings\/bank-accounts\/(.+)$/, ({ path, body }) => {
+  const id = path.split("/bank-accounts/")[1]!;
+  const account = _bankAccounts.find((a) => a.id === id);
+  if (!account) return json(404, { error: "Bank account not found" });
+
+  const b = body as UpdateBankAccountRequest;
+  if (b.bank_name !== undefined) account.bank_name = b.bank_name;
+  if (b.account_number !== undefined) account.account_number = b.account_number;
+  if (b.account_name !== undefined) account.account_name = b.account_name;
+  if (b.is_active !== undefined) account.is_active = b.is_active;
+
+  // is_default is exclusive — setting it here unsets every other account.
+  if (b.is_default) {
+    _bankAccounts = _bankAccounts.map((a) => ({ ...a, is_default: a.id === id }));
+  }
+
+  syncToStorage();
+  return json(200, _bankAccounts.find((a) => a.id === id)!);
+});
+
+route("DELETE", /^\/admin\/settings\/bank-accounts\/(.+)$/, ({ path }) => {
+  const id = path.split("/bank-accounts/")[1]!;
+  const before = _bankAccounts.length;
+  const wasDefault = _bankAccounts.find((a) => a.id === id)?.is_default ?? false;
+  _bankAccounts = _bankAccounts.filter((a) => a.id !== id);
+  if (_bankAccounts.length === before) return json(404, { error: "Bank account not found" });
+
+  // Removing the default promotes the best remaining account, so guests are
+  // never left with a payable bill and nowhere to send the money.
+  if (wasDefault) {
+    const next = rankedActiveAccounts()[0];
+    if (next) next.is_default = true;
+  }
+
+  syncToStorage();
+  return json(200, { success: true });
 });
 
 route("POST", /^\/admin\/settings\/upload$/, () => {
@@ -1091,8 +1217,8 @@ const _mockGroup: import("../types/index").RestaurantGroup = {
   name: "Oshap Restaurant Group",
   branches: [
     { ..._restaurant, id: _restaurant.id, is_active: true, table_count: 13, staff_count: 8 },
-    { id: "rest-002", name: "Oshap VI", description: "Victoria Island Branch", logo_url: null, operating_hours: "10:00 - 23:00", bank_name: "GTBank", account_number: "0123456789", account_name: "Oshap VI Ltd", whatsapp_number: null, is_active: true, table_count: 10, staff_count: 5 },
-    { id: "rest-003", name: "Oshap Ikeja", description: "Ikeja Branch", logo_url: null, operating_hours: "09:00 - 22:00", bank_name: "Access Bank", account_number: "9876543210", account_name: "Oshap Ikeja Ltd", whatsapp_number: null, is_active: false, table_count: 8, staff_count: 4 },
+    { id: "rest-002", name: "Oshap VI", description: "Victoria Island Branch", logo_url: null, operating_hours: "10:00 - 23:00", whatsapp_number: null, is_active: true, table_count: 10, staff_count: 5 },
+    { id: "rest-003", name: "Oshap Ikeja", description: "Ikeja Branch", logo_url: null, operating_hours: "09:00 - 22:00", whatsapp_number: null, is_active: false, table_count: 8, staff_count: 4 },
   ],
 };
 
@@ -1118,8 +1244,8 @@ route("GET", /^\/admin\/group\/analytics$/, () => {
 
 const _platformRestaurants: import("../types/index").PlatformRestaurant[] = [
   { ..._restaurant, subscription_tier: "PRO", is_active: true, created_at: "2025-01-15T09:00:00Z", owner_email: "owner@oshap.com", table_count: 13, monthly_orders: 142 },
-  { id: "rest-002", name: "Oshap VI", description: "Victoria Island Branch", logo_url: null, operating_hours: "10:00 - 23:00", bank_name: "GTBank", account_number: "0123456789", account_name: "Oshap VI Ltd", whatsapp_number: null, subscription_tier: "STARTER", is_active: true, created_at: "2025-03-20T10:00:00Z", owner_email: "vi@oshap.com", table_count: 10, monthly_orders: 87 },
-  { id: "rest-003", name: "Oshap Ikeja", description: "Ikeja Branch", logo_url: null, operating_hours: "09:00 - 22:00", bank_name: "Access Bank", account_number: "9876543210", account_name: "Oshap Ikeja Ltd", whatsapp_number: null, subscription_tier: "FREE", is_active: false, created_at: "2025-06-01T08:00:00Z", owner_email: "ikeja@oshap.com", table_count: 8, monthly_orders: 0 },
+  { id: "rest-002", name: "Oshap VI", description: "Victoria Island Branch", logo_url: null, operating_hours: "10:00 - 23:00", whatsapp_number: null, subscription_tier: "STARTER", is_active: true, created_at: "2025-03-20T10:00:00Z", owner_email: "vi@oshap.com", table_count: 10, monthly_orders: 87 },
+  { id: "rest-003", name: "Oshap Ikeja", description: "Ikeja Branch", logo_url: null, operating_hours: "09:00 - 22:00", whatsapp_number: null, subscription_tier: "FREE", is_active: false, created_at: "2025-06-01T08:00:00Z", owner_email: "ikeja@oshap.com", table_count: 8, monthly_orders: 0 },
 ];
 
 route("GET", /^\/platform\/restaurants$/, () => {
@@ -1144,9 +1270,6 @@ route("POST", /^\/platform\/restaurants$/, ({ body }) => {
     description: null,
     logo_url: null,
     operating_hours: null,
-    bank_name: b.bank_name ?? null,
-    account_number: b.account_number ?? null,
-    account_name: b.account_name ?? null,
     whatsapp_number: null,
     subscription_tier: b.subscription_tier,
     is_active: true,
@@ -1181,6 +1304,49 @@ route("GET", /^\/platform\/health$/, () => {
   } satisfies import("../types/index").PlatformSystemHealth);
 });
 
+/**
+ * Moves an account's success/failure tally. This is the only thing the ranking
+ * learns from, so a verify or reject that skips it silently freezes the order
+ * accounts are offered in.
+ */
+function creditAccount(
+  accountId: string | null | undefined,
+  outcome: "success" | "failure",
+): void {
+  if (!accountId) return;
+  const account = _bankAccounts.find((a) => a.id === accountId);
+  if (!account) return;
+  if (outcome === "success") account.success_count = (account.success_count ?? 0) + 1;
+  else account.failure_count = (account.failure_count ?? 0) + 1;
+}
+
+route("POST", /^\/admin\/reject$/, ({ body }) => {
+  const b = body as AdminRejectRequest;
+  const pendingOrders = [..._orders.values()].filter(
+    (o) => o.table_id === b.table_id && o.status === "PAYMENT_PENDING",
+  );
+
+  if (pendingOrders.length === 0) {
+    return json(404, { error: "No pending payments" });
+  }
+
+  for (const o of pendingOrders) {
+    // The food was served — rejecting the payment returns the order to unpaid,
+    // not to the kitchen.
+    o.status = "READY";
+    const p = _payments.get(o.id);
+    if (!p) continue;
+    p.status = "FAILED";
+    creditAccount(p.bank_account_id, "failure");
+  }
+
+  syncToStorage();
+  return json(200, {
+    success: true as const,
+    rejected: pendingOrders.length,
+  } satisfies AdminRejectResponse);
+});
+
 route("POST", /^\/admin\/verify$/, ({ body }) => {
   const b = body as AdminVerifyRequest;
   const pendingOrders = [..._orders.values()].filter(
@@ -1194,7 +1360,9 @@ route("POST", /^\/admin\/verify$/, ({ body }) => {
   for (const o of pendingOrders) {
     o.status = "CONFIRMED";
     const p = _payments.get(o.id);
-    if (p) p.status = "VERIFIED";
+    if (!p) continue;
+    p.status = "VERIFIED";
+    creditAccount(p.bank_account_id, "success");
   }
 
   // Auto-close if no unpaid remain
@@ -1445,6 +1613,7 @@ function sseEventFor(path: string, body: unknown): string {
   if (path.includes("/request-pos")) return "pos_requested";
   if (path === "/payment/confirm") return "payment_claimed";
   if (path === "/admin/verify") return "payment_verified";
+  if (path === "/admin/reject") return "payment_rejected";
   if (path === "/admin/close") return "table_closed";
   if (path === "/session") return "session_started";
 
