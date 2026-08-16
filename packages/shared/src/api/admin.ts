@@ -29,6 +29,10 @@ import type {
   RecordCashRequest,
   RecordCashResponse,
   ZReportResponse,
+  DiscountRequest,
+  TipRequest,
+  RefundRequest,
+  UpdateOrderItemRequest,
   Order,
   OrderWithItems,
   Restaurant,
@@ -246,6 +250,67 @@ export function adminAnalytics(query: { start_date: string; end_date: string }):
   return request<AdminAnalyticsResponse>("/admin/analytics", {
     admin: true,
     query,
+  });
+}
+
+// ---------- Bill adjustments ----------
+
+const orderPath = (orderId: string) => `/admin/orders/${encodeURIComponent(orderId)}`;
+const itemPath = (orderId: string, itemId: string) =>
+  `${orderPath(orderId)}/items/${encodeURIComponent(itemId)}`;
+
+export function adminDiscountOrder(
+  orderId: string,
+  payload: DiscountRequest,
+): Promise<Order> {
+  return request<Order>(`${orderPath(orderId)}/discount`, {
+    method: "POST",
+    body: payload,
+    admin: true,
+  });
+}
+
+export function adminTipOrder(orderId: string, payload: TipRequest): Promise<Order> {
+  return request<Order>(`${orderPath(orderId)}/tip`, {
+    method: "POST",
+    body: payload,
+    admin: true,
+  });
+}
+
+export function adminRefundOrder(
+  orderId: string,
+  payload: RefundRequest,
+): Promise<Order> {
+  return request<Order>(`${orderPath(orderId)}/refund`, {
+    method: "POST",
+    body: payload,
+    admin: true,
+  });
+}
+
+export function adminUpdateOrderItem(
+  orderId: string,
+  itemId: string,
+  payload: UpdateOrderItemRequest,
+): Promise<Order> {
+  return request<Order>(itemPath(orderId, itemId), {
+    method: "PATCH",
+    body: payload,
+    admin: true,
+  });
+}
+
+/** Removes the line entirely — for something never served. */
+export function adminVoidOrderItem(orderId: string, itemId: string): Promise<Order> {
+  return request<Order>(itemPath(orderId, itemId), { method: "DELETE", admin: true });
+}
+
+/** Keeps the line at zero — for something served but not charged for. */
+export function adminCompOrderItem(orderId: string, itemId: string): Promise<Order> {
+  return request<Order>(`${itemPath(orderId, itemId)}/comp`, {
+    method: "POST",
+    admin: true,
   });
 }
 

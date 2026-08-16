@@ -36,6 +36,12 @@ import {
   adminRejectPayment,
   adminRecordCash,
   adminZReport,
+  adminDiscountOrder,
+  adminTipOrder,
+  adminRefundOrder,
+  adminUpdateOrderItem,
+  adminVoidOrderItem,
+  adminCompOrderItem,
 } from "../api/admin";
 import type {
   AdminHistoryQuery,
@@ -47,6 +53,10 @@ import type {
   UpdateStaffRequest,
   CreateBankAccountRequest,
   UpdateBankAccountRequest,
+  DiscountRequest,
+  TipRequest,
+  RefundRequest,
+  UpdateOrderItemRequest,
 } from "../types/index";
 
 // ---------- Settings ----------
@@ -282,6 +292,75 @@ export function useAdminAnalytics(startDate: string, endDate: string) {
     queryKey: queryKeys.admin.analytics(startDate, endDate),
     queryFn: () => adminAnalytics({ start_date: startDate, end_date: endDate }),
   });
+}
+
+// ---------- Bill adjustments ----------
+
+/**
+ * Adjusting a bill changes what the guest owes, so the customer-facing caches
+ * have to move with the admin ones — otherwise a diner watching their bill sees
+ * the pre-discount figure until they happen to refetch.
+ */
+function useBillAdjustment<TArgs>(mutationFn: (args: TArgs) => Promise<unknown>) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: queryKeys.orders.all });
+      queryClient.invalidateQueries({ queryKey: queryKeys.tables.all });
+      queryClient.invalidateQueries({ queryKey: queryKeys.admin.tables() });
+      queryClient.invalidateQueries({ queryKey: queryKeys.admin.kitchen() });
+    },
+  });
+}
+
+export function useAdminDiscountOrder() {
+  return useBillAdjustment(
+    ({ orderId, payload }: { orderId: string; payload: DiscountRequest }) =>
+      adminDiscountOrder(orderId, payload),
+  );
+}
+
+export function useAdminTipOrder() {
+  return useBillAdjustment(
+    ({ orderId, payload }: { orderId: string; payload: TipRequest }) =>
+      adminTipOrder(orderId, payload),
+  );
+}
+
+export function useAdminRefundOrder() {
+  return useBillAdjustment(
+    ({ orderId, payload }: { orderId: string; payload: RefundRequest }) =>
+      adminRefundOrder(orderId, payload),
+  );
+}
+
+export function useAdminUpdateOrderItem() {
+  return useBillAdjustment(
+    ({
+      orderId,
+      itemId,
+      payload,
+    }: {
+      orderId: string;
+      itemId: string;
+      payload: UpdateOrderItemRequest;
+    }) => adminUpdateOrderItem(orderId, itemId, payload),
+  );
+}
+
+export function useAdminVoidOrderItem() {
+  return useBillAdjustment(
+    ({ orderId, itemId }: { orderId: string; itemId: string }) =>
+      adminVoidOrderItem(orderId, itemId),
+  );
+}
+
+export function useAdminCompOrderItem() {
+  return useBillAdjustment(
+    ({ orderId, itemId }: { orderId: string; itemId: string }) =>
+      adminCompOrderItem(orderId, itemId),
+  );
 }
 
 // ---------- Z-report ----------

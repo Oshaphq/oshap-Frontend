@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { Link } from "react-router";
 import { useAdminHistory, formatCurrency } from "@oshap/shared";
 import { SecondaryButton } from "@oshap/shared/ui";
 import QueryError from "../components/QueryError";
@@ -141,9 +142,13 @@ export default function HistoryPage() {
               >
                 <div className="flex items-start justify-between gap-md">
                   <div className="flex flex-col gap-xs min-w-0">
-                    <span className="text-caption-md font-bold text-primary-text font-mono">
+                    <Link
+                      to={`/orders/${order.id}`}
+                      title="Open the bill"
+                      className="text-caption-md font-bold text-primary-text font-mono hover:text-primary transition-colors no-underline"
+                    >
                       {order.reference}
-                    </span>
+                    </Link>
                     <span className="text-caption-sm text-secondary-text">
                       {order.table_id}
                       {order.customer_name && (

@@ -23,6 +23,10 @@ import type {
   RecordCashResponse,
   PaymentMethod,
   ZReportResponse,
+  DiscountRequest,
+  TipRequest,
+  RefundRequest,
+  UpdateOrderItemRequest,
   BankAccount,
   ClaimPaymentRequest,
   ClaimPaymentResponse,
@@ -1516,6 +1520,137 @@ function creditAccount(
   if (outcome === "success") account.success_count = (account.success_count ?? 0) + 1;
   else account.failure_count = (account.failure_count ?? 0) + 1;
 }
+
+// -------------------- Admin: Bill adjustments --------------------
+
+type StoredOrderWithItems = Order & {
+  order_items: Array<{ id: string; name: string; quantity: number; price: number }>;
+};
+
+/**
+ * Re-prices an order from its current lines. Adjustments never patch `total`
+ * directly — they change an input and let the same formula recompute, so the
+ * invariant can't drift out from under the Z-report.
+ */
+function reprice(order: StoredOrderWithItems): void {
+  const subtotal = order.order_items.reduce((s, i) => s + i.price * i.quantity, 0);
+  Object.assign(order, priceOrder(subtotal, order.discount ?? 0, order.tip ?? 0));
+}
+
+function findAdjustableOrder(path: string, marker: string) {
+  const orderId = path.split("/admin/orders/")[1]!.split("/")[0]!;
+  const order = _orders.get(orderId) as StoredOrderWithItems | undefined;
+  return { orderId, order, marker };
+}
+
+route("POST", /^\/admin\/orders\/[^/]+\/discount$/, ({ path, body }) => {
+  const { order } = findAdjustableOrder(path, "discount");
+  if (!order) return json(404, { error: "Order not found" });
+
+  const b = body as DiscountRequest;
+  const subtotal = order.order_items.reduce((s, i) => s + i.price * i.quantity, 0);
+  const discount =
+    b.percent !== undefined ? applyRate(subtotal, Math.round(b.percent * 100)) : (b.amount ?? 0);
+
+  // A discount larger than the bill would invert the total.
+  if (discount < 0 || discount > subtotal) {
+    return json(400, { error: "Discount cannot exceed the subtotal" });
+  }
+
+  order.discount = discount;
+  reprice(order);
+  syncToStorage();
+  return json(200, order);
+});
+
+route("POST", /^\/admin\/orders\/[^/]+\/tip$/, ({ path, body }) => {
+  const { order } = findAdjustableOrder(path, "tip");
+  if (!order) return json(404, { error: "Order not found" });
+
+  const amount = (body as TipRequest).amount;
+  if (!Number.isFinite(amount) || amount < 0) {
+    return json(400, { error: "Tip must be zero or more" });
+  }
+
+  order.tip = amount;
+  reprice(order);
+  syncToStorage();
+  return json(200, order);
+});
+
+route("POST", /^\/admin\/orders\/[^/]+\/refund$/, ({ path, body }) => {
+  const { order } = findAdjustableOrder(path, "refund");
+  if (!order) return json(404, { error: "Order not found" });
+
+  const b = body as RefundRequest;
+  const amount = b.amount ?? order.total;
+  if (amount <= 0 || amount > order.total) {
+    return json(400, { error: "Refund must be between zero and the order total" });
+  }
+
+  // A refunded order stops being takings, so it leaves CONFIRMED — otherwise
+  // the Z-report would keep counting money that was handed back.
+  const payment = _payments.get(order.id);
+  if (payment) payment.status = "FAILED";
+  order.status = "CANCELLED";
+
+  syncToStorage();
+  return json(200, order);
+});
+
+route("PATCH", /^\/admin\/orders\/[^/]+\/items\/[^/]+$/, ({ path, body }) => {
+  const { order } = findAdjustableOrder(path, "item");
+  if (!order) return json(404, { error: "Order not found" });
+
+  const itemId = path.split("/items/")[1]!;
+  const item = order.order_items.find((i) => i.id === itemId);
+  if (!item) return json(404, { error: "Item not found" });
+
+  const b = body as UpdateOrderItemRequest;
+  if (b.name !== undefined) item.name = b.name;
+  if (b.price !== undefined) {
+    if (b.price < 0) return json(400, { error: "Price cannot be negative" });
+    item.price = b.price;
+  }
+  if (b.quantity !== undefined) {
+    if (b.quantity < 1) return json(400, { error: "Use void to remove a line" });
+    item.quantity = b.quantity;
+  }
+
+  reprice(order);
+  syncToStorage();
+  return json(200, order);
+});
+
+route("DELETE", /^\/admin\/orders\/[^/]+\/items\/[^/]+$/, ({ path }) => {
+  const { order } = findAdjustableOrder(path, "item");
+  if (!order) return json(404, { error: "Order not found" });
+
+  const itemId = path.split("/items/")[1]!;
+  const before = order.order_items.length;
+  order.order_items = order.order_items.filter((i) => i.id !== itemId);
+  if (order.order_items.length === before) return json(404, { error: "Item not found" });
+
+  reprice(order);
+  syncToStorage();
+  return json(200, order);
+});
+
+route("POST", /^\/admin\/orders\/[^/]+\/items\/[^/]+\/comp$/, ({ path }) => {
+  const { order } = findAdjustableOrder(path, "comp");
+  if (!order) return json(404, { error: "Order not found" });
+
+  const itemId = path.split("/items/")[1]!.replace("/comp", "");
+  const item = order.order_items.find((i) => i.id === itemId);
+  if (!item) return json(404, { error: "Item not found" });
+
+  // Comp keeps the line visible at zero — the kitchen still made it, and the
+  // guest should see it was given rather than silently removed.
+  item.price = 0;
+  reprice(order);
+  syncToStorage();
+  return json(200, order);
+});
 
 // -------------------- Admin: Z-report --------------------
 

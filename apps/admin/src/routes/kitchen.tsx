@@ -7,6 +7,7 @@ import {
 import type { OrderWithItems } from "@oshap/shared";
 import { PrimaryButton } from "@oshap/shared/ui";
 import QueryError from "../components/QueryError";
+import { Link } from "react-router";
 import { useAuth } from "../context/AuthContext";
 
 function timeAgo(dateStr: string): string {
@@ -273,9 +274,13 @@ function KitchenColumn({
                       {timeAgo(order.created_at)}
                     </span>
                   </div>
-                  <span className="text-caption-sm text-outline font-mono">
+                  <Link
+                    to={`/orders/${order.id}`}
+                    title="Open the bill"
+                    className="text-caption-sm text-outline font-mono hover:text-primary transition-colors no-underline"
+                  >
                     #{stripRef(order.reference)}
-                  </span>
+                  </Link>
                 </div>
                 <ul className="flex flex-col gap-xs">
                   {order.order_items.map((item) => (
