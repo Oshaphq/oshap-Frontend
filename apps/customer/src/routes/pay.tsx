@@ -4,6 +4,7 @@ import {
   formatCurrency,
   getDeviceToken,
   useClaimPayment,
+  useOrder,
   useRequestPos,
   useTable,
 } from "@oshap/shared";
@@ -32,6 +33,22 @@ export default function PayPage() {
   const requestPos = useRequestPos();
   const [copiedField, setCopiedField] = useState<string | null>(null);
   const [selectedAccountId, setSelectedAccountId] = useState<string | null>(null);
+
+  /**
+   * `/session/orders` only returns active orders, so once a bill settles the
+   * customer has no way back to it. Remembering the id at claim time lets us
+   * fetch it from the public order endpoint and show a receipt.
+   *
+   * Cash is settled by staff without the customer's phone claiming anything,
+   * so a cash-paying guest won't have this — they get the paper receipt.
+   */
+  const settledOrderKey = `oshap-settled-order-${tableId}`;
+  const [settledOrderId, setSettledOrderId] = useState<string | null>(() => {
+    if (typeof window === "undefined") return null;
+    return window.sessionStorage.getItem(settledOrderKey);
+  });
+
+  const settledOrder = useOrder(settledOrderId ?? undefined);
 
   const posFlagKey = `oshap-pos-requested-${tableId}`;
   const [posRequested, setPosRequested] = useState<boolean>(() => {
@@ -130,6 +147,8 @@ export default function PayPage() {
         // the ranking never learns which accounts actually work.
         bank_account_id: selectedAccount?.id,
       });
+      window.sessionStorage.setItem(settledOrderKey, unpaidOrder.id);
+      setSettledOrderId(unpaidOrder.id);
     } catch (err) {
       console.error("Payment confirmation error:", err);
       toast.error(
@@ -140,13 +159,19 @@ export default function PayPage() {
     }
   };
 
-  // Case 1: clean slate
+  // Case 1: nothing outstanding. If we know what they just paid for and it has
+  // been verified, show a receipt rather than a bare "all settled" — a customer
+  // who has handed over money is owed proof of what it bought.
   if (!unpaidOrder && !pendingPayments && !refParam) {
+    const receipt = settledOrder.data;
+    const isPaid = receipt?.status === "CONFIRMED";
+
     return (
       <div className="min-h-screen bg-surface-container-low pb-20">
         <CustomerHeader
           tableId={tableId}
           title="Pay Bill"
+          subtitle={isPaid ? `Ref: ${receipt.reference}` : undefined}
           leftSlot={
             <button
               type="button"
@@ -158,14 +183,51 @@ export default function PayPage() {
             </button>
           }
         />
-        <EmptyState
-          icon="mgc_check_double_fill"
-          iconClassName="text-success"
-          title="All Settled"
-          message="You have no pending bills. Ready for more?"
-          cta="Browse Menu"
-          onCta={() => navigate(`/menu?table=${tableId}`)}
-        />
+
+        {isPaid ? (
+          <>
+            <section className="py-2xl px-md bg-surface-container-low border-b-[6px] border-surface-container flex flex-col items-center gap-s text-center">
+              <i className="mgc_check_circle_fill text-5xl text-success" />
+              <span className="font-display text-display-h2 font-semibold text-primary-text">
+                Payment confirmed
+              </span>
+              <span className="text-p2 text-secondary-text">
+                {formatCurrency(receipt.total)} received
+                {receipt.payment?.method === "CASH"
+                  ? " in cash"
+                  : receipt.payment?.method === "POS"
+                    ? " by card"
+                    : " by transfer"}
+              </span>
+            </section>
+
+            <BillBreakdown
+              heading="Receipt"
+              items={receipt.items}
+              subtotal={receipt.subtotal}
+              discount={receipt.discount}
+              serviceCharge={receipt.service_charge}
+              vat={receipt.vat}
+              tip={receipt.tip}
+              total={receipt.total}
+            />
+
+            <section className="py-l px-md bg-surface-container-low flex flex-col gap-md">
+              <SecondaryButton onClick={() => navigate(`/menu?table=${tableId}`)}>
+                Order More
+              </SecondaryButton>
+            </section>
+          </>
+        ) : (
+          <EmptyState
+            icon="mgc_check_double_fill"
+            iconClassName="text-success"
+            title="All Settled"
+            message="You have no pending bills. Ready for more?"
+            cta="Browse Menu"
+            onCta={() => navigate(`/menu?table=${tableId}`)}
+          />
+        )}
         <BottomNav tableId={tableId} />
       </div>
     );
@@ -254,6 +316,19 @@ export default function PayPage() {
           {formatCurrency(total)}
         </span>
       </section>
+
+      {/* A guest who ordered ₦75 of food and is asked for ₦84.66 will not pay
+          until they can see why. Showing what they ordered and every line the
+          total is built from is the difference between a bill and a demand. */}
+      <BillBreakdown
+        items={unpaidOrder?.order_items ?? []}
+        subtotal={unpaidOrder?.subtotal}
+        discount={unpaidOrder?.discount}
+        serviceCharge={unpaidOrder?.service_charge}
+        vat={unpaidOrder?.vat}
+        tip={unpaidOrder?.tip}
+        total={total}
+      />
 
       <section className="py-l px-md bg-surface-container-low border-b-[6px] border-surface-container flex flex-col gap-md">
         <div className="flex flex-col gap-xs">
@@ -388,6 +463,92 @@ function EmptyState({
       <PrimaryButton size="md" onClick={onCta}>
         {cta}
       </PrimaryButton>
+    </div>
+  );
+}
+
+/**
+ * The itemised bill. Deliberately shows every component rather than a single
+ * figure — a guest comparing the menu price against the amount due needs to see
+ * where the difference came from, or they assume they're being overcharged.
+ */
+function BillBreakdown({
+  items,
+  subtotal,
+  discount,
+  serviceCharge,
+  vat,
+  tip,
+  total,
+  heading = "Your order",
+}: {
+  items: Array<{ id: string; name: string; quantity: number; price: number }>;
+  subtotal?: number;
+  discount?: number;
+  serviceCharge?: number;
+  vat?: number;
+  tip?: number;
+  total: number;
+  heading?: string;
+}) {
+  return (
+    <section className="py-l px-md bg-surface-container-low border-b-[6px] border-surface-container flex flex-col gap-md">
+      <h2 className="font-display text-display-h3 font-semibold text-primary-text">
+        {heading}
+      </h2>
+
+      {items.length > 0 && (
+        <div className="flex flex-col gap-s">
+          {items.map((item) => (
+            <div key={item.id} className="flex items-start justify-between gap-md">
+              <span className="text-p2 text-primary-text min-w-0">
+                <span className="text-secondary-text tabular-nums">
+                  {item.quantity}×{" "}
+                </span>
+                {item.name}
+              </span>
+              <span className="text-p2 text-primary-text tabular-nums shrink-0">
+                {formatCurrency(item.price * item.quantity)}
+              </span>
+            </div>
+          ))}
+        </div>
+      )}
+
+      <div className="flex flex-col pt-s border-t border-outline-variant">
+        {subtotal != null && <BillLine label="Item total" value={subtotal} />}
+        {(discount ?? 0) > 0 && <BillLine label="Discount" value={-(discount ?? 0)} />}
+        {(serviceCharge ?? 0) > 0 && (
+          <BillLine label="Service charge" value={serviceCharge ?? 0} />
+        )}
+        {/* Named rather than folded into the total: a guest is entitled to see
+            the tax they are paying. */}
+        {(vat ?? 0) > 0 && <BillLine label="VAT" value={vat ?? 0} />}
+        {(tip ?? 0) > 0 && <BillLine label="Tip" value={tip ?? 0} />}
+
+        <div className="flex items-center justify-between gap-md pt-s mt-xs border-t border-outline-variant">
+          <span className="text-label-l3 font-semibold text-primary-text">Total</span>
+          <span className="text-label-l2 font-semibold text-primary tabular-nums">
+            {formatCurrency(total)}
+          </span>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function BillLine({ label, value }: { label: string; value: number }) {
+  const isDeduction = value < 0;
+  return (
+    <div className="flex items-center justify-between gap-md py-xs">
+      <span className="text-p2 text-secondary-text">{label}</span>
+      <span
+        className={`text-p2 tabular-nums ${
+          isDeduction ? "text-error" : "text-primary-text"
+        }`}
+      >
+        {isDeduction ? `− ${formatCurrency(-value)}` : formatCurrency(value)}
+      </span>
     </div>
   );
 }

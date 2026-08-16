@@ -304,7 +304,18 @@ let _orderCounter = 0;
 
 const STORAGE_KEY = "oshap-mock-state";
 
+/**
+ * Bumped whenever the seed's shape or units change. Persisted collections from
+ * an older version are discarded rather than merged, because an array can't be
+ * merged field-by-field the way the restaurant object can.
+ *
+ * v2: money moved from naira to kobo. A menu persisted before that holds
+ * prices 100x too small, and silently renders ₦25 for a ₦2,500 dish.
+ */
+const SEED_VERSION = 2;
+
 interface PersistedState {
+  seedVersion?: number;
   restaurant?: Restaurant;
   bankAccounts?: BankAccount[];
   menu?: MenuItem[];
@@ -322,6 +333,13 @@ export function syncFromStorage(): void {
     const raw = localStorage.getItem(STORAGE_KEY);
     if (!raw) return;
     const saved = JSON.parse(raw) as PersistedState;
+
+    // Written by an older seed: its menu and orders are in the wrong units, so
+    // starting fresh is the only correct option.
+    if (saved.seedVersion !== SEED_VERSION) {
+      localStorage.removeItem(STORAGE_KEY);
+      return;
+    }
 
     // Merged, not replaced. JSON drops absent keys, so a wholesale restore
     // permanently hides any field added to the seed later — that has already
@@ -370,6 +388,7 @@ function syncToStorage(): void {
   if (typeof localStorage === "undefined") return;
   try {
     const payload: PersistedState = {
+      seedVersion: SEED_VERSION,
       restaurant: _restaurant,
       bankAccounts: _bankAccounts,
       menu: _menu,
@@ -517,25 +536,37 @@ route("GET", /^\/table\/(.+)$/, ({ path, query }) => {
   const createdOrders = scopedOrders.filter((o) => ["CREATED", "PREPARING", "READY"].includes(o.status));
   const pendingOrders = scopedOrders.filter((o) => o.status === "PAYMENT_PENDING");
 
-  let unpaidOrder = null;
-  if (createdOrders.length > 0) {
-    const latest = createdOrders[createdOrders.length - 1]!;
-    unpaidOrder = {
-      ...latest,
-      total: createdOrders.reduce((s, o) => s + o.total, 0),
-      combined_order_ids: createdOrders.map((o) => o.id),
-    };
-  }
+  /**
+   * Combines several orders on one table into a single bill.
+   *
+   * Every money field is summed, not just `total`. Spreading the latest order
+   * and overriding only the total left the breakdown describing one order while
+   * the total described all of them — which nobody notices until the bill is
+   * shown to a guest and the parts don't add up.
+   */
+  const combine = (orders: StoredOrder[]) => {
+    const latest = orders[orders.length - 1]!;
+    const sum = (pick: (o: StoredOrder) => number | undefined) =>
+      orders.reduce((acc, o) => acc + (pick(o) ?? 0), 0);
 
-  let pendingPayments = null;
-  if (pendingOrders.length > 0) {
-    const latest = pendingOrders[pendingOrders.length - 1]!;
-    pendingPayments = {
+    return {
       ...latest,
-      total: pendingOrders.reduce((s, o) => s + o.total, 0),
-      combined_order_ids: pendingOrders.map((o) => o.id),
+      subtotal: sum((o) => o.subtotal),
+      discount: sum((o) => o.discount),
+      service_charge: sum((o) => o.service_charge),
+      vat: sum((o) => o.vat),
+      tip: sum((o) => o.tip),
+      total: sum((o) => o.total),
+      // Guests are shown what they ordered, so the lines come from every order
+      // in the bill rather than only the most recent.
+      order_items: orders.flatMap((o) => o.order_items ?? []),
+      combined_order_ids: orders.map((o) => o.id),
     };
-  }
+  };
+
+  const unpaidOrder = createdOrders.length > 0 ? combine(createdOrders) : null;
+
+  const pendingPayments = pendingOrders.length > 0 ? combine(pendingOrders) : null;
 
   const result: TableInfo = {
     table_id: tableId,
