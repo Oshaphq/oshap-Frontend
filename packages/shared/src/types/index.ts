@@ -77,6 +77,13 @@ export interface Restaurant {
   address?: string | null;
   operating_hours?: string | null;
   whatsapp_number?: string | null;
+  /**
+   * Tax and service charge in **integer basis points**, not percentages:
+   * `750` = 7.5%, `1000` = 10%. Kept as integers for the same reason money is —
+   * a percentage float would reintroduce drift into VAT.
+   */
+  vat_rate?: number;
+  service_charge_rate?: number;
 }
 
 export interface StaffMember {
@@ -115,6 +122,20 @@ export interface Order {
   table_id: string;
   restaurant_id: string;
   status: OrderStatus;
+  /**
+   * The money breakdown, computed server-side in integer kobo. The invariant,
+   * exactly — no rounding slack:
+   *
+   *   total = subtotal - discount + service_charge + vat + tip
+   *
+   * Optional because orders placed before these fields existed only carry
+   * `total`; treat a missing part as zero rather than recomputing it here.
+   */
+  subtotal?: number;
+  discount?: number;
+  service_charge?: number;
+  vat?: number;
+  tip?: number;
   total: number;
   reference: string;
   session_id?: string | null;
@@ -174,6 +195,12 @@ export interface OrderDetail {
   id: string;
   table: string;
   items: OrderItem[];
+  /** Same breakdown as `Order` — a guest should be able to see the VAT they paid. */
+  subtotal?: number;
+  discount?: number;
+  service_charge?: number;
+  vat?: number;
+  tip?: number;
   total: number;
   status: OrderStatus;
   reference: string;
@@ -427,6 +454,32 @@ export interface RecordCashRequest {
 export interface RecordCashResponse {
   success: true;
   confirmed: number;
+}
+
+/** One payment method's contribution to the day, for cashing up the drawer. */
+export interface ZReportMethodLine {
+  method: PaymentMethod;
+  count: number;
+  total: number;
+}
+
+/**
+ * End-of-day close. The numbers a manager reconciles against the till before
+ * locking up, so every line is stated rather than derived on the client:
+ *
+ *   net_sales = gross_sales - discounts + service_charge + vat + tips - refunds
+ */
+export interface ZReportResponse {
+  date: string;
+  order_count: number;
+  gross_sales: number;
+  discounts: number;
+  service_charge: number;
+  vat: number;
+  tips: number;
+  refunds: number;
+  net_sales: number;
+  by_method: ZReportMethodLine[];
 }
 
 export interface AdminVerifyRequest {

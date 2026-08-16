@@ -28,6 +28,7 @@ import type {
   MenuItem,
   RecordCashRequest,
   RecordCashResponse,
+  ZReportResponse,
   Order,
   OrderWithItems,
   Restaurant,
@@ -245,6 +246,15 @@ export function adminAnalytics(query: { start_date: string; end_date: string }):
   return request<AdminAnalyticsResponse>("/admin/analytics", {
     admin: true,
     query,
+  });
+}
+
+// ---------- Z-report ----------
+
+export function adminZReport(date: string): Promise<ZReportResponse> {
+  return request<ZReportResponse>("/admin/z-report", {
+    admin: true,
+    query: { date },
   });
 }
 

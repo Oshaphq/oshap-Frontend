@@ -61,7 +61,10 @@ body {
 }
 
 @media print {
-  body > *:not(#oshap-print-root) {
+  /* Scoped with :has() so this only applies when a dedicated print sheet is
+     mounted. Without the guard, every other page in the app prints blank —
+     which is exactly what the daily-close screen would have done. */
+  body:has(#oshap-print-root) > *:not(#oshap-print-root) {
     display: none !important;
   }
 
@@ -79,5 +82,16 @@ body {
     /* Never split a table's code across two sheets of paper. */
     break-inside: avoid;
     page-break-inside: avoid;
+  }
+
+  /* Pages that print themselves rather than a dedicated sheet: drop the app
+     chrome and controls, and print on white regardless of the admin's theme. */
+  .oshap-print-hide {
+    display: none !important;
+  }
+
+  body {
+    background: #ffffff;
+    color: #000000;
   }
 }

@@ -35,6 +35,7 @@ import {
   adminDeleteBankAccount,
   adminRejectPayment,
   adminRecordCash,
+  adminZReport,
 } from "../api/admin";
 import type {
   AdminHistoryQuery,
@@ -280,6 +281,16 @@ export function useAdminAnalytics(startDate: string, endDate: string) {
   return useQuery({
     queryKey: queryKeys.admin.analytics(startDate, endDate),
     queryFn: () => adminAnalytics({ start_date: startDate, end_date: endDate }),
+  });
+}
+
+// ---------- Z-report ----------
+
+export function useAdminZReport(date: string) {
+  return useQuery({
+    queryKey: queryKeys.admin.zReport(date),
+    queryFn: () => adminZReport(date),
+    enabled: Boolean(date),
   });
 }
 

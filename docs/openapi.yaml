@@ -176,10 +176,14 @@ components:
             "You're sitting at …", so it should read as a place a person
             recognises rather than a postal-formatted line.
         operating_hours: { type: string, nullable: true }
-        bank_name: { type: string, nullable: true }
-        account_number: { type: string, nullable: true }
-        account_name: { type: string, nullable: true }
         whatsapp_number: { type: string, nullable: true }
+        vat_rate:
+          type: integer
+          description: >
+            Integer basis points, not a percentage — `750` = 7.5%. Integers for
+            the same reason money is: a float would reintroduce drift into VAT.
+          example: 750
+        service_charge_rate: { type: integer, example: 500 }
       required: [id, name]
 
     AdminUpdateSettingsRequest:
@@ -233,7 +237,16 @@ components:
         restaurant_id: { type: string, format: uuid }
         status:
           $ref: "#/components/schemas/OrderStatus"
-        total: { type: integer }
+        subtotal: { type: integer, description: Sum of line totals, in kobo. }
+        discount: { type: integer }
+        service_charge: { type: integer }
+        vat: { type: integer }
+        tip: { type: integer }
+        total:
+          type: integer
+          description: >
+            Exactly `subtotal - discount + service_charge + vat + tip`, in
+            integer kobo — no rounding slack.
         reference: { type: string }
         session_id: { type: string, format: uuid, nullable: true }
         customer_name: { type: string, nullable: true }
@@ -1509,6 +1522,59 @@ paths:
           content:
             application/json:
               schema: { $ref: "#/components/schemas/Error" }
+
+  /admin/z-report:
+    get:
+      tags: [Admin]
+      summary: End-of-day close
+      description: |
+        The figures a manager reconciles against the till before locking up.
+
+        **Settled orders only** — an unpaid bill is not takings, and including
+        it would make the report disagree with the drawer.
+
+        Every component of the total is reported rather than derived, and the
+        stated invariant holds exactly in integer kobo:
+
+        ```
+        net_sales = gross_sales - discounts + service_charge + vat + tips - refunds
+        ```
+
+        `by_method` is the part checked against the cash drawer, so its totals
+        must sum to `net_sales`.
+      security: [{ adminPin: [] }]
+      parameters:
+        - name: date
+          in: query
+          required: true
+          schema: { type: string, format: date }
+          description: YYYY-MM-DD.
+      responses:
+        "200":
+          description: Daily close
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  date: { type: string, format: date }
+                  order_count: { type: integer }
+                  gross_sales: { type: integer, description: Subtotal before adjustments, in kobo. }
+                  discounts: { type: integer }
+                  service_charge: { type: integer }
+                  vat: { type: integer }
+                  tips: { type: integer }
+                  refunds: { type: integer }
+                  net_sales: { type: integer, description: What was actually taken. }
+                  by_method:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        method: { type: string, enum: [CASH, MANUAL_TRANSFER, POS] }
+                        count: { type: integer }
+                        total: { type: integer }
+                      required: [method, count, total]
 
   /admin/orders/cash:
     post:
