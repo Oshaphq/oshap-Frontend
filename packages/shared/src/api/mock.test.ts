@@ -882,3 +882,97 @@ describe("mock API — paper trail", () => {
     expect(res.status).toBe(404);
   });
 });
+
+describe("mock API — combined bill", () => {
+  // Two orders on one table are shown as a single bill. Summing only `total`
+  // while copying the breakdown from the latest order produced a bill whose
+  // parts didn't add up to its own total — invisible until a guest reads it.
+  it("aggregates every money field across combined orders, not just the total", async () => {
+    const menu = await mockRequest("/menu", "GET", null, q(), false);
+    const item = (menu.body as Array<{ name: string; price: number }>)[0]!;
+    const device = "combine-device";
+
+    for (let i = 0; i < 2; i++) {
+      await mockRequest(
+        "/orders",
+        "POST",
+        {
+          table: "T10",
+          restaurant_id: HOME_RESTAURANT,
+          items: [{ name: item.name, qty: 1, price: item.price }],
+          device_token: device,
+        },
+        q(),
+        false,
+      );
+    }
+
+    const res = await mockRequest(
+      "/table/T10",
+      "GET",
+      null,
+      q(`device_token=${device}`),
+      false,
+    );
+    const bill = (res.body as {
+      unpaid_order: {
+        subtotal: number;
+        service_charge: number;
+        vat: number;
+        discount?: number;
+        tip?: number;
+        total: number;
+        order_items: unknown[];
+        combined_order_ids: string[];
+      } | null;
+    }).unpaid_order!;
+
+    expect(bill.combined_order_ids).toHaveLength(2);
+    // Lines from both orders, so the guest sees everything they ordered.
+    expect(bill.order_items.length).toBe(2);
+    expect(
+      bill.subtotal -
+        (bill.discount ?? 0) +
+        bill.service_charge +
+        bill.vat +
+        (bill.tip ?? 0),
+    ).toBe(bill.total);
+  });
+});
+
+describe("mock API — seed versioning", () => {
+  // Persisted state written before money moved to kobo holds prices 100x too
+  // small, and an array can't be merged field-by-field the way the restaurant
+  // object can. The version stamp is what stops a stale menu silently
+  // resurfacing as ₦25 for a ₦2,500 dish.
+  it("discards persisted state written by an older seed", async () => {
+    localStorage.setItem(
+      "oshap-mock-state",
+      JSON.stringify({
+        seedVersion: 1,
+        menu: [
+          {
+            id: "stale-1",
+            restaurant_id: HOME_RESTAURANT,
+            name: "Stale Naira Dish",
+            price: 2500,
+            category: "Meals",
+            available: true,
+            sort_order: 1,
+            stock_count: null,
+            low_stock_threshold: 5,
+          },
+        ],
+      }),
+    );
+
+    const { syncFromStorage } = await import("./mock");
+    syncFromStorage();
+
+    const res = await mockRequest("/menu", "GET", null, q(), false);
+    const names = (res.body as Array<{ name: string }>).map((m) => m.name);
+
+    expect(names).not.toContain("Stale Naira Dish");
+    expect(localStorage.getItem("oshap-mock-state")).toBeNull();
+  });
+});
