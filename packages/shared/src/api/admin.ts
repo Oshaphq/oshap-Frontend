@@ -32,6 +32,7 @@ import type {
   DiscountRequest,
   TipRequest,
   RefundRequest,
+  RefundResponse,
   UpdateOrderItemRequest,
   ReceiptResponse,
   AuditLogQuery,
@@ -281,11 +282,12 @@ export function adminTipOrder(orderId: string, payload: TipRequest): Promise<Ord
   });
 }
 
+/** Answers with the amount refunded, not the order — refetch to see the change. */
 export function adminRefundOrder(
   orderId: string,
   payload: RefundRequest,
-): Promise<Order> {
-  return request<Order>(`${orderPath(orderId)}/refund`, {
+): Promise<RefundResponse> {
+  return request<RefundResponse>(`${orderPath(orderId)}/refund`, {
     method: "POST",
     body: payload,
     admin: true,

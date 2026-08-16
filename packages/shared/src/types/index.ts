@@ -19,7 +19,9 @@ export type OrderStatus =
   | "READY"
   | "PAYMENT_PENDING"
   | "CONFIRMED"
-  | "CANCELLED";
+  | "CANCELLED"
+  /** Was paid, then refunded. Distinct from CANCELLED, which was never paid. */
+  | "REFUNDED";
 
 /** FAILED = staff rejected a claimed payment; the order returns to unpaid. */
 export type PaymentStatus =
@@ -27,7 +29,10 @@ export type PaymentStatus =
   | "CLAIMED"
   | "CONFIRMED"
   | "VERIFIED"
-  | "FAILED";
+  /** Staff rejected a claimed payment; the order returns to unpaid. */
+  | "FAILED"
+  /** A refund. The payment row carries a negative amount. */
+  | "REFUNDED";
 
 export type TableStatus = "OPEN" | "CLOSED";
 
@@ -449,37 +454,38 @@ export interface AdminHistoryResponse {
  */
 export interface RecordCashRequest {
   order_ids: string[];
+  /** Cash tendered, in kobo. Recorded for the drawer, not used to settle. */
+  amount?: number;
 }
 
 export interface RecordCashResponse {
   success: true;
-  confirmed: number;
-}
-
-/** One payment method's contribution to the day, for cashing up the drawer. */
-export interface ZReportMethodLine {
-  method: PaymentMethod;
-  count: number;
-  total: number;
+  /** Orders settled. */
+  paid: number;
+  /** Total settled, in kobo. */
+  amount: number;
 }
 
 /**
- * End-of-day close. The numbers a manager reconciles against the till before
- * locking up, so every line is stated rather than derived on the client:
+ * End-of-day close.
  *
- *   net_sales = gross_sales - discounts + service_charge + vat + tips - refunds
+ * Reported as flat figures rather than a computed breakdown. There is no
+ * separate "sales before adjustments" — `total_sales` is the headline, and the
+ * rest describe what made it up. The three per-method totals are what gets
+ * checked against the drawer.
  */
 export interface ZReportResponse {
   date: string;
   order_count: number;
-  gross_sales: number;
-  discounts: number;
-  service_charge: number;
-  vat: number;
-  tips: number;
-  refunds: number;
-  net_sales: number;
-  by_method: ZReportMethodLine[];
+  total_sales: number;
+  cash_total: number;
+  transfer_total: number;
+  pos_total: number;
+  vat_collected: number;
+  service_charge_collected: number;
+  discount_total: number;
+  tip_total: number;
+  refund_total: number;
 }
 
 // ---------------------------------------------------------------------------
@@ -491,21 +497,29 @@ export interface ZReportResponse {
 // correcting it on paper, which is how a restaurant ends up running two systems.
 // ---------------------------------------------------------------------------
 
-/** Either a flat `amount` in kobo or a `percent` of subtotal — not both. */
+/** Either a flat `amount` in kobo or a `percent` of subtotal (0–100). */
 export interface DiscountRequest {
   amount?: number;
   percent?: number;
-  reason?: string;
 }
 
 export interface TipRequest {
   amount: number;
 }
 
-/** Omitting `amount` refunds the whole order. */
+/**
+ * Omitting `amount` refunds the whole order. Only a `CONFIRMED` order can be
+ * refunded, and the amount cannot exceed its total.
+ */
 export interface RefundRequest {
   amount?: number;
   reason?: string;
+}
+
+export interface RefundResponse {
+  success: true;
+  /** Amount refunded, in kobo. */
+  refunded: number;
 }
 
 export interface UpdateOrderItemRequest {
@@ -523,39 +537,55 @@ export interface UpdateOrderItemRequest {
  * A receipt is composed server-side rather than assembled from the live order,
  * because it has to reflect the restaurant and prices *at the time of sale* —
  * a name or VAT-rate change afterwards must not rewrite history.
+/** A receipt line. Note there is no id — key on position when rendering. */
+export interface ReceiptItem {
+  name: string;
+  quantity: number;
+  price: number;
+  notes?: string | null;
+  modifiers?: Array<{ name: string; option: string; price_delta: number }> | null;
+}
+
+/**
+ * Composed server-side rather than assembled from the live order, so it
+ * reflects the sale as it happened — a later rename or rate change must not
+ * rewrite a receipt already handed over.
  */
 export interface ReceiptResponse {
+  restaurant: Restaurant;
   order_id: string;
   reference: string;
   table_id: string;
-  issued_at: string;
-  restaurant: {
-    name: string;
-    address?: string | null;
-    logo_url?: string | null;
-  };
-  items: OrderItem[];
+  customer_name?: string | null;
+  status: OrderStatus;
+  payment_method?: PaymentMethod | null;
+  items: ReceiptItem[];
   subtotal: number;
   discount: number;
   service_charge: number;
   vat: number;
   tip: number;
   total: number;
-  payment_method?: PaymentMethod | null;
+  created_at: string;
+  /** Null until the bill is settled. */
+  paid_at?: string | null;
 }
 
-/** What a staff member did to a bill. Written server-side, never by the client. */
+/**
+ * What a staff member did to a bill. Written server-side, never by the client.
+ *
+ * `details` is free-form per action rather than a prepared sentence, so the
+ * wording is ours to compose. `target_id` is the order id when `target_type`
+ * is `"order"`.
+ */
 export interface AuditLogEntry {
   id: string;
   created_at: string;
   action: string;
   actor_name?: string | null;
-  order_id?: string | null;
-  order_reference?: string | null;
-  /** Human-readable summary — the server owns the wording. */
-  detail?: string | null;
-  /** Money moved by this action, in kobo, where the action moved any. */
-  amount?: number | null;
+  target_type?: string | null;
+  target_id?: string | null;
+  details?: Record<string, unknown> | null;
 }
 
 export interface AuditLogQuery {
@@ -564,15 +594,28 @@ export interface AuditLogQuery {
   action?: string;
 }
 
+/** Note the flat pagination — no page count is returned, so derive it. */
 export interface AuditLogResponse {
-  entries: AuditLogEntry[];
-  pagination: {
-    page: number;
-    per_page: number;
-    total: number;
-    total_pages: number;
-  };
+  logs: AuditLogEntry[];
+  total: number;
+  page: number;
+  per_page: number;
 }
+
+/**
+ * The action vocabulary, read off the backend's `log_audit` calls. Exact
+ * strings matter — the filter compares them, so a wrong one silently shows
+ * nothing rather than erroring.
+ */
+export const AUDIT_ACTIONS = {
+  discount: "order.discount",
+  tip: "order.tip",
+  refund: "order.refund",
+  cashPaid: "order.cash_paid",
+  itemUpdate: "item.update",
+  itemVoid: "item.void",
+  itemComp: "item.comp",
+} as const;
 
 export interface AdminVerifyRequest {
   table_id: string;

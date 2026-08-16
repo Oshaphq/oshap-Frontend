@@ -1,6 +1,7 @@
 import { describe, it, expect } from "vitest";
 import { mockRequest } from "./mock";
 import { formatCurrency } from "../utils/currency";
+import { AUDIT_ACTIONS } from "../types/index";
 
 const HOME_RESTAURANT = "00000000-0000-0000-0000-000000000001";
 const q = (s = "") => new URLSearchParams(s);
@@ -466,7 +467,7 @@ describe("mock API — cash payments", () => {
     );
 
     expect(res.status).toBe(200);
-    expect((res.body as { confirmed: number }).confirmed).toBe(1);
+    expect((res.body as { paid: number; amount: number }).paid).toBe(1);
 
     const detail = await mockRequest(
       `/orders/${order.order_id}`,
@@ -544,11 +545,12 @@ describe("mock API — Z-report", () => {
     const res = await mockRequest("/admin/z-report", "GET", null, q(`date=${TODAY}`), true);
     return res.body as {
       order_count: number;
-      gross_sales: number;
-      vat: number;
-      service_charge: number;
-      net_sales: number;
-      by_method: Array<{ method: string; count: number; total: number }>;
+      total_sales: number;
+      cash_total: number;
+      transfer_total: number;
+      pos_total: number;
+      vat_collected: number;
+      refund_total: number;
     };
   }
 
@@ -560,7 +562,7 @@ describe("mock API — Z-report", () => {
     const after = await report();
 
     expect(after.order_count).toBe(before.order_count);
-    expect(after.net_sales).toBe(before.net_sales);
+    expect(after.total_sales).toBe(before.total_sales);
   });
 
   it("counts an order once it is settled, and attributes it to its method", async () => {
@@ -570,51 +572,28 @@ describe("mock API — Z-report", () => {
 
     const after = await report();
     expect(after.order_count).toBe(before.order_count + 1);
-    expect(after.net_sales).toBe(before.net_sales + order.total);
-
-    const cash = after.by_method.find((m) => m.method === "CASH");
-    expect(cash).toBeDefined();
-    expect(cash!.total).toBeGreaterThanOrEqual(order.total);
+    expect(after.total_sales).toBe(before.total_sales + order.total);
+    expect(after.cash_total).toBe(before.cash_total + order.total);
   });
 
-  it("reconciles: the breakdown adds up to net takings", async () => {
+  // The server sends no "sales before adjustments" figure, so there is no
+  // gross-to-net equation to assert. What must hold is that the three method
+  // totals account for every naira reported as taken.
+  it("per-method totals account for the whole day", async () => {
     const order = await orderAt("T8");
     await mockRequest("/admin/orders/cash", "POST", { order_ids: [order.order_id] }, q(), true);
 
-    const r = (await mockRequest(
-      "/admin/z-report",
-      "GET",
-      null,
-      q(`date=${TODAY}`),
-      true,
-    )).body as {
-      gross_sales: number;
-      discounts: number;
-      service_charge: number;
-      vat: number;
-      tips: number;
-      refunds: number;
-      net_sales: number;
-    };
-
-    expect(
-      r.gross_sales - r.discounts + r.service_charge + r.vat + r.tips - r.refunds,
-    ).toBe(r.net_sales);
-  });
-
-  it("per-method totals sum to net takings", async () => {
     const r = await report();
-    const summed = r.by_method.reduce((s, m) => s + m.total, 0);
-    expect(summed).toBe(r.net_sales);
+    expect(r.cash_total + r.transfer_total + r.pos_total).toBe(r.total_sales);
   });
 
   it("returns an empty report for a day with no trade", async () => {
     const res = await mockRequest("/admin/z-report", "GET", null, q("date=2020-01-01"), true);
-    const r = res.body as { order_count: number; net_sales: number; by_method: unknown[] };
+    const r = res.body as { order_count: number; total_sales: number; cash_total: number };
 
     expect(r.order_count).toBe(0);
-    expect(r.net_sales).toBe(0);
-    expect(r.by_method).toEqual([]);
+    expect(r.total_sales).toBe(0);
+    expect(r.cash_total).toBe(0);
   });
 });
 
@@ -761,7 +740,12 @@ describe("mock API — bill adjustments", () => {
 
     const res = await mockRequest(`/admin/orders/${id}/refund`, "POST", {}, q(), true);
     expect(res.status).toBe(200);
-    expect((res.body as { status: string }).status).toBe("CANCELLED");
+    expect((res.body as { refunded: number }).refunded).toBeGreaterThan(0);
+
+    // REFUNDED, not CANCELLED — a cancelled order was never paid for, and
+    // conflating them would misreport the day.
+    const after = await mockRequest(`/orders/${id}`, "GET", null, q(), false);
+    expect((after.body as { status: string }).status).toBe("REFUNDED");
   });
 });
 
@@ -790,8 +774,12 @@ describe("mock API — paper trail", () => {
       true,
     );
     return res.body as {
-      entries: Array<{ action: string; order_id: string | null; amount: number | null }>;
-      pagination: { total: number; total_pages: number };
+      logs: Array<{
+        action: string;
+        target_id: string | null;
+        details?: Record<string, unknown> | null;
+      }>;
+      total: number;
     };
   }
 
@@ -802,11 +790,12 @@ describe("mock API — paper trail", () => {
     const orderId = await orderFor("T1");
     await mockRequest(`/admin/orders/${orderId}/discount`, "POST", { amount: 20_000 }, q(), true);
 
-    const { entries } = await logs("order.discount");
-    const entry = entries.find((e) => e.order_id === orderId);
+    const { logs: entries } = await logs(AUDIT_ACTIONS.discount);
+    const entry = entries.find((e) => e.target_id === orderId);
 
     expect(entry).toBeDefined();
-    expect(entry!.amount).toBe(20_000);
+    // The amount lives inside the free-form details, not as a column.
+    expect(entry!.details?.amount).toBe(20_000);
   });
 
   it("records a comp and a void as different actions", async () => {
@@ -823,27 +812,27 @@ describe("mock API — paper trail", () => {
       true,
     );
 
-    const comps = await logs("item.comp");
-    expect(comps.entries.some((e) => e.order_id === orderId)).toBe(true);
+    const comps = await logs(AUDIT_ACTIONS.itemComp);
+    expect(comps.logs.some((e) => e.target_id === orderId)).toBe(true);
 
-    const voids = await logs("item.void");
-    expect(voids.entries.some((e) => e.order_id === orderId)).toBe(false);
+    const voids = await logs(AUDIT_ACTIONS.itemVoid);
+    expect(voids.logs.some((e) => e.target_id === orderId)).toBe(false);
   });
 
   it("records taking cash", async () => {
     const orderId = await orderFor("T3");
     await mockRequest("/admin/orders/cash", "POST", { order_ids: [orderId] }, q(), true);
 
-    const { entries } = await logs("payment.cash");
-    expect(entries.some((e) => e.order_id === orderId)).toBe(true);
+    const { logs: entries } = await logs(AUDIT_ACTIONS.cashPaid);
+    expect(entries.some((e) => e.target_id === orderId)).toBe(true);
   });
 
   it("filters to one action and reports its own total", async () => {
     const all = await logs();
-    const discounts = await logs("order.discount");
+    const discounts = await logs(AUDIT_ACTIONS.discount);
 
-    expect(discounts.entries.every((e) => e.action === "order.discount")).toBe(true);
-    expect(discounts.pagination.total).toBeLessThanOrEqual(all.pagination.total);
+    expect(discounts.logs.every((e) => e.action === AUDIT_ACTIONS.discount)).toBe(true);
+    expect(discounts.total).toBeLessThanOrEqual(all.total);
   });
 
   it("builds a receipt with the totals broken out", async () => {

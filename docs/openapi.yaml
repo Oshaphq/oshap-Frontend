@@ -373,11 +373,11 @@ components:
     OrderStatus:
       type: string
       enum:
-        [CREATED, PREPARING, READY, PAYMENT_PENDING, CONFIRMED, CANCELLED]
+        [CREATED, PREPARING, READY, PAYMENT_PENDING, CONFIRMED, CANCELLED, REFUNDED]
 
     PaymentStatus:
       type: string
-      enum: [NOT_PAID, CLAIMED, CONFIRMED, VERIFIED]
+      enum: [NOT_PAID, CLAIMED, CONFIRMED, VERIFIED, FAILED, REFUNDED]
 
     TableStatus:
       type: string
@@ -1602,10 +1602,19 @@ paths:
                 reason: { type: string }
       responses:
         "200":
-          description: Refunded order
+          description: Refund recorded
           content:
             application/json:
-              schema: { $ref: "#/components/schemas/Order" }
+              schema:
+                type: object
+                properties:
+                  success: { type: boolean, example: true }
+                  refunded: { type: integer, description: Amount refunded, in kobo. }
+        "400":
+          description: Order is not CONFIRMED, or the amount exceeds its total
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
 
   /admin/orders/{order_id}/items/{item_id}:
     parameters:
@@ -1690,19 +1699,37 @@ paths:
               schema:
                 type: object
                 properties:
-                  order_id: { type: string }
+                  order_id: { type: string, format: uuid }
                   reference: { type: string }
                   table_id: { type: string }
-                  issued_at: { type: string, format: date-time }
-                  restaurant:
-                    type: object
-                    properties:
-                      name: { type: string }
-                      address: { type: string, nullable: true }
-                      logo_url: { type: string, nullable: true }
+                  customer_name: { type: string, nullable: true }
+                  status: { $ref: "#/components/schemas/OrderStatus" }
+                  created_at: { type: string, format: date-time }
+                  paid_at:
+                    type: string
+                    format: date-time
+                    nullable: true
+                    description: Null until the bill is settled.
+                  restaurant: { $ref: "#/components/schemas/Restaurant" }
                   items:
                     type: array
-                    items: { $ref: "#/components/schemas/OrderItem" }
+                    description: Receipt lines carry no id — key on position.
+                    items:
+                      type: object
+                      properties:
+                        name: { type: string }
+                        quantity: { type: integer }
+                        price: { type: integer }
+                        notes: { type: string, nullable: true }
+                        modifiers:
+                          type: array
+                          nullable: true
+                          items:
+                            type: object
+                            properties:
+                              name: { type: string }
+                              option: { type: string }
+                              price_delta: { type: integer }
                   subtotal: { type: integer }
                   discount: { type: integer }
                   service_charge: { type: integer }
@@ -1739,8 +1766,9 @@ paths:
           in: query
           schema: { type: string }
           description: >
-            e.g. `order.discount`, `order.refund`, `item.void`, `item.comp`,
-            `payment.cash`, `payment.verify`, `payment.reject`.
+            Exact match. Known values: `order.discount`, `order.tip`,
+            `order.refund`, `order.cash_paid`, `item.update`, `item.void`,
+            `item.comp`. A wrong value returns nothing rather than erroring.
       responses:
         "200":
           description: Audit entries
@@ -1749,30 +1777,29 @@ paths:
               schema:
                 type: object
                 properties:
-                  entries:
+                  logs:
                     type: array
                     items:
                       type: object
                       properties:
-                        id: { type: string }
+                        id: { type: string, format: uuid }
                         created_at: { type: string, format: date-time }
                         action: { type: string }
                         actor_name: { type: string, nullable: true }
-                        order_id: { type: string, nullable: true }
-                        order_reference: { type: string, nullable: true }
-                        detail: { type: string, nullable: true }
-                        amount:
-                          type: integer
+                        target_type: { type: string, nullable: true, example: order }
+                        target_id: { type: string, nullable: true }
+                        details:
+                          type: object
                           nullable: true
-                          description: Money moved by this action, in kobo, where any moved.
+                          description: >
+                            Free-form per action rather than a prepared sentence —
+                            typically `amount`, `reason`, `percent`. The wording
+                            shown to a user is the client's to compose.
                       required: [id, created_at, action]
-                  pagination:
-                    type: object
-                    properties:
-                      page: { type: integer }
-                      per_page: { type: integer }
-                      total: { type: integer }
-                      total_pages: { type: integer }
+                  total: { type: integer }
+                  page: { type: integer }
+                  per_page: { type: integer }
+                required: [logs, total, page, per_page]
 
   /admin/z-report:
     get:
@@ -1781,25 +1808,20 @@ paths:
       description: |
         The figures a manager reconciles against the till before locking up.
 
-        **Settled orders only** — an unpaid bill is not takings, and including
-        it would make the report disagree with the drawer.
+        **Settled orders only** — an unpaid bill is not takings.
 
-        Every component of the total is reported rather than derived, and the
-        stated invariant holds exactly in integer kobo:
+        Reported as flat figures. Note there is no "sales before adjustments":
+        `total_sales` is the headline and the rest describe what made it up, so
+        do not present them as an equation resolving to the total.
 
-        ```
-        net_sales = gross_sales - discounts + service_charge + vat + tips - refunds
-        ```
-
-        `by_method` is the part checked against the cash drawer, so its totals
-        must sum to `net_sales`.
+        `cash_total + transfer_total + pos_total` is what gets checked against
+        the drawer.
       security: [{ adminPin: [] }]
       parameters:
         - name: date
           in: query
           required: true
           schema: { type: string, format: date }
-          description: YYYY-MM-DD.
       responses:
         "200":
           description: Daily close
@@ -1810,22 +1832,15 @@ paths:
                 properties:
                   date: { type: string, format: date }
                   order_count: { type: integer }
-                  gross_sales: { type: integer, description: Subtotal before adjustments, in kobo. }
-                  discounts: { type: integer }
-                  service_charge: { type: integer }
-                  vat: { type: integer }
-                  tips: { type: integer }
-                  refunds: { type: integer }
-                  net_sales: { type: integer, description: What was actually taken. }
-                  by_method:
-                    type: array
-                    items:
-                      type: object
-                      properties:
-                        method: { type: string, enum: [CASH, MANUAL_TRANSFER, POS] }
-                        count: { type: integer }
-                        total: { type: integer }
-                      required: [method, count, total]
+                  total_sales: { type: integer, description: What was taken, in kobo. }
+                  cash_total: { type: integer }
+                  transfer_total: { type: integer }
+                  pos_total: { type: integer }
+                  vat_collected: { type: integer }
+                  service_charge_collected: { type: integer }
+                  discount_total: { type: integer }
+                  tip_total: { type: integer }
+                  refund_total: { type: integer }
 
   /admin/orders/cash:
     post:
@@ -1851,6 +1866,9 @@ paths:
                 order_ids:
                   type: array
                   items: { type: string, format: uuid }
+                amount:
+                  type: integer
+                  description: Cash tendered, in kobo. Recorded for the drawer.
               required: [order_ids]
       responses:
         "200":
@@ -1861,7 +1879,8 @@ paths:
                 type: object
                 properties:
                   success: { type: boolean, example: true }
-                  confirmed: { type: integer }
+                  paid: { type: integer, description: Orders settled. }
+                  amount: { type: integer, description: Total settled, in kobo. }
         "400":
           description: No orders given
           content:

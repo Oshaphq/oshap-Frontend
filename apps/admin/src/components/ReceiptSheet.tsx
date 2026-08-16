@@ -93,18 +93,33 @@ export default function ReceiptSheet({ orderId, onDone }: Props) {
         <span>Table {data.table_id}</span>
       </div>
       <div style={{ fontSize: "8pt" }}>
-        {new Date(data.issued_at).toLocaleString()}
+        {new Date(data.paid_at ?? data.created_at).toLocaleString()}
       </div>
 
       <div style={{ borderTop: "1px dashed #000", margin: "2mm 0" }} />
 
       <div style={{ display: "flex", flexDirection: "column", gap: "1mm" }}>
-        {data.items.map((item) => (
-          <div key={item.id} style={{ display: "flex", justifyContent: "space-between", gap: "4mm" }}>
-            <span>
-              {item.quantity}× {item.name}
-            </span>
-            <span>{formatCurrency(item.price * item.quantity)}</span>
+        {data.items.map((item, i) => (
+          <div key={`${item.name}-${i}`} style={{ display: "flex", flexDirection: "column" }}>
+            <div style={{ display: "flex", justifyContent: "space-between", gap: "4mm" }}>
+              <span>
+                {item.quantity}× {item.name}
+              </span>
+              <span>{formatCurrency(item.price * item.quantity)}</span>
+            </div>
+            {/* Modifiers and notes are part of what was bought, so they belong
+                on the receipt and not only on the kitchen ticket. */}
+            {item.modifiers?.map((modifier, j) => (
+              <span key={j} style={{ fontSize: "8pt", paddingLeft: "4mm" }}>
+                + {modifier.option}
+                {modifier.price_delta > 0 && ` (${formatCurrency(modifier.price_delta)})`}
+              </span>
+            ))}
+            {item.notes && (
+              <span style={{ fontSize: "8pt", paddingLeft: "4mm", fontStyle: "italic" }}>
+                {item.notes}
+              </span>
+            )}
           </div>
         ))}
       </div>

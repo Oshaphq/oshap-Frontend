@@ -498,6 +498,10 @@ const ORDER_STATUS_META: Record<OrderStatus, { label: string; cls: string }> = {
     label: "Paid",
     cls: "bg-success-container text-on-success-container",
   },
+  REFUNDED: {
+    label: "Refunded",
+    cls: "bg-surface-container-high text-outline",
+  },
   CANCELLED: {
     label: "Cancelled",
     cls: "bg-error-container text-on-error-container",
