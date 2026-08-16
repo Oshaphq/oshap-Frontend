@@ -482,6 +482,39 @@ export interface ZReportResponse {
   by_method: ZReportMethodLine[];
 }
 
+// ---------------------------------------------------------------------------
+// Bill adjustments
+//
+// Every one of these is audited server-side. They exist because a real service
+// goes wrong in small ways — a dish sent back, a regular given something off,
+// a card charged twice — and the alternative to correcting the bill in Oshap is
+// correcting it on paper, which is how a restaurant ends up running two systems.
+// ---------------------------------------------------------------------------
+
+/** Either a flat `amount` in kobo or a `percent` of subtotal — not both. */
+export interface DiscountRequest {
+  amount?: number;
+  percent?: number;
+  reason?: string;
+}
+
+export interface TipRequest {
+  amount: number;
+}
+
+/** Omitting `amount` refunds the whole order. */
+export interface RefundRequest {
+  amount?: number;
+  reason?: string;
+}
+
+export interface UpdateOrderItemRequest {
+  quantity?: number;
+  price?: number;
+  name?: string;
+  notes?: string;
+}
+
 export interface AdminVerifyRequest {
   table_id: string;
 }

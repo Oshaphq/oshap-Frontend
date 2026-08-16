@@ -1523,6 +1523,149 @@ paths:
             application/json:
               schema: { $ref: "#/components/schemas/Error" }
 
+  /admin/orders/{order_id}/discount:
+    post:
+      tags: [Admin]
+      summary: Discount a bill
+      description: >
+        Either a flat `amount` in kobo or a `percent` of subtotal. The order is
+        **re-priced**, not patched — VAT and service charge are recomputed from
+        the discounted subtotal, so the total invariant still holds exactly. A
+        discount larger than the subtotal is rejected rather than inverting the
+        bill.
+      security: [{ adminPin: [] }]
+      parameters: [{ name: order_id, in: path, required: true, schema: { type: string } }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                amount: { type: integer, description: Flat amount in kobo. }
+                percent: { type: number, description: Percentage of subtotal. }
+                reason: { type: string }
+      responses:
+        "200":
+          description: Re-priced order
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Order" }
+        "400":
+          description: Discount exceeds the subtotal
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+
+  /admin/orders/{order_id}/tip:
+    post:
+      tags: [Admin]
+      summary: Add a tip
+      description: >
+        Added on top of the taxed total — a tip is not a taxable supply, so it
+        must not attract VAT or service charge.
+      security: [{ adminPin: [] }]
+      parameters: [{ name: order_id, in: path, required: true, schema: { type: string } }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                amount: { type: integer }
+              required: [amount]
+      responses:
+        "200":
+          description: Re-priced order
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Order" }
+
+  /admin/orders/{order_id}/refund:
+    post:
+      tags: [Admin]
+      summary: Refund a settled bill
+      description: >
+        Omitting `amount` refunds the whole order. A refunded order leaves
+        `CONFIRMED`, so it stops counting towards the day's takings — otherwise
+        the Z-report keeps reporting money that was handed back.
+      security: [{ adminPin: [] }]
+      parameters: [{ name: order_id, in: path, required: true, schema: { type: string } }]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                amount: { type: integer }
+                reason: { type: string }
+      responses:
+        "200":
+          description: Refunded order
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Order" }
+
+  /admin/orders/{order_id}/items/{item_id}:
+    parameters:
+      - { name: order_id, in: path, required: true, schema: { type: string } }
+      - { name: item_id, in: path, required: true, schema: { type: string } }
+    patch:
+      tags: [Admin]
+      summary: Edit a line on the bill
+      description: >
+        Quantity must be at least 1 — removing a line is a void, which is a
+        different intent and a different audit record.
+      security: [{ adminPin: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                quantity: { type: integer, minimum: 1 }
+                price: { type: integer, minimum: 0 }
+                name: { type: string }
+                notes: { type: string }
+      responses:
+        "200":
+          description: Re-priced order
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Order" }
+    delete:
+      tags: [Admin]
+      summary: Void a line
+      description: Removes it entirely — for something never served.
+      security: [{ adminPin: [] }]
+      responses:
+        "200":
+          description: Re-priced order
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Order" }
+
+  /admin/orders/{order_id}/items/{item_id}/comp:
+    post:
+      tags: [Admin]
+      summary: Comp a line
+      description: >
+        Sets the price to zero but keeps the line on the bill — the kitchen made
+        it, and the guest should see it was given rather than silently removed.
+        That distinction from a void is the whole point.
+      security: [{ adminPin: [] }]
+      parameters:
+        - { name: order_id, in: path, required: true, schema: { type: string } }
+        - { name: item_id, in: path, required: true, schema: { type: string } }
+      responses:
+        "200":
+          description: Re-priced order
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Order" }
+
   /admin/z-report:
     get:
       tags: [Admin]

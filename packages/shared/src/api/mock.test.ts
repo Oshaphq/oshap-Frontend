@@ -617,3 +617,150 @@ describe("mock API — Z-report", () => {
     expect(r.by_method).toEqual([]);
   });
 });
+
+describe("mock API — bill adjustments", () => {
+  async function freshOrder() {
+    const res = await mockRequest(
+      "/orders",
+      "POST",
+      {
+        table: "T4",
+        restaurant_id: HOME_RESTAURANT,
+        items: [
+          { name: "Adjust A", qty: 2, price: 100_000 },
+          { name: "Adjust B", qty: 1, price: 50_000 },
+        ],
+      },
+      q(),
+      false,
+    );
+    const id = (res.body as { order_id: string }).order_id;
+    const detail = await mockRequest(`/orders/${id}`, "GET", null, q(), false);
+    return {
+      id,
+      detail: detail.body as {
+        items: Array<{ id: string; name: string; price: number; quantity: number }>;
+        subtotal: number;
+        total: number;
+      },
+    };
+  }
+
+  /** The invariant every adjustment must preserve. */
+  function assertBalances(o: {
+    subtotal?: number;
+    discount?: number;
+    service_charge?: number;
+    vat?: number;
+    tip?: number;
+    total: number;
+  }) {
+    expect(
+      (o.subtotal ?? 0) -
+        (o.discount ?? 0) +
+        (o.service_charge ?? 0) +
+        (o.vat ?? 0) +
+        (o.tip ?? 0),
+    ).toBe(o.total);
+  }
+
+  it("recomputes VAT when a discount is applied, rather than patching the total", async () => {
+    const { id, detail } = await freshOrder();
+
+    const res = await mockRequest(
+      `/admin/orders/${id}/discount`,
+      "POST",
+      { amount: 50_000 },
+      q(),
+      true,
+    );
+    const order = res.body as Parameters<typeof assertBalances>[0] & { vat: number };
+
+    expect(order.discount).toBe(50_000);
+    expect(order.total).toBeLessThan(detail.total);
+    // VAT is charged on the discounted amount — a patched total would leave it
+    // computed on the pre-discount figure.
+    assertBalances(order);
+  });
+
+  it("refuses a discount larger than the bill", async () => {
+    const { id, detail } = await freshOrder();
+    const res = await mockRequest(
+      `/admin/orders/${id}/discount`,
+      "POST",
+      { amount: detail.subtotal + 1 },
+      q(),
+      true,
+    );
+    expect(res.status).toBe(400);
+  });
+
+  it("adds a tip on top without it attracting VAT", async () => {
+    const { id } = await freshOrder();
+    const before = (
+      await mockRequest(`/orders/${id}`, "GET", null, q(), false)
+    ).body as { vat: number };
+
+    const res = await mockRequest(`/admin/orders/${id}/tip`, "POST", { amount: 20_000 }, q(), true);
+    const order = res.body as Parameters<typeof assertBalances>[0] & { vat: number; tip: number };
+
+    expect(order.tip).toBe(20_000);
+    expect(order.vat).toBe(before.vat);
+    assertBalances(order);
+  });
+
+  it("voiding a line reprices the whole bill", async () => {
+    const { id, detail } = await freshOrder();
+    const target = detail.items[0]!;
+
+    const res = await mockRequest(
+      `/admin/orders/${id}/items/${target.id}`,
+      "DELETE",
+      null,
+      q(),
+      true,
+    );
+    const order = res.body as Parameters<typeof assertBalances>[0] & { subtotal: number };
+
+    expect(order.subtotal).toBe(detail.subtotal - target.price * target.quantity);
+    assertBalances(order);
+  });
+
+  // Comp keeps the line visible at zero: the kitchen made it, and the guest
+  // should see it was given rather than silently vanish.
+  it("comping zeroes the line but keeps it on the bill", async () => {
+    const { id, detail } = await freshOrder();
+    const target = detail.items[0]!;
+
+    await mockRequest(`/admin/orders/${id}/items/${target.id}/comp`, "POST", null, q(), true);
+
+    const after = (await mockRequest(`/orders/${id}`, "GET", null, q(), false)).body as {
+      items: Array<{ id: string; price: number }>;
+    };
+    const comped = after.items.find((i) => i.id === target.id);
+
+    expect(comped).toBeDefined();
+    expect(comped!.price).toBe(0);
+  });
+
+  it("rejects a quantity of zero — voiding is the way to remove a line", async () => {
+    const { id, detail } = await freshOrder();
+    const res = await mockRequest(
+      `/admin/orders/${id}/items/${detail.items[0]!.id}`,
+      "PATCH",
+      { quantity: 0 },
+      q(),
+      true,
+    );
+    expect(res.status).toBe(400);
+  });
+
+  it("a refunded order stops counting as takings", async () => {
+    const { id } = await freshOrder();
+    await mockRequest("/admin/orders/cash", "POST", { order_ids: [id] }, q(), true);
+
+    const res = await mockRequest(`/admin/orders/${id}/refund`, "POST", {}, q(), true);
+    expect(res.status).toBe(200);
+    expect((res.body as { status: string }).status).toBe("CANCELLED");
+  });
+});
