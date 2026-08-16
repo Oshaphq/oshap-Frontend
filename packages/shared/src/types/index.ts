@@ -515,6 +515,65 @@ export interface UpdateOrderItemRequest {
   notes?: string;
 }
 
+// ---------------------------------------------------------------------------
+// Paper trail
+// ---------------------------------------------------------------------------
+
+/**
+ * A receipt is composed server-side rather than assembled from the live order,
+ * because it has to reflect the restaurant and prices *at the time of sale* —
+ * a name or VAT-rate change afterwards must not rewrite history.
+ */
+export interface ReceiptResponse {
+  order_id: string;
+  reference: string;
+  table_id: string;
+  issued_at: string;
+  restaurant: {
+    name: string;
+    address?: string | null;
+    logo_url?: string | null;
+  };
+  items: OrderItem[];
+  subtotal: number;
+  discount: number;
+  service_charge: number;
+  vat: number;
+  tip: number;
+  total: number;
+  payment_method?: PaymentMethod | null;
+}
+
+/** What a staff member did to a bill. Written server-side, never by the client. */
+export interface AuditLogEntry {
+  id: string;
+  created_at: string;
+  action: string;
+  actor_name?: string | null;
+  order_id?: string | null;
+  order_reference?: string | null;
+  /** Human-readable summary — the server owns the wording. */
+  detail?: string | null;
+  /** Money moved by this action, in kobo, where the action moved any. */
+  amount?: number | null;
+}
+
+export interface AuditLogQuery {
+  page?: number;
+  per_page?: number;
+  action?: string;
+}
+
+export interface AuditLogResponse {
+  entries: AuditLogEntry[];
+  pagination: {
+    page: number;
+    per_page: number;
+    total: number;
+    total_pages: number;
+  };
+}
+
 export interface AdminVerifyRequest {
   table_id: string;
 }

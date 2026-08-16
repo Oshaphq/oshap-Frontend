@@ -1666,6 +1666,114 @@ paths:
             application/json:
               schema: { $ref: "#/components/schemas/Order" }
 
+  /admin/orders/{order_id}/receipt:
+    get:
+      tags: [Admin]
+      summary: Receipt for a settled bill
+      description: >
+        Composed server-side rather than assembled from the live order: a
+        receipt must reflect the sale **as it happened**, so renaming the
+        restaurant or changing the VAT rate afterwards must not rewrite a
+        receipt already handed to a customer.
+
+
+        VAT is itemised rather than folded into the total — a customer is
+        entitled to see the tax they paid, and a business customer needs it to
+        reclaim.
+      security: [{ adminPin: [] }]
+      parameters: [{ name: order_id, in: path, required: true, schema: { type: string } }]
+      responses:
+        "200":
+          description: Receipt
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  order_id: { type: string }
+                  reference: { type: string }
+                  table_id: { type: string }
+                  issued_at: { type: string, format: date-time }
+                  restaurant:
+                    type: object
+                    properties:
+                      name: { type: string }
+                      address: { type: string, nullable: true }
+                      logo_url: { type: string, nullable: true }
+                  items:
+                    type: array
+                    items: { $ref: "#/components/schemas/OrderItem" }
+                  subtotal: { type: integer }
+                  discount: { type: integer }
+                  service_charge: { type: integer }
+                  vat: { type: integer }
+                  tip: { type: integer }
+                  total: { type: integer }
+                  payment_method:
+                    type: string
+                    enum: [CASH, MANUAL_TRANSFER, POS]
+                    nullable: true
+        "404":
+          description: Order not found
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+
+  /admin/audit-logs:
+    get:
+      tags: [Admin]
+      summary: Who changed what on a bill
+      description: >
+        Newest first. Written server-side by the actions themselves — a client
+        can never author an entry, or the trail would be worth nothing.
+
+
+        This is what a manager opens when the daily close doesn't reconcile, so
+        the actions that move money away from the restaurant (discounts, comps,
+        voids, refunds, rejected payments) are the ones worth filtering to.
+      security: [{ adminPin: [] }]
+      parameters:
+        - { name: page, in: query, schema: { type: integer, default: 1 } }
+        - { name: per_page, in: query, schema: { type: integer, default: 25 } }
+        - name: action
+          in: query
+          schema: { type: string }
+          description: >
+            e.g. `order.discount`, `order.refund`, `item.void`, `item.comp`,
+            `payment.cash`, `payment.verify`, `payment.reject`.
+      responses:
+        "200":
+          description: Audit entries
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  entries:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id: { type: string }
+                        created_at: { type: string, format: date-time }
+                        action: { type: string }
+                        actor_name: { type: string, nullable: true }
+                        order_id: { type: string, nullable: true }
+                        order_reference: { type: string, nullable: true }
+                        detail: { type: string, nullable: true }
+                        amount:
+                          type: integer
+                          nullable: true
+                          description: Money moved by this action, in kobo, where any moved.
+                      required: [id, created_at, action]
+                  pagination:
+                    type: object
+                    properties:
+                      page: { type: integer }
+                      per_page: { type: integer }
+                      total: { type: integer }
+                      total_pages: { type: integer }
+
   /admin/z-report:
     get:
       tags: [Admin]

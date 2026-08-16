@@ -27,6 +27,9 @@ import type {
   TipRequest,
   RefundRequest,
   UpdateOrderItemRequest,
+  AuditLogEntry,
+  AuditLogResponse,
+  ReceiptResponse,
   BankAccount,
   ClaimPaymentRequest,
   ClaimPaymentResponse,
@@ -1521,6 +1524,78 @@ function creditAccount(
   else account.failure_count = (account.failure_count ?? 0) + 1;
 }
 
+// -------------------- Admin: Paper trail --------------------
+
+/**
+ * Written by the actions themselves rather than seeded, so the log in mock mode
+ * reflects what was actually done. A fixture list would demo the screen and
+ * prove nothing about whether actions are recorded.
+ */
+const _auditLog: AuditLogEntry[] = [];
+
+function audit(
+  action: string,
+  order: { id: string; reference: string } | null,
+  detail: string,
+  amount?: number,
+): void {
+  _auditLog.unshift({
+    id: uid(),
+    created_at: now(),
+    action,
+    actor_name: [..._staff.values()].find((st) => st.role === "OWNER")?.name ?? "Staff",
+    order_id: order?.id ?? null,
+    order_reference: order?.reference ?? null,
+    detail,
+    amount: amount ?? null,
+  });
+}
+
+route("GET", /^\/admin\/audit-logs$/, ({ query }) => {
+  const page = Number(query.get("page")) || 1;
+  const perPage = Number(query.get("per_page")) || 25;
+  const action = query.get("action");
+
+  const filtered = action ? _auditLog.filter((e) => e.action === action) : _auditLog;
+  const start = (page - 1) * perPage;
+
+  return json(200, {
+    entries: filtered.slice(start, start + perPage),
+    pagination: {
+      page,
+      per_page: perPage,
+      total: filtered.length,
+      total_pages: Math.max(1, Math.ceil(filtered.length / perPage)),
+    },
+  } satisfies AuditLogResponse);
+});
+
+route("GET", /^\/admin\/orders\/[^/]+\/receipt$/, ({ path }) => {
+  const orderId = path.split("/admin/orders/")[1]!.split("/")[0]!;
+  const order = _orders.get(orderId) as StoredOrderWithItems | undefined;
+  if (!order) return json(404, { error: "Order not found" });
+
+  return json(200, {
+    order_id: order.id,
+    reference: order.reference,
+    table_id: order.table_id,
+    issued_at: now(),
+    restaurant: {
+      name: _restaurant.name,
+      address: _restaurant.address ?? null,
+      logo_url: _restaurant.logo_url ?? null,
+    },
+    items: order.order_items,
+    subtotal: order.subtotal ?? order.total,
+    discount: order.discount ?? 0,
+    service_charge: order.service_charge ?? 0,
+    vat: order.vat ?? 0,
+    tip: order.tip ?? 0,
+    total: order.total,
+    payment_method: _payments.get(order.id)?.method ?? null,
+  } satisfies ReceiptResponse);
+});
+
 // -------------------- Admin: Bill adjustments --------------------
 
 type StoredOrderWithItems = Order & {
@@ -1559,6 +1634,7 @@ route("POST", /^\/admin\/orders\/[^/]+\/discount$/, ({ path, body }) => {
 
   order.discount = discount;
   reprice(order);
+  audit("order.discount", order, `Discount applied to ${order.reference}`, discount);
   syncToStorage();
   return json(200, order);
 });
@@ -1574,6 +1650,7 @@ route("POST", /^\/admin\/orders\/[^/]+\/tip$/, ({ path, body }) => {
 
   order.tip = amount;
   reprice(order);
+  audit("order.tip", order, `Tip added to ${order.reference}`, amount);
   syncToStorage();
   return json(200, order);
 });
@@ -1594,6 +1671,7 @@ route("POST", /^\/admin\/orders\/[^/]+\/refund$/, ({ path, body }) => {
   if (payment) payment.status = "FAILED";
   order.status = "CANCELLED";
 
+  audit("order.refund", order, b.reason || `Refunded ${order.reference}`, amount);
   syncToStorage();
   return json(200, order);
 });
@@ -1618,6 +1696,7 @@ route("PATCH", /^\/admin\/orders\/[^/]+\/items\/[^/]+$/, ({ path, body }) => {
   }
 
   reprice(order);
+  audit("item.edit", order, `Edited ${item.name} on ${order.reference}`);
   syncToStorage();
   return json(200, order);
 });
@@ -1632,6 +1711,7 @@ route("DELETE", /^\/admin\/orders\/[^/]+\/items\/[^/]+$/, ({ path }) => {
   if (order.order_items.length === before) return json(404, { error: "Item not found" });
 
   reprice(order);
+  audit("item.void", order, `Voided a line on ${order.reference}`);
   syncToStorage();
   return json(200, order);
 });
@@ -1648,6 +1728,7 @@ route("POST", /^\/admin\/orders\/[^/]+\/items\/[^/]+\/comp$/, ({ path }) => {
   // guest should see it was given rather than silently removed.
   item.price = 0;
   reprice(order);
+  audit("item.comp", order, `Comped ${item.name} on ${order.reference}`);
   syncToStorage();
   return json(200, order);
 });
@@ -1715,6 +1796,7 @@ route("POST", /^\/admin\/orders\/cash$/, ({ body }) => {
       method: "CASH",
       created_at: now(),
     });
+    audit("payment.cash", order, `Cash taken for ${order.reference}`, order.total);
     confirmed++;
   }
 
@@ -1742,6 +1824,7 @@ route("POST", /^\/admin\/reject$/, ({ body }) => {
     if (!p) continue;
     p.status = "FAILED";
     creditAccount(p.bank_account_id, "failure");
+    audit("payment.reject", o, b.reason || `Rejected payment for ${o.reference}`, o.total);
   }
 
   syncToStorage();
@@ -1767,6 +1850,7 @@ route("POST", /^\/admin\/verify$/, ({ body }) => {
     if (!p) continue;
     p.status = "VERIFIED";
     creditAccount(p.bank_account_id, "success");
+    audit("payment.verify", o, `Verified payment for ${o.reference}`, o.total);
   }
 
   // Auto-close if no unpaid remain

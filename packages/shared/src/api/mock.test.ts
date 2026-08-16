@@ -764,3 +764,121 @@ describe("mock API — bill adjustments", () => {
     expect((res.body as { status: string }).status).toBe("CANCELLED");
   });
 });
+
+describe("mock API — paper trail", () => {
+  async function orderFor(tableId: string) {
+    const res = await mockRequest(
+      "/orders",
+      "POST",
+      {
+        table: tableId,
+        restaurant_id: HOME_RESTAURANT,
+        items: [{ name: "Audited Dish", qty: 1, price: 120_000 }],
+      },
+      q(),
+      false,
+    );
+    return (res.body as { order_id: string }).order_id;
+  }
+
+  async function logs(action?: string) {
+    const res = await mockRequest(
+      "/admin/audit-logs",
+      "GET",
+      null,
+      q(action ? `action=${action}` : ""),
+      true,
+    );
+    return res.body as {
+      entries: Array<{ action: string; order_id: string | null; amount: number | null }>;
+      pagination: { total: number; total_pages: number };
+    };
+  }
+
+  // The log is written by the actions themselves. If an action forgets to
+  // record, the trail is silently incomplete — which is worse than absent,
+  // because it looks trustworthy.
+  it("records a discount, with the amount that moved", async () => {
+    const orderId = await orderFor("T1");
+    await mockRequest(`/admin/orders/${orderId}/discount`, "POST", { amount: 20_000 }, q(), true);
+
+    const { entries } = await logs("order.discount");
+    const entry = entries.find((e) => e.order_id === orderId);
+
+    expect(entry).toBeDefined();
+    expect(entry!.amount).toBe(20_000);
+  });
+
+  it("records a comp and a void as different actions", async () => {
+    const orderId = await orderFor("T2");
+    const detail = (await mockRequest(`/orders/${orderId}`, "GET", null, q(), false)).body as {
+      items: Array<{ id: string }>;
+    };
+
+    await mockRequest(
+      `/admin/orders/${orderId}/items/${detail.items[0]!.id}/comp`,
+      "POST",
+      null,
+      q(),
+      true,
+    );
+
+    const comps = await logs("item.comp");
+    expect(comps.entries.some((e) => e.order_id === orderId)).toBe(true);
+
+    const voids = await logs("item.void");
+    expect(voids.entries.some((e) => e.order_id === orderId)).toBe(false);
+  });
+
+  it("records taking cash", async () => {
+    const orderId = await orderFor("T3");
+    await mockRequest("/admin/orders/cash", "POST", { order_ids: [orderId] }, q(), true);
+
+    const { entries } = await logs("payment.cash");
+    expect(entries.some((e) => e.order_id === orderId)).toBe(true);
+  });
+
+  it("filters to one action and reports its own total", async () => {
+    const all = await logs();
+    const discounts = await logs("order.discount");
+
+    expect(discounts.entries.every((e) => e.action === "order.discount")).toBe(true);
+    expect(discounts.pagination.total).toBeLessThanOrEqual(all.pagination.total);
+  });
+
+  it("builds a receipt with the totals broken out", async () => {
+    const orderId = await orderFor("T5");
+    await mockRequest("/admin/orders/cash", "POST", { order_ids: [orderId] }, q(), true);
+
+    const res = await mockRequest(
+      `/admin/orders/${orderId}/receipt`,
+      "GET",
+      null,
+      q(),
+      true,
+    );
+    const receipt = res.body as {
+      reference: string;
+      restaurant: { name: string };
+      items: unknown[];
+      subtotal: number;
+      vat: number;
+      total: number;
+      payment_method: string | null;
+    };
+
+    expect(receipt.reference).toBeTruthy();
+    expect(receipt.restaurant.name).toBeTruthy();
+    expect(receipt.items.length).toBeGreaterThan(0);
+    // A customer is entitled to see the tax they paid, so it must be itemised
+    // rather than folded into the total.
+    expect(receipt.vat).toBeGreaterThan(0);
+    expect(receipt.subtotal).toBeLessThan(receipt.total);
+    expect(receipt.payment_method).toBe("CASH");
+  });
+
+  it("404s a receipt for an unknown order", async () => {
+    const res = await mockRequest("/admin/orders/nope-123/receipt", "GET", null, q(), true);
+    expect(res.status).toBe(404);
+  });
+});

@@ -42,6 +42,8 @@ import {
   adminUpdateOrderItem,
   adminVoidOrderItem,
   adminCompOrderItem,
+  adminOrderReceipt,
+  adminAuditLogs,
 } from "../api/admin";
 import type {
   AdminHistoryQuery,
@@ -57,6 +59,7 @@ import type {
   TipRequest,
   RefundRequest,
   UpdateOrderItemRequest,
+  AuditLogQuery,
 } from "../types/index";
 
 // ---------- Settings ----------
@@ -361,6 +364,25 @@ export function useAdminCompOrderItem() {
     ({ orderId, itemId }: { orderId: string; itemId: string }) =>
       adminCompOrderItem(orderId, itemId),
   );
+}
+
+// ---------- Paper trail ----------
+
+export function useAdminReceipt(orderId: string, enabled = true) {
+  return useQuery({
+    queryKey: queryKeys.admin.receipt(orderId),
+    queryFn: () => adminOrderReceipt(orderId),
+    enabled: enabled && Boolean(orderId),
+  });
+}
+
+export function useAdminAuditLogs(query: AuditLogQuery = {}) {
+  const page = query.page ?? 1;
+  const perPage = query.per_page ?? 25;
+  return useQuery({
+    queryKey: queryKeys.admin.auditLogs(page, perPage, query.action),
+    queryFn: () => adminAuditLogs({ ...query, page, per_page: perPage }),
+  });
 }
 
 // ---------- Z-report ----------
