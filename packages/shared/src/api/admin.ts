@@ -33,6 +33,9 @@ import type {
   TipRequest,
   RefundRequest,
   UpdateOrderItemRequest,
+  ReceiptResponse,
+  AuditLogQuery,
+  AuditLogResponse,
   Order,
   OrderWithItems,
   Restaurant,
@@ -311,6 +314,23 @@ export function adminCompOrderItem(orderId: string, itemId: string): Promise<Ord
   return request<Order>(`${itemPath(orderId, itemId)}/comp`, {
     method: "POST",
     admin: true,
+  });
+}
+
+// ---------- Paper trail ----------
+
+export function adminOrderReceipt(orderId: string): Promise<ReceiptResponse> {
+  return request<ReceiptResponse>(`${orderPath(orderId)}/receipt`, { admin: true });
+}
+
+export function adminAuditLogs(query: AuditLogQuery = {}): Promise<AuditLogResponse> {
+  return request<AuditLogResponse>("/admin/audit-logs", {
+    admin: true,
+    query: {
+      page: query.page,
+      per_page: query.per_page,
+      action: query.action,
+    },
   });
 }
 

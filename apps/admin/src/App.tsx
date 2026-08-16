@@ -10,6 +10,7 @@ import SettingsPage from "./routes/settings";
 import AnalyticsPage from "./routes/analytics";
 import ZReportPage from "./routes/z-report";
 import OrderDetailPage from "./routes/order-detail";
+import AuditPage from "./routes/audit";
 import GroupAnalyticsPage from "./routes/group-analytics";
 import { AuthProvider, useAuth } from "./context/AuthContext";
 import { useGlobalSSE } from "@oshap/shared";
@@ -50,6 +51,7 @@ export default function App() {
             <Route path="/z-report" element={<ZReportPage />} />
             {/* Correcting a bill is cashier work, not owner-only. */}
             <Route path="/orders/:orderId" element={<OrderDetailPage />} />
+            <Route path="/audit" element={<AuditPage />} />
           </Route>
 
           <Route element={<RoleGate allowedRoles={["OWNER", "MANAGER"]} />}>

@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { Link } from "react-router";
 import { formatCurrency, useAdminZReport } from "@oshap/shared";
 import type { PaymentMethod } from "@oshap/shared";
 import { SecondaryButton } from "@oshap/shared/ui";
@@ -127,6 +128,12 @@ export default function ZReportPage() {
                 {data.order_count} settled order
                 {data.order_count === 1 ? "" : "s"} on {data.date}
               </p>
+              <Link
+                to="/audit"
+                className="text-caption-md font-semibold text-primary hover:underline no-underline oshap-print-hide"
+              >
+                Not adding up? See what changed →
+              </Link>
             </section>
           </>
         )

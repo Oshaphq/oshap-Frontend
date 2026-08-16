@@ -13,6 +13,7 @@ import {
 } from "@oshap/shared";
 import { PrimaryButton, SecondaryButton, toast } from "@oshap/shared/ui";
 import QueryError from "../components/QueryError";
+import ReceiptSheet from "../components/ReceiptSheet";
 
 type Adjustment = "discount" | "tip" | "refund";
 
@@ -40,6 +41,7 @@ export default function OrderDetailPage() {
   const [openAdjustment, setOpenAdjustment] = useState<Adjustment | null>(null);
   const [amount, setAmount] = useState("");
   const [pendingItemAction, setPendingItemAction] = useState<string | null>(null);
+  const [printingReceipt, setPrintingReceipt] = useState(false);
 
   const fail = (err: unknown, fallback: string) =>
     toast.error(err instanceof Error ? err.message : fallback);
@@ -114,7 +116,14 @@ export default function OrderDetailPage() {
             Table {data.table} · {data.status}
           </p>
         </div>
+        <SecondaryButton size="md" onClick={() => setPrintingReceipt(true)}>
+          <i className="mgc_print_line" /> Receipt
+        </SecondaryButton>
       </header>
+
+      {printingReceipt && (
+        <ReceiptSheet orderId={orderId} onDone={() => setPrintingReceipt(false)} />
+      )}
 
       {isCancelled && (
         <div className="flex items-start gap-s p-md rounded-lg bg-error-container text-on-error-container">
