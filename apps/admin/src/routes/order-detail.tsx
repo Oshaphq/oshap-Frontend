@@ -93,7 +93,10 @@ export default function OrderDetailPage() {
 
   const data = order.data;
   const isSettled = data.status === "CONFIRMED";
-  const isCancelled = data.status === "CANCELLED";
+  // A refunded bill was paid then handed back; a cancelled one was never paid.
+  // Both are closed to further changes, but they read differently to staff.
+  const isRefunded = data.status === "REFUNDED";
+  const isClosed = isRefunded || data.status === "CANCELLED";
   const busy =
     discount.isPending || tip.isPending || refund.isPending ||
     updateItem.isPending || voidItem.isPending || compItem.isPending;
@@ -125,12 +128,13 @@ export default function OrderDetailPage() {
         <ReceiptSheet orderId={orderId} onDone={() => setPrintingReceipt(false)} />
       )}
 
-      {isCancelled && (
+      {isClosed && (
         <div className="flex items-start gap-s p-md rounded-lg bg-error-container text-on-error-container">
           <i className="mgc_alert_line text-xl shrink-0 mt-0.5" />
           <p className="text-label-l5">
-            This order was refunded or cancelled. It no longer counts towards the
-            day&rsquo;s takings.
+            {isRefunded
+              ? "This bill was refunded. It no longer counts towards the day's takings."
+              : "This order was cancelled. It was never paid for."}
           </p>
         </div>
       )}
@@ -163,7 +167,7 @@ export default function OrderDetailPage() {
                   </span>
                 </div>
 
-                {!isSettled && !isCancelled && (
+                {!isSettled && !isClosed && (
                   <div className="flex items-center gap-md">
                     {confirming ? (
                       <>
@@ -282,7 +286,7 @@ export default function OrderDetailPage() {
         </div>
       </section>
 
-      {!isCancelled && (
+      {!isClosed && (
         <section className="bg-surface-container-low rounded-md p-l flex flex-col gap-md">
           <h2 className="text-label-l2 font-semibold text-primary-text">Adjust</h2>
 

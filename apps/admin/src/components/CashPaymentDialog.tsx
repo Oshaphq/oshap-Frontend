@@ -36,8 +36,8 @@ export default function CashPaymentDialog({ tableId, onClose }: Props) {
   const total = unpaid?.total ?? 0;
   const orderIds = unpaid?.combined_order_ids ?? (unpaid ? [unpaid.id] : []);
 
-  // Tendered and change are a counter aid, not part of the request — the
-  // endpoint records the bill, and the drawer is the cashier's business.
+  // The endpoint accepts what was handed over, so it's recorded rather than
+  // only used to work out change.
   const tenderedKobo = tendered === "" ? null : nairaToKobo(Number(tendered));
   const change =
     tenderedKobo !== null && tenderedKobo >= total ? tenderedKobo - total : null;
@@ -46,7 +46,12 @@ export default function CashPaymentDialog({ tableId, onClose }: Props) {
   const handleConfirm = () => {
     if (orderIds.length === 0) return;
     recordCash.mutate(
-      { order_ids: orderIds },
+      {
+        order_ids: orderIds,
+        // Only sent when it was actually entered — a blank field is "didn't
+        // record it", not "nothing was handed over".
+        ...(tenderedKobo != null ? { amount: tenderedKobo } : {}),
+      },
       {
         onSuccess: () => {
           toast.success(`Cash recorded for ${tableId}`);
@@ -137,7 +142,7 @@ export default function CashPaymentDialog({ tableId, onClose }: Props) {
             </div>
 
             {/* Saves the cashier doing subtraction at a busy till, which is
-                where change mistakes come from. Not sent to the server. */}
+                where change mistakes come from. */}
             {change !== null && (
               <div className="flex items-center justify-between p-md rounded-lg bg-success-container text-on-success-container">
                 <span className="text-label-l4 font-semibold">Change due</span>

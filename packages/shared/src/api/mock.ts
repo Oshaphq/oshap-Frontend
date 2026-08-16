@@ -26,6 +26,7 @@ import type {
   DiscountRequest,
   TipRequest,
   RefundRequest,
+  RefundResponse,
   UpdateOrderItemRequest,
   AuditLogEntry,
   AuditLogResponse,
@@ -63,6 +64,7 @@ import type {
   CreateBankAccountRequest,
   UpdateBankAccountRequest,
 } from "../types/index";
+import { AUDIT_ACTIONS } from "../types/index";
 
 // ---------------------------------------------------------------------------
 // Mock EventSource for SSE
@@ -1567,18 +1569,18 @@ const _auditLog: AuditLogEntry[] = [];
 function audit(
   action: string,
   order: { id: string; reference: string } | null,
-  detail: string,
-  amount?: number,
+  details: Record<string, unknown> = {},
 ): void {
   _auditLog.unshift({
     id: uid(),
     created_at: now(),
     action,
     actor_name: [..._staff.values()].find((st) => st.role === "OWNER")?.name ?? "Staff",
-    order_id: order?.id ?? null,
-    order_reference: order?.reference ?? null,
-    detail,
-    amount: amount ?? null,
+    target_type: order ? "order" : null,
+    target_id: order?.id ?? null,
+    // Free-form per action, matching the server. The reference rides along so
+    // the log can name an order without a second lookup.
+    details: order ? { reference: order.reference, ...details } : details,
   });
 }
 
@@ -1591,13 +1593,10 @@ route("GET", /^\/admin\/audit-logs$/, ({ query }) => {
   const start = (page - 1) * perPage;
 
   return json(200, {
-    entries: filtered.slice(start, start + perPage),
-    pagination: {
-      page,
-      per_page: perPage,
-      total: filtered.length,
-      total_pages: Math.max(1, Math.ceil(filtered.length / perPage)),
-    },
+    logs: filtered.slice(start, start + perPage),
+    total: filtered.length,
+    page,
+    per_page: perPage,
   } satisfies AuditLogResponse);
 });
 
@@ -1606,24 +1605,31 @@ route("GET", /^\/admin\/orders\/[^/]+\/receipt$/, ({ path }) => {
   const order = _orders.get(orderId) as StoredOrderWithItems | undefined;
   if (!order) return json(404, { error: "Order not found" });
 
+  const payment = _payments.get(order.id);
+
   return json(200, {
     order_id: order.id,
     reference: order.reference,
     table_id: order.table_id,
-    issued_at: now(),
-    restaurant: {
-      name: _restaurant.name,
-      address: _restaurant.address ?? null,
-      logo_url: _restaurant.logo_url ?? null,
-    },
-    items: order.order_items,
+    customer_name: order.customer_name ?? null,
+    status: order.status,
+    restaurant: _restaurant,
+    created_at: order.created_at,
+    // Only set once the money is in, so a receipt for an unpaid bill is
+    // distinguishable from one for a settled bill.
+    paid_at: payment?.status === "VERIFIED" ? payment.created_at : null,
+    items: order.order_items.map((i) => ({
+      name: i.name,
+      quantity: i.quantity,
+      price: i.price,
+    })),
     subtotal: order.subtotal ?? order.total,
     discount: order.discount ?? 0,
     service_charge: order.service_charge ?? 0,
     vat: order.vat ?? 0,
     tip: order.tip ?? 0,
     total: order.total,
-    payment_method: _payments.get(order.id)?.method ?? null,
+    payment_method: payment?.method ?? null,
   } satisfies ReceiptResponse);
 });
 
@@ -1665,7 +1671,7 @@ route("POST", /^\/admin\/orders\/[^/]+\/discount$/, ({ path, body }) => {
 
   order.discount = discount;
   reprice(order);
-  audit("order.discount", order, `Discount applied to ${order.reference}`, discount);
+  audit(AUDIT_ACTIONS.discount, order, { amount: discount });
   syncToStorage();
   return json(200, order);
 });
@@ -1681,7 +1687,7 @@ route("POST", /^\/admin\/orders\/[^/]+\/tip$/, ({ path, body }) => {
 
   order.tip = amount;
   reprice(order);
-  audit("order.tip", order, `Tip added to ${order.reference}`, amount);
+  audit(AUDIT_ACTIONS.tip, order, { amount });
   syncToStorage();
   return json(200, order);
 });
@@ -1690,21 +1696,36 @@ route("POST", /^\/admin\/orders\/[^/]+\/refund$/, ({ path, body }) => {
   const { order } = findAdjustableOrder(path, "refund");
   if (!order) return json(404, { error: "Order not found" });
 
+  // Only a settled bill can be refunded — there is nothing to hand back
+  // otherwise, and allowing it would let an unpaid order reduce the takings.
+  if (order.status !== "CONFIRMED") {
+    return json(400, { error: "Only confirmed orders can be refunded" });
+  }
+
   const b = body as RefundRequest;
   const amount = b.amount ?? order.total;
   if (amount <= 0 || amount > order.total) {
-    return json(400, { error: "Refund must be between zero and the order total" });
+    return json(400, { error: "Refund exceeds order total" });
   }
 
-  // A refunded order stops being takings, so it leaves CONFIRMED — otherwise
-  // the Z-report would keep counting money that was handed back.
-  const payment = _payments.get(order.id);
-  if (payment) payment.status = "FAILED";
-  order.status = "CANCELLED";
+  // REFUNDED rather than CANCELLED: a cancelled order was never paid for, and
+  // conflating the two would misreport the day.
+  order.status = "REFUNDED";
+  _payments.set(order.id, {
+    id: uid(),
+    order_id: order.id,
+    // Negative, so a refund reads as money leaving rather than arriving.
+    amount: -amount,
+    status: "REFUNDED",
+    proof_url: null,
+    bank_account_id: null,
+    method: _payments.get(order.id)?.method,
+    created_at: now(),
+  });
 
-  audit("order.refund", order, b.reason || `Refunded ${order.reference}`, amount);
+  audit(AUDIT_ACTIONS.refund, order, { amount, reason: b.reason ?? null });
   syncToStorage();
-  return json(200, order);
+  return json(200, { success: true as const, refunded: amount } satisfies RefundResponse);
 });
 
 route("PATCH", /^\/admin\/orders\/[^/]+\/items\/[^/]+$/, ({ path, body }) => {
@@ -1727,7 +1748,7 @@ route("PATCH", /^\/admin\/orders\/[^/]+\/items\/[^/]+$/, ({ path, body }) => {
   }
 
   reprice(order);
-  audit("item.edit", order, `Edited ${item.name} on ${order.reference}`);
+  audit(AUDIT_ACTIONS.itemUpdate, order, { item: item.name });
   syncToStorage();
   return json(200, order);
 });
@@ -1742,7 +1763,7 @@ route("DELETE", /^\/admin\/orders\/[^/]+\/items\/[^/]+$/, ({ path }) => {
   if (order.order_items.length === before) return json(404, { error: "Item not found" });
 
   reprice(order);
-  audit("item.void", order, `Voided a line on ${order.reference}`);
+  audit(AUDIT_ACTIONS.itemVoid, order, {});
   syncToStorage();
   return json(200, order);
 });
@@ -1759,7 +1780,7 @@ route("POST", /^\/admin\/orders\/[^/]+\/items\/[^/]+\/comp$/, ({ path }) => {
   // guest should see it was given rather than silently removed.
   item.price = 0;
   reprice(order);
-  audit("item.comp", order, `Comped ${item.name} on ${order.reference}`);
+  audit(AUDIT_ACTIONS.itemComp, order, { item: item.name });
   syncToStorage();
   return json(200, order);
 });
@@ -1778,28 +1799,29 @@ route("GET", /^\/admin\/z-report$/, ({ query }) => {
   const sum = (pick: (o: (typeof settled)[number]) => number) =>
     settled.reduce((acc, o) => acc + pick(o), 0);
 
-  const byMethod = new Map<PaymentMethod, { count: number; total: number }>();
-  for (const order of settled) {
-    const method = _payments.get(order.id)?.method ?? "MANUAL_TRANSFER";
-    const line = byMethod.get(method) ?? { count: 0, total: 0 };
-    line.count++;
-    line.total += order.total;
-    byMethod.set(method, line);
-  }
+  const totalFor = (method: PaymentMethod) =>
+    settled
+      .filter((o) => (_payments.get(o.id)?.method ?? "MANUAL_TRANSFER") === method)
+      .reduce((acc, o) => acc + o.total, 0);
 
-  // Refunds aren't modelled in the mock yet; reported as zero rather than
-  // omitted, so the shape matches the real response.
+  // Refunded orders leave CONFIRMED, so they never reach `settled` — their
+  // value is reported separately rather than netted off the sales figure.
+  const refunded = [..._orders.values()].filter(
+    (o) => o.status === "REFUNDED" && o.created_at.slice(0, 10) === date,
+  );
+
   return json(200, {
     date,
     order_count: settled.length,
-    gross_sales: sum((o) => o.subtotal ?? o.total),
-    discounts: sum((o) => o.discount ?? 0),
-    service_charge: sum((o) => o.service_charge ?? 0),
-    vat: sum((o) => o.vat ?? 0),
-    tips: sum((o) => o.tip ?? 0),
-    refunds: 0,
-    net_sales: sum((o) => o.total),
-    by_method: [...byMethod.entries()].map(([method, line]) => ({ method, ...line })),
+    total_sales: sum((o) => o.total),
+    cash_total: totalFor("CASH"),
+    transfer_total: totalFor("MANUAL_TRANSFER"),
+    pos_total: totalFor("POS"),
+    vat_collected: sum((o) => o.vat ?? 0),
+    service_charge_collected: sum((o) => o.service_charge ?? 0),
+    discount_total: sum((o) => o.discount ?? 0),
+    tip_total: sum((o) => o.tip ?? 0),
+    refund_total: refunded.reduce((acc, o) => acc + o.total, 0),
   } satisfies ZReportResponse);
 });
 
@@ -1809,7 +1831,8 @@ route("POST", /^\/admin\/orders\/cash$/, ({ body }) => {
   const b = body as RecordCashRequest;
   if (!b.order_ids?.length) return json(400, { error: "No orders specified" });
 
-  let confirmed = 0;
+  let paid = 0;
+  let amount = 0;
   for (const oid of b.order_ids) {
     const order = _orders.get(oid);
     if (!order || order.status === "CONFIRMED") continue;
@@ -1827,14 +1850,15 @@ route("POST", /^\/admin\/orders\/cash$/, ({ body }) => {
       method: "CASH",
       created_at: now(),
     });
-    audit("payment.cash", order, `Cash taken for ${order.reference}`, order.total);
-    confirmed++;
+    audit(AUDIT_ACTIONS.cashPaid, order, { amount: order.total });
+    paid++;
+    amount += order.total;
   }
 
-  if (confirmed === 0) return json(404, { error: "No unpaid orders found" });
+  if (paid === 0) return json(404, { error: "No unpaid orders found" });
 
   syncToStorage();
-  return json(200, { success: true as const, confirmed } satisfies RecordCashResponse);
+  return json(200, { success: true as const, paid, amount } satisfies RecordCashResponse);
 });
 
 route("POST", /^\/admin\/reject$/, ({ body }) => {
@@ -1855,7 +1879,7 @@ route("POST", /^\/admin\/reject$/, ({ body }) => {
     if (!p) continue;
     p.status = "FAILED";
     creditAccount(p.bank_account_id, "failure");
-    audit("payment.reject", o, b.reason || `Rejected payment for ${o.reference}`, o.total);
+    audit("payment.reject", o, { amount: o.total, reason: b.reason ?? null });
   }
 
   syncToStorage();
@@ -1881,7 +1905,7 @@ route("POST", /^\/admin\/verify$/, ({ body }) => {
     if (!p) continue;
     p.status = "VERIFIED";
     creditAccount(p.bank_account_id, "success");
-    audit("payment.verify", o, `Verified payment for ${o.reference}`, o.total);
+    audit("payment.verify", o, { amount: o.total });
   }
 
   // Auto-close if no unpaid remain

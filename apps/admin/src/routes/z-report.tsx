@@ -83,46 +83,37 @@ export default function ZReportPage() {
               <h2 className="text-label-l2 font-semibold text-primary-text">
                 Takings by method
               </h2>
+              {/* The three lines that get checked against the drawer, so they
+                  sit closest to the total and always show — a method with no
+                  takings is itself worth seeing. */}
               <div className="flex flex-col">
-                {data.by_method.map((line) => (
-                  <div
-                    key={line.method}
-                    className="flex items-center justify-between gap-md py-s border-b border-outline-variant last:border-none"
-                  >
-                    <span className="text-p2 text-primary-text">
-                      {METHOD_LABELS[line.method] ?? line.method}
-                      <span className="text-secondary-text">
-                        {" "}
-                        · {line.count} order{line.count === 1 ? "" : "s"}
-                      </span>
-                    </span>
-                    <span className="text-label-l3 font-semibold text-primary-text tabular-nums">
-                      {formatCurrency(line.total)}
-                    </span>
-                  </div>
-                ))}
+                <Line label={METHOD_LABELS.CASH} value={data.cash_total} />
+                <Line label={METHOD_LABELS.MANUAL_TRANSFER} value={data.transfer_total} />
+                <Line label={METHOD_LABELS.POS} value={data.pos_total} />
+                <div className="flex items-center justify-between gap-md pt-md mt-s border-t-2 border-ink">
+                  <span className="text-label-l2 font-semibold text-primary-text">
+                    Total takings
+                  </span>
+                  <span className="font-display text-display-h2 font-semibold text-primary tabular-nums">
+                    {formatCurrency(data.total_sales)}
+                  </span>
+                </div>
               </div>
             </section>
 
             <section className="bg-surface-container-low rounded-md p-l flex flex-col gap-md">
               <h2 className="text-label-l2 font-semibold text-primary-text">
-                Breakdown
+                Included in the day
               </h2>
+              {/* Reported figures, not an equation. The server sends no
+                  "sales before adjustments", so presenting these as arithmetic
+                  that resolves to the total would be inventing a sum. */}
               <div className="flex flex-col">
-                <Line label="Gross sales" value={data.gross_sales} />
-                <Line label="Discounts" value={-data.discounts} />
-                <Line label="Service charge" value={data.service_charge} />
-                <Line label="VAT" value={data.vat} />
-                <Line label="Tips" value={data.tips} />
-                <Line label="Refunds" value={-data.refunds} />
-                <div className="flex items-center justify-between gap-md pt-md mt-s border-t-2 border-ink">
-                  <span className="text-label-l2 font-semibold text-primary-text">
-                    Net takings
-                  </span>
-                  <span className="font-display text-display-h2 font-semibold text-primary tabular-nums">
-                    {formatCurrency(data.net_sales)}
-                  </span>
-                </div>
+                <Line label="VAT collected" value={data.vat_collected} />
+                <Line label="Service charge collected" value={data.service_charge_collected} />
+                <Line label="Discounts given" value={data.discount_total} />
+                <Line label="Tips" value={data.tip_total} />
+                <Line label="Refunded" value={data.refund_total} isDeduction />
               </div>
               <p className="text-caption-md text-secondary-text">
                 {data.order_count} settled order
@@ -142,9 +133,17 @@ export default function ZReportPage() {
   );
 }
 
-/** A signed line — negatives are shown as deductions rather than raw minus figures. */
-function Line({ label, value }: { label: string; value: number }) {
-  const isDeduction = value < 0;
+/** `isDeduction` marks money that left, which the server reports as a positive. */
+function Line({
+  label,
+  value,
+  isDeduction: forceDeduction = false,
+}: {
+  label: string;
+  value: number;
+  isDeduction?: boolean;
+}) {
+  const isDeduction = forceDeduction ? value > 0 : value < 0;
   return (
     <div className="flex items-center justify-between gap-md py-s border-b border-outline-variant last:border-none">
       <span className="text-p2 text-secondary-text">{label}</span>
@@ -153,7 +152,7 @@ function Line({ label, value }: { label: string; value: number }) {
           isDeduction ? "text-error" : "text-primary-text"
         }`}
       >
-        {isDeduction ? `− ${formatCurrency(-value)}` : formatCurrency(value)}
+        {isDeduction ? `− ${formatCurrency(Math.abs(value))}` : formatCurrency(value)}
       </span>
     </div>
   );
