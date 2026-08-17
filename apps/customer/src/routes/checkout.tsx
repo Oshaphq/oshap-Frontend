@@ -5,7 +5,7 @@ import {
   useCreateOrder,
   useTable,
 } from "@oshap/shared";
-import { CartProvider, useCart } from "../context/CartContext";
+import { CartProvider, unitPrice, useCart } from "../context/CartContext";
 import { useSession } from "../context/SessionContext";
 import CustomerHeader from "../components/CustomerHeader";
 import { PrimaryButton, toast } from "@oshap/shared/ui";
@@ -41,10 +41,16 @@ function CheckoutView({ tableId }: { tableId: string }) {
       const { order_id } = await createOrder.mutateAsync({
         table: tableId,
         restaurant_id: restaurantId,
+        // `price` is the dish's BASE price. The server adds each option's
+        // delta itself, so sending unitPrice() here would charge every
+        // modifier twice.
         items: items.map((i) => ({
           name: i.name,
           qty: i.quantity,
-          price: i.price,
+          price: i.basePrice,
+          menu_item_id: i.menuItemId,
+          notes: i.notes,
+          modifiers: i.modifiers.map((m) => ({ option_id: m.option_id })),
         })),
         session_id: session?.id ?? undefined,
         customer_name: customerName || undefined,
@@ -134,22 +140,32 @@ function CheckoutView({ tableId }: { tableId: string }) {
         <div className="flex flex-col gap-md">
           {items.map((item) => (
             <div
-              key={item.id}
-              className="flex items-center justify-between gap-md"
+              key={item.lineId}
+              className="flex items-start justify-between gap-md"
             >
-              <div className="flex items-center gap-s flex-1 min-w-0">
-                <i className="mgc_fork_spoon_line text-xl text-outline-variant" />
+              <div className="flex items-start gap-s flex-1 min-w-0">
+                <i className="mgc_fork_spoon_line text-xl text-outline-variant mt-0.5" />
                 <div className="flex flex-col gap-0.5 min-w-0">
                   <span className="text-label-l3 font-semibold text-primary-text truncate">
                     {item.name}
                   </span>
+                  {item.modifiers.length > 0 && (
+                    <span className="text-caption-sm text-secondary-text">
+                      {item.modifiers.map((m) => m.option_name).join(" · ")}
+                    </span>
+                  )}
+                  {item.notes && (
+                    <span className="text-caption-sm text-secondary-text italic">
+                      {item.notes}
+                    </span>
+                  )}
                   <span className="text-label-l5 text-secondary-text">
                     Qty {item.quantity}
                   </span>
                 </div>
               </div>
-              <span className="text-label-l3 font-semibold text-primary-text shrink-0">
-                {formatCurrency(item.price * item.quantity)}
+              <span className="text-label-l3 font-semibold text-primary-text shrink-0 tabular-nums">
+                {formatCurrency(unitPrice(item) * item.quantity)}
               </span>
             </div>
           ))}
