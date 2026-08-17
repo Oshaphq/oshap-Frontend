@@ -1,6 +1,6 @@
 import { useNavigate } from "react-router";
 import { formatCurrency } from "@oshap/shared";
-import { useCart } from "../context/CartContext";
+import { unitPrice, useCart } from "../context/CartContext";
 import { useDragToDismiss } from "../hooks/useDragToDismiss";
 import { PrimaryButton } from "@oshap/shared/ui";
 
@@ -67,17 +67,29 @@ export default function CartDrawer({ tableId }: CartDrawerProps) {
             <div className="flex-1 overflow-y-auto px-md py-md flex flex-col gap-md">
               {items.map((item) => (
                 <div
-                  key={item.id}
-                  className="flex items-center justify-between gap-md"
+                  key={item.lineId}
+                  className="flex items-start justify-between gap-md"
                 >
-                  <div className="flex items-center gap-s flex-1 min-w-0">
-                    <i className="mgc_fork_spoon_line text-xl text-outline-variant" />
+                  <div className="flex items-start gap-s flex-1 min-w-0">
+                    <i className="mgc_fork_spoon_line text-xl text-outline-variant mt-0.5" />
                     <div className="flex flex-col gap-0.5 min-w-0">
                       <span className="text-label-l3 font-semibold text-primary-text truncate">
                         {item.name}
                       </span>
-                      <span className="text-label-l5 text-secondary-text">
-                        {formatCurrency(item.price * item.quantity)}
+                      {/* What was chosen, so a guest can tell two otherwise
+                          identical lines apart before they pay for both. */}
+                      {item.modifiers.length > 0 && (
+                        <span className="text-caption-sm text-secondary-text">
+                          {item.modifiers.map((m) => m.option_name).join(" · ")}
+                        </span>
+                      )}
+                      {item.notes && (
+                        <span className="text-caption-sm text-secondary-text italic">
+                          {item.notes}
+                        </span>
+                      )}
+                      <span className="text-label-l5 text-secondary-text tabular-nums">
+                        {formatCurrency(unitPrice(item) * item.quantity)}
                       </span>
                     </div>
                   </div>
@@ -85,7 +97,7 @@ export default function CartDrawer({ tableId }: CartDrawerProps) {
                     <button
                       type="button"
                       onClick={() =>
-                        updateQuantity(item.id, item.quantity - 1)
+                        updateQuantity(item.lineId, item.quantity - 1)
                       }
                       aria-label={`Decrease ${item.name}`}
                       className="w-8 h-8 flex items-center justify-center rounded-4xl bg-surface-container text-on-surface-variant hover:bg-primary hover:text-on-primary transition-colors"
@@ -98,7 +110,7 @@ export default function CartDrawer({ tableId }: CartDrawerProps) {
                     <button
                       type="button"
                       onClick={() =>
-                        updateQuantity(item.id, item.quantity + 1)
+                        updateQuantity(item.lineId, item.quantity + 1)
                       }
                       aria-label={`Increase ${item.name}`}
                       className="w-8 h-8 flex items-center justify-center rounded-4xl bg-surface-container text-on-surface-variant hover:bg-primary hover:text-on-primary transition-colors"

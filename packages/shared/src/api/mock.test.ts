@@ -1,6 +1,7 @@
 import { describe, it, expect } from "vitest";
 import { mockRequest } from "./mock";
 import { formatCurrency } from "../utils/currency";
+import { computeOrderTotals } from "../utils/pricing";
 import { AUDIT_ACTIONS } from "../types/index";
 
 const HOME_RESTAURANT = "00000000-0000-0000-0000-000000000001";
@@ -963,5 +964,426 @@ describe("mock API — seed versioning", () => {
 
     expect(names).not.toContain("Stale Naira Dish");
     expect(localStorage.getItem("oshap-mock-state")).toBeNull();
+  });
+});
+
+describe("mock API — modifiers", () => {
+  it("GET /menu attaches modifier groups to the dishes that use them", async () => {
+    const res = await mockRequest("/menu", "GET", null, q(), false);
+    const items = res.body as Array<{
+      id: string;
+      modifier_groups?: Array<{ id: string; name: string; options: unknown[] }>;
+    }>;
+
+    const jollof = items.find((i) => i.id === "m-003");
+    expect(jollof?.modifier_groups?.map((g) => g.id)).toEqual([
+      "mg-protein",
+      "mg-spice",
+      "mg-extras",
+    ]);
+
+    // A dish with nothing attached must not carry an empty group array that
+    // the customer sheet would then render as a heading with no choices.
+    const fries = items.find((i) => i.id === "m-016");
+    expect(fries?.modifier_groups).toBeUndefined();
+  });
+
+  it("prices an order from the BASE price plus the option deltas", async () => {
+    // Jollof is ₦3,500. Turkey adds ₦500, extra plantain ₦500 — so one unit
+    // resolves to ₦4,500 and the client must NOT pre-add those deltas.
+    const body = {
+      table: "T1",
+      restaurant_id: HOME_RESTAURANT,
+      items: [
+        {
+          name: "Jollof Rice & Chicken",
+          qty: 2,
+          price: 350000,
+          menu_item_id: "m-003",
+          modifiers: [
+            { option_id: "mo-p-turkey" },
+            { option_id: "mo-e-plantain" },
+          ],
+        },
+      ],
+    };
+    const created = await mockRequest("/orders", "POST", body, q(), false);
+    expect(created.status).toBe(200);
+    const { order_id } = created.body as { order_id: string };
+
+    const detail = await mockRequest(`/orders/${order_id}`, "GET", null, q(), false);
+    const order = detail.body as {
+      subtotal: number;
+      items: Array<{
+        price: number;
+        modifiers: Array<{ name: string; option: string; price_delta: number }> | null;
+      }>;
+    };
+
+    const line = order.items[0]!;
+    expect(line.price).toBe(450000);
+    expect(order.subtotal).toBe(900000);
+
+    // Denormalized at order time: group name, option name, and the delta as
+    // charged — so renaming the option later can't rewrite this ticket.
+    expect(line.modifiers).toEqual([
+      { name: "Protein", option: "Turkey", price_delta: 50000 },
+      { name: "Extras", option: "Extra plantain", price_delta: 50000 },
+    ]);
+  });
+
+  it("leaves a line without modifiers priced at its base and carrying null", async () => {
+    const body = {
+      table: "T2",
+      restaurant_id: HOME_RESTAURANT,
+      items: [{ name: "Coca-Cola", qty: 1, price: 50000, menu_item_id: "m-012" }],
+    };
+    const created = await mockRequest("/orders", "POST", body, q(), false);
+    const { order_id } = created.body as { order_id: string };
+
+    const detail = await mockRequest(`/orders/${order_id}`, "GET", null, q(), false);
+    const order = detail.body as {
+      items: Array<{ price: number; modifiers: unknown }>;
+    };
+    expect(order.items[0]!.price).toBe(50000);
+    expect(order.items[0]!.modifiers).toBeNull();
+  });
+
+  it("rejects an unknown option rather than silently dropping it", async () => {
+    const body = {
+      table: "T3",
+      restaurant_id: HOME_RESTAURANT,
+      items: [
+        {
+          name: "Jollof Rice & Chicken",
+          qty: 1,
+          price: 350000,
+          modifiers: [{ option_id: "mo-does-not-exist" }],
+        },
+      ],
+    };
+    const res = await mockRequest("/orders", "POST", body, q(), false);
+    expect(res.status).toBe(400);
+  });
+
+  it("renaming an option updates every dish sharing that group", async () => {
+    const res = await mockRequest(
+      "/admin/modifier-options/mo-s-hot",
+      "PATCH",
+      { name: "Very hot" },
+      q(),
+      true,
+    );
+    expect(res.status).toBe(200);
+
+    const menu = await mockRequest("/menu", "GET", null, q(), false);
+    const items = menu.body as Array<{
+      id: string;
+      modifier_groups?: Array<{ id: string; options: Array<{ name: string }> }>;
+    }>;
+    const names = (itemId: string) =>
+      items
+        .find((i) => i.id === itemId)
+        ?.modifier_groups?.find((g) => g.id === "mg-spice")
+        ?.options.map((o) => o.name);
+
+    // m-001 and m-003 both attach mg-spice — one edit, both dishes.
+    expect(names("m-001")).toContain("Very hot");
+    expect(names("m-003")).toContain("Very hot");
+
+    await mockRequest(
+      "/admin/modifier-options/mo-s-hot",
+      "PATCH",
+      { name: "Hot" },
+      q(),
+      true,
+    );
+  });
+
+  it("detaches a deleted group from every dish that referenced it", async () => {
+    const created = await mockRequest(
+      "/admin/modifier-groups",
+      "POST",
+      { name: "Temp group", options: [{ name: "One", price_delta: 100 }] },
+      q(),
+      true,
+    );
+    const group = created.body as { id: string; options: Array<{ id: string }> };
+    expect(created.status).toBe(201);
+    expect(group.options).toHaveLength(1);
+
+    await mockRequest(
+      "/admin/menu/m-016/modifier-groups",
+      "PUT",
+      { group_ids: [group.id] },
+      q(),
+      true,
+    );
+    let menu = await mockRequest("/admin/menu", "GET", null, q(), true);
+    let fries = (menu.body as Array<{ id: string; modifier_groups?: unknown[] }>).find(
+      (i) => i.id === "m-016",
+    );
+    expect(fries?.modifier_groups).toHaveLength(1);
+
+    await mockRequest(`/admin/modifier-groups/${group.id}`, "DELETE", null, q(), true);
+
+    menu = await mockRequest("/admin/menu", "GET", null, q(), true);
+    fries = (menu.body as Array<{ id: string; modifier_groups?: unknown[] }>).find(
+      (i) => i.id === "m-016",
+    );
+    // Not a dangling id, and not an empty group — no attachment at all.
+    expect(fries?.modifier_groups).toBeUndefined();
+  });
+});
+
+describe("mock API — ingredients", () => {
+  it("records opening stock as a movement rather than a bare starting value", async () => {
+    const res = await mockRequest(
+      "/admin/ingredients",
+      "POST",
+      { name: "Test Pepper", unit: "kg", stock_qty: 6.5 },
+      q(),
+      true,
+    );
+    expect(res.status).toBe(201);
+    const created = res.body as { id: string; stock_qty: number };
+    expect(created.stock_qty).toBe(6.5);
+
+    const ledger = await mockRequest(
+      "/admin/ingredients/movements",
+      "GET",
+      null,
+      q("reason=PURCHASE"),
+      true,
+    );
+    const { movements } = ledger.body as {
+      movements: Array<{ ingredient_id: string; delta: number; note: string | null }>;
+    };
+    const opening = movements.find((m) => m.ingredient_id === created.id);
+    expect(opening?.delta).toBe(6.5);
+    expect(opening?.note).toBe("Opening stock");
+  });
+
+  it("adjusts by a signed delta and lets stock go negative", async () => {
+    const before = await mockRequest("/admin/ingredients", "GET", null, q(), true);
+    const beef = (before.body as Array<{ id: string; stock_qty: number }>).find(
+      (i) => i.id === "ing-beef",
+    )!;
+
+    await mockRequest(
+      "/admin/ingredients/ing-beef/adjust",
+      "POST",
+      { delta: -(beef.stock_qty + 1), reason: "WASTAGE", note: "Freezer failure" },
+      q(),
+      true,
+    );
+
+    const after = await mockRequest("/admin/ingredients", "GET", null, q(), true);
+    const updated = (after.body as Array<{ id: string; stock_qty: number }>).find(
+      (i) => i.id === "ing-beef",
+    )!;
+    // Clamping at zero would hide a miscount; a negative level is the signal.
+    expect(updated.stock_qty).toBe(-1);
+
+    await mockRequest(
+      "/admin/ingredients/ing-beef/adjust",
+      "POST",
+      { delta: beef.stock_qty + 1, reason: "CORRECTION" },
+      q(),
+      true,
+    );
+  });
+
+  it("depletes a recipe when an order is placed, and says which order did it", async () => {
+    const before = await mockRequest("/admin/ingredients", "GET", null, q(), true);
+    const riceBefore = (before.body as Array<{ id: string; stock_qty: number }>).find(
+      (i) => i.id === "ing-rice",
+    )!.stock_qty;
+
+    // Jollof (m-003) uses 0.25 kg of rice per serving; three servings = 0.75.
+    const created = await mockRequest(
+      "/orders",
+      "POST",
+      {
+        table: "T5",
+        restaurant_id: HOME_RESTAURANT,
+        items: [
+          { name: "Jollof Rice & Chicken", qty: 3, price: 350000, menu_item_id: "m-003" },
+        ],
+      },
+      q(),
+      false,
+    );
+    const { order_id } = created.body as { order_id: string };
+
+    const after = await mockRequest("/admin/ingredients", "GET", null, q(), true);
+    const riceAfter = (after.body as Array<{ id: string; stock_qty: number }>).find(
+      (i) => i.id === "ing-rice",
+    )!.stock_qty;
+    expect(riceAfter).toBeCloseTo(riceBefore - 0.75, 5);
+
+    const ledger = await mockRequest(
+      "/admin/ingredients/movements",
+      "GET",
+      null,
+      q("reason=SALE"),
+      true,
+    );
+    const { movements } = ledger.body as {
+      movements: Array<{ ingredient_id: string; delta: number; order_id: string | null }>;
+    };
+    const fromThisOrder = movements.filter((m) => m.order_id === order_id);
+    // One movement per recipe line, each attributable to the order.
+    expect(fromThisOrder).toHaveLength(4);
+    expect(fromThisOrder.find((m) => m.ingredient_id === "ing-rice")?.delta).toBeCloseTo(
+      -0.75,
+      5,
+    );
+  });
+
+  it("leaves ingredients alone for a dish with no recipe", async () => {
+    const before = await mockRequest("/admin/ingredients", "GET", null, q(), true);
+    const snapshot = (before.body as Array<{ id: string; stock_qty: number }>).map(
+      (i) => `${i.id}:${i.stock_qty}`,
+    );
+
+    await mockRequest(
+      "/orders",
+      "POST",
+      {
+        table: "T6",
+        restaurant_id: HOME_RESTAURANT,
+        items: [{ name: "Coca-Cola", qty: 2, price: 50000, menu_item_id: "m-012" }],
+      },
+      q(),
+      false,
+    );
+
+    const after = await mockRequest("/admin/ingredients", "GET", null, q(), true);
+    expect(
+      (after.body as Array<{ id: string; stock_qty: number }>).map(
+        (i) => `${i.id}:${i.stock_qty}`,
+      ),
+    ).toEqual(snapshot);
+  });
+
+  it("returns a recipe with the ingredient's name and unit resolved", async () => {
+    const res = await mockRequest("/admin/menu/m-003/recipe", "GET", null, q(), true);
+    const recipe = res.body as {
+      menu_item_id: string;
+      lines: Array<{ ingredient_name: string; unit: string; qty_per_serving: number }>;
+    };
+    expect(recipe.menu_item_id).toBe("m-003");
+    const rice = recipe.lines.find((l) => l.ingredient_name === "Rice");
+    expect(rice).toEqual({
+      ingredient_id: "ing-rice",
+      ingredient_name: "Rice",
+      unit: "kg",
+      qty_per_serving: 0.25,
+    });
+  });
+
+  it("replaces the whole recipe on PUT and drops unknown ingredients", async () => {
+    const res = await mockRequest(
+      "/admin/menu/m-005/recipe",
+      "PUT",
+      {
+        lines: [
+          { ingredient_id: "ing-chicken", qty_per_serving: 0.3 },
+          { ingredient_id: "ing-does-not-exist", qty_per_serving: 9 },
+        ],
+      },
+      q(),
+      true,
+    );
+    expect(res.status).toBe(200);
+    const recipe = res.body as { lines: Array<{ ingredient_id: string }> };
+    expect(recipe.lines.map((l) => l.ingredient_id)).toEqual(["ing-chicken"]);
+
+    await mockRequest("/admin/menu/m-005/recipe", "PUT", { lines: [] }, q(), true);
+  });
+});
+
+describe("mock API — checkout estimate matches the order", () => {
+  it("computeOrderTotals predicts the server's figure exactly", async () => {
+    // The point of the whole exercise: what checkout shows a guest before
+    // they commit must equal what the order comes back with. Any drift here
+    // is a guest agreeing to one number and being charged another.
+    const table = await mockRequest("/table/T9", "GET", null, q(), false);
+    const { restaurant } = table.body as {
+      restaurant: { vat_rate?: number; service_charge_rate?: number };
+    };
+
+    const items = [
+      { name: "Jollof Rice & Chicken", qty: 2, price: 350000, menu_item_id: "m-003" },
+      { name: "Chapman", qty: 3, price: 150000, menu_item_id: "m-009" },
+    ];
+    const subtotal = items.reduce((s, i) => s + i.price * i.qty, 0);
+
+    const predicted = computeOrderTotals(subtotal, {
+      vat_rate: restaurant.vat_rate,
+      service_charge_rate: restaurant.service_charge_rate,
+    });
+
+    const created = await mockRequest(
+      "/orders",
+      "POST",
+      { table: "T9", restaurant_id: HOME_RESTAURANT, items },
+      q(),
+      false,
+    );
+    const { order_id, total } = created.body as {
+      order_id: string;
+      total: number;
+    };
+
+    expect(total).toBe(predicted.total);
+
+    const detail = await mockRequest(`/orders/${order_id}`, "GET", null, q(), false);
+    const order = detail.body as {
+      subtotal: number;
+      service_charge: number;
+      vat: number;
+      total: number;
+    };
+    expect(order.subtotal).toBe(predicted.subtotal);
+    expect(order.service_charge).toBe(predicted.service_charge);
+    expect(order.vat).toBe(predicted.vat);
+    expect(order.total).toBe(predicted.total);
+  });
+
+  it("predicts correctly once modifiers move the line price", async () => {
+    const table = await mockRequest("/table/T10", "GET", null, q(), false);
+    const { restaurant } = table.body as {
+      restaurant: { vat_rate?: number; service_charge_rate?: number };
+    };
+
+    // Base 3,500 + turkey 500 + plantain 500 = 4,500 per unit, ×2.
+    const predicted = computeOrderTotals(900000, {
+      vat_rate: restaurant.vat_rate,
+      service_charge_rate: restaurant.service_charge_rate,
+    });
+
+    const created = await mockRequest(
+      "/orders",
+      "POST",
+      {
+        table: "T10",
+        restaurant_id: HOME_RESTAURANT,
+        items: [
+          {
+            name: "Jollof Rice & Chicken",
+            qty: 2,
+            price: 350000,
+            menu_item_id: "m-003",
+            modifiers: [{ option_id: "mo-p-turkey" }, { option_id: "mo-e-plantain" }],
+          },
+        ],
+      },
+      q(),
+      false,
+    );
+
+    expect((created.body as { total: number }).total).toBe(predicted.total);
   });
 });

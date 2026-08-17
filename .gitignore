@@ -44,3 +44,8 @@ coverage/
 
 # Menu Photo Links
 docs/menu-photo-links.txt
+# Playwright
+/test-results/
+/playwright-report/
+/blob-report/
+/playwright/.cache/

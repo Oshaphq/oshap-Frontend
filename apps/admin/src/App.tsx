@@ -6,6 +6,7 @@ import DashboardPage from "./routes/dashboard";
 import KitchenPage from "./routes/kitchen";
 import HistoryPage from "./routes/history";
 import MenuPage from "./routes/menu";
+import InventoryPage from "./routes/inventory";
 import SettingsPage from "./routes/settings";
 import AnalyticsPage from "./routes/analytics";
 import ZReportPage from "./routes/z-report";
@@ -57,6 +58,7 @@ export default function App() {
           <Route element={<RoleGate allowedRoles={["OWNER", "MANAGER"]} />}>
             <Route path="/history" element={<HistoryPage />} />
             <Route path="/menu" element={<MenuPage />} />
+            <Route path="/inventory" element={<InventoryPage />} />
             <Route path="/settings/*" element={<SettingsPage />} />
           </Route>
 

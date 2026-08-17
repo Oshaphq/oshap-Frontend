@@ -284,3 +284,141 @@ describe("client request() — refresh on 401", () => {
     ).toBe(false);
   });
 });
+
+// The payloads below are copied verbatim from the deployed API at
+// oshap-cerebrum.useshappay.com, not invented — this is the one suite that
+// can be checked against the real thing without a database behind it.
+describe("client request() — validation errors name the field", () => {
+  afterEach(() => {
+    vi.unstubAllEnvs();
+    vi.unstubAllGlobals();
+  });
+
+  it("names the field from a 422 instead of the bare 'Field required'", async () => {
+    stubBackend(422, {
+      success: false,
+      code: 422,
+      message: "Field required",
+      data: {
+        errors: [
+          {
+            type: "missing",
+            loc: ["body", "restaurant_id"],
+            msg: "Field required",
+            input: { table: "T1" },
+          },
+        ],
+      },
+    });
+
+    const err = (await request("/orders", {
+      method: "POST",
+      body: { table: "T1" },
+    }).catch((e) => e)) as ApiError;
+
+    expect(err.status).toBe(422);
+    expect(err.message).toBe("restaurant_id: Field required");
+  });
+
+  it("lists several fields, capping the tail", async () => {
+    stubBackend(422, {
+      success: false,
+      code: 422,
+      message: "Field required",
+      data: {
+        errors: [
+          { loc: ["body", "name"], msg: "Field required" },
+          { loc: ["body", "price"], msg: "Field required" },
+          { loc: ["body", "category"], msg: "Field required" },
+          { loc: ["body", "unit"], msg: "Field required" },
+          { loc: ["body", "qty"], msg: "Field required" },
+        ],
+      },
+    });
+
+    const err = (await request("/admin/menu", { method: "POST", body: {} }).catch(
+      (e) => e,
+    )) as ApiError;
+
+    expect(err.message).toBe(
+      "name: Field required; price: Field required; category: Field required (and 2 more)",
+    );
+  });
+
+  it("reaches past array indexes to the field that actually failed", async () => {
+    stubBackend(422, {
+      success: false,
+      code: 422,
+      message: "Input should be a valid integer",
+      data: {
+        errors: [
+          {
+            loc: ["body", "items", 0, "price"],
+            msg: "Input should be a valid integer",
+          },
+        ],
+      },
+    });
+
+    const err = (await request("/orders", { method: "POST", body: {} }).catch(
+      (e) => e,
+    )) as ApiError;
+
+    expect(err.message).toBe("price: Input should be a valid integer");
+  });
+
+  it("names a missing header, skipping the location segment", async () => {
+    stubBackend(422, {
+      success: false,
+      code: 422,
+      message: "Field required",
+      data: {
+        errors: [
+          { loc: ["header", "x-platform-token"], msg: "Field required" },
+        ],
+      },
+    });
+
+    const err = (await request("/platform/restaurants").catch(
+      (e) => e,
+    )) as ApiError;
+
+    expect(err.message).toBe("x-platform-token: Field required");
+  });
+
+  it("handles a bare FastAPI 422 with issues on `detail`", async () => {
+    stubBackend(422, {
+      detail: [{ loc: ["body", "email"], msg: "value is not a valid email" }],
+    });
+
+    const err = (await request("/auth/login", {
+      method: "POST",
+      body: {},
+    }).catch((e) => e)) as ApiError;
+
+    expect(err.message).toBe("email: value is not a valid email");
+  });
+
+  it("still prefers the plain message when there are no validation issues", async () => {
+    stubBackend(404, {
+      success: false,
+      code: 404,
+      message: "Table not found",
+      data: {},
+    });
+
+    const err = (await request("/table/T1").catch((e) => e)) as ApiError;
+
+    expect(err.message).toBe("Table not found");
+  });
+
+  it("does not mistake an unrelated `detail` string for validation issues", async () => {
+    stubBackend(401, { detail: "Invalid platform token" });
+
+    const err = (await request("/platform/restaurants").catch(
+      (e) => e,
+    )) as ApiError;
+
+    expect(err.message).toBe("Invalid platform token");
+  });
+});

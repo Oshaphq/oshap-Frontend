@@ -303,13 +303,86 @@ function unwrapEnvelope(payload: unknown): unknown {
   return payload;
 }
 
+interface ValidationIssue {
+  loc?: unknown[];
+  msg?: string;
+}
+
+/**
+ * Pulls the field name out of a Pydantic `loc` — `["body", "restaurant_id"]`,
+ * or `["body", "items", 0, "price"]` for a nested one. The leading segment is
+ * where the value came from rather than what it was called, so it's skipped;
+ * the last remaining string is the field.
+ */
+function fieldFromLoc(loc: unknown[]): string | null {
+  const SOURCES = new Set(["body", "query", "header", "path", "cookie"]);
+  for (let i = loc.length - 1; i >= 0; i--) {
+    const part = loc[i];
+    if (typeof part === "string" && !SOURCES.has(part)) return part;
+  }
+  return null;
+}
+
+/**
+ * Turns a 422 into something that names the field.
+ *
+ * The backend's top-level `message` on a validation failure is the first
+ * issue's text alone — "Field required" — which tells a merchant nothing about
+ * *which* field, while the answer sits in `data.errors[].loc`. Reported as
+ * `restaurant_id: Field required`.
+ */
+function extractValidationMessage(payload: unknown): string | null {
+  if (typeof payload !== "object" || payload === null) return null;
+  const record = payload as Record<string, unknown>;
+
+  // Their envelope nests the issues under `data.errors`; a bare FastAPI
+  // response (no envelope) puts the same array straight on `detail`.
+  const nested = record.data as Record<string, unknown> | undefined;
+  const candidates = [
+    nested && typeof nested === "object" ? nested.errors : undefined,
+    record.detail,
+  ];
+
+  const issues = candidates.find(
+    (value): value is ValidationIssue[] =>
+      Array.isArray(value) &&
+      value.length > 0 &&
+      value.every((item) => typeof item === "object" && item !== null),
+  );
+  if (!issues) return null;
+
+  const described = issues
+    .map((issue) => {
+      const message = typeof issue.msg === "string" ? issue.msg : null;
+      const field = Array.isArray(issue.loc) ? fieldFromLoc(issue.loc) : null;
+      if (!message) return field;
+      return field ? `${field}: ${message}` : message;
+    })
+    .filter((line): line is string => Boolean(line));
+
+  if (described.length === 0) return null;
+
+  // Long lists become unreadable in a toast, and past the first few the
+  // merchant is going to fix them one at a time anyway.
+  const shown = described.slice(0, 3).join("; ");
+  const rest = described.length - 3;
+  return rest > 0 ? `${shown} (and ${rest} more)` : shown;
+}
+
 /**
  * Server error messages arrive under different keys depending on the source:
  * `message` from the backend envelope, `error` from the mock, `detail` from
  * FastAPI's own validation errors.
+ *
+ * Validation issues are checked first: they name the offending field, which
+ * the generic top-level message does not.
  */
 function extractErrorMessage(payload: unknown): string | null {
   if (typeof payload !== "object" || payload === null) return null;
+
+  const validation = extractValidationMessage(payload);
+  if (validation) return validation;
+
   for (const key of ["message", "error", "detail"] as const) {
     const value = (payload as Record<string, unknown>)[key];
     if (typeof value === "string" && value.length > 0) return value;

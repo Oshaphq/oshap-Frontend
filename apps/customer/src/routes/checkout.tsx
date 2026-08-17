@@ -1,13 +1,15 @@
 import { useNavigate, useSearchParams } from "react-router";
 import {
+  computeOrderTotals,
   formatCurrency,
   getDeviceToken,
   useCreateOrder,
   useTable,
 } from "@oshap/shared";
-import { CartProvider, useCart } from "../context/CartContext";
+import { CartProvider, unitPrice, useCart } from "../context/CartContext";
 import { useSession } from "../context/SessionContext";
 import CustomerHeader from "../components/CustomerHeader";
+import BillBreakdown from "../components/BillBreakdown";
 import { PrimaryButton, toast } from "@oshap/shared/ui";
 
 export default function CheckoutPage() {
@@ -30,6 +32,16 @@ function CheckoutView({ tableId }: { tableId: string }) {
   const tableQuery = useTable({ tableId, deviceToken, sessionId: session?.id });
   const createOrder = useCreateOrder();
 
+  // Computed with the server's own formula rather than shown as an estimate:
+  // same integer arithmetic, same basis-point rates off the restaurant, so
+  // this is the figure that will be charged. Before this, the screen printed
+  // the subtotal twice and called the second one "Total", which understated
+  // what the guest was agreeing to by the VAT and service charge.
+  const totals = computeOrderTotals(totalPrice, {
+    vat_rate: tableQuery.data?.restaurant?.vat_rate,
+    service_charge_rate: tableQuery.data?.restaurant?.service_charge_rate,
+  });
+
   const handleConfirmOrder = async () => {
     const restaurantId = tableQuery.data?.restaurant?.id;
     if (!restaurantId) {
@@ -41,10 +53,16 @@ function CheckoutView({ tableId }: { tableId: string }) {
       const { order_id } = await createOrder.mutateAsync({
         table: tableId,
         restaurant_id: restaurantId,
+        // `price` is the dish's BASE price. The server adds each option's
+        // delta itself, so sending unitPrice() here would charge every
+        // modifier twice.
         items: items.map((i) => ({
           name: i.name,
           qty: i.quantity,
-          price: i.price,
+          price: i.basePrice,
+          menu_item_id: i.menuItemId,
+          notes: i.notes,
+          modifiers: i.modifiers.map((m) => ({ option_id: m.option_id })),
         })),
         session_id: session?.id ?? undefined,
         customer_name: customerName || undefined,
@@ -126,53 +144,21 @@ function CheckoutView({ tableId }: { tableId: string }) {
         }
       />
 
-      <section className="py-l px-md bg-surface-container-low border-b-[6px] border-surface-container flex flex-col gap-md">
-        <h2 className="font-display text-display-h3 font-semibold text-primary-text">
-          Order Summary
-        </h2>
-
-        <div className="flex flex-col gap-md">
-          {items.map((item) => (
-            <div
-              key={item.id}
-              className="flex items-center justify-between gap-md"
-            >
-              <div className="flex items-center gap-s flex-1 min-w-0">
-                <i className="mgc_fork_spoon_line text-xl text-outline-variant" />
-                <div className="flex flex-col gap-0.5 min-w-0">
-                  <span className="text-label-l3 font-semibold text-primary-text truncate">
-                    {item.name}
-                  </span>
-                  <span className="text-label-l5 text-secondary-text">
-                    Qty {item.quantity}
-                  </span>
-                </div>
-              </div>
-              <span className="text-label-l3 font-semibold text-primary-text shrink-0">
-                {formatCurrency(item.price * item.quantity)}
-              </span>
-            </div>
-          ))}
-        </div>
-      </section>
-
-      <section className="py-l px-md bg-surface-container-low border-b-[6px] border-surface-container flex flex-col gap-s">
-        <div className="flex justify-between items-center">
-          <span className="text-label-l4 text-secondary-text">Subtotal</span>
-          <span className="text-label-l4 text-primary-text">
-            {formatCurrency(totalPrice)}
-          </span>
-        </div>
-        <div className="h-px bg-outline-variant" />
-        <div className="flex justify-between items-center">
-          <span className="text-label-l3 font-semibold text-primary-text">
-            Total
-          </span>
-          <span className="font-display text-display-h2 font-semibold text-primary-text">
-            {formatCurrency(totalPrice)}
-          </span>
-        </div>
-      </section>
+      <BillBreakdown
+        heading="Order Summary"
+        items={items.map((item) => ({
+          id: item.lineId,
+          name: item.modifiers.length
+            ? `${item.name} (${item.modifiers.map((m) => m.option_name).join(", ")})`
+            : item.name,
+          quantity: item.quantity,
+          price: unitPrice(item),
+        }))}
+        subtotal={totals.subtotal}
+        serviceCharge={totals.service_charge}
+        vat={totals.vat}
+        total={totals.total}
+      />
 
       <section className="py-l px-md bg-surface-container-low">
         <PrimaryButton

@@ -99,6 +99,40 @@ export interface StaffMember {
   created_at: string;
 }
 
+/**
+ * One choice within a modifier group — "Large", "Extra shito", "No pepper".
+ *
+ * `price_delta` is in kobo and may be zero or negative: a smaller portion that
+ * costs less is as legitimate as an extra that costs more.
+ */
+export interface ModifierOption {
+  id: string;
+  group_id: string;
+  name: string;
+  price_delta: number;
+  sort_order: number;
+  available: boolean;
+}
+
+/**
+ * A reusable set of choices, owned by the restaurant rather than by a dish —
+ * one "Protein" group can be attached to every rice dish on the menu, so
+ * renaming an option fixes it everywhere at once.
+ *
+ * `min`/`max` bound how many options a guest picks; `required` decides whether
+ * zero is allowed at all. A single-choice group is `min: 1, max: 1`.
+ */
+export interface ModifierGroup {
+  id: string;
+  restaurant_id: string;
+  name: string;
+  required: boolean;
+  min: number;
+  max: number;
+  sort_order: number;
+  options: ModifierOption[];
+}
+
 export interface MenuItem {
   id: string;
   restaurant_id: string;
@@ -112,6 +146,21 @@ export interface MenuItem {
   /** null = inventory tracking disabled for this item */
   stock_count: number | null;
   low_stock_threshold: number;
+  /** Groups attached to this dish, sent inline by `GET /menu`. */
+  modifier_groups?: ModifierGroup[];
+}
+
+/**
+ * A chosen modifier as it appears on an order, kitchen ticket or receipt.
+ *
+ * Denormalized on purpose: `name` is the group's name and `option` the chosen
+ * option's, both captured at order time. Renaming a modifier next month must
+ * not rewrite a ticket already printed.
+ */
+export interface OrderItemModifier {
+  name: string;
+  option: string;
+  price_delta: number;
 }
 
 export interface OrderItem {
@@ -119,7 +168,10 @@ export interface OrderItem {
   order_id?: string;
   name: string;
   quantity: number;
+  /** Per-unit price **including** modifier deltas — the server resolves it. */
   price: number;
+  notes?: string | null;
+  modifiers?: OrderItemModifier[] | null;
 }
 
 export interface Order {
@@ -222,10 +274,32 @@ export interface OrderWithItems extends Order {
 // Request payloads
 // ---------------------------------------------------------------------------
 
+/** Sent when ordering: the option only. The server resolves name and price. */
+export interface OrderItemModifierRequest {
+  option_id: string;
+}
+
+export interface CreateOrderItem {
+  name: string;
+  qty: number;
+  /**
+   * The dish's **base** price in kobo, WITHOUT modifier deltas.
+   *
+   * The server computes `line_price = price + sum(option.price_delta)`, so
+   * sending an already-adjusted price double-counts every modifier. The order
+   * that comes back carries the resolved figure — this is the one place in the
+   * API where the same field name means different things in each direction.
+   */
+  price: number;
+  menu_item_id?: string;
+  notes?: string;
+  modifiers?: OrderItemModifierRequest[];
+}
+
 export interface CreateOrderRequest {
   table: string;
   restaurant_id: string;
-  items: Array<{ name: string; qty: number; price: number }>;
+  items: CreateOrderItem[];
   session_id?: string;
   customer_name?: string;
   device_token?: string;
@@ -380,6 +454,151 @@ export interface UpdateMenuItemRequest {
   description?: string;
   image_url?: string;
   sort_order?: number;
+}
+
+// --- Modifiers -------------------------------------------------------------
+// Groups belong to the restaurant, not to a dish. They're created once and
+// attached to as many items as needed, so the create call takes its options
+// inline while later edits address options individually.
+
+export interface ModifierOptionRequest {
+  name: string;
+  price_delta?: number;
+}
+
+export interface CreateModifierGroupRequest {
+  name: string;
+  required?: boolean;
+  min?: number;
+  max?: number;
+  options?: ModifierOptionRequest[];
+}
+
+export interface UpdateModifierGroupRequest {
+  name?: string;
+  required?: boolean;
+  min?: number;
+  max?: number;
+  sort_order?: number;
+}
+
+export interface CreateModifierOptionRequest {
+  name: string;
+  price_delta?: number;
+}
+
+export interface UpdateModifierOptionRequest {
+  name?: string;
+  price_delta?: number;
+  available?: boolean;
+  sort_order?: number;
+}
+
+/** Replaces the whole attachment set for an item — send every id to keep. */
+export interface SetMenuItemModifierGroupsRequest {
+  group_ids: string[];
+}
+
+// --- Ingredients & recipes -------------------------------------------------
+// Dish-level `stock_count` counts plates; this counts what plates are made of.
+// Quantities are fractional (2.5 kg of rice), unlike the integer plate counts,
+// so every qty here is a float and must not be rounded on the way through.
+
+export interface Ingredient {
+  id: string;
+  restaurant_id: string;
+  name: string;
+  /** Free text — "kg", "L", "bottle". The merchant's own vocabulary. */
+  unit: string;
+  /** Fractional on purpose: 2.5 kg is a real stock level. */
+  stock_qty: number;
+  low_stock_threshold?: number | null;
+  /** Cost of one unit in kobo, for margin once recipes are attached. */
+  cost_per_unit?: number | null;
+  supplier_id?: string | null;
+  /** Target level to reorder back up to. */
+  par_level?: number | null;
+}
+
+export interface CreateIngredientRequest {
+  name: string;
+  unit?: string;
+  stock_qty?: number;
+  low_stock_threshold?: number | null;
+  cost_per_unit?: number | null;
+  par_level?: number | null;
+}
+
+export interface UpdateIngredientRequest {
+  name?: string;
+  unit?: string;
+  low_stock_threshold?: number | null;
+  cost_per_unit?: number | null;
+  par_level?: number | null;
+}
+
+/**
+ * Stock is never set to a figure — it's moved by a delta with a reason, so the
+ * ledger explains every change. `SALE` movements are written by the server when
+ * an order depletes a recipe; the rest come from staff.
+ */
+export const STOCK_REASONS = {
+  purchase: "PURCHASE",
+  wastage: "WASTAGE",
+  stockTake: "STOCK_TAKE",
+  correction: "CORRECTION",
+  sale: "SALE",
+} as const;
+
+export type StockReason = (typeof STOCK_REASONS)[keyof typeof STOCK_REASONS];
+
+export interface AdjustStockRequest {
+  /** Signed: negative removes. */
+  delta: number;
+  reason: string;
+  note?: string;
+}
+
+export interface StockMovement {
+  id: string;
+  ingredient_id: string;
+  delta: number;
+  reason: string;
+  actor_id?: string | null;
+  note?: string | null;
+  /** Present when the movement came from an order rather than a person. */
+  order_id?: string | null;
+  created_at: string;
+}
+
+export interface StockMovementsResponse {
+  movements: StockMovement[];
+  total: number;
+  page: number;
+  per_page: number;
+}
+
+export interface StockMovementQuery {
+  reason?: string;
+  page?: number;
+  per_page?: number;
+}
+
+/** One ingredient consumed by one serving of a dish. */
+export interface RecipeLine {
+  ingredient_id: string;
+  ingredient_name: string;
+  unit: string;
+  qty_per_serving: number;
+}
+
+export interface RecipeResponse {
+  menu_item_id: string;
+  lines: RecipeLine[];
+}
+
+export interface SetRecipeRequest {
+  lines: Array<{ ingredient_id: string; qty_per_serving: number }>;
 }
 
 /** One rejected row from a bulk import, addressed so a merchant can find it. */

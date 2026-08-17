@@ -520,15 +520,39 @@ function OrderStatusBadge({ status }: { status: OrderStatus }) {
 }
 
 function ReorderButton({ item }: { item: OrderItem }) {
-  const { addItem, updateQuantity } = useCart();
+  const { addItem } = useCart();
+  const wasConfigured = Boolean(item.modifiers?.length);
+
+  // The server returns a chosen modifier as group name + option name + delta,
+  // with no option_id, so a past line's choices can't be turned back into the
+  // ids an order needs. Reordering it "close enough" would put food on the
+  // bill the guest didn't pick, so send them through the menu instead. Adding
+  // option_id to OrderItemModifierResponse would let this work properly.
+  if (wasConfigured) {
+    return (
+      <span
+        className="text-caption-xs text-secondary-text"
+        title="This item had choices — add it from the menu to pick them again."
+      >
+        Reorder from menu
+      </span>
+    );
+  }
 
   return (
     <AddButton
       label="REORDER"
-      onClick={() => {
-        addItem({ id: item.id, name: item.name, price: item.price });
-        updateQuantity(item.id, item.quantity);
-      }}
+      onClick={() =>
+        addItem(
+          {
+            menuItemId: item.id,
+            name: item.name,
+            basePrice: item.price,
+            modifiers: [],
+          },
+          item.quantity,
+        )
+      }
     />
   );
 }

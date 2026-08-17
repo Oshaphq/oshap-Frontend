@@ -284,11 +284,30 @@ function KitchenColumn({
                 </div>
                 <ul className="flex flex-col gap-xs">
                   {order.order_items.map((item) => (
-                    <li key={item.id} className="flex items-center gap-s">
+                    <li key={item.id} className="flex items-start gap-s">
                       <span className={`font-bold min-w-l ${cls.qty}`}>
                         {item.quantity}x
                       </span>
-                      <span className="text-primary-text">{item.name}</span>
+                      <div className="flex flex-col min-w-0">
+                        <span className="text-primary-text">{item.name}</span>
+                        {/* The whole point of modifiers: a cook who can't see
+                            "No pepper" is cooking the wrong dish. Prices are
+                            deliberately omitted — the kitchen doesn't need
+                            them and they'd crowd the instruction. */}
+                        {item.modifiers?.map((modifier, i) => (
+                          <span
+                            key={`${modifier.option}-${i}`}
+                            className="text-caption-md text-secondary-text"
+                          >
+                            + {modifier.option}
+                          </span>
+                        ))}
+                        {item.notes && (
+                          <span className="text-caption-md font-semibold text-warning italic">
+                            {item.notes}
+                          </span>
+                        )}
+                      </div>
                     </li>
                   ))}
                 </ul>

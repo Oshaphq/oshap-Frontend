@@ -19,6 +19,9 @@ import { PrimaryButton, SecondaryButton, toast } from "@oshap/shared/ui";
 import QueryError from "../components/QueryError";
 import LowStockBanner from "../components/LowStockBanner";
 import MenuImportDialog from "../components/MenuImportDialog";
+import ModifierGroupsDialog from "../components/ModifierGroupsDialog";
+import ItemModifiersDialog from "../components/ItemModifiersDialog";
+import RecipeDialog from "../components/RecipeDialog";
 
 interface MenuFormState {
   name: string;
@@ -54,6 +57,9 @@ export default function MenuPage() {
   const [stockEditId, setStockEditId] = useState<string | null>(null);
   const [stockInput, setStockInput] = useState<string>("");
   const [showImport, setShowImport] = useState(false);
+  const [showGroups, setShowGroups] = useState(false);
+  const [optionsFor, setOptionsFor] = useState<MenuItem | null>(null);
+  const [recipeFor, setRecipeFor] = useState<MenuItem | null>(null);
 
   const handleExport = () => {
     exportMenu.mutate(undefined, {
@@ -186,6 +192,9 @@ export default function MenuPage() {
           <SecondaryButton size="md" onClick={() => setShowImport(true)}>
             <i className="mgc_file_upload_line" /> Import
           </SecondaryButton>
+          <SecondaryButton size="md" onClick={() => setShowGroups(true)}>
+            <i className="mgc_list_check_line" /> Options
+          </SecondaryButton>
           <PrimaryButton
             size="md"
             onClick={() => {
@@ -249,6 +258,8 @@ export default function MenuPage() {
               onStockCancel={() => setStockEditId(null)}
               onToggle={() => handleToggleAvailable(item.id, item.available)}
               onEdit={() => handleEdit(item)}
+              onEditOptions={() => setOptionsFor(item)}
+              onEditRecipe={() => setRecipeFor(item)}
               onDelete={() => handleDelete(item.id)}
             />
           );
@@ -268,6 +279,16 @@ export default function MenuPage() {
       </div>
 
       {showImport && <MenuImportDialog onClose={() => setShowImport(false)} />}
+      {showGroups && <ModifierGroupsDialog onClose={() => setShowGroups(false)} />}
+      {optionsFor && (
+        <ItemModifiersDialog
+          item={optionsFor}
+          onClose={() => setOptionsFor(null)}
+        />
+      )}
+      {recipeFor && (
+        <RecipeDialog item={recipeFor} onClose={() => setRecipeFor(null)} />
+      )}
     </main>
   );
 }
@@ -282,10 +303,12 @@ interface ItemRowProps {
   onStockCancel: () => void;
   onToggle: () => void;
   onEdit: () => void;
+  onEditOptions: () => void;
+  onEditRecipe: () => void;
   onDelete: () => void;
 }
 
-function MenuItemRow({ item, isStockEditing, stockInput, onStockEditStart, onStockInputChange, onStockSave, onStockCancel, onToggle, onEdit, onDelete }: ItemRowProps) {
+function MenuItemRow({ item, isStockEditing, stockInput, onStockEditStart, onStockInputChange, onStockSave, onStockCancel, onToggle, onEdit, onEditOptions, onEditRecipe, onDelete }: ItemRowProps) {
   const isLow = item.stock_count !== null && item.stock_count <= item.low_stock_threshold;
   const isOut = item.stock_count !== null && item.stock_count === 0;
 
@@ -385,6 +408,25 @@ function MenuItemRow({ item, isStockEditing, stockInput, onStockEditStart, onSto
             className="px-md py-s rounded-lg border border-primary bg-transparent text-primary text-caption-sm font-bold hover:bg-primary hover:text-on-primary transition-all"
           >
             Edit
+          </button>
+          <button
+            type="button"
+            onClick={onEditOptions}
+            className="px-md py-s rounded-lg border border-outline-variant bg-transparent text-secondary-text text-caption-sm font-semibold hover:border-primary-text hover:text-primary-text transition-all"
+          >
+            Options
+            {(item.modifier_groups?.length ?? 0) > 0 && (
+              <span className="ml-xs text-primary font-bold">
+                {item.modifier_groups!.length}
+              </span>
+            )}
+          </button>
+          <button
+            type="button"
+            onClick={onEditRecipe}
+            className="px-md py-s rounded-lg border border-outline-variant bg-transparent text-secondary-text text-caption-sm font-semibold hover:border-primary-text hover:text-primary-text transition-all"
+          >
+            Recipe
           </button>
           <button
             type="button"

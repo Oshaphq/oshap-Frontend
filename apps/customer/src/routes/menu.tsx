@@ -117,14 +117,7 @@ function MenuView({ tableId }: { tableId: string }) {
         ) : (
           <div className="flex flex-col gap-s">
             {filteredItems.map((item) => (
-              <MenuCard
-                key={item.id}
-                id={item.id}
-                name={item.name}
-                price={item.price}
-                description={item.description}
-                image={item.image_url}
-              />
+              <MenuCard key={item.id} item={item} />
             ))}
             {filteredItems.length === 0 && (
               <div className="py-xl text-center">

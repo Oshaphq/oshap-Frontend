@@ -38,6 +38,21 @@ import type {
   ConfirmOrdersResponse,
   CreateMenuItemRequest,
   CreateOrderRequest,
+  ModifierGroup,
+  ModifierOption,
+  Ingredient,
+  StockMovement,
+  RecipeLine,
+  CreateIngredientRequest,
+  UpdateIngredientRequest,
+  AdjustStockRequest,
+  SetRecipeRequest,
+  CreateModifierGroupRequest,
+  UpdateModifierGroupRequest,
+  CreateModifierOptionRequest,
+  UpdateModifierOptionRequest,
+  SetMenuItemModifierGroupsRequest,
+  OrderItemModifier,
   CreateOrderResponse,
   KitchenUpdateRequest,
   MenuImportError,
@@ -273,6 +288,183 @@ const SEED_MENU: MenuItem[] = [
   { id: "m-017", restaurant_id: _restaurant.id, name: "Coleslaw", price: naira(500), category: "Sides", description: "Fresh coleslaw with creamy dressing", image_url: "https://www.inspiredtaste.net/wp-content/uploads/2015/01/Coleslaw-Recipe-1-1200.jpg", available: true, sort_order: 4, stock_count: null, low_stock_threshold: 5 },
 ];
 
+/**
+ * Modifier groups are restaurant-owned and shared between dishes, so they're
+ * stored once here and attached to items by id (see `_menuItemGroups`) rather
+ * than copied onto each one. Renaming an option then updates every dish that
+ * uses it, which is the whole point of the group being reusable.
+ */
+const SEED_MODIFIER_GROUPS: ModifierGroup[] = [
+  {
+    id: "mg-protein",
+    restaurant_id: _restaurant.id,
+    name: "Protein",
+    required: true,
+    min: 1,
+    max: 1,
+    sort_order: 1,
+    options: [
+      { id: "mo-p-chicken", group_id: "mg-protein", name: "Chicken", price_delta: 0, sort_order: 1, available: true },
+      { id: "mo-p-turkey", group_id: "mg-protein", name: "Turkey", price_delta: naira(500), sort_order: 2, available: true },
+      { id: "mo-p-beef", group_id: "mg-protein", name: "Beef", price_delta: naira(800), sort_order: 3, available: true },
+      { id: "mo-p-fish", group_id: "mg-protein", name: "Fish", price_delta: naira(1000), sort_order: 4, available: true },
+    ],
+  },
+  {
+    id: "mg-spice",
+    restaurant_id: _restaurant.id,
+    name: "Spice level",
+    required: true,
+    min: 1,
+    max: 1,
+    sort_order: 2,
+    options: [
+      { id: "mo-s-mild", group_id: "mg-spice", name: "Mild", price_delta: 0, sort_order: 1, available: true },
+      { id: "mo-s-medium", group_id: "mg-spice", name: "Medium", price_delta: 0, sort_order: 2, available: true },
+      { id: "mo-s-hot", group_id: "mg-spice", name: "Hot", price_delta: 0, sort_order: 3, available: true },
+      { id: "mo-s-none", group_id: "mg-spice", name: "No pepper", price_delta: 0, sort_order: 4, available: true },
+    ],
+  },
+  {
+    id: "mg-extras",
+    restaurant_id: _restaurant.id,
+    name: "Extras",
+    required: false,
+    min: 0,
+    max: 4,
+    sort_order: 3,
+    options: [
+      { id: "mo-e-plantain", group_id: "mg-extras", name: "Extra plantain", price_delta: naira(500), sort_order: 1, available: true },
+      { id: "mo-e-sauce", group_id: "mg-extras", name: "Extra pepper sauce", price_delta: naira(200), sort_order: 2, available: true },
+      { id: "mo-e-coleslaw", group_id: "mg-extras", name: "Coleslaw", price_delta: naira(500), sort_order: 3, available: true },
+      { id: "mo-e-egg", group_id: "mg-extras", name: "Boiled egg", price_delta: naira(300), sort_order: 4, available: true },
+    ],
+  },
+  {
+    id: "mg-size",
+    restaurant_id: _restaurant.id,
+    name: "Size",
+    required: true,
+    min: 1,
+    max: 1,
+    sort_order: 4,
+    options: [
+      { id: "mo-z-regular", group_id: "mg-size", name: "Regular", price_delta: 0, sort_order: 1, available: true },
+      { id: "mo-z-large", group_id: "mg-size", name: "Large", price_delta: naira(300), sort_order: 2, available: true },
+    ],
+  },
+];
+
+let _modifierGroups: ModifierGroup[] = SEED_MODIFIER_GROUPS.map((g) => ({
+  ...g,
+  options: g.options.map((o) => ({ ...o })),
+}));
+
+/** menu item id → attached group ids, in the order they should be shown. */
+const SEED_MENU_ITEM_GROUPS: Record<string, string[]> = {
+  "m-001": ["mg-spice", "mg-extras"],
+  "m-003": ["mg-protein", "mg-spice", "mg-extras"],
+  "m-004": ["mg-protein", "mg-extras"],
+  "m-006": ["mg-spice"],
+  "m-009": ["mg-size"],
+  "m-010": ["mg-size"],
+};
+
+let _menuItemGroups: Record<string, string[]> = { ...SEED_MENU_ITEM_GROUPS };
+
+/** Attaches live group objects to an item as `GET /menu` does server-side. */
+function withModifiers(item: MenuItem): MenuItem {
+  const ids = _menuItemGroups[item.id];
+  if (!ids?.length) return item;
+  const groups = ids
+    .map((id) => _modifierGroups.find((g) => g.id === id))
+    .filter((g): g is ModifierGroup => Boolean(g));
+  return { ...item, modifier_groups: groups };
+}
+
+function findOption(optionId: string) {
+  for (const group of _modifierGroups) {
+    const option = group.options.find((o) => o.id === optionId);
+    if (option) return { group, option };
+  }
+  return null;
+}
+
+/**
+ * Ingredient stock, one level below the plate counts on menu items. Quantities
+ * are fractional — 12.5 kg of rice is a real level — so nothing here rounds.
+ */
+const SEED_INGREDIENTS: Ingredient[] = [
+  { id: "ing-rice", restaurant_id: _restaurant.id, name: "Rice", unit: "kg", stock_qty: 24, low_stock_threshold: 5, cost_per_unit: naira(1800), par_level: 40 },
+  { id: "ing-chicken", restaurant_id: _restaurant.id, name: "Chicken", unit: "kg", stock_qty: 11.5, low_stock_threshold: 4, cost_per_unit: naira(4500), par_level: 20 },
+  { id: "ing-beef", restaurant_id: _restaurant.id, name: "Beef", unit: "kg", stock_qty: 3.2, low_stock_threshold: 4, cost_per_unit: naira(6200), par_level: 15 },
+  { id: "ing-tomato", restaurant_id: _restaurant.id, name: "Tomato paste", unit: "tin", stock_qty: 40, low_stock_threshold: 10, cost_per_unit: naira(900), par_level: 60 },
+  { id: "ing-oil", restaurant_id: _restaurant.id, name: "Vegetable oil", unit: "L", stock_qty: 8, low_stock_threshold: 3, cost_per_unit: naira(2400), par_level: 15 },
+  { id: "ing-plantain", restaurant_id: _restaurant.id, name: "Plantain", unit: "piece", stock_qty: 60, low_stock_threshold: 15, cost_per_unit: naira(350), par_level: 100 },
+];
+
+let _ingredients: Ingredient[] = SEED_INGREDIENTS.map((i) => ({ ...i }));
+let _movements: StockMovement[] = [];
+
+/** menu item id → the ingredients one serving consumes. */
+const SEED_RECIPES: Record<string, Array<{ ingredient_id: string; qty_per_serving: number }>> = {
+  "m-003": [
+    { ingredient_id: "ing-rice", qty_per_serving: 0.25 },
+    { ingredient_id: "ing-chicken", qty_per_serving: 0.2 },
+    { ingredient_id: "ing-tomato", qty_per_serving: 0.5 },
+    { ingredient_id: "ing-oil", qty_per_serving: 0.05 },
+  ],
+  "m-004": [
+    { ingredient_id: "ing-rice", qty_per_serving: 0.25 },
+    { ingredient_id: "ing-oil", qty_per_serving: 0.05 },
+  ],
+};
+
+let _recipes: Record<string, Array<{ ingredient_id: string; qty_per_serving: number }>> = {
+  ...SEED_RECIPES,
+};
+
+function recipeLines(menuItemId: string): RecipeLine[] {
+  return (_recipes[menuItemId] ?? []).flatMap((line) => {
+    const ingredient = _ingredients.find((i) => i.id === line.ingredient_id);
+    if (!ingredient) return [];
+    return [{
+      ingredient_id: ingredient.id,
+      ingredient_name: ingredient.name,
+      unit: ingredient.unit,
+      qty_per_serving: line.qty_per_serving,
+    }];
+  });
+}
+
+/** Records a signed movement and applies it. Never clamps below zero: going
+ *  negative is how a merchant discovers the recipe or the count is wrong. */
+function moveStock(
+  ingredientId: string,
+  delta: number,
+  reason: string,
+  note?: string | null,
+  orderId?: string | null,
+): StockMovement | null {
+  const ingredient = _ingredients.find((i) => i.id === ingredientId);
+  if (!ingredient) return null;
+  // Float arithmetic accumulates error over many small depletions, so round
+  // to a sane precision rather than letting 11.5 - 0.2 become 11.299999999998.
+  ingredient.stock_qty = Math.round((ingredient.stock_qty + delta) * 1000) / 1000;
+  const movement: StockMovement = {
+    id: uid(),
+    ingredient_id: ingredientId,
+    delta,
+    reason,
+    actor_id: null,
+    note: note ?? null,
+    order_id: orderId ?? null,
+    created_at: now(),
+  };
+  _movements.unshift(movement);
+  return movement;
+}
+
 const INITIAL_TABLES = [
   "T1", "T2", "T3", "T4", "T5", "T6",
   "T7", "T8", "T9", "T10", "T11", "T12", "T-G37",
@@ -288,13 +480,18 @@ let _tables: string[] = [...INITIAL_TABLES];
 // in the browser devtools, or hard-clear site data.
 // ---------------------------------------------------------------------------
 
+/** `price` is per-unit and already includes modifier deltas, as the API returns. */
+type StoredOrderItem = {
+  id: string;
+  name: string;
+  quantity: number;
+  price: number;
+  notes?: string | null;
+  modifiers?: OrderItemModifier[] | null;
+};
+
 type StoredOrder = Order & {
-  order_items: Array<{
-    id: string;
-    name: string;
-    quantity: number;
-    price: number;
-  }>;
+  order_items: StoredOrderItem[];
 };
 
 let _menu: MenuItem[] = [...SEED_MENU];
@@ -321,6 +518,11 @@ interface PersistedState {
   restaurant?: Restaurant;
   bankAccounts?: BankAccount[];
   menu?: MenuItem[];
+  modifierGroups?: ModifierGroup[];
+  menuItemGroups?: Record<string, string[]>;
+  ingredients?: Ingredient[];
+  movements?: StockMovement[];
+  recipes?: Record<string, Array<{ ingredient_id: string; qty_per_serving: number }>>;
   tables?: string[];
   orders?: Array<[string, StoredOrder]>;
   payments?: Array<[string, Payment]>;
@@ -352,6 +554,13 @@ export function syncFromStorage(): void {
     }
     if (Array.isArray(saved.bankAccounts)) _bankAccounts = saved.bankAccounts;
     if (Array.isArray(saved.menu)) _menu = saved.menu;
+    // Absent on state written before modifiers existed — keep the seed rather
+    // than blanking every dish's options.
+    if (Array.isArray(saved.modifierGroups)) _modifierGroups = saved.modifierGroups;
+    if (saved.menuItemGroups) _menuItemGroups = saved.menuItemGroups;
+    if (Array.isArray(saved.ingredients)) _ingredients = saved.ingredients;
+    if (Array.isArray(saved.movements)) _movements = saved.movements;
+    if (saved.recipes) _recipes = saved.recipes;
     if (Array.isArray(saved.tables)) _tables = saved.tables;
 
     _orders.clear();
@@ -394,6 +603,11 @@ function syncToStorage(): void {
       restaurant: _restaurant,
       bankAccounts: _bankAccounts,
       menu: _menu,
+      modifierGroups: _modifierGroups,
+      menuItemGroups: _menuItemGroups,
+      ingredients: _ingredients,
+      movements: _movements,
+      recipes: _recipes,
       tables: _tables,
       orders: Array.from(_orders.entries()),
       payments: Array.from(_payments.entries()),
@@ -502,7 +716,7 @@ route("GET", /^\/menu$/, ({ query }) => {
   let items = _menu.filter((i) => i.available);
   if (restaurantId) items = items.filter((i) => i.restaurant_id === restaurantId);
   items.sort((a, b) => a.sort_order - b.sort_order);
-  return json(200, items);
+  return json(200, items.map(withModifiers));
 });
 
 // -------------------- Customer: Tables --------------------
@@ -671,12 +885,48 @@ route("POST", /^\/orders$/, ({ body }) => {
     return json(400, { error: "Missing required fields" });
   }
 
-  const money = priceOrder(b.items.reduce((s, i) => s + i.price * i.qty, 0));
+  // Resolve modifiers exactly as the server does: the client sends the dish's
+  // BASE price plus option ids, and the line price is base + the sum of those
+  // options' deltas. Adding the deltas client-side too would double-count them.
+  const resolved: Array<{
+    id: string;
+    name: string;
+    quantity: number;
+    price: number;
+    notes?: string | null;
+    modifiers?: OrderItemModifier[] | null;
+  }> = [];
+
+  for (const item of b.items) {
+    const mods: OrderItemModifier[] = [];
+    for (const chosen of item.modifiers ?? []) {
+      const found = findOption(chosen.option_id);
+      if (!found) {
+        return json(400, { error: `Invalid modifier option: ${chosen.option_id}` });
+      }
+      mods.push({
+        name: found.group.name,
+        option: found.option.name,
+        price_delta: found.option.price_delta,
+      });
+    }
+    const delta = mods.reduce((s, m) => s + m.price_delta, 0);
+    resolved.push({
+      id: uid(),
+      name: item.name,
+      quantity: item.qty,
+      price: item.price + delta,
+      notes: item.notes ?? null,
+      modifiers: mods.length ? mods : null,
+    });
+  }
+
+  const money = priceOrder(resolved.reduce((s, i) => s + i.price * i.quantity, 0));
   _orderCounter++;
   const id = `ord-${_orderCounter.toString().padStart(3, "0")}`;
   const reference = ref(b.table);
 
-  const order: Order & { order_items: Array<{ id: string; name: string; quantity: number; price: number }> } = {
+  const order: StoredOrder = {
     id,
     table_id: b.table,
     restaurant_id: b.restaurant_id,
@@ -687,12 +937,7 @@ route("POST", /^\/orders$/, ({ body }) => {
     customer_name: b.customer_name ?? null,
     device_token: b.device_token ?? null,
     created_at: now(),
-    order_items: b.items.map((item) => ({
-      id: uid(),
-      name: item.name,
-      quantity: item.qty,
-      price: item.price,
-    })),
+    order_items: resolved,
   };
 
   _orders.set(id, order);
@@ -705,6 +950,19 @@ route("POST", /^\/orders$/, ({ body }) => {
       if (menuItem.stock_count === 0) {
         menuItem.available = false;
       }
+    }
+    // Deplete the recipe too. Plate counts and ingredient levels answer
+    // different questions — "can I still sell this dish" versus "do I need to
+    // buy rice" — so both move, and each records its own trail.
+    const recipeFor = menuItem ? _recipes[menuItem.id] : undefined;
+    for (const line of recipeFor ?? []) {
+      moveStock(
+        line.ingredient_id,
+        -(line.qty_per_serving * item.qty),
+        "SALE",
+        null,
+        id,
+      );
     }
   }
 
@@ -1191,7 +1449,10 @@ route("GET", /^\/admin\/history$/, ({ query }) => {
 
 route("GET", /^\/admin\/menu$/, ({ query }) => {
   if (isOtherBranch(query)) return json(200, []);
-  return json(200, [..._menu].sort((a, b) => a.sort_order - b.sort_order));
+  return json(
+    200,
+    [..._menu].sort((a, b) => a.sort_order - b.sort_order).map(withModifiers),
+  );
 });
 
 route("POST", /^\/admin\/menu$/, ({ body }) => {
@@ -1217,7 +1478,7 @@ route("POST", /^\/admin\/menu$/, ({ body }) => {
   return json(201, item);
 });
 
-route("PUT", /^\/admin\/menu\/(.+)$/, ({ path, body }) => {
+route("PUT", /^\/admin\/menu\/([^/]+)$/, ({ path, body }) => {
   const id = path.split("/admin/menu/")[1]!;
   const b = body as UpdateMenuItemRequest;
   const idx = _menu.findIndex((i) => i.id === id);
@@ -1233,7 +1494,7 @@ route("PUT", /^\/admin\/menu\/(.+)$/, ({ path, body }) => {
   return json(200, item);
 });
 
-route("PATCH", /^\/admin\/menu\/(.+)$/, ({ path, body }) => {
+route("PATCH", /^\/admin\/menu\/([^/]+)$/, ({ path, body }) => {
   const id = path.split("/admin/menu/")[1]!;
   const b = body as { available: boolean };
   const item = _menu.find((i) => i.id === id);
@@ -1242,7 +1503,7 @@ route("PATCH", /^\/admin\/menu\/(.+)$/, ({ path, body }) => {
   return json(200, item);
 });
 
-route("DELETE", /^\/admin\/menu\/(.+)$/, ({ path }) => {
+route("DELETE", /^\/admin\/menu\/([^/]+)$/, ({ path }) => {
   const id = path.split("/admin/menu/")[1]!;
   _menu = _menu.filter((i) => i.id !== id);
   return json(200, { success: true as const });
@@ -1411,6 +1672,234 @@ route("POST", /^\/admin\/menu\/upload$/, () => {
   return json(200, {
     url: "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=400&q=80",
   } satisfies UploadResponse);
+});
+
+// -------------------- Admin: Modifiers --------------------
+
+route("GET", /^\/admin\/modifier-groups$/, () =>
+  json(200, [..._modifierGroups].sort((a, b) => a.sort_order - b.sort_order)),
+);
+
+route("POST", /^\/admin\/modifier-groups$/, ({ body }) => {
+  const b = body as CreateModifierGroupRequest;
+  if (!b.name?.trim()) return json(400, { error: "Name is required" });
+
+  const groupId = uid();
+  const group: ModifierGroup = {
+    id: groupId,
+    restaurant_id: _restaurant.id,
+    name: b.name.trim(),
+    required: b.required ?? false,
+    min: b.min ?? 0,
+    max: b.max ?? 1,
+    sort_order: _modifierGroups.length + 1,
+    options: (b.options ?? []).map((o, i) => ({
+      id: uid(),
+      group_id: groupId,
+      name: o.name,
+      price_delta: o.price_delta ?? 0,
+      sort_order: i + 1,
+      available: true,
+    })),
+  };
+  _modifierGroups.push(group);
+  syncToStorage();
+  return json(201, group);
+});
+
+route("PATCH", /^\/admin\/modifier-groups\/(.+)$/, ({ path, body }) => {
+  const id = path.split("/admin/modifier-groups/")[1]!;
+  const group = _modifierGroups.find((g) => g.id === id);
+  if (!group) return json(404, { error: "Modifier group not found" });
+
+  const b = body as UpdateModifierGroupRequest;
+  if (b.name !== undefined) group.name = b.name;
+  if (b.required !== undefined) group.required = b.required;
+  if (b.min !== undefined) group.min = b.min;
+  if (b.max !== undefined) group.max = b.max;
+  if (b.sort_order !== undefined) group.sort_order = b.sort_order;
+  syncToStorage();
+  return json(200, group);
+});
+
+route("DELETE", /^\/admin\/modifier-groups\/(.+)$/, ({ path }) => {
+  const id = path.split("/admin/modifier-groups/")[1]!;
+  const index = _modifierGroups.findIndex((g) => g.id === id);
+  if (index === -1) return json(404, { error: "Modifier group not found" });
+
+  _modifierGroups.splice(index, 1);
+  // Detach from every dish, or the menu would serve a dangling id forever.
+  for (const itemId of Object.keys(_menuItemGroups)) {
+    _menuItemGroups[itemId] = _menuItemGroups[itemId]!.filter((g) => g !== id);
+  }
+  syncToStorage();
+  return json(200, { success: true });
+});
+
+route("POST", /^\/admin\/modifier-groups\/(.+)\/options$/, ({ path, body }) => {
+  const groupId = path.split("/admin/modifier-groups/")[1]!.split("/options")[0]!;
+  const group = _modifierGroups.find((g) => g.id === groupId);
+  if (!group) return json(404, { error: "Modifier group not found" });
+
+  const b = body as CreateModifierOptionRequest;
+  if (!b.name?.trim()) return json(400, { error: "Name is required" });
+
+  const option: ModifierOption = {
+    id: uid(),
+    group_id: groupId,
+    name: b.name.trim(),
+    price_delta: b.price_delta ?? 0,
+    sort_order: group.options.length + 1,
+    available: true,
+  };
+  group.options.push(option);
+  syncToStorage();
+  return json(201, option);
+});
+
+route("PATCH", /^\/admin\/modifier-options\/(.+)$/, ({ path, body }) => {
+  const id = path.split("/admin/modifier-options/")[1]!;
+  const found = findOption(id);
+  if (!found) return json(404, { error: "Modifier option not found" });
+
+  const b = body as UpdateModifierOptionRequest;
+  if (b.name !== undefined) found.option.name = b.name;
+  if (b.price_delta !== undefined) found.option.price_delta = b.price_delta;
+  if (b.available !== undefined) found.option.available = b.available;
+  if (b.sort_order !== undefined) found.option.sort_order = b.sort_order;
+  syncToStorage();
+  return json(200, found.option);
+});
+
+route("DELETE", /^\/admin\/modifier-options\/(.+)$/, ({ path }) => {
+  const id = path.split("/admin/modifier-options/")[1]!;
+  const found = findOption(id);
+  if (!found) return json(404, { error: "Modifier option not found" });
+
+  found.group.options = found.group.options.filter((o) => o.id !== id);
+  syncToStorage();
+  return json(200, { success: true });
+});
+
+route("PUT", /^\/admin\/menu\/(.+)\/modifier-groups$/, ({ path, body }) => {
+  const itemId = path.split("/admin/menu/")[1]!.split("/modifier-groups")[0]!;
+  const item = _menu.find((m) => m.id === itemId);
+  if (!item) return json(404, { error: "Menu item not found" });
+
+  const b = body as SetMenuItemModifierGroupsRequest;
+  const ids = (b.group_ids ?? []).filter((id) =>
+    _modifierGroups.some((g) => g.id === id),
+  );
+  _menuItemGroups[itemId] = ids;
+  syncToStorage();
+  return json(200, { modifier_groups: withModifiers(item).modifier_groups ?? [] });
+});
+
+// -------------------- Admin: Ingredients --------------------
+
+// Registered before the `/admin/ingredients/(.+)` patterns so the literal
+// sub-path isn't captured as an ingredient id.
+route("GET", /^\/admin\/ingredients\/movements$/, ({ query }) => {
+  const reason = query.get("reason");
+  const page = Number(query.get("page") ?? "1");
+  const perPage = Number(query.get("per_page") ?? "25");
+
+  const all = reason
+    ? _movements.filter((m) => m.reason === reason)
+    : _movements;
+  const start = (page - 1) * perPage;
+
+  return json(200, {
+    movements: all.slice(start, start + perPage),
+    total: all.length,
+    page,
+    per_page: perPage,
+  });
+});
+
+route("GET", /^\/admin\/ingredients$/, ({ query }) => {
+  if (isOtherBranch(query)) return json(200, []);
+  return json(200, [..._ingredients].sort((a, b) => a.name.localeCompare(b.name)));
+});
+
+route("POST", /^\/admin\/ingredients$/, ({ body }) => {
+  const b = body as CreateIngredientRequest;
+  if (!b.name?.trim()) return json(400, { error: "Name is required" });
+
+  const ingredient: Ingredient = {
+    id: uid(),
+    restaurant_id: _restaurant.id,
+    name: b.name.trim(),
+    unit: b.unit?.trim() || "unit",
+    stock_qty: b.stock_qty ?? 0,
+    low_stock_threshold: b.low_stock_threshold ?? null,
+    cost_per_unit: b.cost_per_unit ?? null,
+    supplier_id: null,
+    par_level: b.par_level ?? null,
+  };
+  _ingredients.push(ingredient);
+
+  // Opening stock is itself a movement, so the ledger starts from zero and
+  // explains every unit — otherwise the first count has no provenance.
+  if (ingredient.stock_qty > 0) {
+    const opening = ingredient.stock_qty;
+    ingredient.stock_qty = 0;
+    moveStock(ingredient.id, opening, "PURCHASE", "Opening stock");
+  }
+
+  syncToStorage();
+  return json(201, ingredient);
+});
+
+route("PATCH", /^\/admin\/ingredients\/([^/]+)$/, ({ path, body }) => {
+  const id = path.split("/admin/ingredients/")[1]!;
+  const ingredient = _ingredients.find((i) => i.id === id);
+  if (!ingredient) return json(404, { error: "Ingredient not found" });
+
+  const b = body as UpdateIngredientRequest;
+  if (b.name !== undefined) ingredient.name = b.name;
+  if (b.unit !== undefined) ingredient.unit = b.unit;
+  if (b.low_stock_threshold !== undefined) {
+    ingredient.low_stock_threshold = b.low_stock_threshold;
+  }
+  if (b.cost_per_unit !== undefined) ingredient.cost_per_unit = b.cost_per_unit;
+  if (b.par_level !== undefined) ingredient.par_level = b.par_level;
+  syncToStorage();
+  return json(200, ingredient);
+});
+
+route("POST", /^\/admin\/ingredients\/([^/]+)\/adjust$/, ({ path, body }) => {
+  const id = path.split("/admin/ingredients/")[1]!.split("/adjust")[0]!;
+  const b = body as AdjustStockRequest;
+  if (typeof b.delta !== "number" || Number.isNaN(b.delta)) {
+    return json(400, { error: "delta must be a number" });
+  }
+  if (!b.reason?.trim()) return json(400, { error: "reason is required" });
+
+  const movement = moveStock(id, b.delta, b.reason, b.note ?? null);
+  if (!movement) return json(404, { error: "Ingredient not found" });
+
+  syncToStorage();
+  return json(201, movement);
+});
+
+route("GET", /^\/admin\/menu\/([^/]+)\/recipe$/, ({ path }) => {
+  const itemId = path.split("/admin/menu/")[1]!.split("/recipe")[0]!;
+  return json(200, { menu_item_id: itemId, lines: recipeLines(itemId) });
+});
+
+route("PUT", /^\/admin\/menu\/([^/]+)\/recipe$/, ({ path, body }) => {
+  const itemId = path.split("/admin/menu/")[1]!.split("/recipe")[0]!;
+  if (!_menu.some((m) => m.id === itemId)) {
+    return json(404, { error: "Menu item not found" });
+  }
+
+  const b = body as SetRecipeRequest;
+  _recipes[itemId] = (b.lines ?? []).filter((line) =>
+    _ingredients.some((i) => i.id === line.ingredient_id),
+  );
+  syncToStorage();
+  return json(200, { menu_item_id: itemId, lines: recipeLines(itemId) });
 });
 
 // -------------------- Admin: Inventory --------------------
@@ -1636,7 +2125,7 @@ route("GET", /^\/admin\/orders\/[^/]+\/receipt$/, ({ path }) => {
 // -------------------- Admin: Bill adjustments --------------------
 
 type StoredOrderWithItems = Order & {
-  order_items: Array<{ id: string; name: string; quantity: number; price: number }>;
+  order_items: StoredOrderItem[];
 };
 
 /**
