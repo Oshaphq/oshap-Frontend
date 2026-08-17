@@ -274,7 +274,7 @@
 
 ### Pillar 3 — Platform Admin App ✅
 - `apps/platform` — new Vite + React + Tailwind app (`npm run dev:platform`, port 5176)
-- `VITE_PLATFORM_TOKEN` gate: the login screen validates the entered code against it, and the shared client sends it to the backend as the `x-platform-token` header on every `/platform/*` call (sessionStorage-backed)
+- Operator gate: the entered access code is stored in sessionStorage and sent as `x-platform-token` on every `/platform/*` call, and verified against the server on submit. Nothing is compiled into the bundle.
 - Platform mock routes: `GET/POST/PATCH /platform/restaurants`, `GET /platform/health`
 - `usePlatformRestaurants()`, `usePlatformRestaurant()`, `usePlatformHealth()`, `usePlatformCreateRestaurant()`, `usePlatformUpdateRestaurant()` hooks
 - Routes: `/` (dashboard), `/restaurants`, `/restaurants/new` (2-step wizard), `/restaurants/:id`, `/subscriptions` (mock billing table), `/health` (uptime/latency/error metrics)

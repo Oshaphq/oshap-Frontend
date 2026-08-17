@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { NavLink, Outlet, Route, Routes, Navigate } from "react-router";
 import { PrimaryButton, ThemeToggle } from "@oshap/shared/ui";
-import { setPlatformToken } from "@oshap/shared";
+import { platformApi, setPlatformToken } from "@oshap/shared";
 import DashboardPage from "./routes/dashboard";
 import RestaurantsPage from "./routes/restaurants";
 import RestaurantDetailPage from "./routes/restaurant-detail";
@@ -19,26 +19,56 @@ function readAuth(): boolean {
   }
 }
 
+/**
+ * The operator gate.
+ *
+ * The access code is NOT compiled into this bundle, and must never be. A
+ * `VITE_`-prefixed variable is inlined as a literal at build time, so a
+ * deployed platform app built with the token would publish — to anyone who
+ * opens devtools — the one secret that grants create, list and update over
+ * every tenant on the production API.
+ *
+ * So there is nothing to compare against locally. The typed code is stored,
+ * sent as `x-platform-token`, and validated by the server on a real request.
+ * That was always the only boundary that counted; the old client-side
+ * equality check just made it look like there were two.
+ */
 function PlatformLogin({ onLogin }: { onLogin: () => void }) {
   const [token, setToken] = useState("");
   const [error, setError] = useState("");
+  const [checking, setChecking] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const expected = import.meta.env.VITE_PLATFORM_TOKEN as string | undefined;
-    const valid = !expected || token === expected;
-    if (!valid) {
-      setError("Invalid access code.");
-      return;
-    }
-    try {
-      sessionStorage.setItem(AUTH_KEY, "1");
-    } catch {
-      /* sessionStorage unavailable — auth stays in memory for this load */
-    }
-    // Persist the token so the shared client attaches it as x-platform-token.
+    if (!token || checking) return;
+
+    setChecking(true);
+    setError("");
+    // Attach it first: the verification request has to carry the header it
+    // is verifying.
     setPlatformToken(token);
-    onLogin();
+    try {
+      await platformApi.getHealth();
+      try {
+        sessionStorage.setItem(AUTH_KEY, "1");
+      } catch {
+        /* sessionStorage unavailable — auth stays in memory for this load */
+      }
+      onLogin();
+    } catch (err: unknown) {
+      setPlatformToken(null);
+      const status =
+        err && typeof err === "object" && "status" in err
+          ? (err as { status: number }).status
+          : 0;
+      setError(
+        status === 401 || status === 422
+          ? "Invalid access code."
+          : "Could not reach the server. Check your connection.",
+      );
+    } finally {
+      setChecking(false);
+    }
   };
 
   return (
@@ -71,8 +101,12 @@ function PlatformLogin({ onLogin }: { onLogin: () => void }) {
           }`}
         />
         {error && <p className="text-caption-md text-error self-start">{error}</p>}
-        <PrimaryButton type="submit" disabled={!token} className="w-full">
-          Access Platform
+        <PrimaryButton
+          type="submit"
+          disabled={!token || checking}
+          className="w-full"
+        >
+          {checking ? "Checking…" : "Access Platform"}
         </PrimaryButton>
       </form>
     </div>
