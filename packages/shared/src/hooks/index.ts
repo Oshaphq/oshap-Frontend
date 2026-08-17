@@ -6,3 +6,4 @@ export * from "./useAdmin";
 export * from "./useSSE";
 export * from "./useInventory";
 export * from "./usePlatform";
+export * from "./useModifiers";

@@ -7,3 +7,4 @@ export * as paymentsApi from "./payments";
 export * as sessionsApi from "./sessions";
 export * as adminApi from "./admin";
 export * as devicesApi from "./devices";
+export * as modifiersApi from "./modifiers";

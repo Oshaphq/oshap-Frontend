@@ -965,3 +965,172 @@ describe("mock API — seed versioning", () => {
     expect(localStorage.getItem("oshap-mock-state")).toBeNull();
   });
 });
+
+describe("mock API — modifiers", () => {
+  it("GET /menu attaches modifier groups to the dishes that use them", async () => {
+    const res = await mockRequest("/menu", "GET", null, q(), false);
+    const items = res.body as Array<{
+      id: string;
+      modifier_groups?: Array<{ id: string; name: string; options: unknown[] }>;
+    }>;
+
+    const jollof = items.find((i) => i.id === "m-003");
+    expect(jollof?.modifier_groups?.map((g) => g.id)).toEqual([
+      "mg-protein",
+      "mg-spice",
+      "mg-extras",
+    ]);
+
+    // A dish with nothing attached must not carry an empty group array that
+    // the customer sheet would then render as a heading with no choices.
+    const fries = items.find((i) => i.id === "m-016");
+    expect(fries?.modifier_groups).toBeUndefined();
+  });
+
+  it("prices an order from the BASE price plus the option deltas", async () => {
+    // Jollof is ₦3,500. Turkey adds ₦500, extra plantain ₦500 — so one unit
+    // resolves to ₦4,500 and the client must NOT pre-add those deltas.
+    const body = {
+      table: "T1",
+      restaurant_id: HOME_RESTAURANT,
+      items: [
+        {
+          name: "Jollof Rice & Chicken",
+          qty: 2,
+          price: 350000,
+          menu_item_id: "m-003",
+          modifiers: [
+            { option_id: "mo-p-turkey" },
+            { option_id: "mo-e-plantain" },
+          ],
+        },
+      ],
+    };
+    const created = await mockRequest("/orders", "POST", body, q(), false);
+    expect(created.status).toBe(200);
+    const { order_id } = created.body as { order_id: string };
+
+    const detail = await mockRequest(`/orders/${order_id}`, "GET", null, q(), false);
+    const order = detail.body as {
+      subtotal: number;
+      items: Array<{
+        price: number;
+        modifiers: Array<{ name: string; option: string; price_delta: number }> | null;
+      }>;
+    };
+
+    const line = order.items[0]!;
+    expect(line.price).toBe(450000);
+    expect(order.subtotal).toBe(900000);
+
+    // Denormalized at order time: group name, option name, and the delta as
+    // charged — so renaming the option later can't rewrite this ticket.
+    expect(line.modifiers).toEqual([
+      { name: "Protein", option: "Turkey", price_delta: 50000 },
+      { name: "Extras", option: "Extra plantain", price_delta: 50000 },
+    ]);
+  });
+
+  it("leaves a line without modifiers priced at its base and carrying null", async () => {
+    const body = {
+      table: "T2",
+      restaurant_id: HOME_RESTAURANT,
+      items: [{ name: "Coca-Cola", qty: 1, price: 50000, menu_item_id: "m-012" }],
+    };
+    const created = await mockRequest("/orders", "POST", body, q(), false);
+    const { order_id } = created.body as { order_id: string };
+
+    const detail = await mockRequest(`/orders/${order_id}`, "GET", null, q(), false);
+    const order = detail.body as {
+      items: Array<{ price: number; modifiers: unknown }>;
+    };
+    expect(order.items[0]!.price).toBe(50000);
+    expect(order.items[0]!.modifiers).toBeNull();
+  });
+
+  it("rejects an unknown option rather than silently dropping it", async () => {
+    const body = {
+      table: "T3",
+      restaurant_id: HOME_RESTAURANT,
+      items: [
+        {
+          name: "Jollof Rice & Chicken",
+          qty: 1,
+          price: 350000,
+          modifiers: [{ option_id: "mo-does-not-exist" }],
+        },
+      ],
+    };
+    const res = await mockRequest("/orders", "POST", body, q(), false);
+    expect(res.status).toBe(400);
+  });
+
+  it("renaming an option updates every dish sharing that group", async () => {
+    const res = await mockRequest(
+      "/admin/modifier-options/mo-s-hot",
+      "PATCH",
+      { name: "Very hot" },
+      q(),
+      true,
+    );
+    expect(res.status).toBe(200);
+
+    const menu = await mockRequest("/menu", "GET", null, q(), false);
+    const items = menu.body as Array<{
+      id: string;
+      modifier_groups?: Array<{ id: string; options: Array<{ name: string }> }>;
+    }>;
+    const names = (itemId: string) =>
+      items
+        .find((i) => i.id === itemId)
+        ?.modifier_groups?.find((g) => g.id === "mg-spice")
+        ?.options.map((o) => o.name);
+
+    // m-001 and m-003 both attach mg-spice — one edit, both dishes.
+    expect(names("m-001")).toContain("Very hot");
+    expect(names("m-003")).toContain("Very hot");
+
+    await mockRequest(
+      "/admin/modifier-options/mo-s-hot",
+      "PATCH",
+      { name: "Hot" },
+      q(),
+      true,
+    );
+  });
+
+  it("detaches a deleted group from every dish that referenced it", async () => {
+    const created = await mockRequest(
+      "/admin/modifier-groups",
+      "POST",
+      { name: "Temp group", options: [{ name: "One", price_delta: 100 }] },
+      q(),
+      true,
+    );
+    const group = created.body as { id: string; options: Array<{ id: string }> };
+    expect(created.status).toBe(201);
+    expect(group.options).toHaveLength(1);
+
+    await mockRequest(
+      "/admin/menu/m-016/modifier-groups",
+      "PUT",
+      { group_ids: [group.id] },
+      q(),
+      true,
+    );
+    let menu = await mockRequest("/admin/menu", "GET", null, q(), true);
+    let fries = (menu.body as Array<{ id: string; modifier_groups?: unknown[] }>).find(
+      (i) => i.id === "m-016",
+    );
+    expect(fries?.modifier_groups).toHaveLength(1);
+
+    await mockRequest(`/admin/modifier-groups/${group.id}`, "DELETE", null, q(), true);
+
+    menu = await mockRequest("/admin/menu", "GET", null, q(), true);
+    fries = (menu.body as Array<{ id: string; modifier_groups?: unknown[] }>).find(
+      (i) => i.id === "m-016",
+    );
+    // Not a dangling id, and not an empty group — no attachment at all.
+    expect(fries?.modifier_groups).toBeUndefined();
+  });
+});

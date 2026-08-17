@@ -45,6 +45,7 @@ export const queryKeys = {
       ["admin", "audit-logs", page, perPage, action] as const,
     group: () => ["admin", "group"] as const,
     groupAnalytics: () => ["admin", "group", "analytics"] as const,
+    modifierGroups: () => ["admin", "modifier-groups"] as const,
   },
   platform: {
     all: ["platform"] as const,
