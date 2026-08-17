@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router";
-import { usePlatformCreateRestaurant } from "@oshap/shared";
+import { formatPhone, tryNormalizePhone, usePlatformCreateRestaurant } from "@oshap/shared";
 import type { SubscriptionTier } from "@oshap/shared";
 import { PrimaryButton, SecondaryButton, toast } from "@oshap/shared/ui";
 
@@ -16,6 +16,7 @@ const TIER_PRICES: Record<SubscriptionTier, string> = {
 interface FormState {
   name: string;
   owner_name: string;
+  owner_phone: string;
   owner_email: string;
   subscription_tier: SubscriptionTier;
   table_count: string;
@@ -27,6 +28,7 @@ interface FormState {
 const EMPTY: FormState = {
   name: "",
   owner_name: "",
+  owner_phone: "",
   owner_email: "",
   subscription_tier: "STARTER",
   table_count: "10",
@@ -40,14 +42,20 @@ export default function RestaurantNewPage() {
   const create = usePlatformCreateRestaurant();
   const [form, setForm] = useState<FormState>(EMPTY);
   const [step, setStep] = useState<1 | 2>(1);
+  const [setupUrl, setSetupUrl] = useState<string | null>(null);
+  const [created, setCreated] = useState("");
 
   const set = (field: keyof FormState) => (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) =>
     setForm((prev) => ({ ...prev, [field]: e.target.value }));
 
   const handleNext = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!form.name || !form.owner_name || !form.owner_email) {
-      toast.error("Name, owner name, and email are required.");
+    if (!form.name || !form.owner_name || !form.owner_phone) {
+      toast.error("Restaurant name, owner name and phone number are required.");
+      return;
+    }
+    if (!tryNormalizePhone(form.owner_phone)) {
+      toast.error("Enter a valid Nigerian phone number for the owner.");
       return;
     }
     setStep(2);
@@ -59,15 +67,24 @@ export default function RestaurantNewPage() {
       const r = await create.mutateAsync({
         name: form.name,
         owner_name: form.owner_name,
-        owner_email: form.owner_email,
+        owner_phone: tryNormalizePhone(form.owner_phone)!,
+        owner_email: form.owner_email || undefined,
         subscription_tier: form.subscription_tier,
         table_count: Number(form.table_count) || 10,
         bank_name: form.bank_name || undefined,
         account_number: form.account_number || undefined,
         account_name: form.account_name || undefined,
       });
-      toast.success(`${r.name} onboarded successfully.`);
-      navigate(`/restaurants/${r.id}`);
+      // The setup link is returned once and never again. Hand it to the
+      // operator rather than only navigating away, because for an owner with
+      // no inbox this link is the only route into their account.
+      if (r.owner_setup_url) {
+        setSetupUrl(r.owner_setup_url);
+        setCreated(r.name);
+      } else {
+        toast.success(`${r.name} onboarded successfully.`);
+        navigate(`/restaurants/${r.id}`);
+      }
     } catch {
       toast.error("Failed to create restaurant. Please try again.");
     }
@@ -75,6 +92,45 @@ export default function RestaurantNewPage() {
 
   const inputClass =
     "w-full px-md py-s rounded-lg bg-surface-container-low border border-outline-variant text-p2 text-primary-text placeholder:text-outline outline-none focus:border-primary transition-colors";
+
+  if (setupUrl) {
+    return (
+      <main className="p-md flex flex-col gap-l max-w-[36rem]">
+        <header className="flex flex-col gap-xs">
+          <h1 className="font-display text-display-h2 font-semibold text-primary-text">
+            {created} is ready
+          </h1>
+          <p className="text-p2 text-secondary-text">
+            Send this link to {formatPhone(tryNormalizePhone(form.owner_phone) ?? "")} so
+            the owner can set their password. It works once and then expires.
+          </p>
+        </header>
+
+        <div className="bg-surface-container-low rounded-md p-md flex flex-col gap-s">
+          <code className="text-caption-sm text-primary-text break-all font-mono">
+            {setupUrl}
+          </code>
+          <SecondaryButton
+            onClick={() => {
+              navigator.clipboard?.writeText(setupUrl);
+              toast.success("Link copied");
+            }}
+          >
+            Copy link
+          </SecondaryButton>
+        </div>
+
+        <p className="text-caption-md text-secondary-text">
+          This is the only time it is shown. If it is lost, the owner can request
+          a new one from the sign-in screen.
+        </p>
+
+        <PrimaryButton onClick={() => navigate("/restaurants")}>
+          Done
+        </PrimaryButton>
+      </main>
+    );
+  }
 
   return (
     <main className="p-md flex flex-col gap-l max-w-[36rem]">
@@ -109,7 +165,8 @@ export default function RestaurantNewPage() {
             <h2 className="text-label-l2 font-semibold text-primary-text">Restaurant Details</h2>
             <input className={inputClass} aria-label="Restaurant name" placeholder="Restaurant name *" value={form.name} onChange={set("name")} />
             <input className={inputClass} aria-label="Owner full name" placeholder="Owner full name *" value={form.owner_name} onChange={set("owner_name")} />
-            <input className={inputClass} type="email" aria-label="Owner email" placeholder="Owner email *" value={form.owner_email} onChange={set("owner_email")} />
+            <input className={inputClass} type="tel" inputMode="tel" aria-label="Owner phone number" placeholder="Owner phone number * — 0803 123 4567" value={form.owner_phone} onChange={set("owner_phone")} />
+            <input className={inputClass} type="email" aria-label="Owner email" placeholder="Owner email (optional)" value={form.owner_email} onChange={set("owner_email")} />
           </div>
 
           <div className="bg-surface-container-low rounded-md p-md flex flex-col gap-md">

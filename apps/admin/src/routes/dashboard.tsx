@@ -7,12 +7,15 @@ import {
   useAdminCloseTable,
   useAdminInventoryAlerts,
   formatCurrency,
+  getAdminRestaurantId,
 } from "@oshap/shared";
 import { PrimaryButton, SecondaryButton, toast } from "@oshap/shared/ui";
 import QueryError from "../components/QueryError";
 import CashPaymentDialog from "../components/CashPaymentDialog";
+import SetupChecklist from "../components/SetupChecklist";
 
 export default function DashboardPage() {
+  const restaurantId = getAdminRestaurantId();
   const tablesQuery = useAdminTables();
   const verifyPayment = useAdminVerifyPayment();
   const rejectPayment = useAdminRejectPayment();
@@ -78,6 +81,7 @@ export default function DashboardPage() {
 
   return (
     <main className="p-md flex flex-col gap-l">
+      {restaurantId && <SetupChecklist restaurantId={restaurantId} />}
       <header className="flex items-center justify-between">
         <h1 className="font-display text-display-h2 font-semibold text-primary-text">
           Waiter Dashboard

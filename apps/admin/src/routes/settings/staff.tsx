@@ -6,6 +6,7 @@ import {
   useAdminDeleteStaff 
 } from "@oshap/shared/hooks";
 import { Role, StaffMember } from "@oshap/shared/types";
+import { formatPhone, tryNormalizePhone } from "@oshap/shared";
 import { PrimaryButton, SecondaryButton, toast } from "@oshap/shared/ui";
 import { useAuth } from "../../context/AuthContext";
 
@@ -21,31 +22,51 @@ export default function StaffSettings() {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [form, setForm] = useState({
     name: "",
+    phone: "",
     email: "",
     role: "WAITER" as Role,
     password: "", // Only needed for creation or reset
   });
+  const [phoneError, setPhoneError] = useState("");
 
   const handleOpenNew = () => {
     setEditingId(null);
-    setForm({ name: "", email: "", role: "WAITER", password: "" });
+    setForm({ name: "", phone: "", email: "", role: "WAITER", password: "" });
+    setPhoneError("");
     setIsModalOpen(true);
   };
 
   const handleOpenEdit = (staff: StaffMember) => {
     setEditingId(staff.id);
-    setForm({ name: staff.name, email: staff.email, role: staff.role, password: "" });
+    setForm({
+      name: staff.name,
+      phone: formatPhone(staff.phone),
+      email: staff.email ?? "",
+      role: staff.role,
+      password: "",
+    });
+    setPhoneError("");
     setIsModalOpen(true);
   };
 
   const handleSave = () => {
+    // Normalized here rather than at the input, so a half-typed number isn't
+    // rejected mid-keystroke — and so what reaches the API is always E.164.
+    const phone = tryNormalizePhone(form.phone);
+    if (!phone) {
+      setPhoneError("Enter a valid Nigerian phone number");
+      return;
+    }
+    setPhoneError("");
+
     if (editingId) {
       updateStaff.mutate(
         { 
           id: editingId, 
           payload: { 
-            name: form.name, 
-            email: form.email, 
+            name: form.name,
+            phone,
+            email: form.email || undefined,
             role: form.role,
             ...(form.password ? { password: form.password } : {})
           } 
@@ -61,10 +82,14 @@ export default function StaffSettings() {
     } else {
       createStaff.mutate(
         { 
-          name: form.name, 
-          email: form.email, 
+          name: form.name,
+          phone,
+          email: form.email || undefined,
           role: form.role,
-          password: form.password || "password" // Default mock password
+          // No silent default: an account created without one used to be
+          // given the literal string "password", which makes the audit trail
+          // worthless the moment two people share it.
+          password: form.password,
         },
         {
           onSuccess: () => {
@@ -127,7 +152,12 @@ export default function StaffSettings() {
             {staffList.map((staff) => (
               <tr key={staff.id} className="border-b border-surface-container-highest last:border-none hover:bg-surface-container-low transition-colors">
                 <td className="py-s px-md text-p2 text-primary-text font-medium">{staff.name}</td>
-                <td className="py-s px-md text-p2 text-secondary-text">{staff.email}</td>
+                <td className="py-s px-md text-p2 text-secondary-text">
+                  <span className="tabular-nums">{formatPhone(staff.phone)}</span>
+                  {staff.email && (
+                    <span className="block text-caption-sm text-outline">{staff.email}</span>
+                  )}
+                </td>
                 <td className="py-s px-md">
                   <span className="px-xs py-xs bg-surface-container-highest text-primary-text text-label-l4 rounded-md font-mono">
                     {staff.role}
@@ -183,7 +213,31 @@ export default function StaffSettings() {
                 />
               </div>
               <div>
-                <label className={labelClass}>Email</label>
+                <label className={labelClass}>Phone number</label>
+                <input
+                  type="tel"
+                  inputMode="tel"
+                  value={form.phone}
+                  onChange={(e) => {
+                    setForm({ ...form, phone: e.target.value });
+                    if (phoneError) setPhoneError("");
+                  }}
+                  placeholder="0803 123 4567"
+                  aria-invalid={Boolean(phoneError)}
+                  className={inputClass}
+                />
+                <p className="text-caption-xs text-secondary-text mt-xs">
+                  {phoneError ? (
+                    <span className="text-error font-semibold">{phoneError}</span>
+                  ) : (
+                    "How they sign in. Every member of staff needs one."
+                  )}
+                </p>
+              </div>
+              <div>
+                <label className={labelClass}>
+                  Email <span className="font-normal text-secondary-text">(optional)</span>
+                </label>
                 <input
                   type="email"
                   value={form.email}
@@ -244,7 +298,7 @@ export default function StaffSettings() {
               <PrimaryButton
                 size="md"
                 onClick={handleSave}
-                disabled={!form.name || !form.email || createStaff.isPending || updateStaff.isPending}
+                disabled={!form.name || !form.phone || (!editingId && !form.password) || createStaff.isPending || updateStaff.isPending}
               >
                 {createStaff.isPending || updateStaff.isPending ? "Saving..." : "Save"}
               </PrimaryButton>

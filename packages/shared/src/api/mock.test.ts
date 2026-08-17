@@ -1387,3 +1387,195 @@ describe("mock API — checkout estimate matches the order", () => {
     expect((created.body as { total: number }).total).toBe(predicted.total);
   });
 });
+
+describe("mock API — owner setup", () => {
+  // Phone is a globally unique identity, so each onboarding needs its own
+  // number — reusing one is rejected, exactly as it would be in production.
+  let phoneSeq = 1000;
+  const nextPhone = () => `0803123${(phoneSeq += 1)}`;
+
+  async function onboard(name = "Setup Test Kitchen", phone = nextPhone()) {
+    const res = await mockRequest(
+      "/platform/restaurants",
+      "POST",
+      {
+        name,
+        owner_name: "Tunde A.",
+        owner_phone: phone,
+        subscription_tier: "STARTER",
+        table_count: 4,
+      },
+      q(),
+      false,
+    );
+    const body = res.body as { owner_setup_url: string; owner_phone: string };
+    const token = new URL(body.owner_setup_url).searchParams.get("token")!;
+    return { body, token };
+  }
+
+  it("provisions the owner with a setup link and no password", async () => {
+    const { body, token } = await onboard("Setup Test Kitchen", "08031234567");
+    expect(body.owner_setup_url).toContain("/setup?token=");
+    expect(token).toBeTruthy();
+    // Normalized on the way in: 0803… is stored as +234803….
+    expect(body.owner_phone).toBe("+2348031234567");
+  });
+
+  it("verify returns enough to recognise the account, with contact masked", async () => {
+    const { token } = await onboard("Masking Test", "08031114567");
+    const res = await mockRequest("/auth/setup/verify", "POST", { token }, q(), false);
+
+    expect(res.status).toBe(200);
+    const data = res.body as {
+      restaurant_name: string;
+      owner_name: string;
+      phone_hint: string;
+    };
+    expect(data.owner_name).toBe("Tunde A.");
+    // The last four only — enough to know which account, not enough to
+    // hand a full number to whoever is holding the link.
+    expect(data.phone_hint).toContain("4567");
+    expect(data.phone_hint).not.toContain("+234803111");
+  });
+
+  it("completes setup, signs the owner in, and burns the token", async () => {
+    const { token } = await onboard("Complete Test", "08032224567");
+
+    const done = await mockRequest(
+      "/auth/setup/complete",
+      "POST",
+      { token, password: "a-long-enough-password" },
+      q(),
+      false,
+    );
+    expect(done.status).toBe(200);
+    const session = done.body as { access_token: string; user: { phone: string } };
+    // Same shape as login, so the caller needs no second round-trip.
+    expect(session.access_token).toBeTruthy();
+    expect(session.user.phone).toBe("+2348032224567");
+
+    // Single use — a forwarded WhatsApp message stops working.
+    const again = await mockRequest(
+      "/auth/setup/complete",
+      "POST",
+      { token, password: "another-long-password" },
+      q(),
+      false,
+    );
+    expect(again.status).toBe(410);
+  });
+
+  it("rejects a password shorter than the policy", async () => {
+    const { token } = await onboard();
+    const res = await mockRequest(
+      "/auth/setup/complete",
+      "POST",
+      { token, password: "short" },
+      q(),
+      false,
+    );
+    expect(res.status).toBe(422);
+    // The message names the field, per the 422 handling in client.ts.
+    expect((res.body as { message: string }).message).toContain("password");
+  });
+
+  it("treats unknown, spent and expired links identically", async () => {
+    const res = await mockRequest(
+      "/auth/setup/verify",
+      "POST",
+      { token: "setup-does-not-exist" },
+      q(),
+      false,
+    );
+    expect(res.status).toBe(410);
+    expect((res.body as { message: string }).message).toBe(
+      "This setup link has expired.",
+    );
+  });
+
+  it("lets the owner sign in with the password they chose, by phone or email", async () => {
+    const { token } = await onboard("Sign In Test", "08037654321");
+    await mockRequest(
+      "/auth/setup/complete",
+      "POST",
+      { token, password: "a-long-enough-password" },
+      q(),
+      false,
+    );
+
+    // Any form of the number resolves to the same account.
+    for (const identifier of ["08037654321", "+2348037654321", "0803 765 4321"]) {
+      const res = await mockRequest(
+        "/auth/login",
+        "POST",
+        { identifier, password: "a-long-enough-password" },
+        q(),
+        false,
+      );
+      expect(res.status).toBe(200);
+    }
+
+    const wrong = await mockRequest(
+      "/auth/login",
+      "POST",
+      { identifier: "08037654321", password: "not-the-password" },
+      q(),
+      false,
+    );
+    expect(wrong.status).toBe(401);
+  });
+
+  it("answers forgot-password identically whether or not the account exists", async () => {
+    const known = await mockRequest(
+      "/auth/forgot-password",
+      "POST",
+      { identifier: "08031234567" },
+      q(),
+      false,
+    );
+    const unknown = await mockRequest(
+      "/auth/forgot-password",
+      "POST",
+      { identifier: "08039999999" },
+      q(),
+      false,
+    );
+
+    // Differing here would turn the endpoint into a way to discover which
+    // merchants are on the platform.
+    expect(known.status).toBe(200);
+    expect(unknown.status).toBe(200);
+    expect(known.body).toEqual(unknown.body);
+  });
+
+  it("refuses a staff account without a valid phone number", async () => {
+    const res = await mockRequest(
+      "/admin/staff",
+      "POST",
+      { name: "Bad Number", phone: "12345", role: "WAITER" },
+      q(),
+      true,
+    );
+    expect(res.status).toBe(422);
+  });
+
+  it("treats two spellings of one number as the same person", async () => {
+    const first = await mockRequest(
+      "/admin/staff",
+      "POST",
+      { name: "Chidinma O.", phone: "08051234567", role: "WAITER", password: "x" },
+      q(),
+      true,
+    );
+    expect(first.status).toBe(201);
+
+    const duplicate = await mockRequest(
+      "/admin/staff",
+      "POST",
+      { name: "Same Person", phone: "+234 805 123 4567", role: "CASHIER", password: "x" },
+      q(),
+      true,
+    );
+    expect(duplicate.status).toBe(400);
+  });
+});

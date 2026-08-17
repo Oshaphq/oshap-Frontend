@@ -5,10 +5,12 @@ import {
   useAdminDeleteTable,
   useAdminSettings,
 } from "@oshap/shared/hooks";
+import { getAdminRestaurantId } from "@oshap/shared";
 import { PrimaryButton, SecondaryButton, toast } from "@oshap/shared/ui";
 import TableQrDialog from "../../components/TableQrDialog";
 import QrPrintSheet, { type QrPrintRequest } from "../../components/QrPrintSheet";
 import { isLocalOrigin } from "../../utils/qr";
+import { qrPrintedKey } from "../../components/SetupChecklist";
 
 export default function TablesSettings() {
   const tablesQuery = useAdminTables();
@@ -25,6 +27,17 @@ export default function TablesSettings() {
 
   const requestPrint = (tableIds: string[]) => {
     if (tableIds.length === 0) return;
+    // Marks the checklist step done. Nothing server-side records that paper
+    // came out of a printer, so this is the only signal available — and a
+    // false positive here costs a ticked box, not a broken restaurant.
+    const restaurantId = getAdminRestaurantId();
+    if (restaurantId) {
+      try {
+        localStorage.setItem(qrPrintedKey(restaurantId), "true");
+      } catch {
+        // Non-fatal.
+      }
+    }
     setPrintRequest({
       tableIds,
       restaurantName: settingsQuery.data?.name ?? "Oshap",

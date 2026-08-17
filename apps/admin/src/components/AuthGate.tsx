@@ -34,11 +34,11 @@ export default function AuthGate() {
     setIsLoggingIn(true);
 
     try {
-      const res = await adminApi.adminLoginEmail({ email, password });
+      const res = await adminApi.adminLoginEmail({ identifier: email, password });
       login(res);
     } catch (err: unknown) {
       if (err && typeof err === "object" && "status" in err && err.status === 401) {
-        setError("Invalid email or password.");
+        setError("Invalid credentials. Check the number or email and try again.");
       } else {
         setError("Connection failed. Check your network.");
       }
@@ -71,14 +71,17 @@ export default function AuthGate() {
             Staff Login
           </h1>
           <p className="text-p2 text-secondary-text text-center mb-s">
-            Enter your email and password to access the dashboard.
+            Enter your phone number or email and password to continue.
           </p>
 
           <input
             className={`w-full px-md py-md rounded-lg bg-surface-container-low border-2 text-p text-primary-text placeholder:text-outline outline-none transition-colors ${error ? "border-error" : "border-outline-variant focus:border-primary"}`}
-            type="email"
-            aria-label="Email address"
-            placeholder="Email address"
+            // Not type="email": most staff sign in with a phone number, and
+            // the browser would reject one as malformed before we ever ask.
+            type="text"
+            inputMode="email"
+            aria-label="Phone number or email"
+            placeholder="Phone number or email"
             value={email}
             onChange={(e) => {
               setEmail(e.target.value);

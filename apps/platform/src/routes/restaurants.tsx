@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link } from "react-router";
-import { usePlatformRestaurants } from "@oshap/shared";
+import { formatPhone, usePlatformRestaurants } from "@oshap/shared";
 import type { SubscriptionTier } from "@oshap/shared";
 
 const TIER_ORDER: SubscriptionTier[] = ["FREE", "STARTER", "PRO", "ENTERPRISE"];
@@ -24,7 +24,8 @@ export default function RestaurantsPage() {
     const matchSearch =
       !search ||
       r.name.toLowerCase().includes(search.toLowerCase()) ||
-      r.owner_email.toLowerCase().includes(search.toLowerCase());
+      (r.owner_email ?? "").toLowerCase().includes(search.toLowerCase()) ||
+      (r.owner_phone ?? "").includes(search);
     const matchTier = tierFilter === "ALL" || r.subscription_tier === tierFilter;
     const matchStatus =
       statusFilter === "ALL" ||
@@ -113,7 +114,7 @@ export default function RestaurantsPage() {
               <div className="min-w-0">
                 <p className="font-semibold text-primary-text truncate">{r.name}</p>
                 <p className="text-caption-sm text-secondary-text truncate">
-                  {r.owner_email} · {r.table_count} tables
+                  {r.owner_phone ? formatPhone(r.owner_phone) : r.owner_email} · {r.table_count} tables
                 </p>
               </div>
             </div>
