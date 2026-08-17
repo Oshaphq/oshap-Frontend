@@ -499,6 +499,108 @@ export interface SetMenuItemModifierGroupsRequest {
   group_ids: string[];
 }
 
+// --- Ingredients & recipes -------------------------------------------------
+// Dish-level `stock_count` counts plates; this counts what plates are made of.
+// Quantities are fractional (2.5 kg of rice), unlike the integer plate counts,
+// so every qty here is a float and must not be rounded on the way through.
+
+export interface Ingredient {
+  id: string;
+  restaurant_id: string;
+  name: string;
+  /** Free text — "kg", "L", "bottle". The merchant's own vocabulary. */
+  unit: string;
+  /** Fractional on purpose: 2.5 kg is a real stock level. */
+  stock_qty: number;
+  low_stock_threshold?: number | null;
+  /** Cost of one unit in kobo, for margin once recipes are attached. */
+  cost_per_unit?: number | null;
+  supplier_id?: string | null;
+  /** Target level to reorder back up to. */
+  par_level?: number | null;
+}
+
+export interface CreateIngredientRequest {
+  name: string;
+  unit?: string;
+  stock_qty?: number;
+  low_stock_threshold?: number | null;
+  cost_per_unit?: number | null;
+  par_level?: number | null;
+}
+
+export interface UpdateIngredientRequest {
+  name?: string;
+  unit?: string;
+  low_stock_threshold?: number | null;
+  cost_per_unit?: number | null;
+  par_level?: number | null;
+}
+
+/**
+ * Stock is never set to a figure — it's moved by a delta with a reason, so the
+ * ledger explains every change. `SALE` movements are written by the server when
+ * an order depletes a recipe; the rest come from staff.
+ */
+export const STOCK_REASONS = {
+  purchase: "PURCHASE",
+  wastage: "WASTAGE",
+  stockTake: "STOCK_TAKE",
+  correction: "CORRECTION",
+  sale: "SALE",
+} as const;
+
+export type StockReason = (typeof STOCK_REASONS)[keyof typeof STOCK_REASONS];
+
+export interface AdjustStockRequest {
+  /** Signed: negative removes. */
+  delta: number;
+  reason: string;
+  note?: string;
+}
+
+export interface StockMovement {
+  id: string;
+  ingredient_id: string;
+  delta: number;
+  reason: string;
+  actor_id?: string | null;
+  note?: string | null;
+  /** Present when the movement came from an order rather than a person. */
+  order_id?: string | null;
+  created_at: string;
+}
+
+export interface StockMovementsResponse {
+  movements: StockMovement[];
+  total: number;
+  page: number;
+  per_page: number;
+}
+
+export interface StockMovementQuery {
+  reason?: string;
+  page?: number;
+  per_page?: number;
+}
+
+/** One ingredient consumed by one serving of a dish. */
+export interface RecipeLine {
+  ingredient_id: string;
+  ingredient_name: string;
+  unit: string;
+  qty_per_serving: number;
+}
+
+export interface RecipeResponse {
+  menu_item_id: string;
+  lines: RecipeLine[];
+}
+
+export interface SetRecipeRequest {
+  lines: Array<{ ingredient_id: string; qty_per_serving: number }>;
+}
+
 /** One rejected row from a bulk import, addressed so a merchant can find it. */
 export interface MenuImportError {
   row: number;

@@ -1134,3 +1134,171 @@ describe("mock API — modifiers", () => {
     expect(fries?.modifier_groups).toBeUndefined();
   });
 });
+
+describe("mock API — ingredients", () => {
+  it("records opening stock as a movement rather than a bare starting value", async () => {
+    const res = await mockRequest(
+      "/admin/ingredients",
+      "POST",
+      { name: "Test Pepper", unit: "kg", stock_qty: 6.5 },
+      q(),
+      true,
+    );
+    expect(res.status).toBe(201);
+    const created = res.body as { id: string; stock_qty: number };
+    expect(created.stock_qty).toBe(6.5);
+
+    const ledger = await mockRequest(
+      "/admin/ingredients/movements",
+      "GET",
+      null,
+      q("reason=PURCHASE"),
+      true,
+    );
+    const { movements } = ledger.body as {
+      movements: Array<{ ingredient_id: string; delta: number; note: string | null }>;
+    };
+    const opening = movements.find((m) => m.ingredient_id === created.id);
+    expect(opening?.delta).toBe(6.5);
+    expect(opening?.note).toBe("Opening stock");
+  });
+
+  it("adjusts by a signed delta and lets stock go negative", async () => {
+    const before = await mockRequest("/admin/ingredients", "GET", null, q(), true);
+    const beef = (before.body as Array<{ id: string; stock_qty: number }>).find(
+      (i) => i.id === "ing-beef",
+    )!;
+
+    await mockRequest(
+      "/admin/ingredients/ing-beef/adjust",
+      "POST",
+      { delta: -(beef.stock_qty + 1), reason: "WASTAGE", note: "Freezer failure" },
+      q(),
+      true,
+    );
+
+    const after = await mockRequest("/admin/ingredients", "GET", null, q(), true);
+    const updated = (after.body as Array<{ id: string; stock_qty: number }>).find(
+      (i) => i.id === "ing-beef",
+    )!;
+    // Clamping at zero would hide a miscount; a negative level is the signal.
+    expect(updated.stock_qty).toBe(-1);
+
+    await mockRequest(
+      "/admin/ingredients/ing-beef/adjust",
+      "POST",
+      { delta: beef.stock_qty + 1, reason: "CORRECTION" },
+      q(),
+      true,
+    );
+  });
+
+  it("depletes a recipe when an order is placed, and says which order did it", async () => {
+    const before = await mockRequest("/admin/ingredients", "GET", null, q(), true);
+    const riceBefore = (before.body as Array<{ id: string; stock_qty: number }>).find(
+      (i) => i.id === "ing-rice",
+    )!.stock_qty;
+
+    // Jollof (m-003) uses 0.25 kg of rice per serving; three servings = 0.75.
+    const created = await mockRequest(
+      "/orders",
+      "POST",
+      {
+        table: "T5",
+        restaurant_id: HOME_RESTAURANT,
+        items: [
+          { name: "Jollof Rice & Chicken", qty: 3, price: 350000, menu_item_id: "m-003" },
+        ],
+      },
+      q(),
+      false,
+    );
+    const { order_id } = created.body as { order_id: string };
+
+    const after = await mockRequest("/admin/ingredients", "GET", null, q(), true);
+    const riceAfter = (after.body as Array<{ id: string; stock_qty: number }>).find(
+      (i) => i.id === "ing-rice",
+    )!.stock_qty;
+    expect(riceAfter).toBeCloseTo(riceBefore - 0.75, 5);
+
+    const ledger = await mockRequest(
+      "/admin/ingredients/movements",
+      "GET",
+      null,
+      q("reason=SALE"),
+      true,
+    );
+    const { movements } = ledger.body as {
+      movements: Array<{ ingredient_id: string; delta: number; order_id: string | null }>;
+    };
+    const fromThisOrder = movements.filter((m) => m.order_id === order_id);
+    // One movement per recipe line, each attributable to the order.
+    expect(fromThisOrder).toHaveLength(4);
+    expect(fromThisOrder.find((m) => m.ingredient_id === "ing-rice")?.delta).toBeCloseTo(
+      -0.75,
+      5,
+    );
+  });
+
+  it("leaves ingredients alone for a dish with no recipe", async () => {
+    const before = await mockRequest("/admin/ingredients", "GET", null, q(), true);
+    const snapshot = (before.body as Array<{ id: string; stock_qty: number }>).map(
+      (i) => `${i.id}:${i.stock_qty}`,
+    );
+
+    await mockRequest(
+      "/orders",
+      "POST",
+      {
+        table: "T6",
+        restaurant_id: HOME_RESTAURANT,
+        items: [{ name: "Coca-Cola", qty: 2, price: 50000, menu_item_id: "m-012" }],
+      },
+      q(),
+      false,
+    );
+
+    const after = await mockRequest("/admin/ingredients", "GET", null, q(), true);
+    expect(
+      (after.body as Array<{ id: string; stock_qty: number }>).map(
+        (i) => `${i.id}:${i.stock_qty}`,
+      ),
+    ).toEqual(snapshot);
+  });
+
+  it("returns a recipe with the ingredient's name and unit resolved", async () => {
+    const res = await mockRequest("/admin/menu/m-003/recipe", "GET", null, q(), true);
+    const recipe = res.body as {
+      menu_item_id: string;
+      lines: Array<{ ingredient_name: string; unit: string; qty_per_serving: number }>;
+    };
+    expect(recipe.menu_item_id).toBe("m-003");
+    const rice = recipe.lines.find((l) => l.ingredient_name === "Rice");
+    expect(rice).toEqual({
+      ingredient_id: "ing-rice",
+      ingredient_name: "Rice",
+      unit: "kg",
+      qty_per_serving: 0.25,
+    });
+  });
+
+  it("replaces the whole recipe on PUT and drops unknown ingredients", async () => {
+    const res = await mockRequest(
+      "/admin/menu/m-005/recipe",
+      "PUT",
+      {
+        lines: [
+          { ingredient_id: "ing-chicken", qty_per_serving: 0.3 },
+          { ingredient_id: "ing-does-not-exist", qty_per_serving: 9 },
+        ],
+      },
+      q(),
+      true,
+    );
+    expect(res.status).toBe(200);
+    const recipe = res.body as { lines: Array<{ ingredient_id: string }> };
+    expect(recipe.lines.map((l) => l.ingredient_id)).toEqual(["ing-chicken"]);
+
+    await mockRequest("/admin/menu/m-005/recipe", "PUT", { lines: [] }, q(), true);
+  });
+});

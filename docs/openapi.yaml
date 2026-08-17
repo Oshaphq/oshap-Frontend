@@ -335,6 +335,119 @@ components:
         available: { type: boolean }
         sort_order: { type: integer }
 
+    Ingredient:
+      type: object
+      description: >
+        Stock one level below a menu item: what dishes are made of. Quantities
+        are fractional (2.5 kg of rice), unlike the integer plate counts on
+        MenuItem.stock_count.
+      properties:
+        id: { type: string, format: uuid }
+        restaurant_id: { type: string, format: uuid }
+        name: { type: string }
+        unit: { type: string, description: Free text in the merchant own vocabulary - kg, L, tin. }
+        stock_qty: { type: number, format: float }
+        low_stock_threshold: { type: number, format: float, nullable: true }
+        cost_per_unit: { type: integer, nullable: true, description: Cost of one unit in kobo. }
+        supplier_id: { type: string, format: uuid, nullable: true }
+        par_level: { type: number, format: float, nullable: true, description: Target level to reorder back up to. }
+      required: [id, restaurant_id, name, unit, stock_qty]
+
+    CreateIngredientRequest:
+      type: object
+      properties:
+        name: { type: string }
+        unit: { type: string, default: unit }
+        stock_qty: { type: number, format: float, default: 0 }
+        low_stock_threshold: { type: number, format: float, nullable: true }
+        cost_per_unit: { type: integer, nullable: true }
+        par_level: { type: number, format: float, nullable: true }
+      required: [name]
+
+    UpdateIngredientRequest:
+      type: object
+      description: Note that stock_qty is absent - levels move through /adjust only.
+      properties:
+        name: { type: string }
+        unit: { type: string }
+        low_stock_threshold: { type: number, format: float, nullable: true }
+        cost_per_unit: { type: integer, nullable: true }
+        par_level: { type: number, format: float, nullable: true }
+
+    AdjustStockRequest:
+      type: object
+      properties:
+        delta: { type: number, format: float, description: Signed - negative removes. }
+        reason:
+          type: string
+          description: >
+            PURCHASE, WASTAGE, STOCK_TAKE or CORRECTION from staff. SALE is
+            written by the server when an order depletes a recipe.
+        note: { type: string, nullable: true }
+      required: [delta, reason]
+
+    StockMovement:
+      type: object
+      properties:
+        id: { type: string, format: uuid }
+        ingredient_id: { type: string, format: uuid }
+        delta: { type: number, format: float }
+        reason: { type: string }
+        actor_id: { type: string, format: uuid, nullable: true }
+        note: { type: string, nullable: true }
+        order_id:
+          type: string
+          format: uuid
+          nullable: true
+          description: Present when the movement came from an order rather than a person.
+        created_at: { type: string, format: date-time }
+      required: [id, ingredient_id, delta, reason, created_at]
+
+    StockMovementsResponse:
+      type: object
+      properties:
+        movements:
+          type: array
+          items:
+            $ref: "#/components/schemas/StockMovement"
+        total: { type: integer }
+        page: { type: integer }
+        per_page: { type: integer }
+      required: [movements, total, page, per_page]
+
+    RecipeLine:
+      type: object
+      properties:
+        ingredient_id: { type: string, format: uuid }
+        ingredient_name: { type: string }
+        unit: { type: string }
+        qty_per_serving: { type: number, format: float }
+      required: [ingredient_id, ingredient_name, unit, qty_per_serving]
+
+    RecipeResponse:
+      type: object
+      properties:
+        menu_item_id: { type: string, format: uuid }
+        lines:
+          type: array
+          items:
+            $ref: "#/components/schemas/RecipeLine"
+      required: [menu_item_id, lines]
+
+    SetRecipeRequest:
+      type: object
+      description: Replaces the whole recipe for the dish - send every line to keep.
+      properties:
+        lines:
+          type: array
+          items:
+            type: object
+            properties:
+              ingredient_id: { type: string, format: uuid }
+              qty_per_serving: { type: number, format: float, default: 1 }
+            required: [ingredient_id]
+      required: [lines]
+
     SetMenuItemModifierGroupsRequest:
       type: object
       description: Replaces the item's entire attachment set — send every id to keep.
@@ -2411,6 +2524,150 @@ paths:
                 type: object
                 properties:
                   success: { type: boolean, enum: [true] }
+
+  /admin/ingredients:
+    get:
+      tags: [Admin]
+      summary: List ingredients
+      security: [{ bearerAuth: [] }]
+      responses:
+        "200":
+          description: Ingredients
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Ingredient"
+    post:
+      tags: [Admin]
+      summary: Create an ingredient
+      description: >
+        A non-zero stock_qty is recorded as an opening PURCHASE movement, so the
+        ledger accounts for every unit rather than starting mid-air.
+      security: [{ bearerAuth: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateIngredientRequest"
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Ingredient"
+
+  /admin/ingredients/movements:
+    get:
+      tags: [Admin]
+      summary: Stock movement ledger
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - { name: reason, in: query, required: false, schema: { type: string } }
+        - { name: page, in: query, required: false, schema: { type: integer, default: 1 } }
+        - { name: per_page, in: query, required: false, schema: { type: integer, default: 25 } }
+      responses:
+        "200":
+          description: Movements, newest first
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/StockMovementsResponse"
+
+  /admin/ingredients/{ingredient_id}:
+    patch:
+      tags: [Admin]
+      summary: Update an ingredient's details
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - name: ingredient_id
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateIngredientRequest"
+      responses:
+        "200":
+          description: Updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Ingredient"
+
+  /admin/ingredients/{ingredient_id}/adjust:
+    post:
+      tags: [Admin]
+      summary: Move stock by a signed delta
+      description: >
+        The only way a level changes. Stock is never assigned a value, so the
+        ledger can always explain how a level was reached - a stock take is
+        therefore also expressed as a delta.
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - name: ingredient_id
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AdjustStockRequest"
+      responses:
+        "201":
+          description: The recorded movement
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/StockMovement"
+
+  /admin/menu/{item_id}/recipe:
+    get:
+      tags: [Admin]
+      summary: What one serving of a dish consumes
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - name: item_id
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+      responses:
+        "200":
+          description: Recipe lines with ingredient name and unit resolved
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RecipeResponse"
+    put:
+      tags: [Admin]
+      summary: Replace a dish's recipe
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - name: item_id
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SetRecipeRequest"
+      responses:
+        "200":
+          description: The recipe after the write
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RecipeResponse"
 
   /admin/modifier-groups:
     get:

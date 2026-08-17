@@ -40,6 +40,13 @@ import type {
   CreateOrderRequest,
   ModifierGroup,
   ModifierOption,
+  Ingredient,
+  StockMovement,
+  RecipeLine,
+  CreateIngredientRequest,
+  UpdateIngredientRequest,
+  AdjustStockRequest,
+  SetRecipeRequest,
   CreateModifierGroupRequest,
   UpdateModifierGroupRequest,
   CreateModifierOptionRequest,
@@ -383,6 +390,81 @@ function findOption(optionId: string) {
   return null;
 }
 
+/**
+ * Ingredient stock, one level below the plate counts on menu items. Quantities
+ * are fractional — 12.5 kg of rice is a real level — so nothing here rounds.
+ */
+const SEED_INGREDIENTS: Ingredient[] = [
+  { id: "ing-rice", restaurant_id: _restaurant.id, name: "Rice", unit: "kg", stock_qty: 24, low_stock_threshold: 5, cost_per_unit: naira(1800), par_level: 40 },
+  { id: "ing-chicken", restaurant_id: _restaurant.id, name: "Chicken", unit: "kg", stock_qty: 11.5, low_stock_threshold: 4, cost_per_unit: naira(4500), par_level: 20 },
+  { id: "ing-beef", restaurant_id: _restaurant.id, name: "Beef", unit: "kg", stock_qty: 3.2, low_stock_threshold: 4, cost_per_unit: naira(6200), par_level: 15 },
+  { id: "ing-tomato", restaurant_id: _restaurant.id, name: "Tomato paste", unit: "tin", stock_qty: 40, low_stock_threshold: 10, cost_per_unit: naira(900), par_level: 60 },
+  { id: "ing-oil", restaurant_id: _restaurant.id, name: "Vegetable oil", unit: "L", stock_qty: 8, low_stock_threshold: 3, cost_per_unit: naira(2400), par_level: 15 },
+  { id: "ing-plantain", restaurant_id: _restaurant.id, name: "Plantain", unit: "piece", stock_qty: 60, low_stock_threshold: 15, cost_per_unit: naira(350), par_level: 100 },
+];
+
+let _ingredients: Ingredient[] = SEED_INGREDIENTS.map((i) => ({ ...i }));
+let _movements: StockMovement[] = [];
+
+/** menu item id → the ingredients one serving consumes. */
+const SEED_RECIPES: Record<string, Array<{ ingredient_id: string; qty_per_serving: number }>> = {
+  "m-003": [
+    { ingredient_id: "ing-rice", qty_per_serving: 0.25 },
+    { ingredient_id: "ing-chicken", qty_per_serving: 0.2 },
+    { ingredient_id: "ing-tomato", qty_per_serving: 0.5 },
+    { ingredient_id: "ing-oil", qty_per_serving: 0.05 },
+  ],
+  "m-004": [
+    { ingredient_id: "ing-rice", qty_per_serving: 0.25 },
+    { ingredient_id: "ing-oil", qty_per_serving: 0.05 },
+  ],
+};
+
+let _recipes: Record<string, Array<{ ingredient_id: string; qty_per_serving: number }>> = {
+  ...SEED_RECIPES,
+};
+
+function recipeLines(menuItemId: string): RecipeLine[] {
+  return (_recipes[menuItemId] ?? []).flatMap((line) => {
+    const ingredient = _ingredients.find((i) => i.id === line.ingredient_id);
+    if (!ingredient) return [];
+    return [{
+      ingredient_id: ingredient.id,
+      ingredient_name: ingredient.name,
+      unit: ingredient.unit,
+      qty_per_serving: line.qty_per_serving,
+    }];
+  });
+}
+
+/** Records a signed movement and applies it. Never clamps below zero: going
+ *  negative is how a merchant discovers the recipe or the count is wrong. */
+function moveStock(
+  ingredientId: string,
+  delta: number,
+  reason: string,
+  note?: string | null,
+  orderId?: string | null,
+): StockMovement | null {
+  const ingredient = _ingredients.find((i) => i.id === ingredientId);
+  if (!ingredient) return null;
+  // Float arithmetic accumulates error over many small depletions, so round
+  // to a sane precision rather than letting 11.5 - 0.2 become 11.299999999998.
+  ingredient.stock_qty = Math.round((ingredient.stock_qty + delta) * 1000) / 1000;
+  const movement: StockMovement = {
+    id: uid(),
+    ingredient_id: ingredientId,
+    delta,
+    reason,
+    actor_id: null,
+    note: note ?? null,
+    order_id: orderId ?? null,
+    created_at: now(),
+  };
+  _movements.unshift(movement);
+  return movement;
+}
+
 const INITIAL_TABLES = [
   "T1", "T2", "T3", "T4", "T5", "T6",
   "T7", "T8", "T9", "T10", "T11", "T12", "T-G37",
@@ -438,6 +520,9 @@ interface PersistedState {
   menu?: MenuItem[];
   modifierGroups?: ModifierGroup[];
   menuItemGroups?: Record<string, string[]>;
+  ingredients?: Ingredient[];
+  movements?: StockMovement[];
+  recipes?: Record<string, Array<{ ingredient_id: string; qty_per_serving: number }>>;
   tables?: string[];
   orders?: Array<[string, StoredOrder]>;
   payments?: Array<[string, Payment]>;
@@ -473,6 +558,9 @@ export function syncFromStorage(): void {
     // than blanking every dish's options.
     if (Array.isArray(saved.modifierGroups)) _modifierGroups = saved.modifierGroups;
     if (saved.menuItemGroups) _menuItemGroups = saved.menuItemGroups;
+    if (Array.isArray(saved.ingredients)) _ingredients = saved.ingredients;
+    if (Array.isArray(saved.movements)) _movements = saved.movements;
+    if (saved.recipes) _recipes = saved.recipes;
     if (Array.isArray(saved.tables)) _tables = saved.tables;
 
     _orders.clear();
@@ -517,6 +605,9 @@ function syncToStorage(): void {
       menu: _menu,
       modifierGroups: _modifierGroups,
       menuItemGroups: _menuItemGroups,
+      ingredients: _ingredients,
+      movements: _movements,
+      recipes: _recipes,
       tables: _tables,
       orders: Array.from(_orders.entries()),
       payments: Array.from(_payments.entries()),
@@ -859,6 +950,19 @@ route("POST", /^\/orders$/, ({ body }) => {
       if (menuItem.stock_count === 0) {
         menuItem.available = false;
       }
+    }
+    // Deplete the recipe too. Plate counts and ingredient levels answer
+    // different questions — "can I still sell this dish" versus "do I need to
+    // buy rice" — so both move, and each records its own trail.
+    const recipeFor = menuItem ? _recipes[menuItem.id] : undefined;
+    for (const line of recipeFor ?? []) {
+      moveStock(
+        line.ingredient_id,
+        -(line.qty_per_serving * item.qty),
+        "SALE",
+        null,
+        id,
+      );
     }
   }
 
@@ -1689,6 +1793,113 @@ route("PUT", /^\/admin\/menu\/(.+)\/modifier-groups$/, ({ path, body }) => {
   _menuItemGroups[itemId] = ids;
   syncToStorage();
   return json(200, { modifier_groups: withModifiers(item).modifier_groups ?? [] });
+});
+
+// -------------------- Admin: Ingredients --------------------
+
+// Registered before the `/admin/ingredients/(.+)` patterns so the literal
+// sub-path isn't captured as an ingredient id.
+route("GET", /^\/admin\/ingredients\/movements$/, ({ query }) => {
+  const reason = query.get("reason");
+  const page = Number(query.get("page") ?? "1");
+  const perPage = Number(query.get("per_page") ?? "25");
+
+  const all = reason
+    ? _movements.filter((m) => m.reason === reason)
+    : _movements;
+  const start = (page - 1) * perPage;
+
+  return json(200, {
+    movements: all.slice(start, start + perPage),
+    total: all.length,
+    page,
+    per_page: perPage,
+  });
+});
+
+route("GET", /^\/admin\/ingredients$/, ({ query }) => {
+  if (isOtherBranch(query)) return json(200, []);
+  return json(200, [..._ingredients].sort((a, b) => a.name.localeCompare(b.name)));
+});
+
+route("POST", /^\/admin\/ingredients$/, ({ body }) => {
+  const b = body as CreateIngredientRequest;
+  if (!b.name?.trim()) return json(400, { error: "Name is required" });
+
+  const ingredient: Ingredient = {
+    id: uid(),
+    restaurant_id: _restaurant.id,
+    name: b.name.trim(),
+    unit: b.unit?.trim() || "unit",
+    stock_qty: b.stock_qty ?? 0,
+    low_stock_threshold: b.low_stock_threshold ?? null,
+    cost_per_unit: b.cost_per_unit ?? null,
+    supplier_id: null,
+    par_level: b.par_level ?? null,
+  };
+  _ingredients.push(ingredient);
+
+  // Opening stock is itself a movement, so the ledger starts from zero and
+  // explains every unit — otherwise the first count has no provenance.
+  if (ingredient.stock_qty > 0) {
+    const opening = ingredient.stock_qty;
+    ingredient.stock_qty = 0;
+    moveStock(ingredient.id, opening, "PURCHASE", "Opening stock");
+  }
+
+  syncToStorage();
+  return json(201, ingredient);
+});
+
+route("PATCH", /^\/admin\/ingredients\/([^/]+)$/, ({ path, body }) => {
+  const id = path.split("/admin/ingredients/")[1]!;
+  const ingredient = _ingredients.find((i) => i.id === id);
+  if (!ingredient) return json(404, { error: "Ingredient not found" });
+
+  const b = body as UpdateIngredientRequest;
+  if (b.name !== undefined) ingredient.name = b.name;
+  if (b.unit !== undefined) ingredient.unit = b.unit;
+  if (b.low_stock_threshold !== undefined) {
+    ingredient.low_stock_threshold = b.low_stock_threshold;
+  }
+  if (b.cost_per_unit !== undefined) ingredient.cost_per_unit = b.cost_per_unit;
+  if (b.par_level !== undefined) ingredient.par_level = b.par_level;
+  syncToStorage();
+  return json(200, ingredient);
+});
+
+route("POST", /^\/admin\/ingredients\/([^/]+)\/adjust$/, ({ path, body }) => {
+  const id = path.split("/admin/ingredients/")[1]!.split("/adjust")[0]!;
+  const b = body as AdjustStockRequest;
+  if (typeof b.delta !== "number" || Number.isNaN(b.delta)) {
+    return json(400, { error: "delta must be a number" });
+  }
+  if (!b.reason?.trim()) return json(400, { error: "reason is required" });
+
+  const movement = moveStock(id, b.delta, b.reason, b.note ?? null);
+  if (!movement) return json(404, { error: "Ingredient not found" });
+
+  syncToStorage();
+  return json(201, movement);
+});
+
+route("GET", /^\/admin\/menu\/([^/]+)\/recipe$/, ({ path }) => {
+  const itemId = path.split("/admin/menu/")[1]!.split("/recipe")[0]!;
+  return json(200, { menu_item_id: itemId, lines: recipeLines(itemId) });
+});
+
+route("PUT", /^\/admin\/menu\/([^/]+)\/recipe$/, ({ path, body }) => {
+  const itemId = path.split("/admin/menu/")[1]!.split("/recipe")[0]!;
+  if (!_menu.some((m) => m.id === itemId)) {
+    return json(404, { error: "Menu item not found" });
+  }
+
+  const b = body as SetRecipeRequest;
+  _recipes[itemId] = (b.lines ?? []).filter((line) =>
+    _ingredients.some((i) => i.id === line.ingredient_id),
+  );
+  syncToStorage();
+  return json(200, { menu_item_id: itemId, lines: recipeLines(itemId) });
 });
 
 // -------------------- Admin: Inventory --------------------

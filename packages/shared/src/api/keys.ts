@@ -46,6 +46,10 @@ export const queryKeys = {
     group: () => ["admin", "group"] as const,
     groupAnalytics: () => ["admin", "group", "analytics"] as const,
     modifierGroups: () => ["admin", "modifier-groups"] as const,
+    ingredients: () => ["admin", "ingredients"] as const,
+    stockMovements: (page: number, perPage: number, reason?: string) =>
+      ["admin", "stock-movements", page, perPage, reason] as const,
+    recipe: (menuItemId: string) => ["admin", "recipe", menuItemId] as const,
   },
   platform: {
     all: ["platform"] as const,

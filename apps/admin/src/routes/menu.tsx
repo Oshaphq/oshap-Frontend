@@ -21,6 +21,7 @@ import LowStockBanner from "../components/LowStockBanner";
 import MenuImportDialog from "../components/MenuImportDialog";
 import ModifierGroupsDialog from "../components/ModifierGroupsDialog";
 import ItemModifiersDialog from "../components/ItemModifiersDialog";
+import RecipeDialog from "../components/RecipeDialog";
 
 interface MenuFormState {
   name: string;
@@ -58,6 +59,7 @@ export default function MenuPage() {
   const [showImport, setShowImport] = useState(false);
   const [showGroups, setShowGroups] = useState(false);
   const [optionsFor, setOptionsFor] = useState<MenuItem | null>(null);
+  const [recipeFor, setRecipeFor] = useState<MenuItem | null>(null);
 
   const handleExport = () => {
     exportMenu.mutate(undefined, {
@@ -257,6 +259,7 @@ export default function MenuPage() {
               onToggle={() => handleToggleAvailable(item.id, item.available)}
               onEdit={() => handleEdit(item)}
               onEditOptions={() => setOptionsFor(item)}
+              onEditRecipe={() => setRecipeFor(item)}
               onDelete={() => handleDelete(item.id)}
             />
           );
@@ -283,6 +286,9 @@ export default function MenuPage() {
           onClose={() => setOptionsFor(null)}
         />
       )}
+      {recipeFor && (
+        <RecipeDialog item={recipeFor} onClose={() => setRecipeFor(null)} />
+      )}
     </main>
   );
 }
@@ -298,10 +304,11 @@ interface ItemRowProps {
   onToggle: () => void;
   onEdit: () => void;
   onEditOptions: () => void;
+  onEditRecipe: () => void;
   onDelete: () => void;
 }
 
-function MenuItemRow({ item, isStockEditing, stockInput, onStockEditStart, onStockInputChange, onStockSave, onStockCancel, onToggle, onEdit, onEditOptions, onDelete }: ItemRowProps) {
+function MenuItemRow({ item, isStockEditing, stockInput, onStockEditStart, onStockInputChange, onStockSave, onStockCancel, onToggle, onEdit, onEditOptions, onEditRecipe, onDelete }: ItemRowProps) {
   const isLow = item.stock_count !== null && item.stock_count <= item.low_stock_threshold;
   const isOut = item.stock_count !== null && item.stock_count === 0;
 
@@ -413,6 +420,13 @@ function MenuItemRow({ item, isStockEditing, stockInput, onStockEditStart, onSto
                 {item.modifier_groups!.length}
               </span>
             )}
+          </button>
+          <button
+            type="button"
+            onClick={onEditRecipe}
+            className="px-md py-s rounded-lg border border-outline-variant bg-transparent text-secondary-text text-caption-sm font-semibold hover:border-primary-text hover:text-primary-text transition-all"
+          >
+            Recipe
           </button>
           <button
             type="button"
