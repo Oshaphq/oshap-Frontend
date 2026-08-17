@@ -144,17 +144,15 @@ test.describe("customer ordering", () => {
 
     await expect(page).toHaveURL(/\/checkout/);
 
-    // The guest sees a breakdown before committing.
-    //
-    // Deliberately not asserting VAT here: this screen currently prints
-    // Subtotal and Total as the same figure and shows no tax line at all, so
-    // the total a guest agrees to is lower than the one the server computes.
-    // That is a real bug, not a gap in the test — asserting the correct
-    // behaviour would leave a permanently red suite, and asserting the
-    // current behaviour would enshrine it. Tighten this once checkout shows
-    // the same itemised breakdown the pay screen already does.
-    await expect(page.getByText(/Subtotal/i)).toBeVisible();
-    await expect(page.getByText(/^Total$/i)).toBeVisible();
+    // Every charge is named before the guest commits. Coca-Cola is ₦500;
+    // the seeded restaurant adds 5% service (₦25) and 7.5% VAT on the
+    // result (₦39.38), so ₦564.38. Asserting the figure and not just the
+    // labels is what catches this screen quietly reverting to printing the
+    // subtotal twice and calling the second one Total.
+    await expect(page.getByText("Item total")).toBeVisible();
+    await expect(page.getByText("Service charge")).toBeVisible();
+    await expect(page.getByText("VAT")).toBeVisible();
+    await expect(page.getByText("₦564.38")).toBeVisible();
 
     await page.getByRole("button", { name: "Confirm Order" }).click();
 

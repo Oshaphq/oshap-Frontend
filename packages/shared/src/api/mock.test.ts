@@ -1,6 +1,7 @@
 import { describe, it, expect } from "vitest";
 import { mockRequest } from "./mock";
 import { formatCurrency } from "../utils/currency";
+import { computeOrderTotals } from "../utils/pricing";
 import { AUDIT_ACTIONS } from "../types/index";
 
 const HOME_RESTAURANT = "00000000-0000-0000-0000-000000000001";
@@ -1300,5 +1301,89 @@ describe("mock API — ingredients", () => {
     expect(recipe.lines.map((l) => l.ingredient_id)).toEqual(["ing-chicken"]);
 
     await mockRequest("/admin/menu/m-005/recipe", "PUT", { lines: [] }, q(), true);
+  });
+});
+
+describe("mock API — checkout estimate matches the order", () => {
+  it("computeOrderTotals predicts the server's figure exactly", async () => {
+    // The point of the whole exercise: what checkout shows a guest before
+    // they commit must equal what the order comes back with. Any drift here
+    // is a guest agreeing to one number and being charged another.
+    const table = await mockRequest("/table/T9", "GET", null, q(), false);
+    const { restaurant } = table.body as {
+      restaurant: { vat_rate?: number; service_charge_rate?: number };
+    };
+
+    const items = [
+      { name: "Jollof Rice & Chicken", qty: 2, price: 350000, menu_item_id: "m-003" },
+      { name: "Chapman", qty: 3, price: 150000, menu_item_id: "m-009" },
+    ];
+    const subtotal = items.reduce((s, i) => s + i.price * i.qty, 0);
+
+    const predicted = computeOrderTotals(subtotal, {
+      vat_rate: restaurant.vat_rate,
+      service_charge_rate: restaurant.service_charge_rate,
+    });
+
+    const created = await mockRequest(
+      "/orders",
+      "POST",
+      { table: "T9", restaurant_id: HOME_RESTAURANT, items },
+      q(),
+      false,
+    );
+    const { order_id, total } = created.body as {
+      order_id: string;
+      total: number;
+    };
+
+    expect(total).toBe(predicted.total);
+
+    const detail = await mockRequest(`/orders/${order_id}`, "GET", null, q(), false);
+    const order = detail.body as {
+      subtotal: number;
+      service_charge: number;
+      vat: number;
+      total: number;
+    };
+    expect(order.subtotal).toBe(predicted.subtotal);
+    expect(order.service_charge).toBe(predicted.service_charge);
+    expect(order.vat).toBe(predicted.vat);
+    expect(order.total).toBe(predicted.total);
+  });
+
+  it("predicts correctly once modifiers move the line price", async () => {
+    const table = await mockRequest("/table/T10", "GET", null, q(), false);
+    const { restaurant } = table.body as {
+      restaurant: { vat_rate?: number; service_charge_rate?: number };
+    };
+
+    // Base 3,500 + turkey 500 + plantain 500 = 4,500 per unit, ×2.
+    const predicted = computeOrderTotals(900000, {
+      vat_rate: restaurant.vat_rate,
+      service_charge_rate: restaurant.service_charge_rate,
+    });
+
+    const created = await mockRequest(
+      "/orders",
+      "POST",
+      {
+        table: "T10",
+        restaurant_id: HOME_RESTAURANT,
+        items: [
+          {
+            name: "Jollof Rice & Chicken",
+            qty: 2,
+            price: 350000,
+            menu_item_id: "m-003",
+            modifiers: [{ option_id: "mo-p-turkey" }, { option_id: "mo-e-plantain" }],
+          },
+        ],
+      },
+      q(),
+      false,
+    );
+
+    expect((created.body as { total: number }).total).toBe(predicted.total);
   });
 });
