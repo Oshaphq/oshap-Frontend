@@ -1,0 +1,89 @@
+name: CI
+
+# Runs on PRs *and* on pushes to master. The push trigger is the point: every
+# change was verified on its branch, nothing verified the result after merge,
+# and master has silently broken twice that way.
+on:
+  pull_request:
+  push:
+    branches: [master]
+
+# A second push to the same branch makes the first run irrelevant.
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    name: Typecheck · Lint · Test · Build
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          # Matches the >=20 engines field. npm workspaces need no extra setup.
+          node-version: 20
+          cache: npm
+
+      # `ci` not `install`: fails on a lockfile that disagrees with
+      # package.json rather than quietly resolving something else.
+      - name: Install
+        run: npm ci
+
+      # Each step runs even if an earlier one failed, so a single run reports
+      # every problem instead of making you fix them one push at a time.
+      - name: Typecheck
+        if: '!cancelled()'
+        run: npm run typecheck
+
+      - name: Lint
+        if: '!cancelled()'
+        run: npm run lint
+
+      - name: Test
+        if: '!cancelled()'
+        run: npm test
+
+      - name: Build
+        if: '!cancelled()'
+        run: npm run build
+
+  e2e:
+    name: End-to-end (customer)
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install
+        run: npm ci
+
+      # Only chromium. The suite runs one mobile project, so pulling firefox
+      # and webkit would triple the download for nothing.
+      - name: Install browser
+        run: npx playwright install --with-deps chromium
+
+      - name: Run E2E
+        run: npm run test:e2e
+
+      # Traces and screenshots are the only way to diagnose a CI-only failure.
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: playwright-report
+          path: |
+            playwright-report/
+            test-results/
+          retention-days: 7
