@@ -205,7 +205,7 @@ components:
         id: { type: string, format: uuid }
         restaurant_id: { type: string, format: uuid }
         name: { type: string }
-        price: { type: integer, description: Price in Naira }
+        price: { type: integer, description: Price in kobo (1 naira = 100 kobo). }
         category: { type: string }
         description: { type: string, nullable: true }
         image_url: { type: string, nullable: true }
@@ -218,6 +218,14 @@ components:
         low_stock_threshold:
           type: integer
           description: Stock level at or below which a low-stock alert fires.
+        modifier_groups:
+          type: array
+          description: >
+            Option groups attached to this dish, returned inline so the customer
+            app needs no second call. Absent or empty means the dish is ordered
+            as-is.
+          items:
+            $ref: "#/components/schemas/ModifierGroup"
       required: [id, restaurant_id, name, price, category, available, sort_order, low_stock_threshold]
 
     OrderItem:
@@ -226,8 +234,115 @@ components:
         id: { type: string, format: uuid }
         name: { type: string }
         quantity: { type: integer }
-        price: { type: integer }
+        price:
+          type: integer
+          description: >
+            Per-unit price in kobo, INCLUDING every chosen modifier's delta.
+            Note the asymmetry with CreateOrderRequest, where the same field
+            carries the base price and the server adds the deltas.
+        notes: { type: string, nullable: true }
+        modifiers:
+          type: array
+          nullable: true
+          description: >
+            Chosen options, denormalized at order time so renaming a modifier
+            later cannot rewrite a ticket already printed.
+          items:
+            $ref: "#/components/schemas/OrderItemModifier"
       required: [id, name, quantity, price]
+
+    OrderItemModifier:
+      type: object
+      properties:
+        name: { type: string, description: The group's name, e.g. "Protein". }
+        option: { type: string, description: The chosen option's name, e.g. "Turkey". }
+        price_delta: { type: integer, description: Amount added in kobo; may be negative. }
+      required: [name, option, price_delta]
+
+    ModifierOption:
+      type: object
+      properties:
+        id: { type: string, format: uuid }
+        group_id: { type: string, format: uuid }
+        name: { type: string }
+        price_delta:
+          type: integer
+          description: >
+            Added to the dish's base price, in kobo. May be zero (a choice that
+            costs nothing) or negative (a smaller portion).
+        sort_order: { type: integer }
+        available: { type: boolean }
+      required: [id, group_id, name, price_delta, sort_order, available]
+
+    ModifierGroup:
+      type: object
+      description: >
+        A reusable set of choices owned by the restaurant, not by a dish. One
+        group can be attached to many menu items, so editing an option updates
+        every dish that uses it.
+      properties:
+        id: { type: string, format: uuid }
+        restaurant_id: { type: string, format: uuid }
+        name: { type: string }
+        required: { type: boolean, description: Whether the guest must choose at least `min`. }
+        min: { type: integer }
+        max: { type: integer, description: "`1` behaves as a radio group; higher allows multi-select." }
+        sort_order: { type: integer }
+        options:
+          type: array
+          items:
+            $ref: "#/components/schemas/ModifierOption"
+      required: [id, restaurant_id, name, required, min, max, sort_order, options]
+
+    CreateModifierGroupRequest:
+      type: object
+      properties:
+        name: { type: string }
+        required: { type: boolean, default: false }
+        min: { type: integer, default: 0 }
+        max: { type: integer, default: 1 }
+        options:
+          type: array
+          items:
+            type: object
+            properties:
+              name: { type: string }
+              price_delta: { type: integer, default: 0 }
+            required: [name]
+      required: [name]
+
+    UpdateModifierGroupRequest:
+      type: object
+      properties:
+        name: { type: string }
+        required: { type: boolean }
+        min: { type: integer }
+        max: { type: integer }
+        sort_order: { type: integer }
+
+    CreateModifierOptionRequest:
+      type: object
+      properties:
+        name: { type: string }
+        price_delta: { type: integer, default: 0 }
+      required: [name]
+
+    UpdateModifierOptionRequest:
+      type: object
+      properties:
+        name: { type: string }
+        price_delta: { type: integer }
+        available: { type: boolean }
+        sort_order: { type: integer }
+
+    SetMenuItemModifierGroupsRequest:
+      type: object
+      description: Replaces the item's entire attachment set — send every id to keep.
+      properties:
+        group_ids:
+          type: array
+          items: { type: string, format: uuid }
+      required: [group_ids]
 
     Order:
       type: object
@@ -404,7 +519,23 @@ components:
             properties:
               name: { type: string }
               qty: { type: integer }
-              price: { type: integer }
+              price:
+                type: integer
+                description: >
+                  The dish's BASE price in kobo, WITHOUT modifier deltas. The
+                  server computes `line_price = price + sum(option.price_delta)`,
+                  so sending an already-adjusted price double-counts every
+                  modifier. The Order returned carries the resolved figure.
+              menu_item_id: { type: string, format: uuid }
+              notes: { type: string }
+              modifiers:
+                type: array
+                description: Chosen options by id; the server resolves name and price.
+                items:
+                  type: object
+                  properties:
+                    option_id: { type: string, format: uuid }
+                  required: [option_id]
             required: [name, qty, price]
         session_id: { type: string, format: uuid }
         customer_name: { type: string }
@@ -2280,6 +2411,184 @@ paths:
                 type: object
                 properties:
                   success: { type: boolean, enum: [true] }
+
+  /admin/modifier-groups:
+    get:
+      tags: [Admin]
+      summary: List the restaurant's modifier groups
+      security: [{ bearerAuth: [] }]
+      responses:
+        "200":
+          description: Groups with their options
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ModifierGroup"
+    post:
+      tags: [Admin]
+      summary: Create a modifier group
+      description: Options may be supplied inline; later edits address them individually.
+      security: [{ bearerAuth: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateModifierGroupRequest"
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ModifierGroup"
+
+  /admin/modifier-groups/{group_id}:
+    patch:
+      tags: [Admin]
+      summary: Update a modifier group
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - name: group_id
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateModifierGroupRequest"
+      responses:
+        "200":
+          description: Updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ModifierGroup"
+    delete:
+      tags: [Admin]
+      summary: Delete a modifier group
+      description: Also detaches it from every menu item that referenced it.
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - name: group_id
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+      responses:
+        "200":
+          description: Deleted
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success: { type: boolean, enum: [true] }
+
+  /admin/modifier-groups/{group_id}/options:
+    post:
+      tags: [Admin]
+      summary: Add an option to a group
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - name: group_id
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateModifierOptionRequest"
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ModifierOption"
+
+  /admin/modifier-options/{option_id}:
+    patch:
+      tags: [Admin]
+      summary: Update a modifier option
+      description: >
+        Setting `available: false` keeps the option visible to guests but
+        unselectable — a choice that vanishes reads as an omission rather than
+        as something the kitchen has run out of.
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - name: option_id
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateModifierOptionRequest"
+      responses:
+        "200":
+          description: Updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ModifierOption"
+    delete:
+      tags: [Admin]
+      summary: Delete a modifier option
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - name: option_id
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+      responses:
+        "200":
+          description: Deleted
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success: { type: boolean, enum: [true] }
+
+  /admin/menu/{item_id}/modifier-groups:
+    put:
+      tags: [Admin]
+      summary: Set which modifier groups a dish offers
+      description: >
+        Replaces the whole attachment set rather than applying a delta, so the
+        caller sends every group id it wants to keep.
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - name: item_id
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SetMenuItemModifierGroupsRequest"
+      responses:
+        "200":
+          description: The item's groups after the write
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  modifier_groups:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/ModifierGroup"
 
   /admin/menu/export:
     get:
