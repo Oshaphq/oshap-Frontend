@@ -155,6 +155,6 @@ Each app is its own Vercel project pointing at `apps/customer`, `apps/admin`, or
 Per-project env vars (set in Vercel dashboard, **not** committed):
 - `VITE_API_BASE_URL` — the FastAPI backend **origin only** (e.g. `https://api.oshap.app`). Do not append `/api/v1`; the client adds it. If unset, the app runs in mock mode (great for previews, not for production).
 - Admin only: `VITE_FCM_API_KEY`, `VITE_FCM_AUTH_DOMAIN`, `VITE_FCM_PROJECT_ID`, `VITE_FCM_STORAGE_BUCKET`, `VITE_FCM_MESSAGING_SENDER_ID`, `VITE_FCM_APP_ID`, `VITE_FCM_VAPID_KEY`.
-- Platform only: `VITE_PLATFORM_TOKEN` — the operator access code (must match the backend's `PLATFORM_TOKEN`). **Always set this in production** — if unset, the client-side gate is open.
+- Platform only: **no token env var.** The operator types the access code at the login screen; it is held in sessionStorage, sent as `x-platform-token`, and validated by the backend. Never reintroduce `VITE_PLATFORM_TOKEN` — Vite inlines `VITE_`-prefixed values into the bundle, so a hosted platform app built with it publishes the secret that administers every tenant.
 
 The customer app is unauthenticated; the admin app sends `Authorization: Bearer <access_token>` on every request; the platform app requires `x-platform-token`.

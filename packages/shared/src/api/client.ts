@@ -7,7 +7,8 @@
  *   - Throws `ApiError` on non-2xx responses with the server's error message.
  *   - Attaches `Authorization: Bearer` for admin-scoped calls, refreshing the
  *     access token once on a 401 before giving up.
- *   - Falls back to mock API when VITE_MOCK_API=true or VITE_API_BASE_URL is not set.
+ *   - Uses the mock API when VITE_MOCK_API=true, or when VITE_API_BASE_URL is
+ *     unset in a DEV build. A production build never falls back silently.
  */
 
 import type { Restaurant } from "../types/index";
@@ -188,9 +189,25 @@ export function getActiveBranchId(): string | null {
 
 function isMockMode(): boolean {
   if (typeof window === "undefined") return false;
+
   const mockFlag = import.meta.env.VITE_MOCK_API;
-  const hasBaseUrl = !!import.meta.env.VITE_API_BASE_URL;
-  return mockFlag === "true" || mockFlag === true || !hasBaseUrl;
+  if (mockFlag === "true" || mockFlag === true) return true;
+
+  if (import.meta.env.VITE_API_BASE_URL) return false;
+
+  // No base URL. In development that means "use the mock", which is the
+  // convenience this flag exists for.
+  //
+  // In a production build it must NOT mean that. A deployed bundle that
+  // silently falls back to the mock is the worst failure this codebase can
+  // produce: the app works perfectly, serves a seeded menu, accepts orders,
+  // and none of it reaches a server or exists anywhere. Nothing errors, so
+  // nothing reveals it — and a QR code printed against that URL sends real
+  // guests to a fake restaurant.
+  //
+  // This has already happened once, to the deployed customer app. Failing
+  // loudly here turns a silent forgery into an obvious misconfiguration.
+  return !import.meta.env.PROD;
 }
 
 // ---------------------------------------------------------------------------

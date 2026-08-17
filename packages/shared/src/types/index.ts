@@ -94,7 +94,13 @@ export interface Restaurant {
 export interface StaffMember {
   id: string;
   name: string;
-  email: string;
+  /**
+   * Canonical E.164, and the account's unique identity. Required because not
+   * every waiter has an email address — asking a restaurant for nine work
+   * inboxes is not a thing that happens.
+   */
+  phone: string;
+  email?: string | null;
   role: Role;
   created_at: string;
 }
@@ -394,11 +400,24 @@ export interface AdminMeResponse {
   user: StaffMember;
 }
 
-/** Staff authenticate with email + password, or a shared PIN. */
+/**
+ * Staff authenticate with an identifier + password, or a PIN.
+ *
+ * `identifier` accepts a phone number or an email and the server resolves
+ * which by shape. `email` remains accepted as a deprecated alias; new call
+ * sites should send `identifier`.
+ *
+ * `restaurant_id` scopes a PIN lookup to one restaurant. Without it the PIN
+ * is matched across every tenant, which is how a PIN belonging to another
+ * merchant could return a working token.
+ */
 export interface AdminLoginRequest {
+  identifier?: string;
+  /** @deprecated Send `identifier` instead. */
   email?: string;
   password?: string;
   pin?: string;
+  restaurant_id?: string;
 }
 
 export interface AuthTokens {
@@ -427,16 +446,49 @@ export interface RefreshTokenResponse {
 
 export interface CreateStaffRequest {
   name: string;
-  email: string;
+  /** Canonical E.164 — normalize with `normalizePhone` before sending. */
+  phone: string;
+  email?: string;
   role: Role;
   password?: string;
 }
 
 export interface UpdateStaffRequest {
   name?: string;
+  phone?: string;
   email?: string;
   role?: Role;
   password?: string;
+}
+
+// --- Owner setup & password recovery ---------------------------------------
+// A setup token stands in for the account until it is used, so it is treated
+// as a credential: single-use, expiring, and never rendered anywhere but the
+// link itself.
+
+export interface SetupVerifyRequest {
+  token: string;
+}
+
+/**
+ * Enough for the owner to recognise which account they are claiming, without
+ * exposing a full contact detail to whoever holds the link.
+ */
+export interface SetupVerifyResponse {
+  restaurant_name: string;
+  owner_name: string;
+  phone_hint: string;
+  email_hint?: string | null;
+}
+
+export interface SetupCompleteRequest {
+  token: string;
+  password: string;
+}
+
+/** Phone or email — the server resolves which by shape. */
+export interface ForgotPasswordRequest {
+  identifier: string;
 }
 
 export interface CreateMenuItemRequest {
@@ -1030,9 +1082,18 @@ export interface PlatformRestaurant extends Restaurant {
   subscription_tier: SubscriptionTier;
   is_active: boolean;
   created_at: string;
-  owner_email: string;
+  owner_phone?: string | null;
+  /** Nullable now that phone is the identity and email is optional. */
+  owner_email?: string | null;
   table_count: number;
   monthly_orders: number;
+  /**
+   * One-time setup link for the owner, returned only by the create call.
+   * The operator relays it — over WhatsApp in practice, since a merchant may
+   * have no inbox. Never shown again after onboarding.
+   */
+  owner_setup_url?: string | null;
+  owner_setup_expires_at?: string | null;
 }
 
 export interface PlatformRestaurantsResponse {
@@ -1051,7 +1112,9 @@ export interface PlatformSystemHealth {
 export interface PlatformCreateRestaurantRequest {
   name: string;
   owner_name: string;
-  owner_email: string;
+  /** Required: the owner is reached here, and may have no email at all. */
+  owner_phone: string;
+  owner_email?: string;
   subscription_tier: SubscriptionTier;
   table_count: number;
   /**

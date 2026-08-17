@@ -9,6 +9,10 @@ import type {
   AdminHistoryResponse,
   AdminLoginRequest,
   AdminLoginResponse,
+  SetupVerifyRequest,
+  SetupVerifyResponse,
+  SetupCompleteRequest,
+  ForgotPasswordRequest,
   AdminMeResponse,
   AdminTablesResponse,
   AdminUpdateSettingsRequest,
@@ -53,6 +57,42 @@ import { request } from "./client";
 // platform app will eventually authenticate through the same endpoints.
 export function adminLoginEmail(payload: AdminLoginRequest): Promise<AdminLoginResponse> {
   return request<AdminLoginResponse>("/auth/login", {
+    method: "POST",
+    body: payload,
+  });
+}
+
+/**
+ * Checks a setup link before the page renders a form, so an expired token
+ * says so up front rather than after someone has chosen a password.
+ */
+export function verifySetupToken(
+  payload: SetupVerifyRequest,
+): Promise<SetupVerifyResponse> {
+  return request<SetupVerifyResponse>("/auth/setup/verify", {
+    method: "POST",
+    body: payload,
+  });
+}
+
+/**
+ * Sets the password and burns the token. Returns the same shape as login, so
+ * the caller can sign the owner straight in without a second round-trip.
+ */
+export function completeSetup(
+  payload: SetupCompleteRequest,
+): Promise<AdminLoginResponse> {
+  return request<AdminLoginResponse>("/auth/setup/complete", {
+    method: "POST",
+    body: payload,
+  });
+}
+
+/** Always resolves, whether or not the identifier matched — see the mock. */
+export function forgotPassword(
+  payload: ForgotPasswordRequest,
+): Promise<{ message: string }> {
+  return request<{ message: string }>("/auth/forgot-password", {
     method: "POST",
     body: payload,
   });

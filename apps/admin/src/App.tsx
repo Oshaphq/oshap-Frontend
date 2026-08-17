@@ -3,6 +3,7 @@ import { Toaster } from "@oshap/shared/ui";
 import AuthGate from "./components/AuthGate";
 import RoleGate from "./components/RoleGate";
 import DashboardPage from "./routes/dashboard";
+import SetupPage from "./routes/setup";
 import KitchenPage from "./routes/kitchen";
 import HistoryPage from "./routes/history";
 import MenuPage from "./routes/menu";
@@ -35,6 +36,9 @@ export default function App() {
     <AuthProvider>
       <GlobalSSE />
       <Routes>
+        {/* Outside AuthGate: an owner claiming their account has no session
+            yet, which is the whole point of the screen. */}
+        <Route path="/setup" element={<SetupPage />} />
         <Route element={<AuthGate />}>
           {/* Default routes based on role */}
           <Route element={<RoleGate allowedRoles={["OWNER", "MANAGER", "WAITER", "CASHIER", "KITCHEN", "BARTENDER"]} />}>

@@ -9,3 +9,4 @@ export * as adminApi from "./admin";
 export * as devicesApi from "./devices";
 export * as modifiersApi from "./modifiers";
 export * as ingredientsApi from "./ingredients";
+export * as platformApi from "./platform";

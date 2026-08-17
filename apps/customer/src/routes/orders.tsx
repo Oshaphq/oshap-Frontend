@@ -214,7 +214,7 @@ function OrdersView({ tableId }: { tableId: string }) {
             </span>
             <input
               type="text"
-              placeholder="e.g. Binjo"
+              placeholder="Enter your name"
               value={customerName}
               onChange={(e) => setCustomerName(e.target.value)}
               className="px-md py-md bg-surface-container-low border border-outline-variant rounded-lg text-label-l3 text-primary-text placeholder:text-secondary-text outline-none focus:border-primary transition-colors"

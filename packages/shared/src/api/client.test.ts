@@ -422,3 +422,42 @@ describe("client request() — validation errors name the field", () => {
     expect(err.message).toBe("Invalid platform token");
   });
 });
+
+describe("client — a production build never falls back to the mock", () => {
+  afterEach(() => {
+    vi.unstubAllEnvs();
+    vi.unstubAllGlobals();
+  });
+
+  it("throws instead of silently mocking when the base URL is missing", async () => {
+    // Exactly the state the deployed customer app shipped in: PROD build,
+    // no VITE_API_BASE_URL. It rendered a seeded menu and took orders that
+    // reached nothing, with no error anywhere to reveal it.
+    vi.stubEnv("VITE_API_BASE_URL", "");
+    vi.stubEnv("VITE_MOCK_API", "");
+    vi.stubEnv("PROD", true);
+
+    const err = await request("/menu").catch((e) => e);
+
+    expect(err).toBeInstanceOf(Error);
+    expect((err as Error).message).toContain("VITE_API_BASE_URL");
+  });
+
+  it("still honours an explicit opt-in, so E2E and demos keep working", async () => {
+    vi.stubEnv("VITE_API_BASE_URL", "");
+    vi.stubEnv("VITE_MOCK_API", "true");
+    vi.stubEnv("PROD", true);
+
+    const items = await request<unknown[]>("/menu");
+    expect(Array.isArray(items)).toBe(true);
+  });
+
+  it("keeps the convenience in a dev build with nothing configured", async () => {
+    vi.stubEnv("VITE_API_BASE_URL", "");
+    vi.stubEnv("VITE_MOCK_API", "");
+    vi.stubEnv("PROD", false);
+
+    const items = await request<unknown[]>("/menu");
+    expect(Array.isArray(items)).toBe(true);
+  });
+});

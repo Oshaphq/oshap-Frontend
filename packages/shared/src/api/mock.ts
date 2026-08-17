@@ -40,6 +40,10 @@ import type {
   CreateOrderRequest,
   ModifierGroup,
   ModifierOption,
+  SetupCompleteRequest,
+  SetupVerifyRequest,
+  SetupVerifyResponse,
+  ForgotPasswordRequest,
   Ingredient,
   StockMovement,
   RecipeLine,
@@ -80,6 +84,7 @@ import type {
   UpdateBankAccountRequest,
 } from "../types/index";
 import { AUDIT_ACTIONS } from "../types/index";
+import { normalizePhone, tryNormalizePhone } from "../utils/phone";
 
 // ---------------------------------------------------------------------------
 // Mock EventSource for SSE
@@ -499,6 +504,8 @@ const _orders: Map<string, StoredOrder> = new Map();
 const _payments: Map<string, Payment> = new Map();
 const _sessions: Map<string, TableSession> = new Map();
 const _staff: Map<string, StaffMember> = new Map();
+/** Set by the setup flow; absent means the seed default. */
+const _staffPasswords: Map<string, string> = new Map();
 let _orderCounter = 0;
 
 const STORAGE_KEY = "oshap-mock-state";
@@ -588,6 +595,7 @@ export function syncFromStorage(): void {
     _staff.set(ownerId, {
       id: ownerId,
       name: "Owner",
+      phone: "+2348030000001",
       email: "owner@oshap.com",
       role: "OWNER",
       created_at: now(),
@@ -1183,10 +1191,110 @@ export function staffIdFromAccessToken(token: string | null): string | null {
   return staffId;
 }
 
+/**
+ * Setup and reset tokens, keyed by the raw token. The real server stores only
+ * a hash; the mock keeps the raw value because it has to hand the same string
+ * back in a URL, and nothing here is a real credential.
+ */
+const _setupTokens = new Map<
+  string,
+  { staffId: string; expiresAt: number; usedAt: number | null }
+>();
+
+/** Where the setup link points. The real server reads ADMIN_APP_URL. */
+function adminAppUrl(): string {
+  if (typeof window !== "undefined" && window.location) {
+    return window.location.origin;
+  }
+  return "http://localhost:5174";
+}
+
+function issueSetupToken(staffId: string, ttlMs: number): string {
+  const token = `setup-${uid()}${uid()}`;
+  _setupTokens.set(token, {
+    staffId,
+    expiresAt: Date.now() + ttlMs,
+    usedAt: null,
+  });
+  return token;
+}
+
+/** Expired, spent and unknown are one outcome — distinguishing them leaks. */
+function resolveSetupToken(token: string) {
+  const entry = _setupTokens.get(token);
+  if (!entry || entry.usedAt !== null || entry.expiresAt < Date.now()) return null;
+  const staff = _staff.get(entry.staffId);
+  return staff ? { entry, staff } : null;
+}
+
+function maskTail(value: string, keep = 4): string {
+  if (!value) return "";
+  return `•••• ${value.slice(-keep)}`;
+}
+
+route("POST", /^\/auth\/setup\/verify$/, ({ body }) => {
+  const b = body as SetupVerifyRequest;
+  const found = resolveSetupToken(b.token ?? "");
+  if (!found) {
+    return json(410, { message: "This setup link has expired." });
+  }
+  return json(200, {
+    restaurant_name: _restaurant.name,
+    owner_name: found.staff.name,
+    phone_hint: maskTail(found.staff.phone),
+    email_hint: found.staff.email ? maskTail(found.staff.email, 6) : null,
+  } satisfies SetupVerifyResponse);
+});
+
+route("POST", /^\/auth\/setup\/complete$/, ({ body }) => {
+  const b = body as SetupCompleteRequest;
+  const found = resolveSetupToken(b.token ?? "");
+  if (!found) {
+    return json(410, { message: "This setup link has expired." });
+  }
+  if (!b.password || b.password.length < 10) {
+    return json(422, { message: "password: Must be at least 10 characters." });
+  }
+
+  found.entry.usedAt = Date.now();
+  _staffPasswords.set(found.staff.id, b.password);
+
+  // Same shape as login, so the caller signs in with no second round-trip.
+  return json(200, {
+    access_token: issueAccessToken(found.staff.id),
+    refresh_token: issueRefreshToken(found.staff.id),
+    token_type: "bearer" as const,
+    expires_in: ACCESS_TOKEN_TTL_MS / 1000,
+    user: found.staff,
+    restaurant: _restaurant,
+  } satisfies AdminLoginResponse);
+});
+
+route("POST", /^\/auth\/forgot-password$/, ({ body }) => {
+  const b = body as ForgotPasswordRequest;
+  const raw = (b.identifier ?? "").trim();
+  const phone = tryNormalizePhone(raw);
+  const staff = [..._staff.values()].find(
+    (s) => (phone && s.phone === phone) || (s.email && s.email === raw.toLowerCase()),
+  );
+
+  // Deliberately the same response either way: a 404 here would turn this
+  // endpoint into a way to discover which merchants exist.
+  if (staff) issueSetupToken(staff.id, 60 * 60 * 1000);
+  return json(200, {
+    message: "If that account exists, a reset link is on its way.",
+  });
+});
+
 route("POST", /^\/auth\/login$/, ({ body }) => {
   const b = body as AdminLoginRequest;
-  const staff = [..._staff.values()].find((s) => s.email === b.email);
-  if (!staff || (b.password && b.password !== "password")) {
+  const raw = (b.identifier ?? b.email ?? "").trim();
+  const phone = tryNormalizePhone(raw);
+  const staff = [..._staff.values()].find(
+    (s) => (phone && s.phone === phone) || (s.email && s.email === raw.toLowerCase()),
+  );
+  const expected = staff ? (_staffPasswords.get(staff.id) ?? "password") : null;
+  if (!staff || (b.password && b.password !== expected)) {
     return json(401, { error: "Invalid credentials" });
   }
   return json(200, {
@@ -1988,8 +2096,21 @@ route("GET", /^\/platform\/restaurants\/(.+)$/, ({ path }) => {
 route("POST", /^\/platform\/restaurants$/, ({ body }) => {
   const b = body as import("../types/index").PlatformCreateRestaurantRequest;
   // `owner_name` is intentionally not stored on the restaurant entity — the
-  // real backend uses it (with `owner_email`) to provision the OWNER staff
-  // account for the new tenant. The response surfaces `owner_email` only.
+  // real backend uses it (with the phone) to provision the OWNER staff
+  // account for the new tenant.
+  let ownerPhone: string;
+  try {
+    ownerPhone = normalizePhone(b.owner_phone);
+  } catch {
+    return json(422, {
+      message: "owner_phone: Enter a valid Nigerian phone number",
+    });
+  }
+  // Phone is the account's global identity, so the same owner cannot be
+  // provisioned twice — the real schema enforces this with a unique index.
+  if ([..._staff.values()].some((st) => st.phone === ownerPhone)) {
+    return json(400, { error: "That phone number already has an account" });
+  }
   const newRest: import("../types/index").PlatformRestaurant = {
     id: uid(),
     name: b.name,
@@ -2000,10 +2121,29 @@ route("POST", /^\/platform\/restaurants$/, ({ body }) => {
     subscription_tier: b.subscription_tier,
     is_active: true,
     created_at: now(),
-    owner_email: b.owner_email,
+    owner_phone: ownerPhone,
+    owner_email: b.owner_email ?? null,
     table_count: b.table_count,
     monthly_orders: 0,
   };
+
+  // Provision the OWNER with no credential, exactly as the server does, and
+  // hand back a one-time link instead. Nobody sets a password for them.
+  const ownerId = uid();
+  _staff.set(ownerId, {
+    id: ownerId,
+    name: b.owner_name,
+    phone: ownerPhone,
+    email: b.owner_email ?? null,
+    role: "OWNER",
+    created_at: now(),
+  });
+  const token = issueSetupToken(ownerId, 7 * 24 * 60 * 60 * 1000);
+  newRest.owner_setup_url = `${adminAppUrl()}/setup?token=${token}`;
+  newRest.owner_setup_expires_at = new Date(
+    Date.now() + 7 * 24 * 60 * 60 * 1000,
+  ).toISOString();
+
   _platformRestaurants.push(newRest);
   return json(201, newRest);
 });
@@ -2537,17 +2677,27 @@ route("GET", /^\/admin\/staff$/, () => {
 
 route("POST", /^\/admin\/staff$/, ({ body }) => {
   const b = body as CreateStaffRequest;
-  if (!b.name || !b.email || !b.role) {
+  if (!b.name || !b.phone || !b.role) {
     return json(400, { error: "Missing required fields" });
   }
-  if ([..._staff.values()].some((s) => s.email === b.email)) {
-    return json(400, { error: "Email already exists" });
+
+  // Normalized before the uniqueness check, or 0803… and +234803… would be
+  // stored as two different people who are in fact one.
+  let phone: string;
+  try {
+    phone = normalizePhone(b.phone);
+  } catch {
+    return json(422, { message: "phone: Enter a valid Nigerian phone number" });
+  }
+  if ([..._staff.values()].some((s) => s.phone === phone)) {
+    return json(400, { error: "That phone number already has an account" });
   }
 
   const staff: StaffMember = {
     id: uid(),
     name: b.name,
-    email: b.email,
+    phone,
+    email: b.email ?? null,
     role: b.role,
     created_at: now(),
   };

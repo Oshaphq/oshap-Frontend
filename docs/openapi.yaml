@@ -335,6 +335,38 @@ components:
         available: { type: boolean }
         sort_order: { type: integer }
 
+    SetupVerifyRequest:
+      type: object
+      properties:
+        token: { type: string }
+      required: [token]
+
+    SetupVerifyResponse:
+      type: object
+      properties:
+        restaurant_name: { type: string }
+        owner_name: { type: string }
+        phone_hint:
+          type: string
+          description: Masked to the last few digits, e.g. "**** 4567".
+        email_hint: { type: string, nullable: true }
+      required: [restaurant_name, owner_name, phone_hint]
+
+    SetupCompleteRequest:
+      type: object
+      properties:
+        token: { type: string }
+        password: { type: string, minLength: 10 }
+      required: [token, password]
+
+    ForgotPasswordRequest:
+      type: object
+      properties:
+        identifier:
+          type: string
+          description: Phone or email; the server resolves which by shape.
+      required: [identifier]
+
     Ingredient:
       type: object
       description: >
@@ -912,17 +944,39 @@ components:
       properties:
         id: { type: string, format: uuid }
         name: { type: string }
-        email: { type: string, format: email }
+        phone:
+          type: string
+          description: >
+            Canonical E.164 (+234XXXXXXXXXX) and the account's unique identity.
+            Required because not every member of floor staff has an email
+            address, and inventing one leaves the account unrecoverable.
+        email: { type: string, format: email, nullable: true }
         role: { $ref: "#/components/schemas/Role" }
         created_at: { type: string, format: date-time }
-      required: [id, name, email, role, created_at]
+      required: [id, name, phone, role, created_at]
 
     AdminLoginRequest:
       type: object
       properties:
-        email: { type: string, format: email }
+        identifier:
+          type: string
+          description: >
+            Phone number or email; the server resolves which by shape. Prefer
+            this over `email`, which is kept only as a deprecated alias.
+        email:
+          type: string
+          format: email
+          deprecated: true
+          description: Deprecated - send `identifier`.
         password: { type: string }
-      required: [email]
+        pin: { type: string }
+        restaurant_id:
+          type: string
+          format: uuid
+          description: >
+            Scopes a PIN lookup to one restaurant. Without it a PIN matches
+            across every tenant, so one merchant's PIN could return a token
+            for another's data.
 
     AdminLoginResponse:
       type: object
@@ -968,16 +1022,23 @@ components:
       type: object
       properties:
         name: { type: string }
-        email: { type: string, format: email }
+        phone:
+          type: string
+          description: >
+            Canonical E.164 (+234XXXXXXXXXX) and the account's unique identity.
+            Required because not every member of floor staff has an email
+            address, and inventing one leaves the account unrecoverable.
+        email: { type: string, format: email, nullable: true }
         role: { $ref: "#/components/schemas/Role" }
         password: { type: string }
-      required: [name, email, role]
+      required: [name, phone, role]
 
     UpdateStaffRequest:
       type: object
       properties:
         name: { type: string }
-        email: { type: string, format: email }
+        phone: { type: string, description: Canonical E.164. }
+        email: { type: string, format: email, nullable: true }
         role: { $ref: "#/components/schemas/Role" }
         password: { type: string }
 
@@ -1122,7 +1183,10 @@ components:
       properties:
         name: { type: string }
         owner_name: { type: string }
-        owner_email: { type: string, format: email }
+        owner_phone:
+          type: string
+          description: Required - the owner is reached here and may have no email.
+        owner_email: { type: string, format: email, nullable: true }
         subscription_tier: { $ref: "#/components/schemas/SubscriptionTier" }
         table_count: { type: integer }
         bank_name: { type: string }
@@ -2668,6 +2732,71 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/RecipeResponse"
+
+  /auth/setup/verify:
+    post:
+      tags: [Auth]
+      summary: Check a setup link before showing a form
+      description: >
+        Unknown, expired and already-used tokens all return 410 with the same
+        message. Distinguishing them would let a holder probe which links exist.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SetupVerifyRequest"
+      responses:
+        "200":
+          description: Enough to recognise the account, with contact masked
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SetupVerifyResponse"
+        "410":
+          description: Expired, spent or unknown
+
+  /auth/setup/complete:
+    post:
+      tags: [Auth]
+      summary: Set the owner's password and claim the account
+      description: >
+        Returns the same shape as POST /auth/login, so the caller signs the
+        owner in without a second round-trip. The token is single-use.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SetupCompleteRequest"
+      responses:
+        "200":
+          description: Signed in
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AdminLoginResponse"
+        "410":
+          description: Expired, spent or unknown
+        "422":
+          description: Password fails policy
+
+  /auth/forgot-password:
+    post:
+      tags: [Auth]
+      summary: Request a reset link
+      description: >
+        Always 200, whether or not the identifier matched — a 404 here would
+        turn the endpoint into a way to enumerate merchants.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ForgotPasswordRequest"
+      responses:
+        "200":
+          description: Accepted, regardless of whether the account exists
 
   /admin/modifier-groups:
     get:
