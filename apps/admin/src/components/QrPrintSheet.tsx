@@ -2,8 +2,14 @@ import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import { buildTableUrl, renderQrSvg } from "../utils/qr";
 
+/** A table's unique id paired with the name printed under its code. */
+export interface QrPrintTable {
+  uuid: string;
+  name: string;
+}
+
 export interface QrPrintRequest {
-  tableIds: string[];
+  tables: QrPrintTable[];
   restaurantName: string;
   logoUrl?: string | null;
 }
@@ -24,7 +30,7 @@ interface Props {
  * admin's current theme.
  */
 export default function QrPrintSheet({ request, onDone }: Props) {
-  const [codes, setCodes] = useState<Array<{ tableId: string; svg: string }>>([]);
+  const [codes, setCodes] = useState<Array<{ name: string; svg: string }>>([]);
 
   useEffect(() => {
     if (!request) {
@@ -35,10 +41,11 @@ export default function QrPrintSheet({ request, onDone }: Props) {
     let cancelled = false;
 
     (async () => {
+      // The code encodes the uuid; the name is only ever printed beneath it.
       const generated = await Promise.all(
-        request.tableIds.map(async (tableId) => ({
-          tableId,
-          svg: await renderQrSvg(buildTableUrl(tableId)),
+        request.tables.map(async (table) => ({
+          name: table.name,
+          svg: await renderQrSvg(buildTableUrl(table.uuid)),
         })),
       );
       if (!cancelled) setCodes(generated);
@@ -52,7 +59,7 @@ export default function QrPrintSheet({ request, onDone }: Props) {
   // Print only once the codes are actually in the DOM — printing early gives
   // a sheet of empty boxes.
   useEffect(() => {
-    if (!request || codes.length !== request.tableIds.length || codes.length === 0) {
+    if (!request || codes.length !== request.tables.length || codes.length === 0) {
       return;
     }
 
@@ -80,9 +87,9 @@ export default function QrPrintSheet({ request, onDone }: Props) {
         gap: "8mm",
       }}
     >
-      {codes.map(({ tableId, svg }) => (
+      {codes.map(({ name, svg }) => (
         <div
-          key={tableId}
+          key={name}
           className="oshap-qr-card"
           style={{
             border: "1.5px solid #111111",
@@ -123,7 +130,7 @@ export default function QrPrintSheet({ request, onDone }: Props) {
           />
 
           <div style={{ fontSize: "28pt", fontWeight: 800, lineHeight: 1 }}>
-            {tableId}
+            {name}
           </div>
 
           <div style={{ fontSize: "11pt", fontWeight: 600 }}>Scan to order</div>

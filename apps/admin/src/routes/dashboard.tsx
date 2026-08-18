@@ -181,7 +181,7 @@ export default function DashboardPage() {
             >
               <div className="flex items-center justify-between">
                 <span className="font-display text-display-h3 font-semibold text-primary-text">
-                  {table.id}
+                  {table.table_id}
                 </span>
                 {isPending ? (
                   <span className="px-s py-xs rounded-4xl font-bold text-caption-xs uppercase tracking-wider whitespace-nowrap bg-warning text-on-warning">

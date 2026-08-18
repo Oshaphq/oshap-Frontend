@@ -111,7 +111,7 @@ describe("mock API — restaurant seed resilience", () => {
     const { syncFromStorage } = await import("./mock");
     syncFromStorage();
 
-    const res = await mockRequest("/table/T1", "GET", null, q(), false);
+    const res = await mockRequest("/table/tbl-t1", "GET", null, q(), false);
     const restaurant = (res.body as {
       restaurant: { address?: string | null; logo_url?: string | null };
     }).restaurant;
@@ -209,7 +209,7 @@ describe("mock API — bank accounts", () => {
   const URL = "/admin/settings/bank-accounts";
 
   it("serves ranked active accounts on the public table payload", async () => {
-    const res = await mockRequest("/table/T1", "GET", null, q(), false);
+    const res = await mockRequest("/table/tbl-t1", "GET", null, q(), false);
     const accounts = (res.body as { bank_accounts: Array<{ is_default: boolean }> })
       .bank_accounts;
 
@@ -242,7 +242,7 @@ describe("mock API — bank accounts", () => {
 
     await mockRequest(`${URL}/${target.id}`, "PATCH", { is_active: false }, q(), true);
 
-    const table = await mockRequest("/table/T1", "GET", null, q(), false);
+    const table = await mockRequest("/table/tbl-t1", "GET", null, q(), false);
     const guestIds = (table.body as { bank_accounts: Array<{ id: string }> }).bank_accounts.map(
       (a) => a.id,
     );
@@ -314,7 +314,7 @@ describe("mock API — payment feedback loop", () => {
     expect(after.failure_count).toBe((before.failure_count ?? 0) + 1);
 
     // The food was served, so the order returns to unpaid rather than to the kitchen.
-    const table = await mockRequest("/table/T7", "GET", null, q(), false);
+    const table = await mockRequest("/table/tbl-t7", "GET", null, q(), false);
     expect((table.body as { unpaid_order: unknown }).unpaid_order).toBeTruthy();
   });
 
@@ -497,7 +497,7 @@ describe("mock API — cash payments", () => {
       true,
     );
 
-    const table = await mockRequest("/table/T12", "GET", null, q(), false);
+    const table = await mockRequest("/table/tbl-t12", "GET", null, q(), false);
     expect((table.body as { unpaid_order: unknown }).unpaid_order).toBeNull();
   });
 
@@ -898,7 +898,7 @@ describe("mock API — combined bill", () => {
     }
 
     const res = await mockRequest(
-      "/table/T10",
+      "/table/tbl-t10",
       "GET",
       null,
       q(`device_token=${device}`),
@@ -1309,7 +1309,7 @@ describe("mock API — checkout estimate matches the order", () => {
     // The point of the whole exercise: what checkout shows a guest before
     // they commit must equal what the order comes back with. Any drift here
     // is a guest agreeing to one number and being charged another.
-    const table = await mockRequest("/table/T9", "GET", null, q(), false);
+    const table = await mockRequest("/table/tbl-t9", "GET", null, q(), false);
     const { restaurant } = table.body as {
       restaurant: { vat_rate?: number; service_charge_rate?: number };
     };
@@ -1353,7 +1353,7 @@ describe("mock API — checkout estimate matches the order", () => {
   });
 
   it("predicts correctly once modifiers move the line price", async () => {
-    const table = await mockRequest("/table/T10", "GET", null, q(), false);
+    const table = await mockRequest("/table/tbl-t10", "GET", null, q(), false);
     const { restaurant } = table.body as {
       restaurant: { vat_rate?: number; service_charge_rate?: number };
     };
@@ -1577,5 +1577,57 @@ describe("mock API — owner setup", () => {
       true,
     );
     expect(duplicate.status).toBe(400);
+  });
+});
+
+// Verified against the deployed API on 18 Aug 2026: the two identifiers are
+// NOT interchangeable, and mixing them up fails silently in exactly one
+// direction. Pinned here so the mock can't quietly start accepting both.
+describe("mock API — table identity is not interchangeable", () => {
+  it("resolves a table path by uuid, never by name", async () => {
+    const byUuid = await mockRequest("/table/tbl-t1", "GET", null, q(), false);
+    expect(byUuid.status).toBe(200);
+
+    // The real server returns 422 here (uuid path parsing); the mock 404s.
+    // Either way it must not succeed — a name in the path identifies nothing,
+    // because every restaurant calls a table "T1".
+    const byName = await mockRequest("/table/T1", "GET", null, q(), false);
+    expect(byName.status).toBeGreaterThanOrEqual(400);
+  });
+
+  it("takes the name in an order body, never the uuid", async () => {
+    const byName = await mockRequest(
+      "/orders",
+      "POST",
+      {
+        table: "T2",
+        restaurant_id: HOME_RESTAURANT,
+        items: [{ name: "Coca-Cola", qty: 1, price: 50000 }],
+      },
+      q(),
+      false,
+    );
+    expect(byName.status).toBe(200);
+
+    const byUuid = await mockRequest(
+      "/orders",
+      "POST",
+      {
+        table: "tbl-t2",
+        restaurant_id: HOME_RESTAURANT,
+        items: [{ name: "Coca-Cola", qty: 1, price: 50000 }],
+      },
+      q(),
+      false,
+    );
+    expect(byUuid.status).toBe(404);
+  });
+
+  it("calls a waiter by uuid, not by name", async () => {
+    const ok = await mockRequest("/table/tbl-t3/call-waiter", "POST", {}, q(), false);
+    expect(ok.status).toBe(200);
+
+    const bad = await mockRequest("/table/T3/call-waiter", "POST", {}, q(), false);
+    expect(bad.status).toBe(404);
   });
 });

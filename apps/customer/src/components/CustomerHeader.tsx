@@ -43,6 +43,11 @@ export default function CustomerHeader({
 
   const address = tableQuery.data?.restaurant?.address;
 
+  // The URL carries the table's uuid, because a name like "T1" repeats across
+  // restaurants and identifies nothing. The name to show comes back with the
+  // table — falling back to the raw param would print a uuid at the guest.
+  const tableName = tableQuery.data?.table_id;
+
   return (
     <header className="sticky top-0 z-40 flex items-center justify-between gap-s p-md bg-surface border-b border-outline-variant">
       <div className="flex items-center gap-s min-w-0">
@@ -86,7 +91,7 @@ export default function CustomerHeader({
 
       <div className="flex items-center gap-s shrink-0">
         <span className="px-s py-xs rounded-4xl border border-primary text-primary text-caption-md font-semibold whitespace-nowrap">
-          Table {tableId}
+          Table {tableName ?? "…"}
         </span>
         <NotificationBell />
         {rightSlot}

@@ -605,7 +605,13 @@ components:
       type: object
       properties:
         id: { type: string, format: uuid }
-        table: { type: string }
+        table:
+          type: string
+          description: >
+            The table's NAME ("T1"), not its uuid. Note the asymmetry with
+            `GET /table/{table_id}`, which takes the uuid: path params identify
+            the table, body fields record the label the order is filed under.
+            Sending a uuid here returns 404.
         items:
           type: array
           items: { $ref: "#/components/schemas/OrderItem" }
@@ -622,7 +628,16 @@ components:
     AdminTableStatus:
       type: object
       properties:
-        id: { type: string }
+        id:
+          type: string
+          format: uuid
+          description: >
+            The table's globally unique id. This is what `GET /table/{table_id}`
+            resolves and what a QR code encodes — table *names* repeat across
+            restaurants, so a name alone identifies nothing.
+        table_id:
+          type: string
+          description: The name staff read ("T1"). Unique only within a restaurant.
         status: { $ref: "#/components/schemas/TableStatus" }
         unpaidTotal: { type: integer }
         pendingTotal: { type: integer }
@@ -668,7 +683,13 @@ components:
     CreateOrderRequest:
       type: object
       properties:
-        table: { type: string }
+        table:
+          type: string
+          description: >
+            The table's NAME ("T1"), not its uuid. Note the asymmetry with
+            `GET /table/{table_id}`, which takes the uuid: path params identify
+            the table, body fields record the label the order is filed under.
+            Sending a uuid here returns 404.
         restaurant_id: { type: string, format: uuid }
         items:
           type: array
@@ -741,7 +762,11 @@ components:
     SessionStartRequest:
       type: object
       properties:
-        tableId: { type: string }
+        tableId:
+          type: string
+          description: >
+            The table's NAME, not its uuid — see the note on
+            `CreateOrderRequest.table`. A uuid here returns 404.
         action: { type: string, enum: [START] }
         customer_name: { type: string }
         unclaimed_order_ids:
@@ -752,7 +777,11 @@ components:
     SessionJoinRequest:
       type: object
       properties:
-        tableId: { type: string }
+        tableId:
+          type: string
+          description: >
+            The table's NAME, not its uuid — see the note on
+            `CreateOrderRequest.table`. A uuid here returns 404.
         action: { type: string, enum: [JOIN] }
         pin: { type: string }
         customer_name: { type: string }
@@ -1251,11 +1280,17 @@ paths:
     get:
       tags: [Tables]
       summary: Get table info with active orders scoped to device/session
+      description: >
+        `id` is the table's globally unique uuid, not its name. Table names
+        repeat across restaurants, so a name would resolve to whichever table
+        the server matched first — potentially another restaurant's, with their
+        bank accounts attached. A name is rejected with 422.
       parameters:
         - name: id
           in: path
           required: true
-          schema: { type: string }
+          schema: { type: string, format: uuid }
+          description: The table's uuid, as encoded in its QR code.
         - name: device_token
           in: query
           schema: { type: string }
@@ -1493,6 +1528,9 @@ paths:
         - name: table_id
           in: query
           schema: { type: string }
+          description: >
+            The table's NAME, not its uuid. A uuid returns 200 with an empty
+            list rather than an error, so a mix-up here fails silently.
         - name: device_token
           in: query
           schema: { type: string }

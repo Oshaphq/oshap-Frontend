@@ -66,3 +66,29 @@ describe("qrFileName", () => {
     expect(qrFileName("///")).toBe("table-table");
   });
 });
+
+// The whole point of the uuid change: a table's *name* repeats across
+// restaurants, so a code encoding the name resolves to whichever table the
+// server finds first — possibly another restaurant's, with their bank details.
+describe("buildTableUrl encodes identity, not the label", () => {
+  const UUID = "57e744f2-9ff8-4d18-b05b-74b6d86f3653";
+
+  it("puts the table's unique id in the URL", () => {
+    expect(buildTableUrl(UUID, "https://order.oshap.app")).toBe(
+      `https://order.oshap.app/menu?table=${UUID}`,
+    );
+  });
+
+  it("never contains the human label", () => {
+    const url = buildTableUrl(UUID, "https://order.oshap.app");
+    expect(url).not.toContain("T1");
+    expect(url).not.toContain("VIP");
+  });
+
+  it("produces a distinct URL per table even when names collide", () => {
+    // Two restaurants both calling a table "T1" must not share a code.
+    const a = buildTableUrl("aaaaaaaa-0000-4000-8000-000000000001");
+    const b = buildTableUrl("bbbbbbbb-0000-4000-8000-000000000002");
+    expect(a).not.toBe(b);
+  });
+});

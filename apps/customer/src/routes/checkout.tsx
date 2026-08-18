@@ -44,14 +44,18 @@ function CheckoutView({ tableId }: { tableId: string }) {
 
   const handleConfirmOrder = async () => {
     const restaurantId = tableQuery.data?.restaurant?.id;
-    if (!restaurantId) {
+    // The URL carries the table's uuid, but POST /orders records the order
+    // against the table's NAME — the two endpoints take different
+    // identifiers, and sending the uuid here returns 404.
+    const tableName = tableQuery.data?.table_id;
+    if (!restaurantId || !tableName) {
       toast.error("Could not load table details. Please refresh and try again.");
       return;
     }
 
     try {
       const { order_id } = await createOrder.mutateAsync({
-        table: tableId,
+        table: tableName,
         restaurant_id: restaurantId,
         // `price` is the dish's BASE price. The server adds each option's
         // delta itself, so sending unitPrice() here would charge every

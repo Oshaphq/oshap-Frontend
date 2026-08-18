@@ -29,9 +29,15 @@ export function isLocalOrigin(origin = getCustomerOrigin()): boolean {
 /**
  * The URL a guest lands on after scanning. Mirrors the customer app's routing
  * (`?table=` on /menu) — see apps/customer/src/App.tsx.
+ *
+ * Takes the table's **unique id**, never its name. Every restaurant names its
+ * tables T1, T2, T3, so a code encoding the name resolves to whichever table
+ * the server happens to find first — potentially another restaurant's, with
+ * their bank details attached. `GET /table/{id}` now requires the uuid, so a
+ * name here produces a 422 on every scan.
  */
-export function buildTableUrl(tableId: string, origin = getCustomerOrigin()): string {
-  return `${origin}/menu?table=${encodeURIComponent(tableId)}`;
+export function buildTableUrl(tableUuid: string, origin = getCustomerOrigin()): string {
+  return `${origin}/menu?table=${encodeURIComponent(tableUuid)}`;
 }
 
 /**

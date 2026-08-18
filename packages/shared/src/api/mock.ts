@@ -474,7 +474,40 @@ const INITIAL_TABLES = [
   "T1", "T2", "T3", "T4", "T5", "T6",
   "T7", "T8", "T9", "T10", "T11", "T12", "T-G37",
 ];
-let _tables: string[] = [...INITIAL_TABLES];
+/**
+ * Tables carry a uuid as well as a name, mirroring the server. The name repeats
+ * across restaurants; only the uuid identifies a table, and it is what a QR
+ * encodes and what `GET /table/{id}` resolves.
+ */
+interface MockTable {
+  uuid: string;
+  name: string;
+}
+
+let _tables: MockTable[] = INITIAL_TABLES.map((name) => ({
+  uuid: `tbl-${name.toLowerCase().replace(/[^a-z0-9]+/g, "-")}`,
+  name,
+}));
+
+/**
+ * The server takes different identifiers in different places, and the mock
+ * mirrors that exactly rather than accepting whichever it is given.
+ *
+ *   GET  /table/{id}, call-waiter, request-pos   -> the uuid   (path param)
+ *   POST /orders {table}, POST /session {tableId} -> the name  (body field)
+ *
+ * Verified against the deployed API: a name in the path returns 422, and a
+ * uuid in the body returns 404. Accepting both here would let a wrong
+ * identifier pass every local test and fail only in production, which is the
+ * failure mode this whole change exists to remove.
+ */
+function findTableByUuid(uuid: string): MockTable | undefined {
+  return _tables.find((t) => t.uuid === uuid);
+}
+
+function findTableByName(name: string): MockTable | undefined {
+  return _tables.find((t) => t.name === name);
+}
 
 // ---------------------------------------------------------------------------
 // State — persisted to localStorage so it survives page refresh AND so tabs
@@ -530,7 +563,7 @@ interface PersistedState {
   ingredients?: Ingredient[];
   movements?: StockMovement[];
   recipes?: Record<string, Array<{ ingredient_id: string; qty_per_serving: number }>>;
-  tables?: string[];
+  tables?: Array<{ uuid: string; name: string }>;
   orders?: Array<[string, StoredOrder]>;
   payments?: Array<[string, Payment]>;
   sessions?: Array<[string, TableSession]>;
@@ -730,13 +763,17 @@ route("GET", /^\/menu$/, ({ query }) => {
 // -------------------- Customer: Tables --------------------
 
 route("GET", /^\/table\/(.+)$/, ({ path, query }) => {
-  const tableId = path.split("/table/")[1]!;
+  const requested = path.split("/table/")[1]!;
   const deviceToken = query.get("device_token") ?? undefined;
   const sessionId = query.get("session_id") ?? undefined;
 
-  if (!_tables.includes(tableId)) {
+  // The URL carries the table's uuid; orders are stored against its name, so
+  // resolve once here rather than comparing the two forms downstream.
+  const table = findTableByUuid(requested);
+  if (!table) {
     return json(404, { error: "Table not found" });
   }
+  const tableId = table.name;
 
   const tableOrders = [..._orders.values()].filter(
     (o) =>
@@ -808,7 +845,7 @@ route("GET", /^\/table\/(.+)$/, ({ path, query }) => {
 
 route("POST", /^\/table\/(.+)\/call-waiter$/, ({ path }) => {
   const tableId = decodeURIComponent(path.split("/table/")[1]!.replace(/\/call-waiter$/, ""));
-  if (!_tables.includes(tableId)) {
+  if (!findTableByUuid(tableId)) {
     return json(404, { error: "Table not found" });
   }
   return json(200, { success: true as const });
@@ -820,7 +857,7 @@ route("POST", /^\/table\/(.+)\/request-pos$/, ({ path, body }) => {
   const tableId = decodeURIComponent(
     path.split("/table/")[1]!.replace(/\/request-pos$/, ""),
   );
-  if (!_tables.includes(tableId)) {
+  if (!findTableByUuid(tableId)) {
     return json(404, { error: "Table not found" });
   }
 
@@ -889,6 +926,10 @@ function priceOrder(subtotal: number, discount = 0, tip = 0) {
 
 route("POST", /^\/orders$/, ({ body }) => {
   const b = body as CreateOrderRequest;
+  // The body carries the table's NAME, not its uuid — see findTableByName.
+  if (b.table && !findTableByName(b.table)) {
+    return json(404, { error: "Table not found" });
+  }
   if (!b.table || !b.restaurant_id || !b.items?.length) {
     return json(400, { error: "Missing required fields" });
   }
@@ -1446,13 +1487,14 @@ route("GET", /^\/admin\/tables$/, ({ query }) => {
     ["CREATED", "PREPARING", "READY", "PAYMENT_PENDING"].includes(o.status),
   );
 
-  const tables = _tables.map((tableId: string) => {
+  const tables = _tables.map(({ uuid, name: tableId }) => {
     const tOrders = allOrders.filter((o) => o.table_id === tableId);
     const unpaid = tOrders.filter((o) => ["CREATED", "PREPARING", "READY"].includes(o.status));
     const pending = tOrders.filter((o) => o.status === "PAYMENT_PENDING");
 
     return {
-      id: tableId,
+      id: uuid,
+      table_id: tableId,
       status: "OPEN" as const,
       unpaidTotal: unpaid.reduce((s, o) => s + o.total, 0),
       pendingTotal: pending.reduce((s, o) => s + o.total, 0),
@@ -1468,20 +1510,20 @@ route("POST", /^\/admin\/tables$/, ({ body }) => {
   const b = body as { id?: string };
   const tableId = (b.id ?? "").trim();
   if (!tableId) return json(400, { error: "Table ID is required" });
-  if (_tables.includes(tableId)) return json(409, { error: "Table already exists" });
-  _tables.push(tableId);
+  if (findTableByName(tableId)) return json(409, { error: "Table already exists" });
+  _tables.push({ uuid: uid(), name: tableId });
   syncToStorage();
   return json(201, { success: true as const, table_id: tableId });
 });
 
 route("DELETE", /^\/admin\/tables\/(.+)$/, ({ path }) => {
   const tableId = decodeURIComponent(path.replace(/^\/admin\/tables\//, ""));
-  if (!_tables.includes(tableId)) return json(404, { error: "Table not found" });
+  if (!findTableByName(tableId)) return json(404, { error: "Table not found" });
   const activeOrders = [..._orders.values()].filter(
     (o) => o.table_id === tableId && ["CREATED", "PREPARING", "READY", "PAYMENT_PENDING"].includes(o.status),
   );
   if (activeOrders.length > 0) return json(409, { error: "Cannot delete a table with active orders" });
-  _tables = _tables.filter((t) => t !== tableId);
+  _tables = _tables.filter((t) => t.uuid !== tableId && t.name !== tableId);
   syncToStorage();
   return json(200, { success: true as const, table_id: tableId });
 });
