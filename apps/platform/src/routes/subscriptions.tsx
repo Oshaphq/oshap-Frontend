@@ -4,15 +4,36 @@ import { Link } from "react-router";
 import { TIER_MONTHLY_KOBO, TIER_ORDER, tierPriceLabel } from "../tiers";
 
 const TIER_FEATURES: Record<SubscriptionTier, string[]> = {
-  FREE: ["Up to 5 tables", "Basic menu", "Mock mode only"],
-  STARTER: ["Up to 15 tables", "Full menu CRUD", "FCM notifications", "History & analytics"],
-  PRO: ["Up to 30 tables", "All Starter features", "Multi-branch view", "Priority support"],
-  ENTERPRISE: ["Unlimited tables", "All Pro features", "Dedicated SLA", "White-label option"],
+  LITE: [
+    "QR Code Menu & Paperless digital menu",
+    "Live menu & price updates",
+    "Instant price controls & Out of Stock toggle",
+    "Up to 3 active staff accounts",
+  ],
+  STANDARD: [
+    "Everything in Lite",
+    "BYOD table & Waiter phone ordering",
+    "Customer self-ordering",
+    "Digital Kitchen Dashboard & KOT",
+    "Manual payment ledger (Transfer/POS/Cash)",
+  ],
+  PRO: [
+    "Everything in Standard",
+    "Inventory management & stock depletion",
+    "End-of-shift Z-reports & reconciliation",
+    "Sales summaries & operational analytics",
+  ],
+  ENTERPRISE: [
+    "Multi-branch master dashboard",
+    "Consolidated financial reporting",
+    "Branch-level performance & franchise mgmt",
+    "Branch settlement & custom integrations",
+  ],
 };
 
 const TIER_COLORS: Record<SubscriptionTier, string> = {
-  FREE: "bg-surface-container-high text-outline border-outline-variant",
-  STARTER: "bg-secondary-container text-on-secondary-container border-secondary",
+  LITE: "bg-surface-container-high text-outline border-outline-variant",
+  STANDARD: "bg-secondary-container text-on-secondary-container border-secondary",
   PRO: "bg-primary-container text-on-primary-container border-primary",
   ENTERPRISE: "bg-tertiary-container text-on-tertiary-container border-tertiary",
 };
@@ -26,7 +47,7 @@ export default function SubscriptionsPage() {
       acc[tier] = restaurants.filter((r) => r.subscription_tier === tier);
       return acc;
     },
-    { FREE: [], STARTER: [], PRO: [], ENTERPRISE: [] },
+    { LITE: [], STANDARD: [], PRO: [], ENTERPRISE: [] },
   );
 
   const mrr = TIER_ORDER.reduce((sum, tier) => {
@@ -56,15 +77,15 @@ export default function SubscriptionsPage() {
           <span className="font-display text-display-h3 font-semibold text-primary-text">{formatCurrency(arr)}</span>
         </div>
         <div className="bg-surface-container-low rounded-md p-md flex flex-col gap-xs">
-          <span className="text-label-l4 font-semibold text-secondary-text uppercase tracking-wider">Paying</span>
+          <span className="text-label-l4 font-semibold text-secondary-text uppercase tracking-wider">Active</span>
           <span className="font-display text-display-h3 font-semibold text-primary-text">
-            {restaurants.filter((r) => r.is_active && r.subscription_tier !== "FREE").length}
+            {restaurants.filter((r) => r.is_active).length}
           </span>
         </div>
         <div className="bg-surface-container-low rounded-md p-md flex flex-col gap-xs">
-          <span className="text-label-l4 font-semibold text-secondary-text uppercase tracking-wider">Free Tier</span>
+          <span className="text-label-l4 font-semibold text-secondary-text uppercase tracking-wider">Lite Tier</span>
           <span className="font-display text-display-h3 font-semibold text-secondary-text">
-            {byTier.FREE.length}
+            {byTier.LITE.length}
           </span>
         </div>
       </div>

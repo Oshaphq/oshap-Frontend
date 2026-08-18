@@ -3,11 +3,11 @@ import { Link } from "react-router";
 import { formatPhone, usePlatformRestaurants } from "@oshap/shared";
 import type { SubscriptionTier } from "@oshap/shared";
 
-const TIER_ORDER: SubscriptionTier[] = ["FREE", "STARTER", "PRO", "ENTERPRISE"];
+const TIER_ORDER: SubscriptionTier[] = ["LITE", "STANDARD", "PRO", "ENTERPRISE"];
 
 const TIER_COLORS: Record<SubscriptionTier, string> = {
-  FREE: "bg-surface-container-high text-outline",
-  STARTER: "bg-secondary-container text-on-secondary-container",
+  LITE: "bg-surface-container-high text-outline",
+  STANDARD: "bg-secondary-container text-on-secondary-container",
   PRO: "bg-primary-container text-on-primary-container",
   ENTERPRISE: "bg-tertiary-container text-on-tertiary-container",
 };

@@ -15,16 +15,16 @@ import type { SubscriptionTier } from "@oshap/shared";
  * disagree.
  */
 export const TIER_MONTHLY_KOBO: Record<SubscriptionTier, number> = {
-  FREE: 0,
-  STARTER: 990_000,
-  PRO: 2_490_000,
-  ENTERPRISE: 7_990_000,
+  LITE: 800_000,
+  STANDARD: 1_800_000,
+  PRO: 3_500_000,
+  ENTERPRISE: 10_000_000,
 };
 
 /** Cheapest first — the order tiers are listed and filtered in. */
 export const TIER_ORDER: SubscriptionTier[] = [
-  "FREE",
-  "STARTER",
+  "LITE",
+  "STANDARD",
   "PRO",
   "ENTERPRISE",
 ];

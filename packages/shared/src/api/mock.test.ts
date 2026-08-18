@@ -1402,7 +1402,7 @@ describe("mock API — owner setup", () => {
         name,
         owner_name: "Tunde A.",
         owner_phone: phone,
-        subscription_tier: "STARTER",
+        subscription_tier: "STANDARD",
         table_count: 4,
       },
       q(),

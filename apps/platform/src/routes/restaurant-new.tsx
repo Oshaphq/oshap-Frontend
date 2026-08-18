@@ -23,7 +23,7 @@ const EMPTY: FormState = {
   owner_name: "",
   owner_phone: "",
   owner_email: "",
-  subscription_tier: "STARTER",
+  subscription_tier: "LITE",
   table_count: "10",
   bank_name: "",
   account_number: "",
