@@ -198,6 +198,19 @@ components:
         account_number: { type: string, nullable: true }
         account_name: { type: string, nullable: true }
         whatsapp_number: { type: string, nullable: true }
+        vat_rate:
+          type: integer
+          minimum: 0
+          maximum: 10000
+          description: >
+            Integer basis points, not percent - 750 is 7.5%. Omit to leave the
+            existing rate unchanged. A restaurant with no rate set charges no
+            VAT at all, silently.
+        service_charge_rate:
+          type: integer
+          minimum: 0
+          maximum: 10000
+          description: Integer basis points, as above.
 
     MenuItem:
       type: object

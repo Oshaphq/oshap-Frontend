@@ -4,6 +4,7 @@ import {
   useAdminUpdateSettings, 
   useAdminUploadSettingsImage 
 } from "@oshap/shared/hooks";
+import { basisPointsToPercent, percentToBasisPoints } from "@oshap/shared";
 import { PrimaryButton, toast } from "@oshap/shared/ui";
 import { useAuth } from "../../context/AuthContext";
 import BankAccountsSection from "../../components/BankAccountsSection";
@@ -22,6 +23,10 @@ export default function GeneralSettings() {
     address: "",
     operating_hours: "",
     whatsapp_number: "",
+    // Held as the percentages a merchant types; converted to basis points on
+    // save, since that is what the API stores.
+    vat_rate: "",
+    service_charge_rate: "",
   });
 
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -35,6 +40,14 @@ export default function GeneralSettings() {
         address: settings.address || "",
         operating_hours: settings.operating_hours || "",
         whatsapp_number: settings.whatsapp_number || "",
+        vat_rate:
+          settings.vat_rate == null
+            ? ""
+            : String(basisPointsToPercent(settings.vat_rate)),
+        service_charge_rate:
+          settings.service_charge_rate == null
+            ? ""
+            : String(basisPointsToPercent(settings.service_charge_rate)),
       });
     }
   }, [settings]);
@@ -44,7 +57,27 @@ export default function GeneralSettings() {
     setForm((prev) => ({ ...prev, [name]: value }));
   };
 
+  /** "" means leave it alone; a number means set it. */
+  const rateToBps = (value: string): number | undefined => {
+    const trimmed = value.trim();
+    if (trimmed === "") return undefined;
+    const percent = Number(trimmed);
+    return Number.isFinite(percent) ? percentToBasisPoints(percent) : undefined;
+  };
+
+  const invalidRate = (value: string) => {
+    const trimmed = value.trim();
+    if (trimmed === "") return false;
+    const percent = Number(trimmed);
+    return !Number.isFinite(percent) || percent < 0 || percent > 100;
+  };
+
   const handleSave = () => {
+    if (invalidRate(form.vat_rate) || invalidRate(form.service_charge_rate)) {
+      toast.error("Tax rates must be a percentage between 0 and 100.");
+      return;
+    }
+
     updateSettings.mutate(
       {
         name: form.name,
@@ -53,6 +86,8 @@ export default function GeneralSettings() {
         address: form.address || null,
         operating_hours: form.operating_hours || null,
         whatsapp_number: form.whatsapp_number || null,
+        vat_rate: rateToBps(form.vat_rate),
+        service_charge_rate: rateToBps(form.service_charge_rate),
       },
       {
         onSuccess: () => {
@@ -157,6 +192,41 @@ export default function GeneralSettings() {
                 className={inputClass}
               />
             </div>
+
+            {/* Until these are set a restaurant charges neither, silently —
+                the totals simply come out lower than they should and nothing
+                anywhere reports a problem. */}
+            <div className="grid grid-cols-2 gap-md">
+              <div>
+                <label className={labelClass}>VAT (%)</label>
+                <input
+                  type="text"
+                  inputMode="decimal"
+                  name="vat_rate"
+                  value={form.vat_rate}
+                  onChange={handleChange}
+                  placeholder="7.5"
+                  className={inputClass}
+                />
+              </div>
+              <div>
+                <label className={labelClass}>Service charge (%)</label>
+                <input
+                  type="text"
+                  inputMode="decimal"
+                  name="service_charge_rate"
+                  value={form.service_charge_rate}
+                  onChange={handleChange}
+                  placeholder="5"
+                  className={inputClass}
+                />
+              </div>
+            </div>
+            <p className="text-caption-xs text-secondary-text -mt-s">
+              Added to every bill and shown to guests as separate lines. Leave
+              blank to charge neither. VAT applies after any discount and
+              includes the service charge in its base.
+            </p>
           </div>
           
           <div className="w-full sm:w-40 flex flex-col items-start gap-s">

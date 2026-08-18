@@ -1,5 +1,10 @@
 import { describe, it, expect } from "vitest";
-import { applyRate, computeOrderTotals } from "./pricing";
+import {
+  applyRate,
+  basisPointsToPercent,
+  computeOrderTotals,
+  percentToBasisPoints,
+} from "./pricing";
 
 // These pin the client to the backend's `compute_order_totals`. If the server
 // changes its arithmetic, a guest agrees to one figure at checkout and is
@@ -89,5 +94,32 @@ describe("computeOrderTotals", () => {
     for (const value of Object.values(totals)) {
       expect(Number.isInteger(value)).toBe(true);
     }
+  });
+});
+
+describe("percent <-> basis points", () => {
+  it("converts the rates a Nigerian merchant actually types", () => {
+    expect(percentToBasisPoints(7.5)).toBe(750);
+    expect(percentToBasisPoints(5)).toBe(500);
+    expect(percentToBasisPoints(10)).toBe(1000);
+    expect(percentToBasisPoints(0)).toBe(0);
+  });
+
+  it("round-trips without drift", () => {
+    for (const percent of [0, 2.5, 5, 7.5, 10, 12.5, 15]) {
+      expect(basisPointsToPercent(percentToBasisPoints(percent))).toBe(percent);
+    }
+  });
+
+  it("rounds to whole basis points rather than storing a float", () => {
+    // 7.499% is not representable; storing it as a float would drift VAT by a
+    // kobo on large bills and never be traced back.
+    expect(percentToBasisPoints(7.499)).toBe(750);
+    expect(Number.isInteger(percentToBasisPoints(3.333))).toBe(true);
+  });
+
+  it("feeds applyRate correctly end to end", () => {
+    // ₦1,000 at a merchant-typed 7.5% is ₦75.
+    expect(applyRate(100_000, percentToBasisPoints(7.5))).toBe(7_500);
   });
 });
