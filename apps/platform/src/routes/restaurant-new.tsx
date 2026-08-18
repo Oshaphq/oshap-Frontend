@@ -1,17 +1,10 @@
 import { useState } from "react";
+import { TIER_ORDER, tierPriceLabel } from "../tiers";
 import { useNavigate } from "react-router";
 import { formatPhone, tryNormalizePhone, usePlatformCreateRestaurant } from "@oshap/shared";
 import type { SubscriptionTier } from "@oshap/shared";
 import { PrimaryButton, SecondaryButton, toast } from "@oshap/shared/ui";
 
-const TIERS: SubscriptionTier[] = ["FREE", "STARTER", "PRO", "ENTERPRISE"];
-
-const TIER_PRICES: Record<SubscriptionTier, string> = {
-  FREE: "₦0/mo",
-  STARTER: "₦9,900/mo",
-  PRO: "₦24,900/mo",
-  ENTERPRISE: "₦79,900/mo",
-};
 
 interface FormState {
   name: string;
@@ -172,7 +165,7 @@ export default function RestaurantNewPage() {
           <div className="bg-surface-container-low rounded-md p-md flex flex-col gap-md">
             <h2 className="text-label-l2 font-semibold text-primary-text">Subscription Tier</h2>
             <div className="grid grid-cols-2 gap-s">
-              {TIERS.map((tier) => (
+              {TIER_ORDER.map((tier) => (
                 <button
                   key={tier}
                   type="button"
@@ -184,7 +177,7 @@ export default function RestaurantNewPage() {
                   }`}
                 >
                   <p className="font-bold text-caption-md">{tier}</p>
-                  <p className="text-caption-xs opacity-70">{TIER_PRICES[tier]}</p>
+                  <p className="text-caption-xs opacity-70">{tierPriceLabel(tier)}</p>
                 </button>
               ))}
             </div>

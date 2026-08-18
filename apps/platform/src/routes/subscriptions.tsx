@@ -1,13 +1,7 @@
 import { usePlatformRestaurants, formatCurrency } from "@oshap/shared";
 import type { SubscriptionTier } from "@oshap/shared";
 import { Link } from "react-router";
-
-const TIER_MONTHLY: Record<SubscriptionTier, number> = {
-  FREE: 0,
-  STARTER: 9900,
-  PRO: 24900,
-  ENTERPRISE: 79900,
-};
+import { TIER_MONTHLY_KOBO, TIER_ORDER, tierPriceLabel } from "../tiers";
 
 const TIER_FEATURES: Record<SubscriptionTier, string[]> = {
   FREE: ["Up to 5 tables", "Basic menu", "Mock mode only"],
@@ -15,8 +9,6 @@ const TIER_FEATURES: Record<SubscriptionTier, string[]> = {
   PRO: ["Up to 30 tables", "All Starter features", "Multi-branch view", "Priority support"],
   ENTERPRISE: ["Unlimited tables", "All Pro features", "Dedicated SLA", "White-label option"],
 };
-
-const TIER_ORDER: SubscriptionTier[] = ["FREE", "STARTER", "PRO", "ENTERPRISE"];
 
 const TIER_COLORS: Record<SubscriptionTier, string> = {
   FREE: "bg-surface-container-high text-outline border-outline-variant",
@@ -39,7 +31,7 @@ export default function SubscriptionsPage() {
 
   const mrr = TIER_ORDER.reduce((sum, tier) => {
     const active = byTier[tier].filter((r) => r.is_active).length;
-    return sum + active * TIER_MONTHLY[tier];
+    return sum + active * TIER_MONTHLY_KOBO[tier];
   }, 0);
 
   const arr = mrr * 12;
@@ -82,7 +74,7 @@ export default function SubscriptionsPage() {
         {TIER_ORDER.map((tier) => {
           const count = byTier[tier].length;
           const active = byTier[tier].filter((r) => r.is_active).length;
-          const revenue = active * TIER_MONTHLY[tier];
+          const revenue = active * TIER_MONTHLY_KOBO[tier];
           return (
             <div
               key={tier}
@@ -91,14 +83,14 @@ export default function SubscriptionsPage() {
               <div className="flex items-center justify-between">
                 <span className="font-display font-bold text-p">{tier}</span>
                 <span className="text-caption-sm font-semibold opacity-80">
-                  {formatCurrency(TIER_MONTHLY[tier])}/mo
+                  {tierPriceLabel(tier)}
                 </span>
               </div>
               <div className="flex flex-col gap-xs">
                 <span className="text-display-h3 font-display font-semibold">{count}</span>
                 <span className="text-caption-xs opacity-70">{active} active · {count - active} inactive</span>
               </div>
-              {TIER_MONTHLY[tier] > 0 && (
+              {TIER_MONTHLY_KOBO[tier] > 0 && (
                 <span className="text-caption-sm font-semibold opacity-80">
                   {formatCurrency(revenue)}/mo revenue
                 </span>
@@ -130,7 +122,7 @@ export default function SubscriptionsPage() {
             </thead>
             <tbody>
               {[...restaurants]
-                .sort((a, b) => TIER_MONTHLY[b.subscription_tier] - TIER_MONTHLY[a.subscription_tier])
+                .sort((a, b) => TIER_MONTHLY_KOBO[b.subscription_tier] - TIER_MONTHLY_KOBO[a.subscription_tier])
                 .map((r) => (
                   <tr key={r.id} className="border-b border-surface-container-highest last:border-none hover:bg-surface-container-low transition-colors">
                     <td className="py-s px-md text-p2 font-medium">
@@ -145,7 +137,7 @@ export default function SubscriptionsPage() {
                       </span>
                     </td>
                     <td className="py-s px-md text-p2 text-right font-semibold text-primary-text">
-                      {r.is_active ? formatCurrency(TIER_MONTHLY[r.subscription_tier]) : "—"}
+                      {r.is_active ? formatCurrency(TIER_MONTHLY_KOBO[r.subscription_tier]) : "—"}
                     </td>
                   </tr>
                 ))}
