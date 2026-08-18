@@ -1,0 +1,62 @@
+name: Production smoke
+
+# Deliberately NOT on pull_request or push.
+#
+# This suite talks to the live API and creates a real tenant (deleting it
+# again), so running it per-commit would be both slow and rude. It answers a
+# different question from CI: not "is this change correct" but "do the two
+# halves still agree today". Contract breaks arrive from the backend without a
+# commit here, so this runs on a clock.
+on:
+  workflow_dispatch:
+  schedule:
+    # 07:00 UTC — 08:00 Lagos, before service.
+    - cron: "0 7 * * *"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: smoke
+  cancel-in-progress: true
+
+jobs:
+  smoke:
+    name: Deployed apps vs live API
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install
+        run: npm ci
+
+      # Only Chromium: this checks CORS and a contract, neither of which is
+      # engine-specific, and the other browsers are a slow download for nothing.
+      - name: Install Chromium
+        run: npx playwright install --with-deps chromium
+
+      - name: Run smoke check
+        env:
+          OSHAP_API_URL: https://oshap-cerebrum.useshappay.com
+          OSHAP_CUSTOMER_URL: https://oshap.useshappay.com
+          OSHAP_ADMIN_URL: https://admin.oshap.useshappay.com
+          # Without this the contract tests skip and the browser checks still
+          # run, so a missing secret degrades rather than fails.
+          OSHAP_PLATFORM_TOKEN: ${{ secrets.OSHAP_PLATFORM_TOKEN }}
+        run: npm run smoke
+
+      # Traces are how you tell a real outage from a flaky network at 7am.
+      - name: Upload traces
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: smoke-traces
+          path: test-results/
+          retention-days: 7

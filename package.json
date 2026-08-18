@@ -23,7 +23,8 @@
     "start": "node ws-relay.js",
     "test:e2e": "playwright test",
     "test:e2e:ui": "playwright test --ui",
-    "preview:customer": "npm run preview --workspace @oshap/customer"
+    "preview:customer": "npm run preview --workspace @oshap/customer",
+    "smoke": "playwright test --config playwright.smoke.config.ts"
   },
   "devDependencies": {
     "@eslint/js": "^9.39.4",
