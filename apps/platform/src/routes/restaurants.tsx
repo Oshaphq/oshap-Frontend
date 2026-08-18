@@ -1,9 +1,10 @@
 import { useState } from "react";
 import { Link } from "react-router";
 import { formatPhone, usePlatformRestaurants } from "@oshap/shared";
+// Every tier, not just the ones on sale — an existing Enterprise restaurant
+// still has to be filterable.
+import { TIER_ORDER } from "../tiers";
 import type { SubscriptionTier } from "@oshap/shared";
-
-const TIER_ORDER: SubscriptionTier[] = ["LITE", "STANDARD", "PRO", "ENTERPRISE"];
 
 const TIER_COLORS: Record<SubscriptionTier, string> = {
   LITE: "bg-surface-container-high text-outline",

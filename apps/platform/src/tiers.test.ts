@@ -1,8 +1,12 @@
 import { describe, it, expect } from "vitest";
 import {
+  MONTHS_BILLED_ANNUALLY,
   monthlyRecurringKobo,
+  PHASE_1_TIERS,
+  TIER_ANNUAL_KOBO,
   TIER_MONTHLY_KOBO,
   TIER_ORDER,
+  tierAnnualLabel,
   tierPriceLabel,
 } from "./tiers";
 
@@ -63,5 +67,52 @@ describe("monthlyRecurringKobo", () => {
     ]);
     expect(mrr).toBe(800_000);
     expect(mrr / 100).toBe(8_000);
+  });
+});
+
+// The pricing document lists a monthly and an annual figure for every plan,
+// and annual is exactly ten months' worth. Deriving it means the two can't
+// drift; these check the derivation against the published numbers.
+describe("annual pricing", () => {
+  it("matches the figures in the pricing document", () => {
+    expect(tierAnnualLabel("LITE")).toBe("₦80,000/yr");
+    expect(tierAnnualLabel("STANDARD")).toBe("₦180,000/yr");
+    expect(tierAnnualLabel("PRO")).toBe("₦350,000/yr");
+  });
+
+  it("is ten months' worth on every plan, not a per-plan number", () => {
+    for (const tier of TIER_ORDER) {
+      expect(TIER_ANNUAL_KOBO[tier]).toBe(
+        TIER_MONTHLY_KOBO[tier] * MONTHS_BILLED_ANNUALLY,
+      );
+    }
+  });
+
+  it("works out to a 17% discount", () => {
+    for (const tier of TIER_ORDER) {
+      const full = TIER_MONTHLY_KOBO[tier] * 12;
+      const discount = 1 - TIER_ANNUAL_KOBO[tier] / full;
+      expect(discount).toBeCloseTo(0.1667, 3);
+    }
+  });
+});
+
+describe("what is actually on sale", () => {
+  it("offers the three Phase 1 plans", () => {
+    expect(PHASE_1_TIERS).toEqual(["LITE", "STANDARD", "PRO"]);
+  });
+
+  it("does not offer Enterprise, which is a Phase 2 product", () => {
+    // It stays in TIER_ORDER so an existing Enterprise restaurant is still
+    // readable and filterable — it just isn't sellable yet.
+    expect(PHASE_1_TIERS).not.toContain("ENTERPRISE");
+    expect(TIER_ORDER).toContain("ENTERPRISE");
+  });
+
+  it("prices every plan it offers", () => {
+    for (const tier of PHASE_1_TIERS) {
+      expect(TIER_MONTHLY_KOBO[tier]).toBeGreaterThan(0);
+      expect(TIER_ANNUAL_KOBO[tier]).toBeGreaterThan(0);
+    }
   });
 });

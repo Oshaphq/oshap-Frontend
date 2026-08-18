@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { TIER_ORDER, tierPriceLabel } from "../tiers";
+import { PHASE_1_TIERS, tierAnnualLabel, tierPriceLabel } from "../tiers";
 import { useNavigate } from "react-router";
 import { formatPhone, tryNormalizePhone, usePlatformCreateRestaurant } from "@oshap/shared";
 import type { SubscriptionTier } from "@oshap/shared";
@@ -164,8 +164,11 @@ export default function RestaurantNewPage() {
 
           <div className="bg-surface-container-low rounded-md p-md flex flex-col gap-md">
             <h2 className="text-label-l2 font-semibold text-primary-text">Subscription Tier</h2>
+            {/* Phase 1 plans only. Enterprise belongs to Phase 2, alongside
+                payment infrastructure that does not exist — offering it here
+                would be selling something we cannot deliver. */}
             <div className="grid grid-cols-2 gap-s">
-              {TIER_ORDER.map((tier) => (
+              {PHASE_1_TIERS.map((tier) => (
                 <button
                   key={tier}
                   type="button"
@@ -178,6 +181,7 @@ export default function RestaurantNewPage() {
                 >
                   <p className="font-bold text-caption-md">{tier}</p>
                   <p className="text-caption-xs opacity-70">{tierPriceLabel(tier)}</p>
+                  <p className="text-caption-xs opacity-50">{tierAnnualLabel(tier)}</p>
                 </button>
               ))}
             </div>
