@@ -7,6 +7,16 @@ import { useAuth } from "../context/AuthContext";
 
 const MIN_PASSWORD = 10;
 
+/** True only for the status that actually means "this token is finished". */
+function isGone(err: unknown): boolean {
+  return (
+    typeof err === "object" &&
+    err !== null &&
+    "status" in err &&
+    (err as { status: number }).status === 410
+  );
+}
+
 /**
  * Where an owner claims the account that was provisioned for them.
  *
@@ -20,7 +30,9 @@ export default function SetupPage() {
   const { login } = useAuth();
   const token = params.get("token") ?? "";
 
-  const [status, setStatus] = useState<"checking" | "ready" | "dead">("checking");
+  const [status, setStatus] = useState<
+    "checking" | "ready" | "dead" | "unreachable"
+  >("checking");
   const [account, setAccount] = useState<SetupVerifyResponse | null>(null);
   const [password, setPassword] = useState("");
   const [confirm, setConfirm] = useState("");
@@ -40,8 +52,13 @@ export default function SetupPage() {
         setAccount(data);
         setStatus("ready");
       })
-      .catch(() => {
-        if (!cancelled) setStatus("dead");
+      .catch((err: unknown) => {
+        if (cancelled) return;
+        // Only a 410 means the link is actually spent. A network failure, a
+        // CORS rejection or a 5xx says nothing about the token — and telling
+        // someone their link expired when the server is unreachable sends
+        // them to fetch a new one that will fail in exactly the same way.
+        setStatus(isGone(err) ? "dead" : "unreachable");
       });
     return () => {
       cancelled = true;
@@ -65,9 +82,9 @@ export default function SetupPage() {
     } catch (err: unknown) {
       const message =
         err instanceof Error ? err.message : "Could not complete setup.";
-      // A 410 here means the link was used or expired between loading the
-      // page and submitting it, so the form is no longer the right screen.
-      if (message.toLowerCase().includes("expired")) {
+      // A 410 here means the link was spent between loading the page and
+      // submitting it, so the form is no longer the right screen.
+      if (isGone(err)) {
         setStatus("dead");
       } else {
         toast.error(message);
@@ -87,6 +104,31 @@ export default function SetupPage() {
     );
   }
 
+  if (status === "unreachable") {
+    return (
+      <div className="flex items-center justify-center min-h-screen bg-surface p-md">
+        <div className="w-full max-w-[400px] bg-surface-container-low rounded-xl p-xl flex flex-col items-center gap-md text-center">
+          <div className="w-16 h-16 rounded-full bg-warning-container flex items-center justify-center text-2xl text-on-warning-container">
+            <i className="mgc_wifi_off_line" />
+          </div>
+          <h1 className="font-display text-display-h2 font-semibold text-primary-text">
+            Can&rsquo;t reach Oshap
+          </h1>
+          <p className="text-p2 text-secondary-text">
+            Your link is probably fine — we just couldn&rsquo;t check it. Try
+            again in a moment, and tell your Oshap contact if it keeps failing.
+          </p>
+          <PrimaryButton
+            className="w-full"
+            onClick={() => window.location.reload()}
+          >
+            Try again
+          </PrimaryButton>
+        </div>
+      </div>
+    );
+  }
+
   // A terminal screen, not an error on a form: there is nothing to retry, and
   // a retry button would invite someone to sit here clicking it.
   if (status === "dead") {
@@ -100,8 +142,10 @@ export default function SetupPage() {
             This link has expired
           </h1>
           <p className="text-p2 text-secondary-text">
-            Setup links work once and time out after a week. Ask your Oshap
-            contact for a new one, or reset from the sign-in screen.
+            Setup links work once and time out after a week. If you already set
+            a password, just sign in. Otherwise use{" "}
+            <span className="font-semibold">Forgot password</span> on the
+            sign-in screen to get a new link.
           </p>
           <PrimaryButton className="w-full" onClick={() => navigate("/")}>
             Go to sign in

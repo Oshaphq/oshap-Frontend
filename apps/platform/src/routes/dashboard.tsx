@@ -1,4 +1,5 @@
 import { Link } from "react-router";
+import { monthlyRecurringKobo } from "../tiers";
 import {
   usePlatformRestaurants,
   usePlatformHealth,
@@ -13,12 +14,7 @@ export default function DashboardPage() {
   const health = healthQuery.data;
 
   const active = restaurants.filter((r) => r.is_active).length;
-  const mrr = restaurants
-    .filter((r) => r.is_active)
-    .reduce((sum, r) => {
-      const tier = { FREE: 0, STARTER: 9900, PRO: 24900, ENTERPRISE: 79900 } as const;
-      return sum + (tier[r.subscription_tier] ?? 0);
-    }, 0);
+  const mrr = monthlyRecurringKobo(restaurants);
 
   return (
     <main className="p-md flex flex-col gap-l">

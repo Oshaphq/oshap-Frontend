@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { TIER_ORDER, tierPriceLabel } from "../tiers";
 import { useParams, Link } from "react-router";
 import {
   usePlatformRestaurant,
@@ -7,14 +8,6 @@ import {
 import type { SubscriptionTier } from "@oshap/shared";
 import { toast } from "@oshap/shared/ui";
 
-const TIERS: SubscriptionTier[] = ["FREE", "STARTER", "PRO", "ENTERPRISE"];
-
-const TIER_PRICES: Record<SubscriptionTier, string> = {
-  FREE: "₦0/mo",
-  STARTER: "₦9,900/mo",
-  PRO: "₦24,900/mo",
-  ENTERPRISE: "₦79,900/mo",
-};
 
 export default function RestaurantDetailPage() {
   const { id } = useParams<{ id: string }>();
@@ -144,7 +137,7 @@ export default function RestaurantDetailPage() {
         {editTier ? (
           <div className="flex flex-col gap-s">
             <div className="grid grid-cols-2 gap-s">
-              {TIERS.map((tier) => (
+              {TIER_ORDER.map((tier) => (
                 <button
                   key={tier}
                   type="button"
@@ -156,7 +149,7 @@ export default function RestaurantDetailPage() {
                   }`}
                 >
                   <p className="font-bold text-caption-md">{tier}</p>
-                  <p className="text-caption-xs opacity-70">{TIER_PRICES[tier]}</p>
+                  <p className="text-caption-xs opacity-70">{tierPriceLabel(tier)}</p>
                 </button>
               ))}
             </div>
@@ -184,7 +177,7 @@ export default function RestaurantDetailPage() {
               {r.subscription_tier}
             </span>
             <span className="text-p2 text-secondary-text">
-              {TIER_PRICES[r.subscription_tier]}
+              {tierPriceLabel(r.subscription_tier)}
             </span>
           </div>
         )}

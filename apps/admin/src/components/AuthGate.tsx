@@ -16,6 +16,8 @@ export default function AuthGate() {
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState("");
   const [isLoggingIn, setIsLoggingIn] = useState(false);
+  const [isResetting, setIsResetting] = useState(false);
+  const [resetSent, setResetSent] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
 
   useEffect(() => {
@@ -44,6 +46,28 @@ export default function AuthGate() {
       }
     } finally {
       setIsLoggingIn(false);
+    }
+  };
+
+  /**
+   * Asks for a fresh setup link. The response is deliberately the same whether
+   * or not the identifier matched — anything else would let a stranger check
+   * which merchants are on the platform — so the UI says the same thing too.
+   */
+  const handleForgot = async () => {
+    if (!email.trim()) {
+      setError("Enter your phone number or email first.");
+      return;
+    }
+    setIsResetting(true);
+    setError("");
+    try {
+      await adminApi.forgotPassword({ identifier: email.trim() });
+      setResetSent(true);
+    } catch {
+      setError("Could not reach the server. Try again in a moment.");
+    } finally {
+      setIsResetting(false);
     }
   };
 
@@ -123,6 +147,24 @@ export default function AuthGate() {
           >
             {isLoggingIn ? "Verifying..." : "Login"}
           </PrimaryButton>
+
+          {/* Without this, a spent or lost setup link is unrecoverable — the
+              only remaining route into the account is someone editing the
+              database. The setup screen already tells people to come here. */}
+          {resetSent ? (
+            <p className="text-caption-md text-secondary-text text-center">
+              If that account exists, a reset link is on its way.
+            </p>
+          ) : (
+            <button
+              type="button"
+              onClick={handleForgot}
+              disabled={isResetting}
+              className="text-caption-md font-semibold text-primary hover:underline disabled:opacity-50 bg-transparent border-0 cursor-pointer"
+            >
+              {isResetting ? "Sending…" : "Forgot password?"}
+            </button>
+          )}
         </form>
       </div>
     );
