@@ -957,6 +957,12 @@ export interface AdminUpdateSettingsRequest {
   address?: string | null;
   operating_hours?: string | null;
   whatsapp_number?: string | null;
+  /**
+   * Integer basis points, not percent: `750` = 7.5%. Convert what a merchant
+   * types with `percentToBasisPoints`. Omit to leave a rate unchanged.
+   */
+  vat_rate?: number;
+  service_charge_rate?: number;
 }
 
 // ---------------------------------------------------------------------------

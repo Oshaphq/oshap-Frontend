@@ -62,3 +62,20 @@ export function computeOrderTotals(
     total: vatBase + vat + tip,
   };
 }
+
+/**
+ * Percent → basis points, for a rate a merchant typed.
+ *
+ * Merchants think in percentages ("7.5%"); the API stores integer basis
+ * points (`750`). Rounding here rather than storing a float is the same
+ * discipline money follows — a rate of 7.499999% would drift VAT by a kobo
+ * on large bills and nobody would ever find it.
+ */
+export function percentToBasisPoints(percent: number): number {
+  return Math.round(percent * 100);
+}
+
+/** Basis points → percent, for display in an input a merchant edits. */
+export function basisPointsToPercent(bps: number): number {
+  return bps / 100;
+}
