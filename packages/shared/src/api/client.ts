@@ -207,7 +207,35 @@ function isMockMode(): boolean {
   //
   // This has already happened once, to the deployed customer app. Failing
   // loudly here turns a silent forgery into an obvious misconfiguration.
+  warnMockOnce();
   return !import.meta.env.PROD;
+}
+
+let warned = false;
+
+/**
+ * Says so, loudly and once, when a dev build falls back to the mock.
+ *
+ * Silent fallback has now cost real time twice: a deployed bundle that served
+ * a fake restaurant, and an onboarding run that produced a mock setup link
+ * nobody could tell from a real one. The mock is convincing enough that its
+ * output is indistinguishable from the real thing — so it has to introduce
+ * itself.
+ */
+function warnMockOnce(): void {
+  if (warned || import.meta.env.PROD) return;
+  warned = true;
+  // eslint-disable-next-line no-console
+  console.warn(
+    "%c OSHAP: using the in-memory MOCK API ",
+    "background:#B24700;color:#fff;font-weight:700;padding:2px 4px;border-radius:2px",
+    `
+Nothing here reaches a server. Any data you create is imaginary.
+
+VITE_API_BASE_URL is not set, so the client fell back to the mock. Note that
+Vite reads .env files from the repository root only (see envDir in each app's
+vite.config.ts) — set it there, then restart the dev server.`,
+  );
 }
 
 // ---------------------------------------------------------------------------

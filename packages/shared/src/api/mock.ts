@@ -1201,12 +1201,17 @@ const _setupTokens = new Map<
   { staffId: string; expiresAt: number; usedAt: number | null }
 >();
 
-/** Where the setup link points. The real server reads ADMIN_APP_URL. */
+/**
+ * Where the setup link points. The real server reads ADMIN_APP_URL.
+ *
+ * Deliberately NOT `window.location.origin`: this endpoint is called from the
+ * platform app on port 5176, while the /setup screen lives in the admin app on
+ * 5174. Using the current origin produced a link to a route that doesn't exist
+ * in the app serving it.
+ */
 function adminAppUrl(): string {
-  if (typeof window !== "undefined" && window.location) {
-    return window.location.origin;
-  }
-  return "http://localhost:5174";
+  const configured = import.meta.env.VITE_ADMIN_APP_URL as string | undefined;
+  return configured?.replace(/\/$/, "") || "http://localhost:5174";
 }
 
 function issueSetupToken(staffId: string, ttlMs: number): string {
