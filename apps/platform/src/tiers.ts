@@ -1,5 +1,10 @@
 import { formatCurrency } from "@oshap/shared";
 import type { SubscriptionTier } from "@oshap/shared";
+import { TIER_MONTHLY_KOBO, TIER_ORDER } from "./tiers.data";
+
+// Re-exported so every existing import site keeps working; the data itself
+// lives in tiers.data.ts, which has no runtime dependencies.
+export { TIER_MONTHLY_KOBO, TIER_ORDER };
 
 /**
  * Subscription pricing — the single source of truth for the platform app.
@@ -14,20 +19,7 @@ import type { SubscriptionTier } from "@oshap/shared";
  * and the labels are derived rather than written out, so the two can no longer
  * disagree.
  */
-export const TIER_MONTHLY_KOBO: Record<SubscriptionTier, number> = {
-  LITE: 800_000,
-  STANDARD: 1_800_000,
-  PRO: 3_500_000,
-  ENTERPRISE: 10_000_000,
-};
 
-/** Cheapest first — the order tiers are listed and filtered in. */
-export const TIER_ORDER: SubscriptionTier[] = [
-  "LITE",
-  "STANDARD",
-  "PRO",
-  "ENTERPRISE",
-];
 
 /** e.g. `₦9,900/mo`. Derived, never typed out. */
 export function tierPriceLabel(tier: SubscriptionTier): string {
