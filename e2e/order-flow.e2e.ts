@@ -11,8 +11,15 @@ import { test, expect, type Page } from "@playwright/test";
  * pay it.
  */
 
-/** Scanning a table QR lands here. */
-async function openMenu(page: Page, table = "T1") {
+/**
+ * Scanning a table QR lands here.
+ *
+ * The parameter is the table's **uuid**, not its name — that is what a QR
+ * encodes and what `GET /table/{id}` resolves. Table names repeat across
+ * restaurants, and the real backend rejects one with a 422, so testing with
+ * "T1" would exercise a path production no longer has.
+ */
+async function openMenu(page: Page, table = "tbl-t1") {
   await page.goto(`/menu?table=${table}`);
   await expect(page.getByText("Chicken Shawarma")).toBeVisible();
 }
@@ -131,7 +138,7 @@ test.describe("customer ordering", () => {
   test("places an order and shows it under the table's orders", async ({
     page,
   }) => {
-    await openMenu(page, "T4");
+    await openMenu(page, "tbl-t4");
 
     await dishCard(page, "Coca-Cola")
       .getByRole("button", { name: /Add Coca-Cola to cart/i })

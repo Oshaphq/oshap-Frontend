@@ -8,7 +8,10 @@ import {
 import { getAdminRestaurantId } from "@oshap/shared";
 import { PrimaryButton, SecondaryButton, toast } from "@oshap/shared/ui";
 import TableQrDialog from "../../components/TableQrDialog";
-import QrPrintSheet, { type QrPrintRequest } from "../../components/QrPrintSheet";
+import QrPrintSheet, {
+  type QrPrintRequest,
+  type QrPrintTable,
+} from "../../components/QrPrintSheet";
 import { isLocalOrigin } from "../../utils/qr";
 import { qrPrintedKey } from "../../components/SetupChecklist";
 
@@ -20,13 +23,13 @@ export default function TablesSettings() {
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [tableId, setTableId] = useState("");
-  const [qrTableId, setQrTableId] = useState<string | null>(null);
+  const [qrTable, setQrTable] = useState<QrPrintTable | null>(null);
   const [printRequest, setPrintRequest] = useState<QrPrintRequest | null>(null);
 
   const tables = tablesQuery.data?.tables ?? [];
 
-  const requestPrint = (tableIds: string[]) => {
-    if (tableIds.length === 0) return;
+  const requestPrint = (tablesToPrint: QrPrintTable[]) => {
+    if (tablesToPrint.length === 0) return;
     // Marks the checklist step done. Nothing server-side records that paper
     // came out of a printer, so this is the only signal available — and a
     // false positive here costs a ticked box, not a broken restaurant.
@@ -39,7 +42,7 @@ export default function TablesSettings() {
       }
     }
     setPrintRequest({
-      tableIds,
+      tables: tablesToPrint,
       restaurantName: settingsQuery.data?.name ?? "Oshap",
       logoUrl: settingsQuery.data?.logo_url,
     });
@@ -99,7 +102,11 @@ export default function TablesSettings() {
         <div className="flex items-center gap-s">
           <SecondaryButton
             size="md"
-            onClick={() => requestPrint(tables.map((t) => t.id))}
+            onClick={() =>
+              requestPrint(
+                tables.map((t) => ({ uuid: t.id, name: t.table_id })),
+              )
+            }
             disabled={tables.length === 0}
           >
             <i className="mgc_print_line" /> Print QR Codes
@@ -148,11 +155,11 @@ export default function TablesSettings() {
 
               return (
                 <tr
-                  key={table.id}
+                  key={table.table_id}
                   className="border-b border-surface-container-highest last:border-none hover:bg-surface-container-low transition-colors"
                 >
                   <td className="py-s px-md text-p2 text-primary-text font-semibold font-display">
-                    {table.id}
+                    {table.table_id}
                   </td>
                   <td className="py-s px-md">
                     {isPending ? (
@@ -171,9 +178,9 @@ export default function TablesSettings() {
                   </td>
                   <td className="py-s px-md text-right">
                     <button
-                      onClick={() => setQrTableId(table.id)}
-                      title={`Show QR code for ${table.id}`}
-                      aria-label={`Show QR code for ${table.id}`}
+                      onClick={() => setQrTable({ uuid: table.id, name: table.table_id })}
+                      title={`Show QR code for ${table.table_id}`}
+                      aria-label={`Show QR code for ${table.table_id}`}
                       className="p-xs text-secondary-text hover:text-primary transition-colors"
                     >
                       <i className="mgc_qrcode_line text-lg" />
@@ -251,13 +258,14 @@ export default function TablesSettings() {
         </div>
       )}
 
-      {qrTableId && (
+      {qrTable && (
         <TableQrDialog
-          tableId={qrTableId}
-          onClose={() => setQrTableId(null)}
+          tableUuid={qrTable.uuid}
+          tableName={qrTable.name}
+          onClose={() => setQrTable(null)}
           onPrint={() => {
-            requestPrint([qrTableId]);
-            setQrTableId(null);
+            requestPrint([qrTable]);
+            setQrTable(null);
           }}
         />
       )}

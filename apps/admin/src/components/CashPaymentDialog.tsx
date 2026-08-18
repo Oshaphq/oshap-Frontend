@@ -32,6 +32,11 @@ export default function CashPaymentDialog({ tableId, onClose }: Props) {
 
   const [tendered, setTendered] = useState("");
 
+  // `tableId` is the table's uuid — that is what the API resolves. The name a
+  // cashier recognises comes back with the table, so read it from there rather
+  // than printing a uuid on screen.
+  const tableName = tableQuery.data?.table_id ?? "";
+
   const unpaid = tableQuery.data?.unpaid_order ?? null;
   const total = unpaid?.total ?? 0;
   const orderIds = unpaid?.combined_order_ids ?? (unpaid ? [unpaid.id] : []);
@@ -54,7 +59,7 @@ export default function CashPaymentDialog({ tableId, onClose }: Props) {
       },
       {
         onSuccess: () => {
-          toast.success(`Cash recorded for ${tableId}`);
+          toast.success(`Cash recorded for ${tableName}`);
           onClose();
         },
         onError: (err) =>
@@ -73,14 +78,14 @@ export default function CashPaymentDialog({ tableId, onClose }: Props) {
       <div
         role="dialog"
         aria-modal="true"
-        aria-label={`Record cash payment for table ${tableId}`}
+        aria-label={`Record cash payment for table ${tableName}`}
         className="w-full max-w-[420px] rounded-md bg-surface-container-high p-l flex flex-col gap-md shadow-xl"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex items-start justify-between gap-md">
           <div className="flex flex-col gap-0.5">
             <h3 className="font-bold text-primary-text">Take cash</h3>
-            <p className="text-caption-md text-secondary-text">Table {tableId}</p>
+            <p className="text-caption-md text-secondary-text">Table {tableName}</p>
           </div>
           <button
             type="button"

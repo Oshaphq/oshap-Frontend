@@ -673,7 +673,14 @@ export interface MenuImportResponse {
 }
 
 export interface AdminTableStatus {
+  /**
+   * The table's globally unique id. This is what `GET /table/{id}` takes and
+   * what a QR code encodes — table *names* repeat across restaurants, so a
+   * name alone identifies nothing.
+   */
   id: string;
+  /** The name staff read: "T1", "VIP 2". Unique only within a restaurant. */
+  table_id: string;
   status: TableStatus;
   unpaidTotal: number;
   pendingTotal: number;

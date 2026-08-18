@@ -4,6 +4,7 @@ import {
   formatCurrency,
   getDeviceToken,
   useSessionOrders,
+  useTable,
 } from "@oshap/shared";
 import type { OrderStatus, OrderWithItems, OrderItem } from "@oshap/shared";
 import { CartProvider, useCart } from "../context/CartContext";
@@ -43,9 +44,17 @@ function OrdersView({ tableId }: { tableId: string }) {
   const { sheetRef: othersSheetRef, handleProps: othersHandleProps } =
     useDragToDismiss(() => setShowOthersDetail(false));
 
+  // POST /session records against the table's NAME, while the URL carries its
+  // uuid — see the note in checkout.tsx.
+  const tableQuery = useTable({ tableId, deviceToken });
+  const tableName = tableQuery.data?.table_id;
+
+  // `table_id` here is a query field, so it takes the NAME. Passing the uuid
+  // returns 200 with an empty list — a silent "no orders" rather than an
+  // error, which is the failure mode worth guarding hardest against.
   const sessionOrdersQuery = useSessionOrders({
     sessionId: session?.id,
-    tableId,
+    tableId: tableName,
     deviceToken,
   });
 
@@ -66,9 +75,13 @@ function OrdersView({ tableId }: { tableId: string }) {
 
   const handleStartSession = async () => {
     if (!customerName.trim()) return;
+    if (!tableName) {
+      setPinError("Still loading this table. Try again in a moment.");
+      return;
+    }
     setPinError("");
     try {
-      await startSession(tableId);
+      await startSession(tableName);
     } catch (err) {
       setPinError(
         err instanceof Error
@@ -85,7 +98,7 @@ function OrdersView({ tableId }: { tableId: string }) {
     }
     setPinError("");
     try {
-      await joinSession(pinInput.trim(), tableId);
+      await joinSession(pinInput.trim(), tableName ?? tableId);
       setShowPinInput(false);
       setPinInput("");
     } catch (err) {

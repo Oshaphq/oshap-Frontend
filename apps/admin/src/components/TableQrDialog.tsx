@@ -9,16 +9,24 @@ import {
 } from "../utils/qr";
 
 interface Props {
-  tableId: string;
+  /** The table's unique id — what the QR encodes and the API resolves. */
+  tableUuid: string;
+  /** The name staff read, for the filename and the on-screen copy. */
+  tableName: string;
   onClose: () => void;
   onPrint: () => void;
 }
 
 /** Preview one table's QR code, download it as PNG, or send it to the printer. */
-export default function TableQrDialog({ tableId, onClose, onPrint }: Props) {
+export default function TableQrDialog({
+  tableUuid,
+  tableName,
+  onClose,
+  onPrint,
+}: Props) {
   const [pngDataUrl, setPngDataUrl] = useState<string | null>(null);
   const [failed, setFailed] = useState(false);
-  const url = buildTableUrl(tableId);
+  const url = buildTableUrl(tableUuid);
 
   useEffect(() => {
     let cancelled = false;
@@ -44,8 +52,8 @@ export default function TableQrDialog({ tableId, onClose, onPrint }: Props) {
 
   const handleDownload = () => {
     if (!pngDataUrl) return;
-    downloadDataUrl(pngDataUrl, `${qrFileName(tableId)}.png`);
-    toast.success(`QR code for "${tableId}" downloaded`);
+    downloadDataUrl(pngDataUrl, `${qrFileName(tableName)}.png`);
+    toast.success(`QR code for "${tableName}" downloaded`);
   };
 
   return (
@@ -56,13 +64,13 @@ export default function TableQrDialog({ tableId, onClose, onPrint }: Props) {
       <div
         role="dialog"
         aria-modal="true"
-        aria-label={`QR code for table ${tableId}`}
+        aria-label={`QR code for table ${tableName}`}
         className="w-full max-w-[400px] rounded-md bg-surface-container-high p-l flex flex-col gap-md shadow-xl"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex items-start justify-between gap-md">
           <div className="flex flex-col gap-0.5">
-            <h3 className="font-bold text-primary-text">Table {tableId}</h3>
+            <h3 className="font-bold text-primary-text">Table {tableName}</h3>
             <p className="text-caption-md text-secondary-text">
               Guests scan this to open your menu.
             </p>
@@ -84,7 +92,7 @@ export default function TableQrDialog({ tableId, onClose, onPrint }: Props) {
           ) : pngDataUrl ? (
             <img
               src={pngDataUrl}
-              alt={`QR code linking to the menu for table ${tableId}`}
+              alt={`QR code linking to the menu for table ${tableName}`}
               className="w-full max-w-[240px] aspect-square"
             />
           ) : (
