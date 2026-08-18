@@ -1076,7 +1076,7 @@ export interface GroupAnalyticsResponse {
 // Platform Admin (Phase 12)
 // ---------------------------------------------------------------------------
 
-export type SubscriptionTier = "FREE" | "STARTER" | "PRO" | "ENTERPRISE";
+export type SubscriptionTier = "LITE" | "STANDARD" | "PRO" | "ENTERPRISE";
 
 export interface PlatformRestaurant extends Restaurant {
   subscription_tier: SubscriptionTier;
