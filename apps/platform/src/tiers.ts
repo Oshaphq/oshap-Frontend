@@ -1,10 +1,22 @@
 import { formatCurrency } from "@oshap/shared";
 import type { SubscriptionTier } from "@oshap/shared";
-import { TIER_MONTHLY_KOBO, TIER_ORDER } from "./tiers.data";
+import {
+  MONTHS_BILLED_ANNUALLY,
+  PHASE_1_TIERS,
+  TIER_ANNUAL_KOBO,
+  TIER_MONTHLY_KOBO,
+  TIER_ORDER,
+} from "./tiers.data";
 
 // Re-exported so every existing import site keeps working; the data itself
 // lives in tiers.data.ts, which has no runtime dependencies.
-export { TIER_MONTHLY_KOBO, TIER_ORDER };
+export {
+  MONTHS_BILLED_ANNUALLY,
+  PHASE_1_TIERS,
+  TIER_ANNUAL_KOBO,
+  TIER_MONTHLY_KOBO,
+  TIER_ORDER,
+};
 
 /**
  * Subscription pricing — the single source of truth for the platform app.
@@ -33,4 +45,9 @@ export function monthlyRecurringKobo(
   return restaurants
     .filter((r) => r.is_active)
     .reduce((sum, r) => sum + (TIER_MONTHLY_KOBO[r.subscription_tier] ?? 0), 0);
+}
+
+/** e.g. `₦80,000/yr` — shown beside the monthly price so a merchant can compare. */
+export function tierAnnualLabel(tier: SubscriptionTier): string {
+  return `${formatCurrency(TIER_ANNUAL_KOBO[tier])}/yr`;
 }

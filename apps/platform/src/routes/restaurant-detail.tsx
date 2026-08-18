@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { TIER_ORDER, tierPriceLabel } from "../tiers";
+import { PHASE_1_TIERS, tierAnnualLabel, tierPriceLabel } from "../tiers";
 import { useParams, Link } from "react-router";
 import {
   usePlatformRestaurant,
@@ -137,7 +137,7 @@ export default function RestaurantDetailPage() {
         {editTier ? (
           <div className="flex flex-col gap-s">
             <div className="grid grid-cols-2 gap-s">
-              {TIER_ORDER.map((tier) => (
+              {PHASE_1_TIERS.map((tier) => (
                 <button
                   key={tier}
                   type="button"
@@ -150,6 +150,7 @@ export default function RestaurantDetailPage() {
                 >
                   <p className="font-bold text-caption-md">{tier}</p>
                   <p className="text-caption-xs opacity-70">{tierPriceLabel(tier)}</p>
+                  <p className="text-caption-xs opacity-50">{tierAnnualLabel(tier)}</p>
                 </button>
               ))}
             </div>
