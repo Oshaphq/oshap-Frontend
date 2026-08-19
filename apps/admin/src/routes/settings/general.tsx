@@ -4,7 +4,13 @@ import {
   useAdminUpdateSettings, 
   useAdminUploadSettingsImage 
 } from "@oshap/shared/hooks";
-import { basisPointsToPercent, percentToBasisPoints } from "@oshap/shared";
+import {
+  basisPointsToPercent,
+  percentToBasisPoints,
+  errorMessage,
+  validateImageFile,
+  IMAGE_ACCEPT_ATTR,
+} from "@oshap/shared";
 import { PrimaryButton, toast } from "@oshap/shared/ui";
 import { useAuth } from "../../context/AuthContext";
 import BankAccountsSection from "../../components/BankAccountsSection";
@@ -104,15 +110,24 @@ export default function GeneralSettings() {
     const file = e.target.files?.[0];
     if (!file) return;
 
+    const problem = validateImageFile(file);
+    if (problem) {
+      toast.error(problem);
+      e.target.value = "";
+      return;
+    }
+
     uploadImage.mutate(file, {
       onSuccess: (res) => {
         setForm((prev) => ({ ...prev, logo_url: res.url }));
-        toast.success("Logo uploaded successfully");
+        toast.success("Logo uploaded — remember to save");
       },
-      onError: () => {
-        toast.error("Failed to upload logo");
+      onError: (err) => {
+        toast.error(errorMessage(err, "upload the logo"));
       },
     });
+    // Let the same file be re-picked after a failure.
+    e.target.value = "";
   };
 
   if (isLoading) {
@@ -252,7 +267,7 @@ export default function GeneralSettings() {
               type="file" 
               ref={fileInputRef} 
               className="hidden" 
-              accept="image/*"
+              accept={IMAGE_ACCEPT_ATTR}
               onChange={handleLogoUpload}
             />
           </div>

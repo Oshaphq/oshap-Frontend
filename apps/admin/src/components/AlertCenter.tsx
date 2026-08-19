@@ -1,6 +1,11 @@
 import { useEffect, useRef, useState } from "react";
-import type { Unsubscribe } from "firebase/messaging";
-import { getMessagingInstance } from "../utils/fcm";
+import { useQueryClient } from "@tanstack/react-query";
+import {
+  queryKeys,
+  subscribeToRealtimeEvents,
+  type RealtimeEvent,
+} from "@oshap/shared";
+import type { AdminTablesResponse } from "@oshap/shared";
 import { playChime } from "../utils/chime";
 
 interface Alert {
@@ -13,73 +18,109 @@ interface Alert {
 
 const VISIBLE_MS = 5_000;
 
+/**
+ * Which realtime events staff are interrupted for, and how it reads.
+ *
+ * Alerts are driven by SSE, not FCM. This used to subscribe to
+ * `onMessage` from Firebase alone, which meant that on any deployment
+ * without FCM credentials — including production — `getMessagingInstance()`
+ * returned null and no alert or chime could ever fire, silently. The events
+ * were arriving on the SSE stream the whole time and being dropped.
+ *
+ * FCM keeps its real job: waking staff when the tab is closed, via the
+ * service worker. That path does not run this component.
+ */
 const TYPE_META: Record<
   string,
-  { iconClass: string; iconColorClass: string; chime: boolean }
+  {
+    iconClass: string;
+    iconColorClass: string;
+    chime: boolean;
+    title: string;
+    body: (table: string | null) => string;
+  }
 > = {
-  pos_requested: {
-    iconClass: "mgc_card_pay_line",
-    iconColorClass: "text-primary",
-    chime: true,
-  },
   waiter_called: {
     iconClass: "mgc_service_line",
     iconColorClass: "text-primary",
     chime: true,
+    title: "Waiter requested",
+    body: (t) => (t ? `${t} needs attention` : "A table needs attention"),
+  },
+  pos_requested: {
+    iconClass: "mgc_card_pay_line",
+    iconColorClass: "text-primary",
+    chime: true,
+    title: "POS requested",
+    body: (t) => (t ? `Take the card machine to ${t}` : "Take the card machine over"),
   },
   new_order: {
     iconClass: "mgc_shopping_bag_2_line",
     iconColorClass: "text-primary",
     chime: true,
+    title: "New order",
+    body: (t) => (t ? `${t} placed an order` : "An order came in"),
   },
   payment_claimed: {
     iconClass: "mgc_wallet_4_line",
     iconColorClass: "text-warning",
     chime: true,
+    title: "Payment to verify",
+    body: (t) =>
+      t ? `${t} says they have paid` : "A guest says they have paid",
   },
 };
 
 export default function AlertCenter() {
   const [alerts, setAlerts] = useState<Alert[]>([]);
   const nextIdRef = useRef(1);
+  const queryClient = useQueryClient();
 
   useEffect(() => {
-    let unsub: Unsubscribe | undefined;
-    let cancelled = false;
+    const timers: number[] = [];
 
-    (async () => {
-      const messaging = getMessagingInstance();
-      if (!messaging) return;
-      const { onMessage } = await import("firebase/messaging");
-      if (cancelled) return;
+    const unsubscribe = subscribeToRealtimeEvents((event: RealtimeEvent) => {
+      const meta = TYPE_META[event.type];
+      if (!meta) return;
 
-      unsub = onMessage(messaging, (payload) => {
-        const type = (payload.data?.type as string | undefined) ?? "";
-        const meta = TYPE_META[type];
-        if (!meta) return;
+      // The stream carries the table's uuid; staff read names. Resolve off the
+      // tables cache the dashboard already keeps warm, and degrade to a
+      // table-less message rather than printing a uuid at a busy waiter.
+      const tableUuid = event.data?.table_id;
+      const cached = queryClient.getQueryData<AdminTablesResponse>(
+        queryKeys.admin.tables(),
+      );
+      const tableName =
+        typeof tableUuid === "string"
+          ? cached?.tables.find((t) => t.id === tableUuid)?.table_id ?? null
+          : null;
 
-        const title = payload.notification?.title ?? "Notification";
-        const body = payload.notification?.body ?? "";
-        const id = nextIdRef.current++;
+      const id = nextIdRef.current++;
+      setAlerts((prev) => [
+        ...prev,
+        {
+          id,
+          title: meta.title,
+          body: meta.body(tableName),
+          iconClass: meta.iconClass,
+          iconColorClass: meta.iconColorClass,
+        },
+      ]);
 
-        setAlerts((prev) => [
-          ...prev,
-          { id, title, body, iconClass: meta.iconClass, iconColorClass: meta.iconColorClass },
-        ]);
+      if (meta.chime) playChime();
 
-        if (meta.chime) playChime();
-
-        setTimeout(() => {
+      timers.push(
+        window.setTimeout(() => {
           setAlerts((prev) => prev.filter((a) => a.id !== id));
-        }, VISIBLE_MS);
-      });
-    })();
+        }, VISIBLE_MS),
+      );
+    });
 
     return () => {
-      cancelled = true;
-      if (unsub) unsub();
+      unsubscribe();
+      timers.forEach(clearTimeout);
     };
-  }, []);
+  }, [queryClient]);
 
   if (alerts.length === 0) return null;
 

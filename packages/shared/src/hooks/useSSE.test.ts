@@ -1,5 +1,11 @@
 import { describe, it, expect } from "vitest";
-import { EVENT_CACHE_KEYS, UNKNOWN_EVENT_KEYS } from "./useSSE";
+import {
+  EVENT_CACHE_KEYS,
+  UNKNOWN_EVENT_KEYS,
+  subscribeToRealtimeEvents,
+  publishRealtimeEvent,
+  type RealtimeEvent,
+} from "./useSSE";
 
 /**
  * The failure mode this guards is silence. If our event names drift from the
@@ -70,5 +76,49 @@ describe("SSE event map", () => {
   it("falls back broadly for an event we don't know yet", () => {
     expect(EVENT_CACHE_KEYS["something_new"]).toBeUndefined();
     expect(UNKNOWN_EVENT_KEYS.length).toBeGreaterThan(0);
+  });
+});
+
+/**
+ * The bug this guards: alerts and the chime used to be wired to Firebase
+ * `onMessage` alone. On any deployment without FCM credentials — production
+ * included — no alert could ever fire, while the events sat on the SSE stream
+ * being dropped. `waiter_called` invalidates no caches by design, so the
+ * subscriber bus is the *only* thing that makes a waiter call visible.
+ */
+describe("realtime event bus", () => {
+  it("delivers events to subscribers and stops on unsubscribe", () => {
+    const seen: RealtimeEvent[] = [];
+    const unsubscribe = subscribeToRealtimeEvents((e) => seen.push(e));
+
+    publishRealtimeEvent({ type: "waiter_called", data: { table_id: "abc" } });
+    expect(seen).toHaveLength(1);
+    expect(seen[0]!.type).toBe("waiter_called");
+    expect(seen[0]!.data?.table_id).toBe("abc");
+
+    unsubscribe();
+    publishRealtimeEvent({ type: "waiter_called", data: {} });
+    expect(seen).toHaveLength(1);
+  });
+
+  it("keeps delivering to healthy listeners when one throws", () => {
+    const seen: string[] = [];
+    const un1 = subscribeToRealtimeEvents(() => {
+      throw new Error("boom");
+    });
+    const un2 = subscribeToRealtimeEvents((e) => seen.push(e.type));
+
+    expect(() => publishRealtimeEvent({ type: "new_order" })).not.toThrow();
+    expect(seen).toEqual(["new_order"]);
+
+    un1();
+    un2();
+  });
+
+  // Every event that interrupts staff must be one the backend actually emits.
+  it("only alerts on events in the backend vocabulary", () => {
+    for (const t of ["waiter_called", "pos_requested", "new_order", "payment_claimed"]) {
+      expect(BACKEND_EVENTS).toContain(t as (typeof BACKEND_EVENTS)[number]);
+    }
   });
 });

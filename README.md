@@ -7,6 +7,7 @@ This repo holds the **frontend only**. The Python/FastAPI backend lives in a sep
 Product docs:
 - [`PRD.md`](PRD.md) — what Oshap is, v1.1 MVP scope, lifecycles
 - [`docs/jtbd.md`](docs/jtbd.md) — what Oshap is hired to do (Jobs To Be Done)
+- [`docs/plans.md`](docs/plans.md) — what each subscription plan includes. Every plan gets the whole product; they differ by capacity (Lite is capped at 3 staff accounts and 10 tables), not capability.
 
 ## Stack
 

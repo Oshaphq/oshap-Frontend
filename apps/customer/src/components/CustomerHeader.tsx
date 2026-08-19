@@ -1,5 +1,6 @@
 import { ReactNode } from "react";
 import { getDeviceToken, useTable } from "@oshap/shared";
+import { BrandMark } from "@oshap/shared/ui";
 import NotificationBell from "./NotificationBell";
 import { useSession } from "../context/SessionContext";
 
@@ -53,11 +54,13 @@ export default function CustomerHeader({
       <div className="flex items-center gap-s min-w-0">
         {leftSlot}
 
+        {/* The restaurant's mark, not ours. A guest scanned a code in *their*
+            dining room; showing the Oshap logo told them nothing and quietly
+            wasted the logo they uploaded in settings. */}
         {!title && (
-          <img
-            src="/oshap.png"
-            alt=""
-            aria-hidden="true"
+          <BrandMark
+            logoUrl={tableQuery.data?.restaurant?.logo_url}
+            fallbackSrc="/oshap.png"
             className="w-8 h-8 shrink-0 rounded-lg object-contain"
           />
         )}
