@@ -1,6 +1,6 @@
 # Oshap
 
-QR-based table ordering and payment system. Customers scan a QR at a table, browse a menu, order, and pay via bank transfer or by requesting a POS terminal. The merchant gets push notifications and verifies payments from a PIN-gated dashboard.
+QR-based table ordering and payment system. Customers scan a QR at a table, browse a menu, order, and pay via bank transfer or by requesting a POS terminal. The merchant gets push notifications and verifies payments from a staff-gated dashboard.
 
 This repo holds the **frontend only**. The Python/FastAPI backend lives in a separate repo and is built against the contract in [`docs/openapi.yaml`](docs/openapi.yaml).
 
@@ -31,6 +31,8 @@ oshap/
 │   └── platform/         Internal operator portal — tenant onboarding, subscriptions, system health
 ├── packages/
 │   └── shared/           Typed API client, TanStack hooks, design tokens, UI primitives
+├── e2e/                  Playwright — customer ordering, against the mock
+├── smoke/                Playwright — deployed apps against the live API
 ├── docs/
 │   ├── openapi.yaml          Source of truth for the backend contract
 │   ├── data-model.md         Where the schema lives (pointer — models are in the backend repo)
@@ -49,13 +51,13 @@ npm install
 
 # No backend needed — mock API auto-activates
 npm run dev:customer   # http://localhost:5173
-npm run dev:admin      # http://localhost:5174 (login: owner@oshap.com / password)
+npm run dev:admin      # http://localhost:5174 (login: 0803 000 0001 / password)
 npm run dev:platform   # http://localhost:5176 (operator portal; any access code in mock)
 ```
 
 > **Cross-app mock sync:** customer (`:5173`) and admin (`:5174`) are different origins and **don't share `localStorage`**, so on the mock API a customer order won't reach the admin app on its own. Start the relay to bridge them: `npm run relay` (`ws-relay.js`, port 5175), then **refresh both tabs**. Tabs of the *same* app already sync via `localStorage` without it.
 
-To point at a real backend, set `VITE_API_BASE_URL` in a `.env.local` file (see `.env.example`). It is the backend **origin only** — `http://localhost:8000`, not `.../api/v1`. The `/api/v1` prefix is owned by the shared client (`API_PREFIX` in [`packages/shared/src/api/client.ts`](packages/shared/src/api/client.ts)), so it can't be lost to a mistyped env var. The mock API is tree-shaken when a real backend URL is configured.
+To point at a real backend, set `VITE_API_BASE_URL` in a `.env.local` file **at the repository root** (see `.env.example`) — every app's `vite.config.ts` sets `envDir` to the root, so that one file serves all three. It is the backend **origin only** — `http://localhost:8000`, not `.../api/v1`. The `/api/v1` prefix is owned by the shared client (`API_PREFIX` in [`packages/shared/src/api/client.ts`](packages/shared/src/api/client.ts)), so it can't be lost to a mistyped env var. The mock API is tree-shaken when a real backend URL is configured.
 
 ## Scripts
 
@@ -67,6 +69,58 @@ To point at a real backend, set `VITE_API_BASE_URL` in a `.env.local` file (see 
 | `npm run typecheck` | `tsc --noEmit` across every workspace |
 | `npm run lint` / `lint:fix` | ESLint (flat config) across the repo |
 | `npm test` / `test:watch` | Vitest — data-layer + mock-API tests (jsdom) |
+| `npm run test:e2e` | Playwright over the customer app, driven against the **mock** |
+| `npm run smoke` | Playwright against the **deployed** apps and the **live** API — see below |
+
+## Things that will catch you
+
+Four contract details that are not guessable, each of which has cost real time.
+
+**Tables have two identifiers, and they are not interchangeable.** A table's
+*name* (`T1`) repeats across restaurants, so it identifies nothing on its own —
+`GET /table/T1` used to return whichever restaurant's `T1` the database found
+first, along with their bank accounts. Path params now take the table's uuid;
+body and query fields take the name.
+
+| Call | Takes | Wrong one gives |
+|---|---|---|
+| `GET /table/{id}`, `call-waiter`, `request-pos` | **uuid** | `422` |
+| `POST /orders {table}`, `POST /session {tableId}` | **name** | `404` |
+| `GET /session/orders?table_id=` | **name** | `200` with an empty list |
+
+That last row is the dangerous one — it succeeds and returns nothing.
+
+**Money is integer kobo, everywhere.** `price: 350000` is ₦3,500. Convert only
+at the edges: `formatCurrency()` to render, `nairaToKobo()` to read what a
+person typed. Rates are integer **basis points** — `750` is 7.5%.
+
+**Order prices are asymmetric.** `POST /orders` takes each item's *base* price
+and the server adds the modifier deltas; the order that comes back carries the
+resolved figure. Sending an already-adjusted price double-charges every
+modifier.
+
+**The menu CSV is in kobo, not naira.** A row reading `3500` imports as ₦35.
+This is a poor default for a file people edit by hand and is on the list to
+change — until it does, multiply by 100.
+
+## Testing
+
+Three suites, answering different questions.
+
+| Suite | Runs against | Answers |
+|---|---|---|
+| `npm test` | mock | Is the data layer correct? |
+| `npm run test:e2e` | mock, real browser | Does the UI work? |
+| `npm run smoke` | **deployed apps, live API** | Do the two halves still agree? |
+
+The first two cannot see a contract break, because the mock is something we
+wrote. The smoke check exists for exactly that gap, and for CORS — which is
+enforced by browsers and invisible to any `fetch` from Node. It runs daily in
+CI and needs `OSHAP_PLATFORM_TOKEN`; without it the contract half skips and the
+browser checks still run.
+
+It creates a throwaway tenant and deletes it, so never point it at a
+deployment holding data you care about.
 
 ## Backend dev — start here
 
