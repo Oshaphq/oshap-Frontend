@@ -104,6 +104,26 @@ test.describe("deployed apps can reach the API", () => {
 test.describe("the API contract still matches what we send", () => {
   test.skip(!PLATFORM_TOKEN, "OSHAP_PLATFORM_TOKEN not set — skipping the contract check");
 
+  // The operator portal opens on this list. It is also the one call that
+  // touches every restaurant at once, so a single row the current schema
+  // cannot serialize takes the whole screen down — which is exactly what a
+  // tier rename without a data migration produces.
+  test("the restaurant list can be read at all", async () => {
+    const api = await pwRequest.newContext();
+    try {
+      const res = await api.get(`${V1}/platform/restaurants`, {
+        headers: { "x-platform-token": PLATFORM_TOKEN! },
+      });
+      expect(
+        res.status(),
+        `listing restaurants failed — often one row holding a value the ` +
+          `current enum no longer has: ${(await res.text()).slice(0, 200)}`,
+      ).toBe(200);
+    } finally {
+      await api.dispose();
+    }
+  });
+
   test("the backend accepts every subscription tier the platform app offers", async () => {
     const api = await pwRequest.newContext();
     const rejected: string[] = [];
