@@ -1,5 +1,6 @@
 import { useState } from "react";
 import {
+  errorMessage,
   formatCurrency,
   useAdminModifierGroups,
   useAdminSetMenuItemGroups,
@@ -43,7 +44,7 @@ export default function ItemModifiersDialog({ item, onClose }: Props) {
           onClose();
         },
         onError: (e: unknown) =>
-          toast.error(e instanceof Error ? e.message : "Could not save options"),
+          toast.error(errorMessage(e, "save the options")),
       },
     );
   };

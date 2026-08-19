@@ -6,10 +6,7 @@ import {
   type ReactNode,
 } from "react";
 import { useSearchParams } from "react-router";
-import {
-  sessionsApi,
-  type TableSession,
-} from "@oshap/shared";
+import { errorMessage, sessionsApi, type TableSession } from "@oshap/shared";
 
 interface SessionContextValue {
   session: TableSession | null;
@@ -115,7 +112,7 @@ export function SessionProvider({ children }: { children: ReactNode }) {
       clearUnclaimedOrderIds(tableId);
       return created;
     } catch (err) {
-      const message = err instanceof Error ? err.message : "Failed to start session";
+      const message = errorMessage(err, "start session");
       setError(message);
       throw err;
     } finally {
@@ -137,7 +134,7 @@ export function SessionProvider({ children }: { children: ReactNode }) {
       clearUnclaimedOrderIds(tableId);
       return joined;
     } catch (err) {
-      const message = err instanceof Error ? err.message : "Failed to join session";
+      const message = errorMessage(err, "join session");
       setError(message);
       throw err;
     } finally {

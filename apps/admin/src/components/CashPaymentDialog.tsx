@@ -1,5 +1,6 @@
 import { useState } from "react";
 import {
+  errorMessage,
   formatCurrency,
   getDeviceToken,
   nairaToKobo,
@@ -64,7 +65,7 @@ export default function CashPaymentDialog({ tableId, onClose }: Props) {
         },
         onError: (err) =>
           toast.error(
-            err instanceof Error ? err.message : "Could not record the payment",
+            errorMessage(err, "record the payment"),
           ),
       },
     );

@@ -25,6 +25,22 @@ export class ApiError extends Error {
   }
 }
 
+/**
+ * A request that never reached a server: offline, DNS, TLS, or a CORS policy
+ * that does not allow this origin. Distinct from ApiError, which means the
+ * server answered and said no — an entirely different problem with an
+ * entirely different fix.
+ */
+export class NetworkError extends Error {
+  override cause?: unknown;
+
+  constructor(message = "Could not reach the server", cause?: unknown) {
+    super(message);
+    this.name = "NetworkError";
+    this.cause = cause;
+  }
+}
+
 export const ADMIN_UNAUTHORIZED_EVENT = "oshap:admin-unauthorized";
 
 // ---------------------------------------------------------------------------
@@ -489,12 +505,33 @@ export async function request<T>(
       headers["Authorization"] = `Bearer ${token}`;
     }
 
-    const response = await fetch(buildUrl(path, query), {
-      method,
-      headers,
-      body,
-      signal: options.signal,
-    });
+    // A browser reports "blocked by CORS", "offline" and "server unreachable"
+    // identically, as a bare TypeError with no status. Wrapping it here means
+    // everything downstream can tell "never reached the server" apart from
+    // "the server said no", which are entirely different problems and were
+    // previously indistinguishable.
+    // Built before the try: getBaseUrl() throws when VITE_API_BASE_URL is
+    // missing from a production build, and that is a misconfiguration, not an
+    // unreachable server. Wrapping it would relabel the one error that names
+    // its own fix — precisely the mistake this wrapping exists to prevent.
+    const url = buildUrl(path, query);
+
+    let response: Response;
+    try {
+      response = await fetch(url, {
+        method,
+        headers,
+        body,
+        signal: options.signal,
+      });
+    } catch (cause) {
+      // An aborted request is a caller's own doing, not a failure to reach.
+      if (cause instanceof DOMException && cause.name === "AbortError") throw cause;
+      throw new NetworkError(
+        "Could not reach the server. This is usually a connection problem, or a CORS policy that does not allow this origin.",
+        cause,
+      );
+    }
 
     const contentType = response.headers.get("content-type") ?? "";
     const isJson = contentType.includes("application/json");

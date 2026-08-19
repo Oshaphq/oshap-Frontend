@@ -6,7 +6,7 @@ import {
   useAdminDeleteStaff 
 } from "@oshap/shared/hooks";
 import { Role, StaffMember } from "@oshap/shared/types";
-import { formatPhone, tryNormalizePhone } from "@oshap/shared";
+import { errorMessage, formatPhone, tryNormalizePhone } from "@oshap/shared";
 import { PrimaryButton, SecondaryButton, toast } from "@oshap/shared/ui";
 import { useAuth } from "../../context/AuthContext";
 
@@ -76,7 +76,7 @@ export default function StaffSettings() {
             toast.success("Staff updated successfully");
             setIsModalOpen(false);
           },
-          onError: (err: unknown) => toast.error(err instanceof Error ? err.message : "Failed to update staff"),
+          onError: (err: unknown) => toast.error(errorMessage(err, "update the staff member")),
         }
       );
     } else {
@@ -96,7 +96,7 @@ export default function StaffSettings() {
             toast.success("Staff created successfully");
             setIsModalOpen(false);
           },
-          onError: (err: unknown) => toast.error(err instanceof Error ? err.message : "Failed to create staff"),
+          onError: (err: unknown) => toast.error(errorMessage(err, "add the staff member")),
         }
       );
     }
@@ -106,7 +106,7 @@ export default function StaffSettings() {
     if (window.confirm("Are you sure you want to remove this staff member?")) {
       deleteStaff.mutate(id, {
         onSuccess: () => toast.success("Staff removed"),
-        onError: (err: unknown) => toast.error(err instanceof Error ? err.message : "Failed to remove staff"),
+        onError: (err: unknown) => toast.error(errorMessage(err, "remove the staff member")),
       });
     }
   };

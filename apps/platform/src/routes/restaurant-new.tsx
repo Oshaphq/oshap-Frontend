@@ -1,7 +1,12 @@
 import { useState } from "react";
 import { PHASE_1_TIERS, tierAnnualLabel, tierPriceLabel } from "../tiers";
 import { useNavigate } from "react-router";
-import { formatPhone, tryNormalizePhone, usePlatformCreateRestaurant } from "@oshap/shared";
+import {
+  errorMessage,
+  formatPhone,
+  tryNormalizePhone,
+  usePlatformCreateRestaurant,
+} from "@oshap/shared";
 import type { SubscriptionTier } from "@oshap/shared";
 import { PrimaryButton, SecondaryButton, toast } from "@oshap/shared/ui";
 
@@ -78,8 +83,11 @@ export default function RestaurantNewPage() {
         toast.success(`${r.name} onboarded successfully.`);
         navigate(`/restaurants/${r.id}`);
       }
-    } catch {
-      toast.error("Failed to create restaurant. Please try again.");
+    } catch (err) {
+      // This message was "Failed to create restaurant. Please try again." for
+      // a rejected tier, a duplicate phone number and a CORS wall alike. Each
+      // time it sent someone looking in the wrong place.
+      toast.error(errorMessage(err, "create the restaurant"));
     }
   };
 

@@ -1,5 +1,6 @@
 export * from "./client";
 export * from "./keys";
+export * from "./errors";
 export * as menuApi from "./menu";
 export * as tablesApi from "./tables";
 export * as ordersApi from "./orders";
