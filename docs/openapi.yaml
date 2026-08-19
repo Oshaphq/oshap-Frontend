@@ -113,6 +113,55 @@ components:
   # Schemas
   # -----------------------------------------------------------------------
   schemas:
+    NotificationType:
+      type: string
+      description: >
+        The six SSE events that ask a person to do something. Deliberately a
+        subset of the event vocabulary — see the `/events` description.
+      enum:
+        - waiter_called
+        - pos_requested
+        - new_order
+        - order_ready
+        - payment_claimed
+        - low_stock
+    Notification:
+      type: object
+      description: >
+        Facts, not sentences. The client composes the wording, because the same
+        record drives a row in the notifications tab and a toast in the alert
+        centre and those must not drift. FCM push payloads are the exception —
+        no client is running to compose those.
+      properties:
+        id: { type: string, format: uuid }
+        type: { $ref: "#/components/schemas/NotificationType" }
+        table_id: { type: string, format: uuid, nullable: true }
+        table_name:
+          type: string
+          nullable: true
+          description: >
+            Resolved when the row is written, never looked up by the client. The
+            SSE payload carries only the uuid, so the live alert already degrades
+            to "a table" when the table cache is cold; a row read three hours
+            later must not depend on what a browser happened to have cached.
+        order_id: { type: string, format: uuid, nullable: true }
+        order_reference: { type: string, nullable: true }
+        amount:
+          type: integer
+          nullable: true
+          description: Kobo, like every other money field.
+        menu_item_id: { type: string, format: uuid, nullable: true }
+        menu_item_name: { type: string, nullable: true, description: "`low_stock` only." }
+        created_at: { type: string, format: date-time }
+        read:
+          type: boolean
+          description: For the calling staff member only.
+        resolved_at: { type: string, format: date-time, nullable: true }
+        resolved_by_name:
+          type: string
+          nullable: true
+          description: Who claimed it, so a colleague knows not to go.
+      required: [id, type, created_at, read]
     Envelope:
       type: object
       description: >
@@ -2160,6 +2209,144 @@ paths:
                   per_page: { type: integer }
                 required: [logs, total, page, per_page]
 
+  /admin/notifications:
+    get:
+      tags: [Admin]
+      summary: What needs a person, and what was missed
+      description: >
+        The durable record behind the in-app alert. An alert lives for five
+        seconds; this is what a waiter opens to ask what happened while they
+        were in the kitchen.
+
+
+        Only the six event types that are a **request for someone to do
+        something** appear here — if nobody would get up, it is not a
+        notification. State changes the screens already reflect
+        (`order_preparing`, payment outcomes, `table_closed`, session events)
+        are deliberately absent.
+
+
+        **Routing is server-side.** The list returns only what the caller's role
+        is entitled to see. A kitchen account must never receive payment
+        notifications, because a client that fetches them and hides them has
+        still put the day's takings on the pass.
+
+
+        Distinct from `/admin/audit-logs`, which records what staff *did* for
+        accountability. This records what *happened* that someone may need to
+        act on. See `docs/notifications.md`.
+      security: [{ adminPin: [] }]
+      parameters:
+        - { name: page, in: query, schema: { type: integer, default: 1 } }
+        - { name: per_page, in: query, schema: { type: integer, default: 25, maximum: 100 } }
+        - name: unread_only
+          in: query
+          schema: { type: boolean, default: false }
+        - name: unresolved_only
+          in: query
+          schema: { type: boolean, default: false }
+          description: What the badge counts.
+        - name: type
+          in: query
+          schema: { $ref: "#/components/schemas/NotificationType" }
+      responses:
+        "200":
+          description: Notifications, newest first
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  notifications:
+                    type: array
+                    items: { $ref: "#/components/schemas/Notification" }
+                  total: { type: integer }
+                  unread_total:
+                    type: integer
+                    description: >
+                      Across the whole restaurant, not this page — a badge that
+                      changes when someone turns a page is not a badge.
+                  unresolved_total:
+                    type: integer
+                    description: What the bell should display.
+                  page: { type: integer }
+                  per_page: { type: integer }
+                required:
+                  [notifications, total, unread_total, unresolved_total, page, per_page]
+
+  /admin/notifications/read:
+    post:
+      tags: [Admin]
+      summary: Mark notifications read for the calling staff member
+      description: >
+        Read state is **per person**, not per restaurant: it describes one
+        member of staff's attention, not whether the work is done. Two waiters
+        can both read the same call.
+
+
+        Idempotent — marking an already-read notification read is a success, not
+        a conflict. The client fires this as rows scroll into view and must not
+        have to reason about duplicates.
+      security: [{ adminPin: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                ids:
+                  type: array
+                  items: { type: string, format: uuid }
+                all:
+                  type: boolean
+                  description: Marks every notification visible to this caller read.
+              description: Supply `ids` or `all`, not both.
+      responses:
+        "200":
+          description: Updated counts
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  unread_total: { type: integer }
+                required: [unread_total]
+
+  /admin/notifications/{id}/resolve:
+    post:
+      tags: [Admin]
+      summary: Claim a notification — "I'll go"
+      description: >
+        Marks the work as taken, for the whole restaurant, so three waiters do
+        not walk to the same table. Sets `resolved_at` and `resolved_by`, and
+        publishes `notification_resolved` so a colleague already walking sees it
+        go quiet.
+
+
+        Valid only for `waiter_called` and `pos_requested`. Every other type
+        resolves itself from the entity it describes — a `payment_claimed`
+        resolves when that payment is verified or rejected — and letting a
+        person resolve one by hand would put this list out of step with the
+        board. Other types return **409**, not 403: the caller is permitted, the
+        action is meaningless.
+
+
+        Already resolved returns **200** with the existing record rather than an
+        error. Two waiters tapping at once is the normal case, and the second
+        needs to see who got there first.
+      security: [{ adminPin: [] }]
+      parameters:
+        - { name: id, in: path, required: true, schema: { type: string, format: uuid } }
+      responses:
+        "200":
+          description: The claimed notification
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Notification" }
+        "409":
+          description: This type resolves itself and cannot be claimed by hand.
+
   /admin/z-report:
     get:
       tags: [Admin]
@@ -3327,6 +3514,7 @@ paths:
         | `waiter_called` | Guest pressed call-a-waiter |
         | `session_started` · `session_joined` | Shared-table session changed |
         | `low_stock` | An item crossed its threshold |
+        | `notification_resolved` | A staff member claimed a waiter call or POS request |
 
         Names are lower_snake. The frontend maps each to the query caches it
         invalidates (`packages/shared/src/hooks/useSSE.ts`); unknown types fall
