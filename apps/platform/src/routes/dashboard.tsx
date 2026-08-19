@@ -1,4 +1,5 @@
 import { Link } from "react-router";
+import { QueryError } from "@oshap/shared/ui";
 import { monthlyRecurringKobo } from "../tiers";
 import {
   usePlatformRestaurants,
@@ -25,6 +26,13 @@ export default function DashboardPage() {
         <p className="text-p2 text-secondary-text">Internal Oshap operator dashboard</p>
       </header>
 
+      {/* A failed query must never render as a real figure. Zero restaurants
+          and "we could not ask" are different facts, and the tiles cannot tell
+          them apart on their own. */}
+      {restaurantsQuery.isError && (
+        <QueryError onRetry={() => restaurantsQuery.refetch()} />
+      )}
+
       {/* KPI row */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-md">
         <div className="bg-surface-container-low rounded-md p-md flex flex-col gap-xs">
@@ -32,7 +40,7 @@ export default function DashboardPage() {
             Total Restaurants
           </span>
           <span className="font-display text-display-h2 font-semibold text-primary-text">
-            {restaurantsQuery.isLoading ? "—" : restaurants.length}
+            {restaurantsQuery.isLoading || restaurantsQuery.isError ? "—" : restaurants.length}
           </span>
         </div>
         <div className="bg-surface-container-low rounded-md p-md flex flex-col gap-xs">
@@ -40,7 +48,7 @@ export default function DashboardPage() {
             Active
           </span>
           <span className="font-display text-display-h2 font-semibold text-success">
-            {restaurantsQuery.isLoading ? "—" : active}
+            {restaurantsQuery.isLoading || restaurantsQuery.isError ? "—" : active}
           </span>
         </div>
         <div className="bg-surface-container-low rounded-md p-md flex flex-col gap-xs">
@@ -48,7 +56,7 @@ export default function DashboardPage() {
             Est. MRR
           </span>
           <span className="font-display text-display-h2 font-semibold text-primary-text">
-            {restaurantsQuery.isLoading ? "—" : formatCurrency(mrr)}
+            {restaurantsQuery.isLoading || restaurantsQuery.isError ? "—" : formatCurrency(mrr)}
           </span>
         </div>
         <div

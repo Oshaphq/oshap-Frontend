@@ -1,4 +1,5 @@
 import { usePlatformHealth } from "@oshap/shared";
+import { QueryError } from "@oshap/shared/ui";
 
 function Metric({
   label,
@@ -70,6 +71,8 @@ export default function HealthPage() {
           </div>
         )}
       </header>
+
+      {query.isError && <QueryError onRetry={() => query.refetch()} />}
 
       {query.isLoading && (
         <div className="flex justify-center py-xl">
