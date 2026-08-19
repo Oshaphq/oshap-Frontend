@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { QueryError } from "@oshap/shared/ui";
 import { Link } from "react-router";
 import { formatPhone, usePlatformRestaurants } from "@oshap/shared";
 // Every tier, not just the ones on sale — an existing Enterprise restaurant
@@ -94,7 +95,13 @@ export default function RestaurantsPage() {
         </div>
       )}
 
-      {!query.isLoading && filtered.length === 0 && (
+      {/* A failed request and a genuinely empty list look identical unless
+          they are told apart. This screen previously showed "no restaurants
+          match your filters" while the API was returning 500, so a real
+          restaurant looked deleted. */}
+      {query.isError && <QueryError onRetry={() => query.refetch()} />}
+
+      {!query.isLoading && !query.isError && filtered.length === 0 && (
         <div className="flex flex-col items-center gap-s py-10 text-center">
           <i className="mgc_fork_spoon_line text-5xl text-outline-variant opacity-40" />
           <p className="text-p2 text-secondary-text">No restaurants match your filters.</p>

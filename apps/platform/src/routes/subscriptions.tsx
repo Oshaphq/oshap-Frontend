@@ -1,4 +1,5 @@
 import { usePlatformRestaurants, formatCurrency } from "@oshap/shared";
+import { QueryError } from "@oshap/shared/ui";
 import type { SubscriptionTier } from "@oshap/shared";
 import { Link } from "react-router";
 import { TIER_MONTHLY_KOBO, TIER_ORDER, tierPriceLabel } from "../tiers";
@@ -56,6 +57,14 @@ export default function SubscriptionsPage() {
   }, 0);
 
   const arr = mrr * 12;
+
+  if (query.isError) {
+    return (
+      <main className="p-md flex flex-col gap-l">
+        <QueryError onRetry={() => query.refetch()} />
+      </main>
+    );
+  }
 
   return (
     <main className="p-md flex flex-col gap-l">
