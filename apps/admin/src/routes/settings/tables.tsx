@@ -12,7 +12,7 @@ import QrPrintSheet, {
   type QrPrintRequest,
   type QrPrintTable,
 } from "../../components/QrPrintSheet";
-import { isLocalOrigin } from "../../utils/qr";
+import { isLocalOrigin, isOriginUnusable } from "../../utils/qr";
 import { qrPrintedKey } from "../../components/SetupChecklist";
 
 export default function TablesSettings() {
@@ -117,14 +117,27 @@ export default function TablesSettings() {
         </div>
       </div>
 
-      {isLocalOrigin() && tables.length > 0 && (
+      {isOriginUnusable() && tables.length > 0 && (
         <div className="flex items-start gap-s p-md rounded-lg bg-warning-container text-on-warning-container">
           <i className="mgc_alert_line text-xl shrink-0 mt-0.5" />
           <p className="text-p2">
-            QR codes currently point at <span className="font-semibold">localhost</span>,
-            which guests&apos; phones can&apos;t reach. Set{" "}
-            <span className="font-semibold">VITE_CUSTOMER_APP_URL</span> to your public
-            customer URL before printing.
+            {isLocalOrigin() ? (
+              <>
+                QR codes currently point at{" "}
+                <span className="font-semibold">localhost</span>, which guests&apos;
+                phones can&apos;t reach. Set{" "}
+                <span className="font-semibold">VITE_CUSTOMER_APP_URL</span> to your
+                public customer URL before printing.
+              </>
+            ) : (
+              <>
+                <span className="font-semibold">VITE_CUSTOMER_APP_URL</span> is missing{" "}
+                <span className="font-semibold">https://</span>. Codes generated here
+                now add it, but any already printed encode a bare domain, which is text
+                rather than a link — some phones will open it, some will not.{" "}
+                <span className="font-semibold">Reprint anything already on a table.</span>
+              </>
+            )}
           </p>
         </div>
       )}

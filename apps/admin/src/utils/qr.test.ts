@@ -3,6 +3,8 @@ import {
   buildTableUrl,
   getCustomerOrigin,
   isLocalOrigin,
+  isOriginUnusable,
+  isSchemeless,
   qrFileName,
 } from "./qr";
 
@@ -90,5 +92,42 @@ describe("buildTableUrl encodes identity, not the label", () => {
     const a = buildTableUrl("aaaaaaaa-0000-4000-8000-000000000001");
     const b = buildTableUrl("bbbbbbbb-0000-4000-8000-000000000002");
     expect(a).not.toBe(b);
+  });
+});
+
+/**
+ * Production had `VITE_CUSTOMER_APP_URL=oshap.useshappay.com` — no scheme — so
+ * every printed code encoded `oshap.useshappay.com/menu?table=…`, which is text
+ * rather than a link. `isLocalOrigin` was the only guard, it checks for
+ * localhost and nothing else, so the one warning built to prevent this stayed
+ * silent while codes went onto tables.
+ */
+describe("a scheme-less origin", () => {
+  afterEach(() => vi.unstubAllEnvs());
+
+  it("is repaired to https so the printed code still works", () => {
+    vi.stubEnv("VITE_CUSTOMER_APP_URL", "oshap.useshappay.com");
+    expect(getCustomerOrigin()).toBe("https://oshap.useshappay.com");
+    expect(buildTableUrl("abc")).toBe("https://oshap.useshappay.com/menu?table=abc");
+  });
+
+  it("is still reported, so the setting gets fixed", () => {
+    vi.stubEnv("VITE_CUSTOMER_APP_URL", "oshap.useshappay.com");
+    expect(isSchemeless()).toBe(true);
+    expect(isOriginUnusable()).toBe(true);
+    // The old guard is exactly why this shipped: it sees nothing wrong here.
+    expect(isLocalOrigin()).toBe(false);
+  });
+
+  it("leaves a properly configured origin alone", () => {
+    vi.stubEnv("VITE_CUSTOMER_APP_URL", "https://oshap.useshappay.com");
+    expect(getCustomerOrigin()).toBe("https://oshap.useshappay.com");
+    expect(isOriginUnusable()).toBe(false);
+  });
+
+  it("still catches localhost", () => {
+    vi.stubEnv("VITE_CUSTOMER_APP_URL", "http://localhost:5173");
+    expect(isOriginUnusable()).toBe(true);
+    expect(isLocalOrigin()).toBe(true);
   });
 });
