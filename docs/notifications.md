@@ -70,6 +70,7 @@ uses today, so a bartender is not woken for a plate of rice.
 Notification
   id                uuid
   restaurant_id     uuid
+  branch_id         uuid | null     -- the venue this happened at
   type              NotificationType
   table_id          uuid | null
   table_name        string | null     -- resolved at write time
@@ -129,6 +130,7 @@ bearer token. Pagination follows `/admin/audit-logs`.
 | `unread_only` | bool | false | |
 | `unresolved_only` | bool | false | What the badge counts |
 | `type` | NotificationType | — | Optional filter |
+| `branch_id` | uuid | — | The shared `BranchId` parameter. Omitted = the caller's default scope |
 
 ```json
 {
@@ -136,6 +138,8 @@ bearer token. Pagination follows `/admin/audit-logs`.
     {
       "id": "9f2c…",
       "type": "waiter_called",
+      "branch_id": "4a1e…",
+      "branch_name": "Ikeja",
       "table_id": "bddce0c6…",
       "table_name": "T4",
       "order_id": null,
@@ -157,8 +161,9 @@ bearer token. Pagination follows `/admin/audit-logs`.
 }
 ```
 
-`unread_total` and `unresolved_total` are **totals across the whole restaurant**, not the
-page — the badge must not change when someone turns a page.
+`unread_total` and `unresolved_total` are **totals for the caller's scope**, not the page —
+the badge must not change when someone turns a page. Scope means one branch for branch
+staff, and whatever the switcher currently selects for an owner.
 
 ### `POST /admin/notifications/read`
 
@@ -245,9 +250,34 @@ that clears because you glanced at it is a badge that has stopped meaning anythi
 Steps 1 and 2 are worth shipping alone. Step 3 is what stops three waiters walking to the
 same table, and is the reason to build this rather than keep a list in the browser.
 
-## Open question for the backend
+## Notifications belong to a branch
 
-Does a notification belong to a **branch** or a restaurant? Once locations exist
-(`docs/plans.md`), a manager at one venue must not be paged for another's tables. Cheap to
-add `branch_id` now, awkward to backfill onto a live table later — recommend adding it from
-the start even though nothing reads it yet.
+**Decided.** A notification is scoped to the venue it happened at, not to the group.
+
+Two reasons, and the second is the one that bites:
+
+- A manager at one venue must never be paged for another's tables. Being interrupted for
+  work you cannot do teaches people to ignore the bell, and a bell people ignore is worse
+  than no bell.
+- **"Table 4 needs attention" is meaningless across two buildings that both have a table
+  4.** Table names are unique within a venue and repeat across them, exactly as they do
+  today across restaurants — which is why a QR code encodes a uuid rather than a name.
+
+So `branch_id` ships on the record from the start, even while nothing reads it. Backfilling
+it onto a live table later means guessing which venue each historical row belonged to, and
+for the rows that matter — the ones someone is disputing the next morning — guessing is
+not good enough.
+
+The list endpoint takes the existing `BranchId` parameter, the same one the branch switcher
+already sends. Omitted means the caller's default scope, matching every other admin
+endpoint rather than inventing a second rule.
+
+`branch_id` is null only for single-location restaurants created before branches exist,
+which is all of them today.
+
+### Consequences for routing
+
+The role matrix above is *within* a branch. A `WAITER` at branch A receives `waiter_called`
+for branch A's tables only. An `OWNER` viewing the whole group receives everything, which
+is the one case where volume could become a problem — worth a per-branch filter in the UI
+from the first version rather than as a later addition.

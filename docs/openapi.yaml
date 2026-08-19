@@ -135,6 +135,19 @@ components:
       properties:
         id: { type: string, format: uuid }
         type: { $ref: "#/components/schemas/NotificationType" }
+        branch_id:
+          type: string
+          format: uuid
+          nullable: true
+          description: >
+            The venue this happened at. A notification belongs to a branch, not a
+            group: a manager at one venue must never be paged for another&#39;s
+            tables, and "Table 4 needs attention" is meaningless across two
+            buildings that both have a table 4.
+
+
+            Null only for single-location restaurants that predate branches.
+        branch_name: { type: string, nullable: true }
         table_id: { type: string, format: uuid, nullable: true }
         table_name:
           type: string
@@ -2249,6 +2262,7 @@ paths:
         - name: type
           in: query
           schema: { $ref: "#/components/schemas/NotificationType" }
+        - $ref: "#/components/parameters/BranchId"
       responses:
         "200":
           description: Notifications, newest first

@@ -14,16 +14,49 @@ const DEFAULT_CUSTOMER_ORIGIN = "http://localhost:5173";
  */
 const ERROR_CORRECTION = "M" as const;
 
+/**
+ * The configured origin, with a missing scheme repaired.
+ *
+ * `VITE_CUSTOMER_APP_URL=oshap.useshappay.com` — no scheme — was set in
+ * production, and every printed code encoded `oshap.useshappay.com/menu?...`.
+ * That is not a URL, it is text: a phone camera may guess at it, may offer to
+ * search for it, or may do nothing, and which of those you get depends on the
+ * handset. Codes were already on tables before anyone noticed.
+ *
+ * So repair it rather than propagate it. A code that works is worth more than
+ * a principled refusal once the laminator has been involved — and
+ * `isOriginUnusable` below still reports it, so the config gets fixed too.
+ */
 export function getCustomerOrigin(): string {
   const configured = import.meta.env.VITE_CUSTOMER_APP_URL;
-  return (configured || DEFAULT_CUSTOMER_ORIGIN).replace(/\/+$/, "");
+  const raw = (configured || DEFAULT_CUSTOMER_ORIGIN).trim().replace(/\/+$/, "");
+  if (!raw) return DEFAULT_CUSTOMER_ORIGIN;
+  return /^https?:\/\//i.test(raw) ? raw : `https://${raw}`;
 }
 
-/** True when QR codes would encode a URL no guest's phone can reach. */
+/** True when the origin points somewhere no guest's phone can reach. */
 export function isLocalOrigin(origin = getCustomerOrigin()): boolean {
   return /^https?:\/\/(localhost|127\.0\.0\.1|0\.0\.0\.0|\[::1\])(:|\/|$)/i.test(
     origin,
   );
+}
+
+/** True when the *configured* value was not a usable absolute URL. */
+export function isSchemeless(): boolean {
+  const configured = import.meta.env.VITE_CUSTOMER_APP_URL;
+  return Boolean(configured) && !/^https?:\/\//i.test(String(configured).trim());
+}
+
+/**
+ * The single question the QR screens should ask: would printing this be a
+ * mistake?
+ *
+ * `isLocalOrigin` alone was too narrow. It caught localhost and nothing else,
+ * so a scheme-less domain sailed past the one guard built to prevent exactly
+ * this, and the warning never appeared.
+ */
+export function isOriginUnusable(): boolean {
+  return isLocalOrigin() || isSchemeless();
 }
 
 /**
