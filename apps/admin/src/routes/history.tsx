@@ -112,7 +112,7 @@ export default function HistoryPage() {
           <p>Loading history...</p>
         </div>
       ) : historyQuery.isError ? (
-        <QueryError onRetry={() => historyQuery.refetch()} />
+        <QueryError error={historyQuery.error} action="load the history" onRetry={() => historyQuery.refetch()} />
       ) : orders.length === 0 ? (
         <div className="flex flex-col items-center justify-center gap-s py-10 px-md text-center">
           <i className="mgc_history_line text-5xl text-outline-variant opacity-40" />

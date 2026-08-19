@@ -61,7 +61,11 @@ export default function KitchenPage() {
   }
 
   if (kitchenQuery.isError || menuQuery.isError) {
-    return <QueryError onRetry={() => { kitchenQuery.refetch(); menuQuery.refetch(); }} />;
+    return <QueryError
+        error={kitchenQuery.error ?? menuQuery.error}
+        action="load the orders"
+        onRetry={() => { kitchenQuery.refetch(); menuQuery.refetch(); }}
+      />;
   }
 
   const menuItems = menuQuery.data ?? [];

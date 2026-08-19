@@ -39,7 +39,7 @@ export default function DashboardPage() {
   }
 
   if (tablesQuery.isError) {
-    return <QueryError onRetry={() => tablesQuery.refetch()} />;
+    return <QueryError error={tablesQuery.error} action="load the tables" onRetry={() => tablesQuery.refetch()} />;
   }
 
   const tables = tablesQuery.data?.tables ?? [];

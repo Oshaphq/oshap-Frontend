@@ -102,3 +102,45 @@ describe("errorMessage — one line for a toast", () => {
     expect(msg).toContain("save settings");
   });
 });
+
+/**
+ * The platform dashboard sat blank while `GET /platform/restaurants` returned
+ * 500, and told the operator to "check your connection". Their connection was
+ * fine; 15 restaurants were sitting in the database. `QueryError` defaulted to
+ * that copy and not one of its thirteen call sites passed the actual error, so
+ * every failure in both apps was reported as a network problem.
+ */
+describe("a server fault is never blamed on the network", () => {
+  it("does not mention the user's connection on a 500", () => {
+    const d = describeError(
+      new ApiError(500, "Something went wrong", null),
+      "load the restaurants",
+    );
+    expect(d.kind).toBe("server");
+    expect(d.isOurFault).toBe(true);
+    expect(d.message.toLowerCase()).not.toContain("your connection");
+    expect(d.message.toLowerCase()).not.toContain("check your");
+  });
+
+  // Only the genuinely offline case may say it, because only then is it true.
+  it("says it when the browser really is offline", () => {
+    const original = Object.getOwnPropertyDescriptor(globalThis, "navigator");
+    Object.defineProperty(globalThis, "navigator", {
+      value: { onLine: false },
+      configurable: true,
+    });
+    try {
+      const d = describeError(new ApiError(500, "Something went wrong", null));
+      expect(d.kind).toBe("offline");
+      expect(d.message.toLowerCase()).toContain("connection");
+    } finally {
+      if (original) Object.defineProperty(globalThis, "navigator", original);
+    }
+  });
+
+  it("still offers a retry when nothing is known about the failure", () => {
+    const d = describeError(undefined);
+    expect(d.canRetry).toBe(true);
+    expect(d.title).toBe("Something went wrong");
+  });
+});

@@ -61,7 +61,11 @@ export default function SubscriptionsPage() {
   if (query.isError) {
     return (
       <main className="p-md flex flex-col gap-l">
-        <QueryError onRetry={() => query.refetch()} />
+        <QueryError
+          error={query.error}
+          action="load the subscriptions"
+          onRetry={() => query.refetch()}
+        />
       </main>
     );
   }
