@@ -25,6 +25,9 @@ const PLATFORM_TOKEN = process.env.OSHAP_PLATFORM_TOKEN;
 
 const V1 = `${API}/api/v1`;
 
+/** Cheapest plan that includes table ordering, per the pricing strategy. */
+const ORDERING_TIER = "STANDARD" as const;
+
 /** Unmistakably test data, and greppable if a cleanup ever fails. */
 const stamp = Date.now().toString().slice(-6);
 const TENANT_NAME = `ZZ SMOKE ${stamp}`;
@@ -145,7 +148,10 @@ test.describe("the API contract still matches what we send", () => {
           name: TENANT_NAME,
           owner_name: "Smoke Check",
           owner_phone: OWNER_PHONE,
-          subscription_tier: TIER_ORDER[0],
+          // Ordering is a Standard feature — Lite is menu-only, by design.
+          // Running this on Lite would assert that a plan can do something it
+          // is explicitly not sold as doing.
+          subscription_tier: ORDERING_TIER,
           table_count: 2,
         },
       });
@@ -216,6 +222,62 @@ test.describe("the API contract still matches what we send", () => {
       if (restaurantId && PLATFORM_TOKEN) {
         await api.delete(`${V1}/platform/restaurants/${restaurantId}`, {
           headers: { "x-platform-token": PLATFORM_TOKEN },
+        });
+      }
+      await api.dispose();
+    }
+  });
+});
+
+test.describe("plans grant what they are sold as granting", () => {
+  test.skip(!PLATFORM_TOKEN, "OSHAP_PLATFORM_TOKEN not set");
+
+  // Tier gating is what makes the plans real rather than three labels. These
+  // assert the boundary from both sides: a Lite restaurant must get everything
+  // Lite is sold as including, and must not get what it isn't.
+  test("Lite gets its own feature set, and not Standard's", async () => {
+    const api = await pwRequest.newContext();
+    let id: string | null = null;
+
+    try {
+      const stampL = `${Date.now()}`.slice(-6);
+      const res = await api.post(`${V1}/platform/restaurants`, {
+        headers: { "x-platform-token": PLATFORM_TOKEN! },
+        data: {
+          name: `ZZ LITE ${stampL}`,
+          owner_name: "Lite Check",
+          owner_phone: `0803${stampL.padStart(7, "0").slice(0, 7)}`,
+          subscription_tier: "LITE",
+          table_count: 2,
+        },
+      });
+      expect(res.status(), await res.text()).toBe(201);
+      const tenant = (await res.json()).data;
+      id = tenant.id;
+
+      const token = new URL(tenant.owner_setup_url).searchParams.get("token");
+      const claimed = await api.post(`${V1}/auth/setup/complete`, {
+        data: { token, password: "lite-check-password" },
+      });
+      const auth = {
+        authorization: `Bearer ${(await claimed.json()).data.access_token}`,
+      };
+
+      // Lite is sold as "QR code menu" — and a QR code is per table. Without
+      // table management a Lite restaurant cannot produce the codes that are
+      // the entire product.
+      for (const path of ["/admin/menu", "/admin/settings", "/admin/tables"]) {
+        const r = await api.get(`${V1}${path}`, { headers: auth });
+        expect(r.status(), `Lite should include ${path}`).toBeLessThan(400);
+      }
+
+      // Kitchen dashboard and tickets start at Standard.
+      const kitchen = await api.get(`${V1}/admin/kitchen`, { headers: auth });
+      expect(kitchen.status(), "kitchen should be Standard and above").toBe(403);
+    } finally {
+      if (id) {
+        await api.delete(`${V1}/platform/restaurants/${id}`, {
+          headers: { "x-platform-token": PLATFORM_TOKEN! },
         });
       }
       await api.dispose();
