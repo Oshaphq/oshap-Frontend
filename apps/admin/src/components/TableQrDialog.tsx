@@ -3,6 +3,7 @@ import { PrimaryButton, SecondaryButton, toast } from "@oshap/shared/ui";
 import {
   buildTableUrl,
   downloadDataUrl,
+  isOriginUnusable,
   isLocalOrigin,
   qrFileName,
   renderQrPngDataUrl,
@@ -109,14 +110,24 @@ export default function TableQrDialog({
           <code className="text-caption-md text-secondary-text break-all">{url}</code>
         </div>
 
-        {isLocalOrigin() && (
+        {isOriginUnusable() && (
           <div className="flex items-start gap-s p-md rounded-lg bg-warning-container text-on-warning-container">
             <i className="mgc_alert_line text-lg shrink-0 mt-0.5" />
             <p className="text-caption-md">
-              This points at <span className="font-semibold">localhost</span>, which
-              a guest&apos;s phone can&apos;t reach. Set{" "}
-              <span className="font-semibold">VITE_CUSTOMER_APP_URL</span> before
-              printing these for real.
+              {isLocalOrigin() ? (
+                <>
+                  This points at <span className="font-semibold">localhost</span>,
+                  which a guest&apos;s phone can&apos;t reach.
+                </>
+              ) : (
+                <>
+                  <span className="font-semibold">VITE_CUSTOMER_APP_URL</span> has no{" "}
+                  <span className="font-semibold">https://</span>. We&apos;ve added it
+                  so this code works, but fix the setting — a bare domain is text, not
+                  a link, and phones disagree about what to do with it.
+                </>
+              )}{" "}
+              Don&apos;t print these until it&apos;s corrected.
             </p>
           </div>
         )}
