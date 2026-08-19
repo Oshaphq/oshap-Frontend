@@ -54,24 +54,47 @@ The owner's own account counts toward the three.
 
 ## Enforcement status
 
-**Not enforced yet.** The limits above are the commercial decision; the backend does not
-currently cap either count, and the frontend does not surface them.
+**None of this is built.** The table above is the commercial decision, not a description of
+how the system behaves today. Today the backend still gates *features* by tier — the model
+this decision replaces — and caps nothing.
 
 Outstanding, in order:
 
-1. Backend rejects a staff creation past the tier's cap with `403` and a message naming the
-   limit and the plan — not a bare "forbidden".
-2. Backend rejects table creation past the cap the same way.
-3. Admin surfaces "3 of 3 staff accounts used" on the staff screen, and the same on tables,
-   before the merchant hits the wall.
-4. Tier changes recalculate: downgrading a restaurant that is over a cap must be a decision
-   someone makes deliberately, not a silent lockout.
+1. **Remove the feature gates.** Every tier reaches every endpoint. This is the blocking
+   one: while it stands, a Lite restaurant is refused table management and so cannot
+   generate a QR code.
+2. Backend rejects staff creation past the cap with `403` and a message naming the limit and
+   the plan — not a bare "forbidden".
+3. Backend rejects table creation past the cap the same way.
+4. Admin surfaces "3 of 3 staff accounts used" before the merchant hits the wall, and the
+   same for tables.
+5. Tier changes recalculate: downgrading a restaurant that is already over a cap must be a
+   deliberate decision, not a silent lockout.
 
-Until (1) and (2) land, every plan behaves as unlimited. That is the safe direction to be
-wrong in — we under-charge rather than block a paying pilot mid-service.
+Order matters. (1) without (2) and (3) means every plan behaves as unlimited for a while,
+which is the safe direction to be wrong in — we under-charge rather than block a paying
+restaurant mid-service. (2) and (3) without (1) would be the worst of both.
 
 ## Testing
 
-[`smoke/production.smoke.ts`](../smoke/production.smoke.ts) asserts the grant model against
-the live API: a Lite tenant must reach every admin surface, because Lite is now sold as the
-full product. The quota assertions are marked pending until enforcement exists.
+[`smoke/production.smoke.ts`](../smoke/production.smoke.ts) carries the grant model as three
+pending tests — Lite reaching every admin surface, and the two caps. All three are
+`test.fixme` because none of it is built yet.
+
+Observed on a fresh Lite tenant, 19 August 2026:
+
+```
+/admin/menu               200
+/admin/settings           200
+/admin/staff              200
+/admin/tables             403   ← a QR code is per table
+/admin/kitchen            403
+/admin/ingredients        403
+```
+
+The `/admin/tables` 403 is the sharp one: without table management a Lite restaurant
+cannot produce the QR codes that are the entire product.
+
+The ordering walk still runs on Standard rather than Lite for the same reason. It moves to
+Lite in the same change that removes the gates — if ordering ever quietly becomes a paid
+upgrade again, that is where it surfaces.
