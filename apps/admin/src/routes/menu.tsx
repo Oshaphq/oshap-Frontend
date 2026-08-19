@@ -98,8 +98,8 @@ export default function MenuPage() {
       });
       setShowNewForm(false);
       setForm(EMPTY_FORM);
-    } catch {
-      toast.error("Failed to create item");
+    } catch (err) {
+      toast.error(errorMessage(err, "add the dish"));
     }
   };
 
@@ -116,8 +116,8 @@ export default function MenuPage() {
         },
       });
       setEditingId(null);
-    } catch {
-      toast.error("Failed to save");
+    } catch (err) {
+      toast.error(errorMessage(err, "save the dish"));
     }
   };
 
@@ -136,8 +136,8 @@ export default function MenuPage() {
   const handleToggleAvailable = async (id: string, available: boolean) => {
     try {
       await toggleItem.mutateAsync({ id, available: !available });
-    } catch {
-      toast.error("Failed to update item");
+    } catch (err) {
+      toast.error(errorMessage(err, "update the dish"));
     }
   };
 
@@ -145,8 +145,12 @@ export default function MenuPage() {
     if (!confirm("Delete this item?")) return;
     try {
       await deleteItem.mutateAsync(id);
-    } catch {
-      toast.error("Failed to delete");
+      toast.success("Dish deleted");
+    } catch (err) {
+      // This swallowed the cause entirely, so a real and reproducible failure
+      // reached the pilot as "Failed to delete" — a sentence that rules nothing
+      // out and sends whoever reads it looking in the wrong place.
+      toast.error(errorMessage(err, "delete the dish"));
     }
   };
 
@@ -156,8 +160,8 @@ export default function MenuPage() {
       await updateStock.mutateAsync({ id: item.id, payload: { stock_count: count } });
       setStockEditId(null);
       toast.success(`Stock updated for ${item.name}`);
-    } catch {
-      toast.error("Failed to update stock");
+    } catch (err) {
+      toast.error(errorMessage(err, "update the stock count"));
     }
   };
 

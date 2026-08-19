@@ -686,6 +686,12 @@ export interface AdminTableStatus {
   pendingTotal: number;
   hasPending: boolean;
   hasUnpaid: boolean;
+  /**
+   * The open bills on this table. Returned by the API and, until it also
+   * returns each bill's guest and payment state, the only way to act on one
+   * order rather than the whole table — which is what settlement actually is.
+   */
+  unpaid_order_ids: string[];
 }
 
 export interface AdminTablesResponse {
@@ -899,9 +905,17 @@ export interface AdminVerifyRequest {
   table_id: string;
 }
 
-/** Rejects a claimed payment: orders return to unpaid, the account is penalised. */
+/**
+ * Rejects a claimed payment: the order returns to unpaid and the bank account
+ * is penalised in the ranking.
+ *
+ * Keyed by **order**, not table, and that is deliberate on the server's side:
+ * two guests at one table pay separately, so "reject the payment on table 4"
+ * does not identify anything. We were sending `table_id` and every rejection
+ * failed with `order_id: Field required`.
+ */
 export interface AdminRejectRequest {
-  table_id: string;
+  order_id: string;
   reason?: string;
 }
 

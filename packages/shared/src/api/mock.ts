@@ -1500,6 +1500,9 @@ route("GET", /^\/admin\/tables$/, ({ query }) => {
       pendingTotal: pending.reduce((s, o) => s + o.total, 0),
       hasPending: pending.length > 0,
       hasUnpaid: unpaid.length > 0,
+      // Every open bill on the table, claimed or not — settlement acts on one
+      // of these, never on the table as a whole.
+      unpaid_order_ids: [...unpaid, ...pending].map((o) => o.id),
     };
   });
 
@@ -2539,8 +2542,9 @@ route("POST", /^\/admin\/orders\/cash$/, ({ body }) => {
 
 route("POST", /^\/admin\/reject$/, ({ body }) => {
   const b = body as AdminRejectRequest;
+  // Per order, matching the real API: two guests at one table pay separately.
   const pendingOrders = [..._orders.values()].filter(
-    (o) => o.table_id === b.table_id && o.status === "PAYMENT_PENDING",
+    (o) => o.id === b.order_id && o.status === "PAYMENT_PENDING",
   );
 
   if (pendingOrders.length === 0) {

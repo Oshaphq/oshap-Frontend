@@ -4,6 +4,7 @@ import { useParams, Link } from "react-router";
 import {
   usePlatformRestaurant,
   usePlatformUpdateRestaurant,
+  errorMessage,
 } from "@oshap/shared";
 import type { SubscriptionTier } from "@oshap/shared";
 import { toast } from "@oshap/shared/ui";
@@ -41,8 +42,8 @@ export default function RestaurantDetailPage() {
     try {
       await update.mutateAsync({ id: r.id, payload: { is_active: !r.is_active } });
       toast.success(`${r.name} ${r.is_active ? "deactivated" : "activated"}.`);
-    } catch {
-      toast.error("Failed to update status.");
+    } catch (err) {
+      toast.error(errorMessage(err, "change the status"));
     }
   };
 
@@ -53,8 +54,8 @@ export default function RestaurantDetailPage() {
       toast.success("Subscription tier updated.");
       setEditTier(false);
       setPendingTier(null);
-    } catch {
-      toast.error("Failed to update tier.");
+    } catch (err) {
+      toast.error(errorMessage(err, "change the plan"));
     }
   };
 

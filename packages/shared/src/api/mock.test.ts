@@ -285,6 +285,7 @@ describe("mock API — payment feedback loop", () => {
       q(),
       false,
     );
+    return orderId;
   }
 
   async function accountById(id: string) {
@@ -304,9 +305,9 @@ describe("mock API — payment feedback loop", () => {
 
   it("penalises the account when the payment is rejected, and unpays the order", async () => {
     const before = await accountById("bank-002");
-    await claimAgainst("bank-002");
+    const orderId = await claimAgainst("bank-002");
 
-    const res = await mockRequest("/admin/reject", "POST", { table_id: "T7" }, q(), true);
+    const res = await mockRequest("/admin/reject", "POST", { order_id: orderId }, q(), true);
     expect(res.status).toBe(200);
     expect((res.body as { rejected: number }).rejected).toBeGreaterThan(0);
 
@@ -316,6 +317,48 @@ describe("mock API — payment feedback loop", () => {
     // The food was served, so the order returns to unpaid rather than to the kitchen.
     const table = await mockRequest("/table/tbl-t7", "GET", null, q(), false);
     expect((table.body as { unpaid_order: unknown }).unpaid_order).toBeTruthy();
+  });
+
+  /**
+   * The model the admin app got wrong: a table is not a bill.
+   *
+   * Two guests order separately at T7. Rejecting one person's payment must
+   * leave the other's order exactly where it was — the admin used to send a
+   * `table_id`, which cannot express "this one and not that one", and the API
+   * rightly refused it.
+   */
+  it("rejects one guest's payment without touching the other's order", async () => {
+    const mine = await claimAgainst("bank-002");
+
+    const menu = await mockRequest("/menu", "GET", null, q(), false);
+    const item = (menu.body as Array<{ name: string; price: number }>)[0]!;
+    const theirs = await mockRequest(
+      "/orders",
+      "POST",
+      {
+        table: "T7",
+        restaurant_id: HOME_RESTAURANT,
+        items: [{ name: item.name, qty: 1, price: item.price }],
+      },
+      q(),
+      false,
+    );
+    const theirOrderId = (theirs.body as { order_id: string }).order_id;
+
+    const before = await mockRequest(`/orders/${theirOrderId}`, "GET", null, q(), false);
+    const statusBefore = (before.body as { status: string }).status;
+
+    const res = await mockRequest("/admin/reject", "POST", { order_id: mine }, q(), true);
+    expect(res.status).toBe(200);
+
+    const after = await mockRequest(`/orders/${theirOrderId}`, "GET", null, q(), false);
+    expect((after.body as { status: string }).status).toBe(statusBefore);
+  });
+
+  it("refuses a rejection that names no order", async () => {
+    await claimAgainst("bank-002");
+    const res = await mockRequest("/admin/reject", "POST", { order_id: "nope" }, q(), true);
+    expect(res.status).toBe(404);
   });
 
   it("404s rejecting a table with nothing pending", async () => {
