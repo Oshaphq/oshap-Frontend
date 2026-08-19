@@ -1,5 +1,6 @@
 import { useState } from "react";
 import {
+  errorMessage,
   formatCurrency,
   nairaToKobo,
   useAdminCreateModifierGroup,
@@ -45,7 +46,7 @@ export default function ModifierGroupsDialog({ onClose }: { onClose: () => void 
           setExpanded(group.id);
         },
         onError: (e: unknown) =>
-          toast.error(e instanceof Error ? e.message : "Could not create group"),
+          toast.error(errorMessage(e, "create the group")),
       },
     );
   };
@@ -54,7 +55,7 @@ export default function ModifierGroupsDialog({ onClose }: { onClose: () => void 
     deleteGroup.mutate(group.id, {
       onSuccess: () => toast.success(`"${group.name}" deleted`),
       onError: (e: unknown) =>
-        toast.error(e instanceof Error ? e.message : "Could not delete group"),
+        toast.error(errorMessage(e, "delete the group")),
     });
   };
 
@@ -164,7 +165,7 @@ function GroupRow({
           setOptionPrice("");
         },
         onError: (e: unknown) =>
-          toast.error(e instanceof Error ? e.message : "Could not add option"),
+          toast.error(errorMessage(e, "add the option")),
       },
     );
   };

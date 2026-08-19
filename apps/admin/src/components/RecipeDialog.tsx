@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import {
+  errorMessage,
   useAdminIngredients,
   useAdminRecipe,
   useAdminSetRecipe,
@@ -78,7 +79,7 @@ export default function RecipeDialog({ item, onClose }: Props) {
           onClose();
         },
         onError: (e: unknown) =>
-          toast.error(e instanceof Error ? e.message : "Could not save recipe"),
+          toast.error(errorMessage(e, "save the recipe")),
       },
     );
   };

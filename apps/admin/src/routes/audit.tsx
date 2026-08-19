@@ -1,6 +1,10 @@
 import { useState } from "react";
 import { Link } from "react-router";
-import { AUDIT_ACTIONS, formatCurrency, useAdminAuditLogs } from "@oshap/shared";
+import {
+  AUDIT_ACTIONS,
+  formatCurrency,
+  useAdminAuditLogs,
+} from "@oshap/shared";
 import type { AuditLogEntry } from "@oshap/shared";
 import { SecondaryButton } from "@oshap/shared/ui";
 import QueryError from "../components/QueryError";

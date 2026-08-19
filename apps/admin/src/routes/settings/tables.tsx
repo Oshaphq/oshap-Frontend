@@ -5,7 +5,7 @@ import {
   useAdminDeleteTable,
   useAdminSettings,
 } from "@oshap/shared/hooks";
-import { getAdminRestaurantId } from "@oshap/shared";
+import { errorMessage, getAdminRestaurantId } from "@oshap/shared";
 import { PrimaryButton, SecondaryButton, toast } from "@oshap/shared/ui";
 import TableQrDialog from "../../components/TableQrDialog";
 import QrPrintSheet, {
@@ -61,7 +61,7 @@ export default function TablesSettings() {
         },
         onError: (err: unknown) =>
           toast.error(
-            err instanceof Error ? err.message : "Failed to add table",
+            errorMessage(err, "add the table"),
           ),
       },
     );
@@ -72,7 +72,7 @@ export default function TablesSettings() {
       onSuccess: () => toast.success(`Table "${id}" removed`),
       onError: (err: unknown) =>
         toast.error(
-          err instanceof Error ? err.message : "Cannot remove table with active orders",
+          errorMessage(err, "remove the table"),
         ),
     });
   };

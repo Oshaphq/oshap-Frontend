@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router";
-import { adminApi } from "@oshap/shared";
+import { adminApi, errorMessage } from "@oshap/shared";
 import type { SetupVerifyResponse } from "@oshap/shared";
 import { PrimaryButton, ThemeToggle, toast } from "@oshap/shared/ui";
 import { useAuth } from "../context/AuthContext";
@@ -81,7 +81,7 @@ export default function SetupPage() {
       navigate("/", { replace: true });
     } catch (err: unknown) {
       const message =
-        err instanceof Error ? err.message : "Could not complete setup.";
+        errorMessage(err, "complete setup");
       // A 410 here means the link was spent between loading the page and
       // submitting it, so the form is no longer the right screen.
       if (isGone(err)) {

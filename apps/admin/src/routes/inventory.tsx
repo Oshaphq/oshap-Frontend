@@ -1,5 +1,6 @@
 import { useState } from "react";
 import {
+  errorMessage,
   formatCurrency,
   nairaToKobo,
   useAdminAdjustStock,
@@ -317,7 +318,7 @@ function AdjustDialog({
           onClose();
         },
         onError: (e: unknown) =>
-          toast.error(e instanceof Error ? e.message : "Could not adjust stock"),
+          toast.error(errorMessage(e, "adjust stock")),
       },
     );
   };
@@ -428,7 +429,7 @@ function NewIngredientDialog({ onClose }: { onClose: () => void }) {
           onClose();
         },
         onError: (e: unknown) =>
-          toast.error(e instanceof Error ? e.message : "Could not add ingredient"),
+          toast.error(errorMessage(e, "add the ingredient")),
       },
     );
   };
