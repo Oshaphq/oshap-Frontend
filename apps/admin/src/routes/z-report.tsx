@@ -30,7 +30,7 @@ export default function ZReportPage() {
   const handlePrint = () => window.print();
 
   if (report.isError) {
-    return <QueryError onRetry={() => report.refetch()} />;
+    return <QueryError error={report.error} action="load the report" onRetry={() => report.refetch()} />;
   }
 
   const data = report.data;

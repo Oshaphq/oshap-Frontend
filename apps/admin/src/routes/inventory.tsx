@@ -43,7 +43,7 @@ export default function InventoryPage() {
   const [showNew, setShowNew] = useState(false);
 
   if (ingredientsQuery.isError) {
-    return <QueryError onRetry={() => ingredientsQuery.refetch()} />;
+    return <QueryError error={ingredientsQuery.error} action="load the inventory" onRetry={() => ingredientsQuery.refetch()} />;
   }
 
   const ingredients = ingredientsQuery.data ?? [];

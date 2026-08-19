@@ -35,6 +35,8 @@ export default function GroupAnalyticsPage() {
   if (isError) {
     return (
       <QueryError
+        error={groupQuery.error ?? analyticsQuery.error}
+        action="load the group figures"
         onRetry={() => {
           groupQuery.refetch();
           analyticsQuery.refetch();

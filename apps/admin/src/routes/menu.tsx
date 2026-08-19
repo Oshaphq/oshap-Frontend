@@ -171,7 +171,7 @@ export default function MenuPage() {
   }
 
   if (menuQuery.isError) {
-    return <QueryError onRetry={() => menuQuery.refetch()} />;
+    return <QueryError error={menuQuery.error} action="load the menu" onRetry={() => menuQuery.refetch()} />;
   }
 
   const items = menuQuery.data ?? [];
