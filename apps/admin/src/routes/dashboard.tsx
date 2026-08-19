@@ -8,6 +8,7 @@ import {
   useAdminInventoryAlerts,
   formatCurrency,
   getAdminRestaurantId,
+  errorMessage,
 } from "@oshap/shared";
 import { PrimaryButton, SecondaryButton, toast } from "@oshap/shared/ui";
 import QueryError from "../components/QueryError";
@@ -50,16 +51,19 @@ export default function DashboardPage() {
       await rejectPayment.mutateAsync({ table_id: tableId });
       setRejectingTableId(null);
       toast.success("Payment rejected — the bill is unpaid again");
-    } catch {
-      toast.error("Failed to reject payment. Please try again.");
+    } catch (err) {
+      toast.error(errorMessage(err, "reject the payment"));
     }
   };
 
   const handleVerify = async (tableId: string) => {
     try {
       await verifyPayment.mutateAsync({ table_id: tableId });
-    } catch {
-      toast.error("Failed to verify payment. Please try again.");
+      // Without this the row just leaves the pending list, which is
+      // indistinguishable from the click never registering.
+      toast.success("Payment verified");
+    } catch (err) {
+      toast.error(errorMessage(err, "verify the payment"));
     }
   };
 
@@ -70,8 +74,11 @@ export default function DashboardPage() {
     setClearPromptTable(null);
     try {
       await closeTable.mutateAsync({ table_id: tableId, reason });
-    } catch {
-      toast.error("Failed to clear table. Please try again.");
+      toast.success(
+        reason === "paid" ? "Table cleared" : "Table cleared as abandoned",
+      );
+    } catch (err) {
+      toast.error(errorMessage(err, "clear the table"));
     }
   };
 

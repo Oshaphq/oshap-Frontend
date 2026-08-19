@@ -68,6 +68,42 @@ export const UNKNOWN_EVENT_KEYS: CacheKey[] = [
   queryKeys.tables.all,
 ];
 
+/** A realtime event as it arrives on the wire. `data` varies by `type`. */
+export interface RealtimeEvent {
+  type: string;
+  data?: Record<string, unknown>;
+}
+
+type EventListener = (event: RealtimeEvent) => void;
+
+const listeners = new Set<EventListener>();
+
+/**
+ * Subscribe to the realtime stream that `useGlobalSSE` already maintains.
+ *
+ * Deliberately a bus rather than a second EventSource: browsers cap concurrent
+ * connections per origin, and every extra stream is another Redis subscriber on
+ * the server. Cache invalidation and user-facing alerts are two readers of one
+ * connection.
+ */
+export function subscribeToRealtimeEvents(listener: EventListener): () => void {
+  listeners.add(listener);
+  return () => {
+    listeners.delete(listener);
+  };
+}
+
+/** Fan an event out to every subscriber. One bad listener must not kill the stream. */
+export function publishRealtimeEvent(event: RealtimeEvent): void {
+  for (const listener of listeners) {
+    try {
+      listener(event);
+    } catch (err) {
+      console.error("[SSE] listener threw", err);
+    }
+  }
+}
+
 const RECONNECT_DELAY_MS = 5_000;
 
 export function useGlobalSSE() {
@@ -81,13 +117,14 @@ export function useGlobalSSE() {
       es = createEventSource("/events");
 
       es.onmessage = (event) => {
-        let type: string;
+        let parsed: RealtimeEvent;
         try {
-          type = JSON.parse(event.data)?.type;
+          parsed = JSON.parse(event.data);
         } catch {
           console.error("[SSE] Ignoring unparseable event payload");
           return;
         }
+        const type = parsed?.type;
 
         // `?? UNKNOWN` rather than `|| UNKNOWN`: an event mapped to [] means
         // "recognized, invalidates nothing", which must not fall through.
@@ -96,6 +133,10 @@ export function useGlobalSSE() {
         for (const queryKey of keys) {
           queryClient.invalidateQueries({ queryKey });
         }
+
+        // Fan out after invalidating, so a listener that reads the cache sees
+        // refetched data rather than the stale copy it just replaced.
+        publishRealtimeEvent(parsed);
       };
 
       es.onerror = () => {

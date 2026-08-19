@@ -13,6 +13,9 @@ import {
   formatCurrency,
   nairaToKobo,
   koboToNaira,
+  errorMessage,
+  validateImageFile,
+  IMAGE_ACCEPT_ATTR,
 } from "@oshap/shared";
 import type { MenuItem } from "@oshap/shared";
 import { PrimaryButton, SecondaryButton, toast } from "@oshap/shared/ui";
@@ -467,11 +470,16 @@ function MenuItemForm({
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleImageUpload = async (file: File) => {
+    const problem = validateImageFile(file);
+    if (problem) {
+      toast.error(problem);
+      return;
+    }
     try {
       const result = await uploadImage.mutateAsync(file);
       setForm({ ...form, image_url: result.url });
-    } catch {
-      toast.error("Upload failed. Please try again.");
+    } catch (err) {
+      toast.error(errorMessage(err, "upload the image"));
     }
   };
 
@@ -522,7 +530,7 @@ function MenuItemForm({
         <input
           ref={fileInputRef}
           type="file"
-          accept="image/jpeg,image/png,image/webp,image/gif"
+          accept={IMAGE_ACCEPT_ATTR}
           className="hidden"
           onChange={(e: ChangeEvent<HTMLInputElement>) => {
             const f = e.target.files?.[0];
