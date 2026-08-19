@@ -209,7 +209,8 @@ Use `toast.success(msg)`, `toast.error(msg)`, `toast.info(msg)` from `@oshap/sha
 Each app is its own Vercel project pointing at `apps/customer`, `apps/admin`, or `apps/platform` as the Root Directory. Each directory contains a `vercel.json` with an SPA rewrite — required so client-side routes survive page refresh and direct URL hits.
 
 Per-project env vars (set in Vercel dashboard, **not** committed):
-- `VITE_API_BASE_URL` — the FastAPI backend **origin only** (e.g. `https://api.oshap.app`). Do not append `/api/v1`; the client adds it. If unset, the app runs in mock mode (great for previews, not for production).
+- `VITE_API_BASE_URL` — the FastAPI backend **origin only**, including the scheme (e.g. `https://oshap-cerebrum.useshappay.com`). Do not append `/api/v1`; the client adds it. If unset, the app runs in mock mode (great for previews, not for production).
+- Admin only: `VITE_CUSTOMER_APP_URL` — the public customer app, **with `https://`** (e.g. `https://oshap.useshappay.com`). Every table QR code is built from this. A bare domain is not a URL: a QR reader treats `oshap.useshappay.com/menu?table=…` as plain text, and whether a guest's phone opens it, offers to search for it, or does nothing depends on the handset. This has already happened once, after the codes were printed and laminated.
 - Admin only: `VITE_FCM_API_KEY`, `VITE_FCM_AUTH_DOMAIN`, `VITE_FCM_PROJECT_ID`, `VITE_FCM_STORAGE_BUCKET`, `VITE_FCM_MESSAGING_SENDER_ID`, `VITE_FCM_APP_ID`, `VITE_FCM_VAPID_KEY`.
 - Platform only: **no token env var.** The operator types the access code at the login screen; it is held in sessionStorage, sent as `x-platform-token`, and validated by the backend. Never reintroduce `VITE_PLATFORM_TOKEN` — Vite inlines `VITE_`-prefixed values into the bundle, so a hosted platform app built with it publishes the secret that administers every tenant.
 

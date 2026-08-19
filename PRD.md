@@ -109,7 +109,7 @@ platform access code (`x-platform-token`). Dev port `5176`.
 Customer scans a QR code printed on the table. The QR encodes:
 
 ```
-https://oshap.app/menu?table=T12
+https://oshap.useshappay.com/menu?table=T12
 ```
 
 The table ID resolves to its restaurant on the backend (`GET /table/:id`). No login. No
