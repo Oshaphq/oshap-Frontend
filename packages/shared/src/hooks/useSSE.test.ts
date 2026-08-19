@@ -31,6 +31,13 @@ const BACKEND_EVENTS = [
   "low_stock",
 ] as const;
 
+/**
+ * Frames the transport sends that are not domain events. They must be listed
+ * in the map so they invalidate nothing — an unlisted type falls through to a
+ * blanket invalidation, and `heartbeat` arrives on a timer.
+ */
+const TRANSPORT_FRAMES = ["connected", "heartbeat"] as const;
+
 describe("SSE event map", () => {
   it("handles every event the backend emits", () => {
     const unhandled = BACKEND_EVENTS.filter((e) => !(e in EVENT_CACHE_KEYS));
@@ -38,10 +45,16 @@ describe("SSE event map", () => {
   });
 
   it("does not carry names the backend never sends", () => {
-    const extra = Object.keys(EVENT_CACHE_KEYS).filter(
-      (e) => !BACKEND_EVENTS.includes(e as (typeof BACKEND_EVENTS)[number]),
-    );
+    const known = [...BACKEND_EVENTS, ...TRANSPORT_FRAMES] as readonly string[];
+    const extra = Object.keys(EVENT_CACHE_KEYS).filter((e) => !known.includes(e));
     expect(extra).toEqual([]);
+  });
+
+  // Observed on the live stream: `connected` on open, `heartbeat` on a timer.
+  // Unlisted, each one would trigger UNKNOWN_EVENT_KEYS and refetch every
+  // admin query — the heartbeat turning a quiet dashboard into a poll.
+  it.each(TRANSPORT_FRAMES)("treats %s as a no-op, not an unknown event", (frame) => {
+    expect(EVENT_CACHE_KEYS[frame]).toEqual([]);
   });
 
   // The old SCREAMING_CASE names were never emitted by the backend, so every
