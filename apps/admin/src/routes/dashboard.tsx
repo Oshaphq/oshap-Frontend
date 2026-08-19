@@ -109,10 +109,15 @@ export default function DashboardPage() {
    * Only ever "they left without paying" now.
    *
    * The other option used to be "Paid (Cash/Transfer)", which called this with
-   * `reason: "paid"` — and `/admin/close` records no payment. A restaurant
-   * pressing it cleared the table and lost the sale: no cash row, nothing in
-   * the Z-report, nothing in analytics. Taking money is now always the cash
-   * dialog, which posts to `/admin/orders/cash` and actually books it.
+   * `reason: "paid"`. That does settle the bill — the order moves to CONFIRMED
+   * with a verified payment for the full amount — but it records **how** the
+   * money arrived nowhere, and no tendered amount, so nothing can be
+   * reconciled against a till afterwards.
+   *
+   * Taking money now always goes through the cash dialog, which posts to
+   * `/admin/orders/cash`: per order, with the amount handed over, and the order
+   * marked `payment_method: CASH`. Closing a table and taking payment are
+   * different acts and were sharing a button.
    */
   const handleAbandon = async (tableId: string) => {
     setClearPromptTable(null);
@@ -343,9 +348,9 @@ export default function DashboardPage() {
                   <span className="text-caption-sm font-semibold text-secondary-text text-center uppercase tracking-wider">
                     Why are you clearing?
                   </span>
-                  {/* "Paid" used to close the table and book nothing — the sale
-                      simply disappeared. Taking money now always goes through
-                      the cash dialog, which records it against the orders. */}
+                  {/* "Paid" settled the bill but recorded no method and no
+                      tendered amount, so a manager could not reconcile it.
+                      Taking money now goes through the cash dialog. */}
                   <button
                     type="button"
                     onClick={() => {
