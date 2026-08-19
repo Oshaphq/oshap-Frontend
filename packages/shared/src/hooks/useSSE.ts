@@ -60,6 +60,14 @@ export const EVENT_CACHE_KEYS: Record<string, CacheKey[]> = {
   // Delivered to staff as a push and an in-app alert. Nothing on the server
   // changed, so invalidating anything here would just be noise.
   waiter_called: [],
+
+  // Transport frames, not domain events. They carry no state and must not
+  // refetch anything — but they have to be *listed*, because an unrecognised
+  // type falls through to a blanket invalidation. `heartbeat` arrives on a
+  // timer, so leaving it unknown would refetch every admin query, forever,
+  // for the lifetime of the connection.
+  connected: [],
+  heartbeat: [],
 };
 
 /** Fallback for an event the backend added and we don't know about yet. */
