@@ -9,11 +9,28 @@ import {
   formatCurrency,
   getAdminRestaurantId,
   errorMessage,
+  describeError,
 } from "@oshap/shared";
 import { PrimaryButton, SecondaryButton, toast } from "@oshap/shared/ui";
 import QueryError from "../components/QueryError";
 import CashPaymentDialog from "../components/CashPaymentDialog";
 import SetupChecklist from "../components/SetupChecklist";
+
+/**
+ * A 404 from verify or reject nearly always means this bill was settled while
+ * the board was showing an older picture — someone else cleared it, or the
+ * same person cleared it a moment ago and the row had not caught up.
+ *
+ * "Not found" is technically true and useless: it reads as a broken button.
+ * Naming what happened, on a board that has just refreshed itself, tells a
+ * waiter the bill is dealt with and they can move on.
+ */
+const ALREADY_SETTLED =
+  "That bill was already settled — the board has been refreshed.";
+
+function settledElsewhere(err: unknown): boolean {
+  return describeError(err).kind === "notFound";
+}
 
 export default function DashboardPage() {
   const restaurantId = getAdminRestaurantId();
@@ -52,7 +69,7 @@ export default function DashboardPage() {
       setRejectingTableId(null);
       toast.success("Payment rejected — the bill is unpaid again");
     } catch (err) {
-      toast.error(errorMessage(err, "reject the payment"));
+      toast.error(settledElsewhere(err) ? ALREADY_SETTLED : errorMessage(err, "reject the payment"));
     }
   };
 
@@ -63,7 +80,7 @@ export default function DashboardPage() {
       // indistinguishable from the click never registering.
       toast.success("Payment verified");
     } catch (err) {
-      toast.error(errorMessage(err, "verify the payment"));
+      toast.error(settledElsewhere(err) ? ALREADY_SETTLED : errorMessage(err, "verify the payment"));
     }
   };
 

@@ -1,6 +1,7 @@
 import { useEffect } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { createEventSource } from "../api/sse";
+import { getAccessToken } from "../api/client";
 import { queryKeys } from "../api/keys";
 
 type CacheKey = readonly unknown[];
@@ -106,14 +107,35 @@ export function publishRealtimeEvent(event: RealtimeEvent): void {
 
 const RECONNECT_DELAY_MS = 5_000;
 
+/**
+ * How long a dead stream may go unnoticed.
+ *
+ * SSE is the fast path, not the only one. A stream can be down for reasons the
+ * page cannot see — a proxy that buffers `text/event-stream`, a phone that
+ * slept, an access token that expired mid-connection — and the failure is
+ * silent by construction: no error, just a board that quietly stops changing
+ * while staff believe they are looking at live orders.
+ *
+ * So every realtime query also polls slowly. Realtime makes it instant; the
+ * poll makes "instant" degrade to "within half a minute" instead of "never".
+ */
+export const REALTIME_POLL_MS = 20_000;
+
 export function useGlobalSSE() {
   const queryClient = useQueryClient();
 
   useEffect(() => {
     let es: EventSource | null = null;
     let reconnectTimeout: number | null = null;
+    let closed = false;
+    // The token the current stream was opened with. Access tokens expire
+    // (~15 minutes), and a reconnect that reuses the expired one 401s forever
+    // — retrying every 5s against a credential that can never work again.
+    let connectedWith: string | null = null;
 
     function connect() {
+      if (closed) return;
+      connectedWith = getAccessToken();
       es = createEventSource("/events");
 
       es.onmessage = (event) => {
@@ -141,13 +163,41 @@ export function useGlobalSSE() {
 
       es.onerror = () => {
         es?.close();
+        if (closed) return;
         reconnectTimeout = window.setTimeout(connect, RECONNECT_DELAY_MS);
       };
     }
 
+    // A refreshed token is the one thing that can turn a permanently failing
+    // reconnect into a working one, so react to it rather than waiting for the
+    // next 5s retry to reuse the same dead credential.
+    function reconnectIfTokenChanged() {
+      if (closed) return;
+      if (getAccessToken() === connectedWith) return;
+      if (reconnectTimeout) clearTimeout(reconnectTimeout);
+      es?.close();
+      connect();
+    }
+
+    // Coming back to the tab is when a stale stream is most likely, and most
+    // likely to be noticed.
+    function onVisible() {
+      if (document.visibilityState !== "visible") return;
+      reconnectIfTokenChanged();
+      if (es?.readyState === EventSource.CLOSED) {
+        if (reconnectTimeout) clearTimeout(reconnectTimeout);
+        connect();
+      }
+    }
+
     connect();
+    const tokenWatch = window.setInterval(reconnectIfTokenChanged, 10_000);
+    document.addEventListener("visibilitychange", onVisible);
 
     return () => {
+      closed = true;
+      clearInterval(tokenWatch);
+      document.removeEventListener("visibilitychange", onVisible);
       if (reconnectTimeout) clearTimeout(reconnectTimeout);
       es?.close();
     };

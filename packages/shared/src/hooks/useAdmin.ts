@@ -4,6 +4,7 @@ import {
   useQueryClient,
 } from "@tanstack/react-query";
 import { queryKeys } from "../api/keys";
+import { REALTIME_POLL_MS } from "./useSSE";
 import {
   adminCloseTable,
   adminCreateMenuItem,
@@ -263,6 +264,10 @@ export function useAdminKitchen() {
   return useQuery({
     queryKey: queryKeys.admin.kitchen(),
     queryFn: adminGetKitchen,
+    // The board a kitchen cooks from. If the stream dies, tickets must still
+    // arrive — late is survivable, never is not.
+    refetchInterval: REALTIME_POLL_MS,
+    refetchIntervalInBackground: true,
   });
 }
 
@@ -401,6 +406,12 @@ export function useAdminTables() {
   return useQuery({
     queryKey: queryKeys.admin.tables(),
     queryFn: adminGetTables,
+    // Realtime is the fast path; this is the floor. Staff read this board to
+    // decide whether to walk to a table, so a silently dead stream must not
+    // leave it frozen — and acting on a stale row is how you get "verify" on a
+    // bill that was already settled.
+    refetchInterval: REALTIME_POLL_MS,
+    refetchIntervalInBackground: false,
   });
 }
 
@@ -412,6 +423,12 @@ export function useAdminVerifyPayment() {
       queryClient.invalidateQueries({ queryKey: queryKeys.admin.tables() });
       queryClient.invalidateQueries({ queryKey: queryKeys.admin.kitchen() });
       queryClient.invalidateQueries({ queryKey: queryKeys.admin.all });
+    },
+    // "No pending payments found" almost always means the board was stale and
+    // this bill was already settled. Leaving the row on screen invites the
+    // same failed click again, so correct the board on the way out.
+    onError: () => {
+      queryClient.invalidateQueries({ queryKey: queryKeys.admin.tables() });
     },
   });
 }
@@ -437,6 +454,9 @@ export function useAdminRejectPayment() {
       queryClient.invalidateQueries({ queryKey: queryKeys.tables.all });
       queryClient.invalidateQueries({ queryKey: queryKeys.admin.bankAccounts() });
     },
+    onError: () => {
+      queryClient.invalidateQueries({ queryKey: queryKeys.admin.tables() });
+    },
   });
 }
 
@@ -447,6 +467,9 @@ export function useAdminCloseTable() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: queryKeys.admin.tables() });
       queryClient.invalidateQueries({ queryKey: queryKeys.admin.all });
+    },
+    onError: () => {
+      queryClient.invalidateQueries({ queryKey: queryKeys.admin.tables() });
     },
   });
 }

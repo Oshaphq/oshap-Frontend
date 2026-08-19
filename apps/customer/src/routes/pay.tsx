@@ -150,6 +150,12 @@ export default function PayPage() {
       });
       window.sessionStorage.setItem(settledOrderKey, unpaidOrder.id);
       setSettledOrderId(unpaidOrder.id);
+      // Saying "I've sent the money" is a transfer, and it is the most recent
+      // thing the guest has told us. Without this the POS flag from an earlier
+      // tap survives and the waiting screen announces "POS On The Way" to
+      // someone who just paid by bank transfer.
+      window.sessionStorage.removeItem(posFlagKey);
+      setPosRequested(false);
     } catch (err) {
       console.error("Payment confirmation error:", err);
       toast.error(
