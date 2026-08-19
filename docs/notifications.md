@@ -130,6 +130,7 @@ bearer token. Pagination follows `/admin/audit-logs`.
 | `unread_only` | bool | false | |
 | `unresolved_only` | bool | false | What the badge counts |
 | `type` | NotificationType | — | Optional filter |
+| `branch_id` | uuid | — | The shared `BranchId` parameter. Omitted = the caller's default scope |
 
 ```json
 {
@@ -137,6 +138,8 @@ bearer token. Pagination follows `/admin/audit-logs`.
     {
       "id": "9f2c…",
       "type": "waiter_called",
+      "branch_id": "4a1e…",
+      "branch_name": "Ikeja",
       "table_id": "bddce0c6…",
       "table_name": "T4",
       "order_id": null,
@@ -158,8 +161,9 @@ bearer token. Pagination follows `/admin/audit-logs`.
 }
 ```
 
-`unread_total` and `unresolved_total` are **totals across the whole restaurant**, not the
-page — the badge must not change when someone turns a page.
+`unread_total` and `unresolved_total` are **totals for the caller's scope**, not the page —
+the badge must not change when someone turns a page. Scope means one branch for branch
+staff, and whatever the switcher currently selects for an owner.
 
 ### `POST /admin/notifications/read`
 
