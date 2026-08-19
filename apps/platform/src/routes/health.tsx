@@ -72,7 +72,11 @@ export default function HealthPage() {
         )}
       </header>
 
-      {query.isError && <QueryError onRetry={() => query.refetch()} />}
+      {query.isError && <QueryError
+          error={query.error}
+          action="load system health"
+          onRetry={() => query.refetch()}
+        />}
 
       {query.isLoading && (
         <div className="flex justify-center py-xl">

@@ -92,7 +92,7 @@ export default function AuditPage() {
     setPage(1);
   };
 
-  if (logs.isError) return <QueryError onRetry={() => logs.refetch()} />;
+  if (logs.isError) return <QueryError error={logs.error} action="load the audit log" onRetry={() => logs.refetch()} />;
 
   const entries = logs.data?.logs ?? [];
   // No page count is returned, so derive it.

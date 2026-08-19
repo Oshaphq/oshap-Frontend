@@ -81,7 +81,7 @@ export default function OrderDetailPage() {
     }
   };
 
-  if (order.isError) return <QueryError onRetry={() => order.refetch()} />;
+  if (order.isError) return <QueryError error={order.error} action="load the order" onRetry={() => order.refetch()} />;
 
   if (order.isLoading || !order.data) {
     return (

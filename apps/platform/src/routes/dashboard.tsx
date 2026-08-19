@@ -30,7 +30,11 @@ export default function DashboardPage() {
           and "we could not ask" are different facts, and the tiles cannot tell
           them apart on their own. */}
       {restaurantsQuery.isError && (
-        <QueryError onRetry={() => restaurantsQuery.refetch()} />
+        <QueryError
+          error={restaurantsQuery.error}
+          action="load the restaurants"
+          onRetry={() => restaurantsQuery.refetch()}
+        />
       )}
 
       {/* KPI row */}

@@ -99,7 +99,11 @@ export default function RestaurantsPage() {
           they are told apart. This screen previously showed "no restaurants
           match your filters" while the API was returning 500, so a real
           restaurant looked deleted. */}
-      {query.isError && <QueryError onRetry={() => query.refetch()} />}
+      {query.isError && <QueryError
+          error={query.error}
+          action="load the restaurants"
+          onRetry={() => query.refetch()}
+        />}
 
       {!query.isLoading && !query.isError && filtered.length === 0 && (
         <div className="flex flex-col items-center gap-s py-10 text-center">
