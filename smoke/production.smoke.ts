@@ -25,8 +25,13 @@ const PLATFORM_TOKEN = process.env.OSHAP_PLATFORM_TOKEN;
 
 const V1 = `${API}/api/v1`;
 
-/** Cheapest plan that includes table ordering, per the pricing strategy. */
-const ORDERING_TIER = "STANDARD" as const;
+/**
+ * Cheapest plan that includes table ordering. Every plan does now — see
+ * `docs/plans.md`. Kept as a named constant because the ordering walk below
+ * should run on the *cheapest* tier: if ordering ever silently becomes a paid
+ * upgrade again, this test is where it surfaces.
+ */
+const ORDERING_TIER = "LITE" as const;
 
 /** Unmistakably test data, and greppable if a cleanup ever fails. */
 const stamp = Date.now().toString().slice(-6);
@@ -232,10 +237,11 @@ test.describe("the API contract still matches what we send", () => {
 test.describe("plans grant what they are sold as granting", () => {
   test.skip(!PLATFORM_TOKEN, "OSHAP_PLATFORM_TOKEN not set");
 
-  // Tier gating is what makes the plans real rather than three labels. These
-  // assert the boundary from both sides: a Lite restaurant must get everything
-  // Lite is sold as including, and must not get what it isn't.
-  test("Lite gets its own feature set, and not Standard's", async () => {
+  // Plans differ by capacity, not capability: every tier gets the whole
+  // product, and Lite is capped at 3 staff accounts and 10 tables. So the
+  // assertion is no longer "Lite is denied X" — it is that Lite is denied
+  // nothing. See docs/plans.md.
+  test("Lite gets the whole product", async () => {
     const api = await pwRequest.newContext();
     let id: string | null = null;
 
@@ -263,17 +269,19 @@ test.describe("plans grant what they are sold as granting", () => {
         authorization: `Bearer ${(await claimed.json()).data.access_token}`,
       };
 
-      // Lite is sold as "QR code menu" — and a QR code is per table. Without
-      // table management a Lite restaurant cannot produce the codes that are
-      // the entire product.
-      for (const path of ["/admin/menu", "/admin/settings", "/admin/tables"]) {
+      // A restaurant that cannot take an order has bought a digital menu, so
+      // the cheapest plan reaches every admin surface the dearest one does.
+      for (const path of [
+        "/admin/menu",
+        "/admin/settings",
+        "/admin/tables",
+        "/admin/kitchen",
+        "/admin/staff",
+        "/admin/analytics/summary",
+      ]) {
         const r = await api.get(`${V1}${path}`, { headers: auth });
         expect(r.status(), `Lite should include ${path}`).toBeLessThan(400);
       }
-
-      // Kitchen dashboard and tickets start at Standard.
-      const kitchen = await api.get(`${V1}/admin/kitchen`, { headers: auth });
-      expect(kitchen.status(), "kitchen should be Standard and above").toBe(403);
     } finally {
       if (id) {
         await api.delete(`${V1}/platform/restaurants/${id}`, {
@@ -283,4 +291,11 @@ test.describe("plans grant what they are sold as granting", () => {
       await api.dispose();
     }
   });
+
+  // The commercial difference between Lite and Standard is entirely these two
+  // numbers, and neither is enforced yet — so today every plan behaves as
+  // unlimited and we under-charge rather than block a pilot mid-service.
+  // Un-fixme these as the backend lands the caps (docs/plans.md §Enforcement).
+  test.fixme("Lite caps active staff accounts at 3", async () => {});
+  test.fixme("Lite caps tables at 10", async () => {});
 });
