@@ -36,7 +36,7 @@ export default function TertiaryButton({
       onClick={onClick}
       disabled={disabled}
       aria-label={ariaLabel}
-      className={`inline-flex items-center justify-center gap-xs ${sizeClass} rounded-lg bg-transparent text-primary border-2 border-primary text-label-l4 leading-4 tracking-normal font-semibold font-display transition-opacity hover:opacity-90 active:scale-[0.99] disabled:opacity-50 disabled:cursor-not-allowed ${className}`}
+      className={`inline-flex items-center justify-center gap-xs ${sizeClass} rounded-lg bg-transparent text-primary border-2 border-primary text-label-l4 leading-4 tracking-normal font-semibold font-display transition duration-100 ease-out hover:opacity-90 active:bg-primary-10a active:scale-[0.97] disabled:opacity-50 disabled:cursor-not-allowed disabled:active:scale-100 ${className}`}
     >
       {children}
     </button>
