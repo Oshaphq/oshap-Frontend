@@ -164,7 +164,18 @@ export interface MenuItem {
  * not rewrite a ticket already printed.
  */
 export interface OrderItemModifier {
+  /**
+   * The chosen option's id, which is what putting this line back in a cart
+   * needs — a name is not enough to order against.
+   *
+   * Optional because orders placed before the API returned it have none. A
+   * historical line missing this cannot be reordered exactly, and guessing
+   * would put food on a bill the guest did not choose.
+   */
+  option_id?: string;
+  /** The group's name, e.g. "Protein". */
   name: string;
+  /** The chosen option's name, e.g. "Turkey". */
   option: string;
   price_delta: number;
 }

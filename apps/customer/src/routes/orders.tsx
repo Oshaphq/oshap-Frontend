@@ -534,23 +534,31 @@ function OrderStatusBadge({ status }: { status: OrderStatus }) {
 
 function ReorderButton({ item }: { item: OrderItem }) {
   const { addItem } = useCart();
-  const wasConfigured = Boolean(item.modifiers?.length);
+  const modifiers = item.modifiers ?? [];
 
-  // The server returns a chosen modifier as group name + option name + delta,
-  // with no option_id, so a past line's choices can't be turned back into the
-  // ids an order needs. Reordering it "close enough" would put food on the
-  // bill the guest didn't pick, so send them through the menu instead. Adding
-  // option_id to OrderItemModifierResponse would let this work properly.
-  if (wasConfigured) {
+  /**
+   * A past line can only go back in the cart if every choice on it still has
+   * an id to order against. The API returns `option_id` now, but orders placed
+   * before it did have none — and a line reordered "close enough" puts food on
+   * a bill the guest did not pick, which is worse than making them tap twice.
+   */
+  const reconstructable = modifiers.every((m) => Boolean(m.option_id));
+
+  if (!reconstructable) {
     return (
       <span
         className="text-caption-xs text-secondary-text"
-        title="This item had choices — add it from the menu to pick them again."
+        title="This item had choices we can no longer identify — add it from the menu to pick them again."
       >
         Reorder from menu
       </span>
     );
   }
+
+  // `item.price` is per-unit **including** the deltas the server resolved, and
+  // the cart wants the base — sending the resolved figure would charge every
+  // modifier twice, once here and once again server-side.
+  const deltas = modifiers.reduce((sum, m) => sum + m.price_delta, 0);
 
   return (
     <AddButton
@@ -560,8 +568,13 @@ function ReorderButton({ item }: { item: OrderItem }) {
           {
             menuItemId: item.id,
             name: item.name,
-            basePrice: item.price,
-            modifiers: [],
+            basePrice: item.price - deltas,
+            modifiers: modifiers.map((m) => ({
+              option_id: m.option_id!,
+              group_name: m.name,
+              option_name: m.option,
+              price_delta: m.price_delta,
+            })),
           },
           item.quantity,
         )
