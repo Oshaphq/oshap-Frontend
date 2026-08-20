@@ -11,6 +11,9 @@
 
 import type {
   AdminCloseRequest,
+  BranchCreateRequest,
+  BranchUpdateRequest,
+  RestaurantBranch,
   AdminCloseResponse,
   AdminHistoryResponse,
   AdminMeResponse,
@@ -2717,6 +2720,77 @@ route("GET", /^\/admin\/analytics$/, ({ query }) => {
 });
 
 // -------------------- Admin: Staff --------------------
+
+// ---------------------------------------------------------------------------
+// Branches — the venues a group runs, and what Pro is sold on
+// ---------------------------------------------------------------------------
+
+/**
+ * Seeded with a single branch, because that is what almost every restaurant
+ * is. The switcher only appears above one, so the default state exercises the
+ * "don't show it" path rather than the exciting one.
+ */
+const _branches: Map<string, RestaurantBranch> = new Map([
+  [
+    "br-main",
+    {
+      id: "br-main",
+      name: "Main",
+      description: null,
+      logo_url: null,
+      operating_hours: null,
+      whatsapp_number: null,
+      address: "12 Adeola Odeku Street, Victoria Island, Lagos",
+      is_active: true,
+      table_count: 12,
+      staff_count: 4,
+    } as RestaurantBranch,
+  ],
+]);
+
+route("GET", /^\/admin\/branches$/, () => {
+  return json(200, [..._branches.values()]);
+});
+
+route("POST", /^\/admin\/branches$/, ({ body }) => {
+  const b = body as BranchCreateRequest;
+  if (!b.name?.trim()) {
+    return json(422, { message: "name: Field required" });
+  }
+  const branch: RestaurantBranch = {
+    id: `br-${Date.now().toString(36)}`,
+    name: b.name.trim(),
+    description: b.description ?? null,
+    logo_url: null,
+    operating_hours: b.operating_hours ?? null,
+    whatsapp_number: b.whatsapp_number ?? null,
+    address: b.address ?? null,
+    is_active: true,
+    // Pre-created with the venue, the way onboarding a restaurant does — a
+    // branch that cannot print a QR code on day one is not open.
+    table_count: b.table_count ?? 0,
+    staff_count: 0,
+  };
+  _branches.set(branch.id, branch);
+  syncToStorage();
+  return json(201, branch);
+});
+
+route("PATCH", /^\/admin\/branches\/([^/]+)$/, ({ path, body }) => {
+  const branch = _branches.get(
+    decodeURIComponent(path.split("/admin/branches/")[1]!),
+  );
+  if (!branch) return json(404, { message: "Branch not found" });
+  const b = body as BranchUpdateRequest;
+  if (b.name !== undefined) branch.name = b.name;
+  if (b.description !== undefined) branch.description = b.description;
+  if (b.address !== undefined) branch.address = b.address;
+  if (b.operating_hours !== undefined) branch.operating_hours = b.operating_hours;
+  if (b.whatsapp_number !== undefined) branch.whatsapp_number = b.whatsapp_number;
+  if (b.is_active !== undefined) branch.is_active = b.is_active;
+  syncToStorage();
+  return json(200, branch);
+});
 
 route("GET", /^\/admin\/staff$/, () => {
   return json(200, [..._staff.values()]);

@@ -1070,6 +1070,38 @@ export interface RestaurantGroup {
   branches: RestaurantBranch[];
 }
 
+/**
+ * A new venue. Only `name` is required — an address and hours can follow once
+ * someone has actually been there.
+ *
+ * `table_count` pre-creates that many tables, the same way onboarding a
+ * restaurant does, so a branch is not born needing every table typed in by
+ * hand before it can print a single QR code.
+ */
+export interface BranchCreateRequest {
+  name: string;
+  description?: string | null;
+  address?: string | null;
+  operating_hours?: string | null;
+  whatsapp_number?: string | null;
+  table_count?: number;
+}
+
+/**
+ * Every field optional — this is a PATCH.
+ *
+ * There is no delete. A branch that closes is deactivated, because its orders,
+ * takings and audit trail have to outlive it.
+ */
+export interface BranchUpdateRequest {
+  name?: string;
+  description?: string | null;
+  address?: string | null;
+  operating_hours?: string | null;
+  whatsapp_number?: string | null;
+  is_active?: boolean;
+}
+
 export interface GroupBranchAnalytics {
   branch_id: string;
   branch_name: string;

@@ -4,7 +4,7 @@ import {
   adminApi,
   getAdminRestaurantId,
   getAdminRestaurantName,
-  useAdminGroup,
+  useAdminBranches,
 } from "@oshap/shared";
 import { PrimaryButton, ThemeToggle } from "@oshap/shared/ui";
 import { initFCM } from "../utils/fcm";
@@ -14,7 +14,7 @@ import { useAuth } from "../context/AuthContext";
 export default function AuthGate() {
   const navigate = useNavigate();
   const { user, isAuthenticated, isLoading, login, logout, activeBranchId, setActiveBranch } = useAuth();
-  const groupQuery = useAdminGroup();
+  const branchesQuery = useAdminBranches();
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -176,9 +176,13 @@ export default function AuthGate() {
   }
 
   const restaurantName = getAdminRestaurantName();
-  const group = groupQuery.data;
-  const showBranchSelector =
-    user?.role === "OWNER" && (group?.branches.length ?? 0) > 1;
+  // A closed venue must not be selectable — switching to one would show a
+  // manager an empty board and no way to tell why. Reopening it in Settings
+  // brings it back.
+  const branches = (branchesQuery.data ?? []).filter((b) => b.is_active);
+  // One venue is the normal case, and a switcher offering a single choice is
+  // furniture. It appears when there is actually something to switch between.
+  const showBranchSelector = user?.role === "OWNER" && branches.length > 1;
 
   // Role-based tabs
   const tabs = [];
@@ -201,7 +205,8 @@ export default function AuthGate() {
   }
   if (user.role === "OWNER") {
     tabs.push({ to: "/analytics", label: "Analytics" });
-    if (group && group.branches && group.branches.length > 1) {
+    // Group analytics compares venues, so it only means anything above one.
+    if (branches.length > 1) {
       tabs.push({ to: "/analytics/group", label: "Group Analytics" });
     }
   }
@@ -240,7 +245,7 @@ export default function AuthGate() {
 
           {/* Right controls — always visible */}
           <div className="flex items-center gap-s shrink-0 ml-auto lg:ml-0">
-            {showBranchSelector && group && (
+            {showBranchSelector && (
               <div className="relative">
                 <select
                   aria-label="Active branch"
@@ -249,7 +254,7 @@ export default function AuthGate() {
                   className="pl-s pr-xl py-xs rounded-lg border border-outline-variant bg-surface-container-low text-caption-md text-primary-text font-semibold outline-none focus:border-primary appearance-none cursor-pointer max-w-[160px]"
                 >
                   <option value="">All Branches</option>
-                  {group.branches.map((b) => (
+                  {branches.map((b) => (
                     <option key={b.id} value={b.id}>
                       {b.name}
                     </option>

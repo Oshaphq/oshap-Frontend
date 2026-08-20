@@ -43,6 +43,7 @@ export const queryKeys = {
     receipt: (orderId: string) => ["admin", "receipt", orderId] as const,
     auditLogs: (page: number, perPage: number, action?: string) =>
       ["admin", "audit-logs", page, perPage, action] as const,
+    branches: () => ["admin", "branches"] as const,
     group: () => ["admin", "group"] as const,
     groupAnalytics: () => ["admin", "group", "analytics"] as const,
     modifierGroups: () => ["admin", "modifier-groups"] as const,

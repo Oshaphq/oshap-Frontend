@@ -3,6 +3,7 @@ export * from "./useTable";
 export * from "./useOrders";
 export * from "./useSession";
 export * from "./useAdmin";
+export * from "./useBranches";
 export * from "./useSSE";
 export * from "./useInventory";
 export * from "./usePlatform";

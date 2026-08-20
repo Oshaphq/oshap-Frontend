@@ -2,6 +2,7 @@ import { NavLink, Routes, Route, Navigate } from "react-router";
 import GeneralSettings from "./settings/general";
 import StaffSettings from "./settings/staff";
 import TablesSettings from "./settings/tables";
+import BranchesSettings from "./settings/branches";
 import { useAuth } from "../context/AuthContext";
 
 const tabCls = ({ isActive }: { isActive: boolean }) =>
@@ -38,6 +39,13 @@ export default function SettingsLayout() {
             Staff
           </NavLink>
         )}
+        {/* Owner-only: branches are a group-level concern, and a manager
+            running one venue has no business closing another. */}
+        {isOwner && (
+          <NavLink to="/settings/branches" className={tabCls}>
+            Branches
+          </NavLink>
+        )}
       </div>
 
       <div className="flex-1">
@@ -45,6 +53,7 @@ export default function SettingsLayout() {
           <Route path="general" element={<GeneralSettings />} />
           <Route path="tables" element={<TablesSettings />} />
           {isOwner && <Route path="staff" element={<StaffSettings />} />}
+          {isOwner && <Route path="branches" element={<BranchesSettings />} />}
           <Route path="*" element={<Navigate to="general" replace />} />
         </Routes>
       </div>
