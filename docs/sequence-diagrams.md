@@ -79,7 +79,12 @@ sequenceDiagram
     API-)Admin: SSE payment_verified, then table_closed
     API-->>Client: AdminVerifyResponse
 
-    Note over Guest,App: The guest is NOT pushed to. There is no SSE or poll in<br/>apps/customer — the receipt appears on the next<br/>GET /table/{id}, after a reload or a remount past staleTime.
+    API-)App: SSE payment_verified on /events/table/{uuid}
+    App->>Client: Refetch GET /table/{uuid}
+    Client-->>App: pending_payments cleared
+    App->>Guest: Receipt replaces "awaiting verification"
+
+    Note over App: The guest stream carries a type and nothing else — it is a<br/>prompt to refetch, not a delivery mechanism. That is what<br/>makes it safe to serve to an unauthenticated guest.<br/>While a claim is outstanding the pay screen also polls,<br/>so a dropped stream degrades to slow rather than to never.
 ```
 
 **Status chain:** `CREATED → PREPARING → READY → PAYMENT_PENDING → CONFIRMED`.
@@ -145,10 +150,12 @@ Tokens live in `sessionStorage`, not `localStorage`, so closing the tab ends the
 session. The refresh token is what spares staff from retyping a password every
 15 minutes.
 
-> **Spec drift:** [`openapi.yaml`](openapi.yaml) still tags admin paths
-> `security: [{ adminPin: [] }]`, and [`CLAUDE.md`](../CLAUDE.md) still states
-> there is no JWT. The client has sent `Authorization: Bearer` since the auth
-> rework — both documents are stale, not this diagram.
+> **On the name `adminPin`:** admin paths in [`openapi.yaml`](openapi.yaml) are
+> tagged `security: [{ adminPin: [] }]`, which reads like PIN auth and is not.
+> The scheme is defined as `type: http, scheme: bearer, bearerFormat: JWT` — the
+> key is historical, and the `x-admin-pin` header it names is gone. The 4-digit
+> PIN that *does* still exist is unrelated: it belongs to shared-table sessions
+> (`POST /session` with `action=JOIN`), and guests use it, not staff.
 
 ---
 
@@ -299,7 +306,7 @@ sequenceDiagram
         API-->>Client: 403 naming the limit and the plan
         Client-->>Admin: ApiError(403)
         Admin->>Owner: Lite includes 1 location — upgrade to Pro for more
-        Note over Admin,Owner: Safe to refuse outright: a second location is set-up<br/>work, never mid-service. The order-volume cap is the<br/>opposite case and cannot be enforced this way.
+        Note over Admin,Owner: Safe to refuse outright: a second location is set-up<br/>work, never mid-service. The order cap is the opposite<br/>case — it never refuses, it accrues 2% per order instead.
     end
 ```
 
@@ -342,11 +349,13 @@ That is the inverse of the commercial decision — a Lite restaurant currently
 cannot manage tables, and so cannot produce the QR codes that are the entire
 product. Removing the feature gates is step 1 and blocks the rest.
 
-Note the two axes need different enforcement. A location cap can refuse outright.
-An order cap is reached in the middle of a Saturday, so it cannot be a `403` —
-what it should do instead is still open ([`plans.md`](plans.md)). The frontend is
-ready either way: `orderUsage()` and `USAGE_WARN_AT = 0.8` warn a merchant at 80%
-of the allowance, so the limit does not read as a bug when it arrives.
+The two axes enforce differently. A location cap refuses outright — a second
+branch is set-up work, and nobody is mid-service when it is refused. The order
+cap never refuses anything: past 10,000 orders in a month, Lite accrues **2% of
+order value on each subsequent order** until the restaurant upgrades. Service is
+untouched, the guest's total is unchanged, and nothing about it reaches the
+customer app. `orderUsage()` and `USAGE_WARN_AT = 0.8` warn the owner at 8,000,
+so the charge is never a surprise. See [`plans.md`](plans.md).
 
 ---
 
@@ -360,10 +369,33 @@ of the allowance, so the limit does not read as a bug when it arrives.
 | **4. Realtime transport** | Any domain event | `GET /events?access_token=…`, `POST /devices/register` | SSE, plus a 20s poll floor, plus FCM web push | Access token in query (SSE); Bearer (register) |
 | **5. Onboarding** | Operator creates a tenant | `POST /platform/restaurants`, `POST /admin/staff` | HTTP JSON | `x-platform-token`; Bearer |
 
-### The customer app has no live channel
+### The guest's live channel, and its deliberate limits
 
-Worth stating plainly, because it is easy to assume otherwise: `apps/customer`
-opens no `EventSource`, sets no `refetchInterval`, and runs with
-`refetchOnWindowFocus: false` and a 30-second `staleTime`. A guest sees a
-verified payment on the next fetch of `GET /table/{id}` — a reload, or a
-navigation that remounts the query past `staleTime`. Nothing pushes it to them.
+`apps/customer` opens exactly one `EventSource`, on the pay screen, via
+`useTableEvents` → `GET /events/table/{id}`. It exists because payment
+verification is a manual act by staff: the guest does not trigger the
+transition that turns their screen into a receipt, so without a push they sit
+on "awaiting verification" until they think to reload.
+
+Three constraints shape it, and each is a decision rather than an oversight:
+
+- **The stream returns no data.** Messages carry a `type` and nothing the client
+  reads beyond it. Every guest-visible fact still arrives through
+  `GET /table/{id}`, which was already public. A stream that delivers nothing
+  cannot widen what an unauthenticated caller can see.
+- **Unknown event types are ignored, not refetched on.** The admin stream does
+  the opposite — an unrecognised type triggers a broad invalidation so a new
+  backend event is never silently missed. Here, an unrecognised type means the
+  backend started sending guests something nobody designed for, and reacting to
+  it would be guessing.
+- **It is scoped to the pay screen, and polls only while a claim is open.** A
+  guest's phone sleeps and backgrounds far more than a till does, so the pay
+  screen also polls at `REALTIME_POLL_MS` while `pending_payments` is set — the
+  same fast-path-plus-floor shape the admin board uses. The menu and orders
+  screens keep the old behaviour: no stream, no poll, 30-second `staleTime`.
+
+> **Backend dependency.** `/events/table/{id}` is specified in
+> [`openapi.yaml`](openapi.yaml) but not yet implemented. Until it is, the
+> `EventSource` fails and retries every 5s, and the poll on the pay screen is
+> what actually delivers the receipt — which is the degradation it was put
+> there for.

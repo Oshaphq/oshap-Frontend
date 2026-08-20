@@ -5,6 +5,7 @@ export * from "./useSession";
 export * from "./useAdmin";
 export * from "./useBranches";
 export * from "./useSSE";
+export * from "./useTableEvents";
 export * from "./useInventory";
 export * from "./usePlatform";
 export * from "./useModifiers";

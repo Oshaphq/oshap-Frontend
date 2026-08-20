@@ -3,10 +3,12 @@ import { useNavigate, useSearchParams } from "react-router";
 import {
   formatCurrency,
   getDeviceToken,
+  REALTIME_POLL_MS,
   useClaimPayment,
   useOrder,
   useRequestPos,
   useTable,
+  useTableEvents,
 } from "@oshap/shared";
 import { PrimaryButton, SecondaryButton, toast } from "@oshap/shared/ui";
 import BottomNav from "../components/BottomNav";
@@ -22,13 +24,23 @@ export default function PayPage() {
   const { session } = useSession();
   const deviceToken = getDeviceToken();
 
-  const tableQuery = useTable({
-    tableId,
-    deviceToken,
-    sessionId: session?.id,
-  });
+  const tableQuery = useTable(
+    {
+      tableId,
+      deviceToken,
+      sessionId: session?.id,
+    },
+    true,
+    // Poll only while a claim is outstanding. This is the one stretch where the
+    // guest is staring at the screen waiting for someone else to act, and the
+    // one where a dropped stream would otherwise strand them on "awaiting
+    // verification" until they thought to reload.
+    (table) => (table?.pending_payments ? REALTIME_POLL_MS : false),
+  );
 
-
+  // Staff verifying a transfer is what turns this screen into a receipt, and
+  // the guest is not the one who triggers it.
+  useTableEvents({ tableId, deviceToken, sessionId: session?.id });
 
   const claimPayment = useClaimPayment();
   const requestPos = useRequestPos();

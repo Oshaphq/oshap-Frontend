@@ -3676,3 +3676,73 @@ paths:
               schema:
                 type: string
                 description: Event payload (JSON stringified)
+
+  /events/table/{table_id}:
+    get:
+      tags: [Events]
+      summary: Guest event stream for one table (SSE)
+      description: |
+        The guest-facing counterpart to `/events`, and the only realtime channel
+        the customer app has. Unauthenticated, like every other customer
+        endpoint: the table's uuid is the scope, exactly as it is for
+        `GET /table/{id}`.
+
+        **Why this exists.** Payment verification is a manual act by staff, so
+        the guest is not the one who triggers the transition that turns their
+        pay screen into a receipt. Without a push they sit on "awaiting
+        verification" until they think to reload.
+
+        **The stream carries no data of its own.** Each message is a JSON object
+        with a `type` and nothing the client reads beyond it — it is a prompt to
+        refetch `GET /table/{id}`, not a delivery mechanism. That is what keeps
+        it safe to serve unauthenticated: it cannot widen what a guest can
+        already read, because it returns nothing.
+
+        Emit only the types below. Anything else is staff business and the
+        customer app ignores it rather than refetching — the opposite of
+        `/events`, where an unknown type triggers a broad invalidation.
+
+        | Event | Why a guest cares |
+        |---|---|
+        | `payment_verified` · `payment_confirmed` | Their transfer was accepted — show the receipt |
+        | `payment_rejected` | It was not, and nobody is coming with a receipt |
+        | `order_preparing` · `order_ready` | Their food moved |
+        | `table_closed` | The table was cleared |
+        | `session_started` · `session_joined` | Someone joined the shared bill |
+
+        Emits `connected` on open and `heartbeat` every 30s, as `/events` does.
+
+        Never emit `new_order` here. A guest sharing a table may see the joint
+        bill through `GET /table/{id}`, but the stream must not become a second,
+        unreviewed route to another guest's order contents.
+      parameters:
+        - name: table_id
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+          description: The table's uuid — not its display name.
+        - name: device_token
+          in: query
+          required: false
+          schema: { type: string }
+          description: >
+            The guest's device token, for attribution and for scoping which of
+            the table's orders concern this device. Not a credential.
+        - name: session_id
+          in: query
+          required: false
+          schema: { type: string, format: uuid }
+          description: Shared-table session, when the guest is in one.
+      responses:
+        "200":
+          description: SSE stream
+          content:
+            text/event-stream:
+              schema:
+                type: string
+                description: Event payload (JSON stringified)
+        "404":
+          description: No such table
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
