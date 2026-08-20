@@ -2,6 +2,7 @@ import { describe, it, expect } from "vitest";
 import { mockRequest } from "./mock";
 import { formatCurrency } from "../utils/currency";
 import { computeOrderTotals } from "../utils/pricing";
+import { STOCK_REASONS } from "../types/index";
 import { AUDIT_ACTIONS } from "../types/index";
 
 const HOME_RESTAURANT = "00000000-0000-0000-0000-000000000001";
@@ -1287,7 +1288,7 @@ describe("mock API — ingredients", () => {
       "/admin/ingredients/movements",
       "GET",
       null,
-      q("reason=PURCHASE"),
+      q("reason=RESTOCK"),
       true,
     );
     const { movements } = ledger.body as {
@@ -1435,6 +1436,66 @@ describe("mock API — ingredients", () => {
     expect(recipe.lines.map((l) => l.ingredient_id)).toEqual(["ing-chicken"]);
 
     await mockRequest("/admin/menu/m-005/recipe", "PUT", { lines: [] }, q(), true);
+  });
+});
+
+/**
+ * The admin offered PURCHASE, STOCK_TAKE and CORRECTION. The server accepts
+ * RESTOCK, WASTAGE, SALE, COUNT_CORRECTION and TRANSFER — so only WASTAGE
+ * overlapped, and three of the four reasons a staff member could pick failed
+ * with a raw enum dump in a toast.
+ *
+ * It survived because `reason` was typed `string` and this mock accepted any
+ * non-empty value, so every test passed against a vocabulary that did not
+ * exist. The mock now rejects what the server rejects, which is the only
+ * reason a test here means anything.
+ */
+describe("mock API — stock reasons match the server's vocabulary", () => {
+
+  async function firstIngredient() {
+    const res = await mockRequest("/admin/ingredients", "GET", null, q(), true);
+    return (res.body as Array<{ id: string }>)[0]!;
+  }
+
+  it.each(["RESTOCK", "WASTAGE", "COUNT_CORRECTION", "TRANSFER"] as const)(
+    "accepts %s",
+    async (reason) => {
+      const ing = await firstIngredient();
+      const res = await mockRequest(
+        `/admin/ingredients/${ing.id}/adjust`,
+        "POST",
+        { delta: 1, reason },
+        q(),
+        true,
+      );
+      // The mock answers 201 here and the live API answers 200; both are a
+      // success and the client treats every 2xx alike. What matters is that a
+      // reason the server knows is not rejected.
+      expect(res.status).toBeLessThan(300);
+    },
+  );
+
+  it.each(["PURCHASE", "STOCK_TAKE", "CORRECTION", "purchase", "restock"])(
+    "rejects %s, which is not a reason the server knows",
+    async (reason) => {
+      const ing = await firstIngredient();
+      const res = await mockRequest(
+        `/admin/ingredients/${ing.id}/adjust`,
+        "POST",
+        { delta: 1, reason },
+        q(),
+        true,
+      );
+      expect(res.status).toBe(422);
+    },
+  );
+
+  it("offers the staff only reasons a person can actually cause", () => {
+    // SALE is written by the server when a recipe depletes, and TRANSFER has
+    // no destination field on this endpoint — offering it would record stock
+    // leaving without recording where it went.
+    expect(STOCK_REASONS.sale).toBe("SALE");
+    expect(STOCK_REASONS.transfer).toBe("TRANSFER");
   });
 });
 

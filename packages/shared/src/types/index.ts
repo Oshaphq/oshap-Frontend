@@ -606,19 +606,29 @@ export interface UpdateIngredientRequest {
  * an order depletes a recipe; the rest come from staff.
  */
 export const STOCK_REASONS = {
-  purchase: "PURCHASE",
+  restock: "RESTOCK",
   wastage: "WASTAGE",
-  stockTake: "STOCK_TAKE",
-  correction: "CORRECTION",
+  countCorrection: "COUNT_CORRECTION",
+  transfer: "TRANSFER",
   sale: "SALE",
 } as const;
 
+/**
+ * The server's vocabulary, exactly.
+ *
+ * We previously used our own — `PURCHASE`, `STOCK_TAKE`, `CORRECTION` — and
+ * only `WASTAGE` overlapped, so three of the four reasons a staff member could
+ * pick were rejected with a raw enum dump. Nothing caught it because `reason`
+ * was typed `string` and the mock accepted any non-empty value; both are fixed
+ * here, which is what stops it recurring.
+ */
 export type StockReason = (typeof STOCK_REASONS)[keyof typeof STOCK_REASONS];
 
 export interface AdjustStockRequest {
   /** Signed: negative removes. */
   delta: number;
-  reason: string;
+  /** Typed, not `string` — the drift above is exactly what that allowed. */
+  reason: StockReason;
   note?: string;
 }
 
@@ -626,7 +636,7 @@ export interface StockMovement {
   id: string;
   ingredient_id: string;
   delta: number;
-  reason: string;
+  reason: StockReason;
   actor_id?: string | null;
   note?: string | null;
   /** Present when the movement came from an order rather than a person. */
