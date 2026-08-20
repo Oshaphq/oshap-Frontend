@@ -262,8 +262,9 @@ test.describe("plans grant what they are sold as granting", () => {
   test.skip(!PLATFORM_TOKEN, "OSHAP_PLATFORM_TOKEN not set");
 
   // Plans differ by capacity, not capability: every tier gets the whole
-  // product, and Lite is capped at 3 staff accounts and 10 tables. So the
-  // assertion is no longer "Lite is denied X" — it is that Lite is denied
+  // product, and Lite is capped only on monthly order volume (10,000) and
+  // locations (1). Staff accounts and tables are unlimited on every tier. So
+  // the assertion is no longer "Lite is denied X" — it is that Lite is denied
   // nothing. See docs/plans.md.
   // Fails today: gating is still live on the backend. Observed on a fresh Lite
   // tenant, 19 Aug — /admin/menu 200, /admin/settings 200, /admin/staff 200,
@@ -322,10 +323,16 @@ test.describe("plans grant what they are sold as granting", () => {
     }
   });
 
-  // The commercial difference between Lite and Standard is entirely these two
-  // numbers, and neither is enforced yet — so today every plan behaves as
-  // unlimited and we under-charge rather than block a pilot mid-service.
-  // Un-fixme these as the backend lands the caps (docs/plans.md §Enforcement).
-  test.fixme("Lite caps active staff accounts at 3", async () => {});
-  test.fixme("Lite caps tables at 10", async () => {});
+  // Two axes, one per tier gap: order volume separates Lite from Standard,
+  // locations separate Standard from Pro. Neither is enforced yet — so today
+  // every plan behaves as uncapped and we under-charge rather than block a
+  // pilot mid-service.
+  //
+  // These two do not land together. A location cap can refuse outright: a
+  // second branch is set-up work, never mid-service. The order cap is reached
+  // in the middle of a Saturday, so it cannot be a 403 — what it should do
+  // instead is still open, and until that is settled there is nothing for the
+  // order test to assert. See docs/plans.md §Enforcement.
+  test.fixme("Lite caps locations at 1", async () => {});
+  test.fixme("Lite caps monthly orders at 10,000", async () => {});
 });

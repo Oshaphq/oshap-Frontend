@@ -17,69 +17,67 @@ restaurant that cannot take an order through the product has bought a digital me
 a digital menu is not worth a subscription. It also made the cheapest plan the one most
 likely to churn, which is exactly backwards.
 
-## Phase 1 plans
+## Tier Model (20 Aug)
 
-| | **Lite** | **Standard** | **Pro** |
-|---|---|---|---|
-| Monthly | ₦8,000 | ₦18,000 | ₦35,000 |
-| Annual (10 months) | ₦80,000 | ₦180,000 | ₦350,000 |
-| Active staff accounts | **3** | Unlimited | Unlimited |
-| Tables | **10** | Unlimited | Unlimited |
-| Everything else | ✅ | ✅ | ✅ |
+| Tier | Monthly | Annual (10 months) | Monthly Orders | Locations | Staff Accounts | Tables | Features |
+|---|---|---|---|---|---|---|---|
+| **Lite** | ₦8,000 | ₦80,000 | **10,000** | **1** | ∞ | ∞ | All |
+| **Standard** | ₦18,000 | ₦180,000 | **Unlimited** | **1** | ∞ | ∞ | All |
+| **Pro** | ₦35,000 | ₦350,000 | **Unlimited** | **Unlimited** | ∞ | ∞ | All |
+| **Enterprise** | ₦100,000 | ₦1,000,000 | **Unlimited** | **Unlimited** | ∞ | ∞ | All |
 
-"Everything else" is literal — customer ordering, kitchen and bar display, payment
+"All features" is literal — customer ordering, kitchen and bar display, payment
 verification and table clearing, menu and modifiers, ingredient inventory, QR generation,
 receipts, analytics, staff roles and RBAC, realtime alerts.
 
-Enterprise exists in `TIER_ORDER` but is not on sale. It sits in Phase 2 alongside payment
-infrastructure that does not exist yet, so the onboarding picker offers only the three
-above (`PHASE_1_TIERS`).
+Enterprise exists in `TIER_ORDER` but is not on sale in Phase 1. The onboarding picker offers `PHASE_1_TIERS` (`LITE`, `STANDARD`, `PRO`).
 
-### Why these two limits
+### Why these caps
 
-They are the two dimensions that track the size of the business rather than its ambition.
-A ten-table restaurant with three staff on the system is genuinely small; when it outgrows
-either number it has grown enough to pay more, and the upgrade prompt arrives at a moment
-the owner already understands. Neither limit requires us to withhold something the
-restaurant needs to operate.
+Two axes, one per tier gap:
+- **Order volume (10,000/mo)** separates Lite from Standard.
+- **Locations (1 vs Multi-location)** separates Standard from Pro.
 
-Both are counts a merchant can see and reason about, which matters — a limit nobody can
-predict hitting reads as a bug, not a plan.
-
-## What "active staff accounts" counts
-
-Staff rows that can log in. Deactivating an account frees a slot; the row and its history
-stay, because an audit trail that disappears when someone leaves is not an audit trail.
-The owner's own account counts toward the three.
+Tables and staff accounts are **unlimited on all tiers** — both were proposed as caps and both were dropped, because restricting them would bite during live service, which is the one time a limit must never interrupt operations.
 
 ## Enforcement status
 
-**None of this is built.** The table above is the commercial decision, not a description of
-how the system behaves today. Today the backend still gates *features* by tier — the model
-this decision replaces — and caps nothing.
+**Nothing enforces these yet.** The backend caps neither order volume nor location count today, so every plan behaves as uncapped. Showing usage early (e.g. at 80% usage threshold `USAGE_WARN_AT`) is the goal so merchants receive fair warning before a limit is reached.
 
 Outstanding, in order:
 
 1. **Remove the feature gates.** Every tier reaches every endpoint. This is the blocking
    one: while it stands, a Lite restaurant is refused table management and so cannot
    generate a QR code.
-2. Backend rejects staff creation past the cap with `403` and a message naming the limit and
-   the plan — not a bare "forbidden".
-3. Backend rejects table creation past the cap the same way.
-4. Admin surfaces "3 of 3 staff accounts used" before the merchant hits the wall, and the
-   same for tables.
+2. Backend counts orders per calendar month per restaurant and returns the figure, so
+   `orderUsage()` has something real to read. Counting comes before enforcing — a merchant
+   must be able to see the number before it can cost them anything.
+3. Backend rejects branch creation past the location cap with `403` and a message naming the
+   limit and the plan — not a bare "forbidden". A second location is set-up work, never
+   mid-service, so refusing one is safe.
+4. Admin surfaces "8,100 of 10,000 orders this month" at `USAGE_WARN_AT`, before the
+   merchant hits the wall.
 5. Tier changes recalculate: downgrading a restaurant that is already over a cap must be a
    deliberate decision, not a silent lockout.
 
-Order matters. (1) without (2) and (3) means every plan behaves as unlimited for a while,
+Order matters. (1) without the rest means every plan behaves as unlimited for a while,
 which is the safe direction to be wrong in — we under-charge rather than block a paying
-restaurant mid-service. (2) and (3) without (1) would be the worst of both.
+restaurant mid-service. Enforcing before (1) would be the worst of both.
+
+**Open question: what the order cap does when it is reached.** The location cap can refuse
+outright. The order cap cannot — it is reached in the middle of a Saturday, and a plan
+limit must never be the reason a guest cannot order. So crossing 10,000 is a billing
+conversation, not a `403`. Whether that means an overage charge, an automatic upgrade, or
+a hard prompt to the owner with service continuing regardless, is undecided. Nothing
+should enforce this axis until it is.
 
 ## Testing
 
 [`smoke/production.smoke.ts`](../smoke/production.smoke.ts) carries the grant model as three
 pending tests — Lite reaching every admin surface, and the two caps. All three are
-`test.fixme` because none of it is built yet.
+`test.fixme` because none of it is built yet. The two cap stubs are `Lite caps locations
+at 1` and `Lite caps monthly orders at 10,000` — the location one can be written as soon
+as the backend refuses a second branch; the order one waits on the open question above.
 
 Observed on a fresh Lite tenant, 19 August 2026:
 
