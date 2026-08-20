@@ -48,7 +48,7 @@ sequenceDiagram
     Note over App: Cart lives in CartProvider — client-side only until checkout.
 
     Guest->>App: Add items, tap Place Order
-    Note over Client,API: POST /orders — table (name), restaurant_id, items[],<br/>session_id?, customer_name?, device_token.<br/>Items send BASE price; the server adds modifier deltas.
+    Note over Client,API: POST /orders — table (name), restaurant_id, items[],<br/>session_id?, customer_name?, device_token.<br/>Items send BASE price — the server adds modifier deltas.
     Client->>API: POST /orders
     API->>DB: Validate, price, insert Order — status CREATED
     API-->>Client: order_id + reference
