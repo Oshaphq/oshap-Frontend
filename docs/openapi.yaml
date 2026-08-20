@@ -1282,18 +1282,31 @@ components:
       type: string
       enum: [FREE, STARTER, PRO, ENTERPRISE]
 
+    BillingPeriod:
+      type: string
+      enum: [MONTHLY, ANNUAL]
+      description: >
+        Annual is ten months' price — a rule rather than three separate figures,
+        so the two can never disagree. See `docs/plans.md`.
+
     PlatformRestaurant:
       allOf:
         - $ref: "#/components/schemas/Restaurant"
         - type: object
           properties:
             subscription_tier: { $ref: "#/components/schemas/SubscriptionTier" }
+            billing_period: { $ref: "#/components/schemas/BillingPeriod" }
             is_active: { type: boolean }
             created_at: { type: string, format: date-time }
             owner_email: { type: string, format: email }
             table_count: { type: integer }
-            monthly_orders: { type: integer }
-          required: [subscription_tier, is_active, created_at, owner_email, table_count, monthly_orders]
+            monthly_orders:
+              type: integer
+              description: >
+                Orders this calendar month. Lite is sold with a 10,000 ceiling,
+                so this is what the platform app measures usage against — see
+                `docs/plans.md`. Nothing enforces it yet.
+          required: [subscription_tier, billing_period, is_active, created_at, owner_email, table_count, monthly_orders]
 
     PlatformRestaurantsResponse:
       type: object
@@ -1324,6 +1337,13 @@ components:
           description: Required - the owner is reached here and may have no email.
         owner_email: { type: string, format: email, nullable: true }
         subscription_tier: { $ref: "#/components/schemas/SubscriptionTier" }
+        billing_period:
+          allOf: [{ $ref: "#/components/schemas/BillingPeriod" }]
+          default: MONTHLY
+          description: >
+            Send it explicitly. It defaults to MONTHLY server-side, and because
+            the frontend never sent it, every restaurant onboarded before this
+            reads as monthly — including any that agreed annual terms.
         table_count: { type: integer }
         bank_name: { type: string }
         account_number: { type: string }
@@ -1335,6 +1355,7 @@ components:
       properties:
         name: { type: string }
         subscription_tier: { $ref: "#/components/schemas/SubscriptionTier" }
+        billing_period: { $ref: "#/components/schemas/BillingPeriod" }
         is_active: { type: boolean }
 
     Error:

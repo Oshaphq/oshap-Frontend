@@ -2130,9 +2130,9 @@ route("GET", /^\/admin\/group\/analytics$/, () => {
 // -------------------- Platform Admin --------------------
 
 const _platformRestaurants: import("../types/index").PlatformRestaurant[] = [
-  { ..._restaurant, subscription_tier: "PRO", is_active: true, created_at: "2025-01-15T09:00:00Z", owner_email: "owner@oshap.com", table_count: 13, monthly_orders: 142 },
-  { id: "rest-002", name: "Oshap VI", description: "Victoria Island Branch", logo_url: null, operating_hours: "10:00 - 23:00", whatsapp_number: null, subscription_tier: "STANDARD", is_active: true, created_at: "2025-03-20T10:00:00Z", owner_email: "vi@oshap.com", table_count: 10, monthly_orders: 87 },
-  { id: "rest-003", name: "Oshap Ikeja", description: "Ikeja Branch", logo_url: null, operating_hours: "09:00 - 22:00", whatsapp_number: null, subscription_tier: "LITE", is_active: false, created_at: "2025-06-01T08:00:00Z", owner_email: "ikeja@oshap.com", table_count: 8, monthly_orders: 0 },
+  { ..._restaurant, subscription_tier: "PRO", billing_period: "ANNUAL", is_active: true, created_at: "2025-01-15T09:00:00Z", owner_email: "owner@oshap.com", table_count: 13, monthly_orders: 142 },
+  { id: "rest-002", name: "Oshap VI", description: "Victoria Island Branch", logo_url: null, operating_hours: "10:00 - 23:00", whatsapp_number: null, subscription_tier: "STANDARD", billing_period: "MONTHLY", is_active: true, created_at: "2025-03-20T10:00:00Z", owner_email: "vi@oshap.com", table_count: 10, monthly_orders: 87 },
+  { id: "rest-003", name: "Oshap Ikeja", description: "Ikeja Branch", logo_url: null, operating_hours: "09:00 - 22:00", whatsapp_number: null, subscription_tier: "LITE", billing_period: "MONTHLY", is_active: false, created_at: "2025-06-01T08:00:00Z", owner_email: "ikeja@oshap.com", table_count: 8, monthly_orders: 0 },
 ];
 
 route("GET", /^\/platform\/restaurants$/, () => {
@@ -2172,6 +2172,7 @@ route("POST", /^\/platform\/restaurants$/, ({ body }) => {
     operating_hours: null,
     whatsapp_number: null,
     subscription_tier: b.subscription_tier,
+    billing_period: b.billing_period ?? "MONTHLY",
     is_active: true,
     created_at: now(),
     owner_phone: ownerPhone,

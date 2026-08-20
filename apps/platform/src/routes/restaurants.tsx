@@ -135,6 +135,14 @@ export default function RestaurantsPage() {
               <span className={`px-s py-xs rounded-4xl text-caption-xs font-bold uppercase tracking-wider ${TIER_COLORS[r.subscription_tier]}`}>
                 {r.subscription_tier}
               </span>
+              {/* Only annual is marked. Monthly is the default and labelling
+                  every row with it would bury the handful that renew yearly,
+                  which is the thing an operator is actually scanning for. */}
+              {r.billing_period === "ANNUAL" && (
+                <span className="px-s py-xs rounded-4xl text-caption-xs font-bold uppercase tracking-wider bg-surface-container-high text-secondary-text">
+                  Annual
+                </span>
+              )}
               <span className={`px-s py-xs rounded-4xl text-caption-xs font-bold uppercase tracking-wider ${r.is_active ? "bg-success-container text-on-success-container" : "bg-surface-container-high text-outline"}`}>
                 {r.is_active ? "Active" : "Inactive"}
               </span>

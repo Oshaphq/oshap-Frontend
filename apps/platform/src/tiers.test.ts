@@ -1,11 +1,15 @@
 import { describe, it, expect } from "vitest";
 import {
   MONTHS_BILLED_ANNUALLY,
-  monthlyRecurringKobo,
   PHASE_1_TIERS,
   TIER_ANNUAL_KOBO,
+  TIER_LOCATION_CAP,
   TIER_MONTHLY_KOBO,
+  TIER_MONTHLY_ORDER_CAP,
   TIER_ORDER,
+  locationAllowanceLabel,
+  monthlyRecurringKobo,
+  orderUsage,
   tierAnnualLabel,
   tierPriceLabel,
 } from "./tiers";
@@ -114,5 +118,55 @@ describe("what is actually on sale", () => {
       expect(TIER_MONTHLY_KOBO[tier]).toBeGreaterThan(0);
       expect(TIER_ANNUAL_KOBO[tier]).toBeGreaterThan(0);
     }
+  });
+});
+
+/**
+ * Two axes, one per gap: order volume separates Lite from Standard, locations
+ * separate Standard from Pro. Nothing enforces either yet, which is exactly
+ * why the numbers need pinning — a cap that drifts from `docs/plans.md` is a
+ * plan we are not selling.
+ */
+describe("plan limits", () => {
+  it("caps only Lite on order volume", () => {
+    expect(TIER_MONTHLY_ORDER_CAP.LITE).toBe(10_000);
+    expect(TIER_MONTHLY_ORDER_CAP.STANDARD).toBeNull();
+    expect(TIER_MONTHLY_ORDER_CAP.PRO).toBeNull();
+  });
+
+  it("gives multiple locations to Pro alone", () => {
+    expect(TIER_LOCATION_CAP.LITE).toBe(1);
+    expect(TIER_LOCATION_CAP.STANDARD).toBe(1);
+    expect(TIER_LOCATION_CAP.PRO).toBeNull();
+  });
+
+  it("reports nothing for an uncapped plan", () => {
+    // A progress bar that can never fill implies a limit that does not exist.
+    expect(orderUsage("STANDARD", 40_000)).toBeNull();
+    expect(orderUsage("PRO", 1)).toBeNull();
+  });
+
+  it("measures a capped plan against its ceiling", () => {
+    const usage = orderUsage("LITE", 2_500)!;
+    expect(usage.cap).toBe(10_000);
+    expect(usage.fraction).toBeCloseTo(0.25);
+    expect(usage.nearLimit).toBe(false);
+  });
+
+  it("warns before the limit bites, not at it", () => {
+    expect(orderUsage("LITE", 7_999)!.nearLimit).toBe(false);
+    expect(orderUsage("LITE", 8_000)!.nearLimit).toBe(true);
+  });
+
+  it("never reports more than a full bar", () => {
+    // Nothing enforces the cap, so a restaurant can and will exceed it.
+    const usage = orderUsage("LITE", 25_000)!;
+    expect(usage.fraction).toBe(1);
+    expect(usage.used).toBe(25_000);
+  });
+
+  it("names the allowance in words a person would use", () => {
+    expect(locationAllowanceLabel("LITE")).toBe("1 location");
+    expect(locationAllowanceLabel("PRO")).toBe("Unlimited locations");
   });
 });
