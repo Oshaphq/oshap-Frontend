@@ -1059,7 +1059,12 @@ describe("mock API — modifiers", () => {
       subtotal: number;
       items: Array<{
         price: number;
-        modifiers: Array<{ name: string; option: string; price_delta: number }> | null;
+        modifiers: Array<{
+          option_id?: string;
+          name: string;
+          option: string;
+          price_delta: number;
+        }> | null;
       }>;
     };
 
@@ -1068,11 +1073,97 @@ describe("mock API — modifiers", () => {
     expect(order.subtotal).toBe(900000);
 
     // Denormalized at order time: group name, option name, and the delta as
-    // charged — so renaming the option later can't rewrite this ticket.
+    // charged — so renaming the option later can't rewrite this ticket. The id
+    // rides along so the line can be reordered against something real.
     expect(line.modifiers).toEqual([
-      { name: "Protein", option: "Turkey", price_delta: 50000 },
-      { name: "Extras", option: "Extra plantain", price_delta: 50000 },
+      { option_id: "mo-p-turkey", name: "Protein", option: "Turkey", price_delta: 50000 },
+      { option_id: "mo-e-plantain", name: "Extras", option: "Extra plantain", price_delta: 50000 },
     ]);
+  });
+
+  /**
+   * Reordering a configured dish was disabled outright, because a chosen
+   * modifier came back as names and a delta with no id — and putting food on a
+   * bill the guest did not pick is worse than making them tap twice.
+   *
+   * With `option_id` returned, the line can be rebuilt exactly. The arithmetic
+   * is the dangerous part: `price` is per-unit *including* the deltas, and the
+   * cart wants the base, so reordering the resolved figure would charge every
+   * modifier twice.
+   */
+  it("can be reordered from what it returns, at the same price", async () => {
+    const first = await mockRequest(
+      "/orders",
+      "POST",
+      {
+        table: "T1",
+        restaurant_id: HOME_RESTAURANT,
+        items: [
+          {
+            name: "Fried Rice & Turkey",
+            qty: 1,
+            price: 400000,
+            menu_item_id: "m-004",
+            modifiers: [{ option_id: "mo-p-turkey" }, { option_id: "mo-e-plantain" }],
+          },
+        ],
+      },
+      q(),
+      false,
+    );
+    const firstDetail = await mockRequest(
+      `/orders/${(first.body as { order_id: string }).order_id}`,
+      "GET",
+      null,
+      q(),
+      false,
+    );
+    const line = (
+      firstDetail.body as {
+        items: Array<{
+          price: number;
+          modifiers: Array<{ option_id?: string; price_delta: number }> | null;
+        }>;
+      }
+    ).items[0]!;
+
+    // What the reorder button does: every choice must still have an id, and
+    // the base price is the resolved one less the deltas it already includes.
+    const mods = line.modifiers ?? [];
+    expect(mods.every((m) => Boolean(m.option_id))).toBe(true);
+    const basePrice = line.price - mods.reduce((sum, m) => sum + m.price_delta, 0);
+    expect(basePrice).toBe(400000);
+
+    const second = await mockRequest(
+      "/orders",
+      "POST",
+      {
+        table: "T1",
+        restaurant_id: HOME_RESTAURANT,
+        items: [
+          {
+            name: "Fried Rice & Turkey",
+            qty: 1,
+            price: basePrice,
+            menu_item_id: "m-004",
+            modifiers: mods.map((m) => ({ option_id: m.option_id! })),
+          },
+        ],
+      },
+      q(),
+      false,
+    );
+    const secondDetail = await mockRequest(
+      `/orders/${(second.body as { order_id: string }).order_id}`,
+      "GET",
+      null,
+      q(),
+      false,
+    );
+    const reordered = (secondDetail.body as { items: Array<{ price: number }> }).items[0]!;
+
+    // Same dish, same choices, same money — no double-charged modifiers.
+    expect(reordered.price).toBe(line.price);
   });
 
   it("leaves a line without modifiers priced at its base and carrying null", async () => {

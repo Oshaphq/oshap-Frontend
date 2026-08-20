@@ -329,6 +329,18 @@ components:
     OrderItemModifier:
       type: object
       properties:
+        option_id:
+          type: string
+          format: uuid
+          description: >
+            The chosen option's id. Without it a past line cannot be put back in
+            a cart — names are not orderable — and reordering was disabled
+            outright rather than guess, because guessing puts food on a bill the
+            guest did not pick.
+
+
+            Optional: orders placed before this was returned have none, and the
+            client falls back to sending the guest through the menu.
         name: { type: string, description: The group's name, e.g. "Protein". }
         option: { type: string, description: The chosen option's name, e.g. "Turkey". }
         price_delta: { type: integer, description: Amount added in kobo; may be negative. }

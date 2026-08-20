@@ -957,6 +957,8 @@ route("POST", /^\/orders$/, ({ body }) => {
         return json(400, { error: `Invalid modifier option: ${chosen.option_id}` });
       }
       mods.push({
+        // Returned so a past line can be put back in a cart exactly.
+        option_id: found.option.id,
         name: found.group.name,
         option: found.option.name,
         price_delta: found.option.price_delta,
