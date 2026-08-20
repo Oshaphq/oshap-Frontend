@@ -56,28 +56,50 @@ Outstanding, in order:
    limit and the plan — not a bare "forbidden". A second location is set-up work, never
    mid-service, so refusing one is safe.
 4. Admin surfaces "8,100 of 10,000 orders this month" at `USAGE_WARN_AT`, before the
-   merchant hits the wall.
-5. Tier changes recalculate: downgrading a restaurant that is already over a cap must be a
+   merchant hits the wall, and shows accrued overage plainly once it starts.
+5. Backend applies the 2% overage to orders past the 10,000th, and stops the moment the
+   restaurant upgrades — see below.
+6. Tier changes recalculate: downgrading a restaurant that is already over a cap must be a
    deliberate decision, not a silent lockout.
 
 Order matters. (1) without the rest means every plan behaves as unlimited for a while,
 which is the safe direction to be wrong in — we under-charge rather than block a paying
 restaurant mid-service. Enforcing before (1) would be the worst of both.
 
-**Open question: what the order cap does when it is reached.** The location cap can refuse
-outright. The order cap cannot — it is reached in the middle of a Saturday, and a plan
-limit must never be the reason a guest cannot order. So crossing 10,000 is a billing
-conversation, not a `403`. Whether that means an overage charge, an automatic upgrade, or
-a hard prompt to the owner with service continuing regardless, is undecided. Nothing
-should enforce this axis until it is.
+### What the order cap does when it is reached
+
+**It never blocks an order.** Past 10,000 orders in a calendar month, Lite charges **2% of
+order value on every subsequent order** until the restaurant upgrades. Service continues
+untouched — the cap is reached in the middle of a Saturday, and a plan limit must never be
+the reason a guest cannot order.
+
+This is the only cap that behaves this way. The location cap refuses outright, because a
+second branch is set-up work and nobody is mid-service when it is refused.
+
+What this requires:
+
+- The 2% applies to orders **after** the 10,000th in the month, not retroactively to all of
+  them. Crossing the line must never produce a bill for volume already served.
+- The counter resets each calendar month, on the restaurant's own timezone rather than the
+  server's — a month that ends at the wrong hour bills the wrong day's trade.
+- The owner is told **before** it starts, at `USAGE_WARN_AT` (80%, so 8,000 orders), and
+  again when it begins. An overage nobody saw coming reads as a bug and gets charged back.
+- Overage accrues against the subscription, not the guest. The guest's total is unchanged,
+  and nothing about this appears in the customer app.
+- Upgrading to Standard stops it immediately, and mid-month. The whole point is to make
+  upgrading the obvious move, so the moment it stops must be unambiguous.
+
+Standard and Pro are uncapped on order volume, so 2% is a Lite-only mechanism.
 
 ## Testing
 
 [`smoke/production.smoke.ts`](../smoke/production.smoke.ts) carries the grant model as three
 pending tests — Lite reaching every admin surface, and the two caps. All three are
-`test.fixme` because none of it is built yet. The two cap stubs are `Lite caps locations
-at 1` and `Lite caps monthly orders at 10,000` — the location one can be written as soon
-as the backend refuses a second branch; the order one waits on the open question above.
+`test.fixme` because none of it is built yet. The two cap stubs are `Lite refuses a second
+location` and `Lite bills 2% on orders past 10,000 in a month`. Note they assert opposite
+things: the location one expects a `403`, the order one expects the order to **succeed**
+and bill. A test that asserts a rejected order past the cap would be enforcing the model
+this decision rejects.
 
 Observed on a fresh Lite tenant, 19 August 2026:
 

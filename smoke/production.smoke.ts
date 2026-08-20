@@ -328,11 +328,12 @@ test.describe("plans grant what they are sold as granting", () => {
   // every plan behaves as uncapped and we under-charge rather than block a
   // pilot mid-service.
   //
-  // These two do not land together. A location cap can refuse outright: a
-  // second branch is set-up work, never mid-service. The order cap is reached
-  // in the middle of a Saturday, so it cannot be a 403 — what it should do
-  // instead is still open, and until that is settled there is nothing for the
-  // order test to assert. See docs/plans.md §Enforcement.
-  test.fixme("Lite caps locations at 1", async () => {});
-  test.fixme("Lite caps monthly orders at 10,000", async () => {});
+  // The two assert different things. A location cap refuses outright: a second
+  // branch is set-up work, never mid-service, so the test is a 403. The order
+  // cap never refuses — past 10,000 orders in a month Lite accrues 2% of order
+  // value per order until it upgrades — so that test asserts an order placed
+  // over the line still succeeds and bills, not that it is rejected.
+  // See docs/plans.md §Enforcement.
+  test.fixme("Lite refuses a second location", async () => {});
+  test.fixme("Lite bills 2% on orders past 10,000 in a month", async () => {});
 });

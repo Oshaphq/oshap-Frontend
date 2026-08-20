@@ -20,7 +20,7 @@ File layout:
 - `apps/admin/src/{routes,components}/` — merchant SPA (dashboard, kitchen, history, menu, settings, analytics; email/password login + RBAC)
 - `apps/platform/src/{routes}/` — internal operator portal (tenant onboarding, subscriptions, system health)
 - `packages/shared/src/`
-  - `api/` — `client.ts` (fetch + `x-admin-pin` + `x-platform-token` + active-branch), `keys.ts` (query-key factory), and per-resource modules
+  - `api/` — `client.ts` (fetch + `Authorization: Bearer` + single-flight token refresh + `x-platform-token` + active-branch), `keys.ts` (query-key factory), and per-resource modules
   - `hooks/` — TanStack Query hooks
   - `types/` — domain types mirroring `docs/openapi.yaml`
   - `tokens/tokens.css` — Tailwind v4 `@theme` block

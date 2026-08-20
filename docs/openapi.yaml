@@ -1771,7 +1771,7 @@ paths:
             application/json:
               schema: { $ref: "#/components/schemas/AdminMeResponse" }
         "401":
-          description: Invalid PIN
+          description: Missing, invalid, or expired access token
           content:
             application/json:
               schema: { $ref: "#/components/schemas/Error" }
@@ -1878,7 +1878,7 @@ paths:
             application/json:
               schema: { $ref: "#/components/schemas/Restaurant" }
         "401":
-          description: Invalid PIN
+          description: Missing, invalid, or expired access token
           content:
             application/json:
               schema: { $ref: "#/components/schemas/Error" }
@@ -1904,7 +1904,7 @@ paths:
             application/json:
               schema: { $ref: "#/components/schemas/Error" }
         "401":
-          description: Invalid PIN
+          description: Missing, invalid, or expired access token
           content:
             application/json:
               schema: { $ref: "#/components/schemas/Error" }
@@ -1921,7 +1921,7 @@ paths:
             application/json:
               schema: { $ref: "#/components/schemas/UploadResponse" }
         "401":
-          description: Invalid PIN
+          description: Missing, invalid, or expired access token
           content:
             application/json:
               schema: { $ref: "#/components/schemas/Error" }
@@ -2571,7 +2571,7 @@ paths:
             application/json:
               schema: { $ref: "#/components/schemas/AdminTablesResponse" }
         "401":
-          description: Invalid PIN
+          description: Missing, invalid, or expired access token
           content:
             application/json:
               schema: { $ref: "#/components/schemas/Error" }
