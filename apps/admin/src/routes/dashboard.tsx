@@ -11,6 +11,7 @@ import {
   errorMessage,
   describeError,
 } from "@oshap/shared";
+import type { AdminTableStatus } from "@oshap/shared";
 import { PrimaryButton, SecondaryButton, toast } from "@oshap/shared/ui";
 import QueryError from "../components/QueryError";
 import CashPaymentDialog from "../components/CashPaymentDialog";
@@ -63,9 +64,29 @@ export default function DashboardPage() {
   const activeTablesCount = tables.filter((t) => t.hasPending || t.hasUnpaid).length;
   const pendingCount = tables.filter((t) => t.hasPending).length;
 
-  const handleReject = async (tableId: string) => {
+  /**
+   * Rejection is per order, because payment is.
+   *
+   * Two guests at one table pay separately, so "reject the payment on table 4"
+   * names nothing — which is why the server asks for an `order_id` and why
+   * every rejection was failing. Until the tables endpoint returns each bill,
+   * we can only act when the table has exactly one, and guessing is not an
+   * option here: the wrong choice puts a real guest's bill back to unpaid and
+   * marks down the account they paid from.
+   */
+  const handleReject = async (table: AdminTableStatus) => {
+    const orderIds = table.unpaid_order_ids ?? [];
+    if (orderIds.length !== 1) {
+      setRejectingTableId(null);
+      toast.error(
+        orderIds.length === 0
+          ? "There's no open bill on this table to reject."
+          : `${table.table_id} has ${orderIds.length} separate bills. Open the table to reject the right one — rejecting the wrong guest's payment is not something to guess at.`,
+      );
+      return;
+    }
     try {
-      await rejectPayment.mutateAsync({ table_id: tableId });
+      await rejectPayment.mutateAsync({ order_id: orderIds[0]! });
       setRejectingTableId(null);
       toast.success("Payment rejected — the bill is unpaid again");
     } catch (err) {
@@ -84,16 +105,25 @@ export default function DashboardPage() {
     }
   };
 
-  const handleClearWithReason = async (
-    tableId: string,
-    reason: "paid" | "abandoned",
-  ) => {
+  /**
+   * Only ever "they left without paying" now.
+   *
+   * The other option used to be "Paid (Cash/Transfer)", which called this with
+   * `reason: "paid"`. That does settle the bill — the order moves to CONFIRMED
+   * with a verified payment for the full amount — but it records **how** the
+   * money arrived nowhere, and no tendered amount, so nothing can be
+   * reconciled against a till afterwards.
+   *
+   * Taking money now always goes through the cash dialog, which posts to
+   * `/admin/orders/cash`: per order, with the amount handed over, and the order
+   * marked `payment_method: CASH`. Closing a table and taking payment are
+   * different acts and were sharing a button.
+   */
+  const handleAbandon = async (tableId: string) => {
     setClearPromptTable(null);
     try {
-      await closeTable.mutateAsync({ table_id: tableId, reason });
-      toast.success(
-        reason === "paid" ? "Table cleared" : "Table cleared as abandoned",
-      );
+      await closeTable.mutateAsync({ table_id: tableId, reason: "abandoned" });
+      toast.success("Table cleared — recorded as unpaid");
     } catch (err) {
       toast.error(errorMessage(err, "clear the table"));
     }
@@ -272,7 +302,7 @@ export default function DashboardPage() {
                       </SecondaryButton>
                       <PrimaryButton
                         className="flex-1"
-                        onClick={() => handleReject(table.id)}
+                        onClick={() => handleReject(table)}
                         disabled={rejectPayment.isPending}
                       >
                         {rejectPayment.isPending ? "Rejecting…" : "Confirm Reject"}
@@ -318,22 +348,31 @@ export default function DashboardPage() {
                   <span className="text-caption-sm font-semibold text-secondary-text text-center uppercase tracking-wider">
                     Why are you clearing?
                   </span>
+                  {/* "Paid" settled the bill but recorded no method and no
+                      tendered amount, so a manager could not reconcile it.
+                      Taking money now goes through the cash dialog. */}
                   <button
                     type="button"
-                    onClick={() => handleClearWithReason(table.id, "paid")}
+                    onClick={() => {
+                      setClearPromptTable(null);
+                      setCashTableId(table.id);
+                    }}
                     className="flex items-center justify-center gap-s py-s rounded-lg font-bold text-caption-md bg-success text-on-success transition-all hover:opacity-90 active:scale-[0.98]"
                   >
                     <i className="mgc_wallet_4_line" />
-                    Paid (Cash/Transfer)
+                    They paid — record it
                   </button>
                   <button
                     type="button"
-                    onClick={() => handleClearWithReason(table.id, "abandoned")}
+                    onClick={() => handleAbandon(table.id)}
                     className="flex items-center justify-center gap-s py-s rounded-lg font-bold text-caption-md border border-error text-error bg-transparent transition-all hover:bg-error/10 active:scale-[0.98]"
                   >
                     <i className="mgc_exit_line" />
-                    Abandoned / Left
+                    Left without paying
                   </button>
+                  <p className="text-caption-xs text-outline text-center">
+                    Clearing as unpaid writes off {formatCurrency(table.unpaidTotal)}.
+                  </p>
                   <button
                     type="button"
                     onClick={() => setClearPromptTable(null)}

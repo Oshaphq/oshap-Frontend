@@ -101,9 +101,17 @@ and the server adds the modifier deltas; the order that comes back carries the
 resolved figure. Sending an already-adjusted price double-charges every
 modifier.
 
-**The menu CSV is in kobo, not naira.** A row reading `3500` imports as ₦35.
-This is a poor default for a file people edit by hand and is on the list to
-change — until it does, multiply by 100.
+**The Z-report buckets by UTC, and the restaurant closes out in WAT.** An order
+settled at 00:30 Lagos time appears on the *previous* day's report, because the
+server stamps `created_at` in UTC and `?date=` filters on that. For a kitchen
+that closes at midnight this is not academic: a chunk of Saturday's takings
+lands in Friday's close, and the till will not reconcile. Verified — a sale
+recorded at `2026-08-19T23:59:46` UTC is absent from `?date=2026-08-20` and
+present in full on `?date=2026-08-19`.
+
+It also makes the report look broken when it is not. Querying today's local date
+after midnight returns zeros across the board, which reads as "nothing was
+recorded" rather than "you asked about the wrong day".
 
 ## Testing
 

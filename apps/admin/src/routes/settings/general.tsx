@@ -99,8 +99,8 @@ export default function GeneralSettings() {
         onSuccess: () => {
           toast.success("Settings updated successfully");
         },
-        onError: () => {
-          toast.error("Failed to update settings");
+        onError: (err) => {
+          toast.error(errorMessage(err, "save the settings"));
         },
       }
     );
