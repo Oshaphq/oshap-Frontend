@@ -9,6 +9,7 @@ Product docs:
 - [`docs/jtbd.md`](docs/jtbd.md) — what Oshap is hired to do (Jobs To Be Done)
 - [`docs/plans.md`](docs/plans.md) — what each subscription plan includes. Every plan gets the whole product; they differ by capacity (Lite is capped at 3 staff accounts and 10 tables), not capability.
 - [`docs/notifications.md`](docs/notifications.md) — spec for the admin notifications tab: which events become notifications, who they route to, and the endpoints the backend needs to build.
+- [`docs/branding.md`](docs/branding.md) — spec for per-restaurant branding in the customer app: how one brand colour becomes a full token set without producing unreadable text, and why the admin app deliberately stays Oshap orange.
 
 ## Stack
 
