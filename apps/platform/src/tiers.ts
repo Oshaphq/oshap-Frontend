@@ -4,8 +4,11 @@ import {
   MONTHS_BILLED_ANNUALLY,
   PHASE_1_TIERS,
   TIER_ANNUAL_KOBO,
+  TIER_LOCATION_CAP,
   TIER_MONTHLY_KOBO,
+  TIER_MONTHLY_ORDER_CAP,
   TIER_ORDER,
+  USAGE_WARN_AT,
 } from "./tiers.data";
 
 // Re-exported so every existing import site keeps working; the data itself
@@ -14,8 +17,11 @@ export {
   MONTHS_BILLED_ANNUALLY,
   PHASE_1_TIERS,
   TIER_ANNUAL_KOBO,
+  TIER_LOCATION_CAP,
   TIER_MONTHLY_KOBO,
+  TIER_MONTHLY_ORDER_CAP,
   TIER_ORDER,
+  USAGE_WARN_AT,
 };
 
 /**
@@ -50,4 +56,32 @@ export function monthlyRecurringKobo(
 /** e.g. `₦80,000/yr` — shown beside the monthly price so a merchant can compare. */
 export function tierAnnualLabel(tier: SubscriptionTier): string {
   return `${formatCurrency(TIER_ANNUAL_KOBO[tier])}/yr`;
+}
+
+/**
+ * How close a restaurant is to its monthly order allowance.
+ *
+ * `null` when the plan is uncapped, which is most of them — the caller should
+ * render nothing rather than a full bar or a reassuring zero.
+ */
+export function orderUsage(
+  tier: SubscriptionTier,
+  monthlyOrders: number,
+): { used: number; cap: number; fraction: number; nearLimit: boolean } | null {
+  const cap = TIER_MONTHLY_ORDER_CAP[tier];
+  if (cap == null) return null;
+  const fraction = cap === 0 ? 1 : monthlyOrders / cap;
+  return {
+    used: monthlyOrders,
+    cap,
+    fraction: Math.min(fraction, 1),
+    nearLimit: fraction >= USAGE_WARN_AT,
+  };
+}
+
+/** e.g. `1 location` / `Unlimited locations`. */
+export function locationAllowanceLabel(tier: SubscriptionTier): string {
+  const cap = TIER_LOCATION_CAP[tier];
+  if (cap == null) return "Unlimited locations";
+  return `${cap} location${cap === 1 ? "" : "s"}`;
 }

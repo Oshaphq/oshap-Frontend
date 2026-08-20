@@ -1137,8 +1137,19 @@ export interface GroupAnalyticsResponse {
 
 export type SubscriptionTier = "LITE" | "STANDARD" | "PRO" | "ENTERPRISE";
 
+/**
+ * How a restaurant pays. Annual is ten months' worth — see `docs/plans.md`.
+ *
+ * The backend has stored this since the tier rename and the frontend never
+ * sent it, so every restaurant onboarded so far defaults to MONTHLY, including
+ * any that agreed annual terms. That is a wrong revenue record today, not a
+ * missing feature.
+ */
+export type BillingPeriod = "MONTHLY" | "ANNUAL";
+
 export interface PlatformRestaurant extends Restaurant {
   subscription_tier: SubscriptionTier;
+  billing_period: BillingPeriod;
   is_active: boolean;
   created_at: string;
   owner_phone?: string | null;
@@ -1175,6 +1186,8 @@ export interface PlatformCreateRestaurantRequest {
   owner_phone: string;
   owner_email?: string;
   subscription_tier: SubscriptionTier;
+  /** Defaults to MONTHLY server-side; send it anyway, so the record is a choice. */
+  billing_period?: BillingPeriod;
   table_count: number;
   /**
    * Onboarding convenience: the backend converts these into the tenant's first
@@ -1189,5 +1202,6 @@ export interface PlatformCreateRestaurantRequest {
 export interface PlatformUpdateRestaurantRequest {
   name?: string;
   subscription_tier?: SubscriptionTier;
+  billing_period?: BillingPeriod;
   is_active?: boolean;
 }

@@ -7,7 +7,7 @@ import {
   tryNormalizePhone,
   usePlatformCreateRestaurant,
 } from "@oshap/shared";
-import type { SubscriptionTier } from "@oshap/shared";
+import type { BillingPeriod, SubscriptionTier } from "@oshap/shared";
 import { PrimaryButton, SecondaryButton, toast } from "@oshap/shared/ui";
 
 
@@ -17,6 +17,7 @@ interface FormState {
   owner_phone: string;
   owner_email: string;
   subscription_tier: SubscriptionTier;
+  billing_period: BillingPeriod;
   table_count: string;
   bank_name: string;
   account_number: string;
@@ -29,6 +30,7 @@ const EMPTY: FormState = {
   owner_phone: "",
   owner_email: "",
   subscription_tier: "LITE",
+  billing_period: "MONTHLY",
   table_count: "10",
   bank_name: "",
   account_number: "",
@@ -68,6 +70,7 @@ export default function RestaurantNewPage() {
         owner_phone: tryNormalizePhone(form.owner_phone)!,
         owner_email: form.owner_email || undefined,
         subscription_tier: form.subscription_tier,
+        billing_period: form.billing_period,
         table_count: Number(form.table_count) || 10,
         bank_name: form.bank_name || undefined,
         account_number: form.account_number || undefined,
@@ -192,6 +195,41 @@ export default function RestaurantNewPage() {
                   <p className="text-caption-xs opacity-50">{tierAnnualLabel(tier)}</p>
                 </button>
               ))}
+            </div>
+
+            {/* Recorded from the start. The backend has stored this all along
+                and we never sent it, so every restaurant onboarded so far reads
+                as monthly — including any that signed for a year. */}
+            <div className="flex flex-col gap-s">
+              <span className="text-caption-md font-semibold text-primary-text">
+                Billing
+              </span>
+              <div className="grid grid-cols-2 gap-s">
+                {(["MONTHLY", "ANNUAL"] as const).map((period) => (
+                  <button
+                    key={period}
+                    type="button"
+                    onClick={() => setForm((p) => ({ ...p, billing_period: period }))}
+                    className={`py-s px-md rounded-lg border-2 text-left transition-all ${
+                      form.billing_period === period
+                        ? "border-primary bg-primary-container text-on-primary-container"
+                        : "border-outline-variant bg-surface-container-low text-primary-text hover:border-outline"
+                    }`}
+                  >
+                    <p className="font-bold text-caption-md">
+                      {period === "MONTHLY" ? "Monthly" : "Annual"}
+                    </p>
+                    <p className="text-caption-xs opacity-70">
+                      {period === "MONTHLY"
+                        ? tierPriceLabel(form.subscription_tier)
+                        : tierAnnualLabel(form.subscription_tier)}
+                    </p>
+                    <p className="text-caption-xs opacity-50">
+                      {period === "MONTHLY" ? "Billed each month" : "Ten months' price"}
+                    </p>
+                  </button>
+                ))}
+              </div>
             </div>
           </div>
 
