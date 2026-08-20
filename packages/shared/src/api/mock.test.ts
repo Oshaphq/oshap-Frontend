@@ -1674,3 +1674,83 @@ describe("mock API — table identity is not interchangeable", () => {
     expect(bad.status).toBe(404);
   });
 });
+
+/**
+ * Branches are what separates Pro from the plans below it, and until now the
+ * frontend had no way to create, list or close one — the plan was sold on a
+ * capability nobody could reach.
+ */
+describe("mock API — branches", () => {
+  const URL = "/admin/branches";
+
+  it("starts with a single branch, which is the normal restaurant", async () => {
+    const res = await mockRequest(URL, "GET", null, q(), true);
+    expect(res.status).toBe(200);
+    const branches = res.body as Array<{ name: string; is_active: boolean }>;
+    expect(branches).toHaveLength(1);
+    expect(branches[0]!.is_active).toBe(true);
+  });
+
+  it("creates a branch with its tables ready to print codes for", async () => {
+    const res = await mockRequest(
+      URL,
+      "POST",
+      { name: "Ikeja", address: "12 Allen Avenue", table_count: 8 },
+      q(),
+      true,
+    );
+    expect(res.status).toBe(201);
+    const branch = res.body as { id: string; name: string; table_count: number; is_active: boolean };
+    expect(branch.name).toBe("Ikeja");
+    // A venue that cannot produce a QR code on its first day is not open.
+    expect(branch.table_count).toBe(8);
+    expect(branch.is_active).toBe(true);
+  });
+
+  it("refuses a branch with no name, because staff pick it from a list", async () => {
+    const res = await mockRequest(URL, "POST", { name: "   " }, q(), true);
+    expect(res.status).toBe(422);
+  });
+
+  /**
+   * Closing is deactivation, never deletion: the venue's orders, takings and
+   * audit trail have to outlive it, and one that reopens keeps its history.
+   */
+  it("closes and reopens a branch without losing it", async () => {
+    const created = await mockRequest(URL, "POST", { name: "Lekki" }, q(), true);
+    const id = (created.body as { id: string }).id;
+
+    const closed = await mockRequest(`${URL}/${id}`, "PATCH", { is_active: false }, q(), true);
+    expect(closed.status).toBe(200);
+    expect((closed.body as { is_active: boolean }).is_active).toBe(false);
+
+    const all = await mockRequest(URL, "GET", null, q(), true);
+    const found = (all.body as Array<{ id: string; name: string }>).find((b) => b.id === id);
+    expect(found?.name).toBe("Lekki");
+
+    const reopened = await mockRequest(`${URL}/${id}`, "PATCH", { is_active: true }, q(), true);
+    expect((reopened.body as { is_active: boolean }).is_active).toBe(true);
+  });
+
+  it("patches only what it is given", async () => {
+    const created = await mockRequest(
+      URL,
+      "POST",
+      { name: "Yaba", address: "3 Herbert Macaulay Way" },
+      q(),
+      true,
+    );
+    const id = (created.body as { id: string }).id;
+
+    const renamed = await mockRequest(`${URL}/${id}`, "PATCH", { name: "Yaba Main" }, q(), true);
+    const b = renamed.body as { name: string; address: string | null };
+    expect(b.name).toBe("Yaba Main");
+    // Renaming a venue must not silently blank its address.
+    expect(b.address).toBe("3 Herbert Macaulay Way");
+  });
+
+  it("404s on a branch that does not exist", async () => {
+    const res = await mockRequest(`${URL}/nope`, "PATCH", { name: "x" }, q(), true);
+    expect(res.status).toBe(404);
+  });
+});

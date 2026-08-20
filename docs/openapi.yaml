@@ -1214,6 +1214,38 @@ components:
             staff_count: { type: integer }
           required: [is_active, table_count, staff_count]
 
+    BranchCreateRequest:
+      type: object
+      properties:
+        name:
+          type: string
+          description: >
+            What staff pick from the switcher, so somewhere recognisable beats
+            something formal — "Ikeja", not "Branch 2".
+        description: { type: string, nullable: true }
+        address: { type: string, nullable: true }
+        operating_hours: { type: string, nullable: true }
+        whatsapp_number: { type: string, nullable: true }
+        table_count:
+          type: integer
+          description: >
+            Pre-creates this many tables, as onboarding a restaurant does. A
+            branch that cannot print a QR code on its first day is not open, and
+            typing twenty tables by hand before serving anyone is the kind of
+            setup people abandon halfway.
+      required: [name]
+
+    BranchUpdateRequest:
+      type: object
+      description: "Every field optional. Closing a branch is `is_active: false`."
+      properties:
+        name: { type: string }
+        description: { type: string, nullable: true }
+        address: { type: string, nullable: true }
+        operating_hours: { type: string, nullable: true }
+        whatsapp_number: { type: string, nullable: true }
+        is_active: { type: boolean }
+
     RestaurantGroup:
       type: object
       properties:
@@ -2612,6 +2644,70 @@ paths:
   # =========================================================================
   # ADMIN — Multi-branch group
   # =========================================================================
+  /admin/branches:
+    get:
+      tags: [Admin]
+      summary: The venues this restaurant runs
+      description: >
+        Includes closed branches — the caller decides what to show. The admin's
+        branch switcher hides inactive ones, because switching to a closed venue
+        shows a manager an empty board and no way to tell why; the settings
+        screen lists them all so one can be reopened.
+      security: [{ adminPin: [] }]
+      responses:
+        "200":
+          description: Branches
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/RestaurantBranch" }
+    post:
+      tags: [Admin]
+      summary: Open a branch
+      security: [{ adminPin: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/BranchCreateRequest" }
+      responses:
+        "201":
+          description: The new branch
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/RestaurantBranch" }
+
+  /admin/branches/{branch_id}:
+    patch:
+      tags: [Admin]
+      summary: Edit a branch, or close and reopen it
+      description: >
+        **There is no delete, and there should not be.** A venue's orders,
+        takings and audit trail have to outlive it, and one that closes for a
+        refit reopens with its history intact. Closing is
+        `is_active: false`.
+
+
+        PATCH rather than PUT so renaming a branch does not silently blank the
+        address and hours a caller did not resend.
+      security: [{ adminPin: [] }]
+      parameters:
+        - { name: branch_id, in: path, required: true, schema: { type: string, format: uuid } }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/BranchUpdateRequest" }
+      responses:
+        "200":
+          description: The updated branch
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/RestaurantBranch" }
+        "404":
+          description: No such branch.
+
   /admin/group:
     get:
       tags: [Group]
