@@ -37,7 +37,7 @@ export default function SecondaryButton({
       onClick={onClick}
       disabled={disabled}
       aria-label={ariaLabel}
-      className={`inline-flex items-center justify-center gap-xs ${sizeClass} rounded-lg bg-surface-container text-on-surface-variant text-label-l4 leading-4 tracking-normal font-semibold font-display transition-colors hover:bg-surface-container-high active:scale-[0.99] disabled:opacity-50 disabled:cursor-not-allowed ${className}`}
+      className={`inline-flex items-center justify-center gap-xs ${sizeClass} rounded-lg bg-surface-container text-on-surface-variant text-label-l4 leading-4 tracking-normal font-semibold font-display transition duration-100 ease-out hover:bg-surface-container-high active:bg-surface-container-highest active:scale-[0.97] disabled:opacity-50 disabled:cursor-not-allowed disabled:active:scale-100 ${className}`}
     >
       {children}
     </button>

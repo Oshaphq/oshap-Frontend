@@ -38,7 +38,7 @@ export default function PrimaryButton({
       onClick={onClick}
       disabled={disabled}
       aria-label={ariaLabel}
-      className={`inline-flex items-center justify-center gap-xs ${sizeClass} rounded-lg bg-primary text-on-primary text-label-l4 leading-4 tracking-normal font-semibold font-display transition-opacity hover:opacity-90 active:scale-[0.99] disabled:opacity-50 disabled:cursor-not-allowed ${className}`}
+      className={`inline-flex items-center justify-center gap-xs ${sizeClass} rounded-lg bg-primary text-on-primary text-label-l4 leading-4 tracking-normal font-semibold font-display transition duration-100 ease-out hover:opacity-90 active:scale-[0.97] active:brightness-95 disabled:opacity-50 disabled:cursor-not-allowed disabled:active:scale-100 disabled:active:brightness-100 ${className}`}
     >
       {children}
     </button>

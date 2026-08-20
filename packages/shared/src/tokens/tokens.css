@@ -607,3 +607,84 @@
     border-radius: var(--radius-l);
   }
 }
+
+/* ============================================================================
+ * Interaction feedback.
+ *
+ * Every one of the three apps shipped with no visible press state and no
+ * focus indicator at all. The shared buttons carried `active:scale-[0.99]` —
+ * a 1% shrink, half a pixel on a 52px button, which nobody has ever seen.
+ *
+ * This matters more here than the word "polish" suggests. The customer app is
+ * used on a phone, on restaurant wifi, by someone who has just tapped "Place
+ * Order" and cannot tell whether it registered. Without feedback they tap
+ * again, and the thing they are double-tapping is an order.
+ *
+ * Defined at base level so all ~117 interactive elements get it rather than
+ * the handful wired by hand; per-component utilities still override.
+ * ========================================================================= */
+@layer base {
+  /* The OS tap flash is grey, arrives late, and differs per platform. Ours
+     replaces it rather than fighting it. */
+  button,
+  a,
+  summary,
+  [role="button"],
+  [role="tab"] {
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  /* There was no focus ring anywhere, in any app. A keyboard user could not
+     tell which control they were on — not a polish issue, an access one.
+     `:focus-visible` rather than `:focus`, so a mouse press does not leave a
+     ring behind. */
+  :focus-visible {
+    outline: 2px solid var(--ds-primary);
+    outline-offset: 2px;
+  }
+
+  button:not(:disabled),
+  summary,
+  [role="button"]:not([aria-disabled="true"]),
+  [role="tab"] {
+    transition:
+      scale 110ms ease-out,
+      filter 110ms ease-out;
+  }
+
+  /* The `scale` property, not `transform: scale()`. Tailwind v4's
+     `active:scale-*` utility sets `scale`, and the two are applied
+     independently — a button carrying both would shrink by 6% rather than 3%.
+     Matching the property lets a per-component utility override this cleanly
+     instead of compounding with it. */
+  button:not(:disabled):active,
+  summary:active,
+  [role="button"]:not([aria-disabled="true"]):active,
+  [role="tab"]:active {
+    scale: 0.97;
+  }
+
+  /* Links are inline, and a transform on an inline box does nothing, so they
+     dim instead of shrinking. */
+  a:active {
+    opacity: 0.7;
+  }
+
+  /* Feedback still has to exist without motion — dropping it entirely would
+     leave these users worse off than before, not safer. */
+  @media (prefers-reduced-motion: reduce) {
+    button:not(:disabled),
+    summary,
+    [role="button"]:not([aria-disabled="true"]),
+    [role="tab"] {
+      transition: filter 110ms ease-out;
+    }
+    button:not(:disabled):active,
+    summary:active,
+    [role="button"]:not([aria-disabled="true"]):active,
+    [role="tab"]:active {
+      scale: 1;
+      filter: brightness(0.9);
+    }
+  }
+}

@@ -60,7 +60,7 @@ export default function CallWaiterFab({ tableId }: { tableId: string }) {
         onClick={handleClick}
         disabled={callWaiter.isPending}
         title="Call a waiter"
-        className="fixed right-4 bottom-[calc(4rem+1rem+env(safe-area-inset-bottom,0px))] z-40 flex items-center gap-xs h-12 px-md rounded-4xl text-xl shadow-lg bg-primary text-on-primary font-display transition-opacity hover:opacity-90 active:scale-[0.99] disabled:opacity-50 disabled:cursor-wait"
+        className="fixed right-4 bottom-[calc(4rem+1rem+env(safe-area-inset-bottom,0px))] z-40 flex items-center gap-xs h-12 px-md rounded-4xl text-xl shadow-lg bg-primary text-on-primary font-display transition duration-100 ease-out hover:opacity-90 active:scale-[0.97] active:brightness-95 disabled:opacity-50 disabled:cursor-wait"
       >
         {callWaiter.isPending ? (
           <i className="mgc_loading_line animate-spin" />

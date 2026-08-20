@@ -43,7 +43,7 @@ export default function RestaurantsPage() {
         </h1>
         <Link
           to="/restaurants/new"
-          className="inline-flex items-center justify-center gap-xs py-3 px-l rounded-lg bg-primary text-on-primary text-label-l4 leading-4 tracking-normal font-semibold font-display no-underline transition-opacity hover:opacity-90 active:scale-[0.99]"
+          className="inline-flex items-center justify-center gap-xs py-3 px-l rounded-lg bg-primary text-on-primary text-label-l4 leading-4 tracking-normal font-semibold font-display no-underline transition duration-100 ease-out hover:opacity-90 active:scale-[0.97] active:brightness-95"
         >
           <i className="mgc_add_line" />
           Onboard New
