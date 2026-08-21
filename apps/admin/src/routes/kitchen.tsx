@@ -124,7 +124,7 @@ export default function KitchenPage() {
             {newOrders.length} new
           </span>
           <span className="px-s py-xs rounded-4xl font-bold text-caption-sm bg-warning-container text-on-warning-container">
-            {inProgress.length} cooking
+            {inProgress.length} preparing
           </span>
           <span className="px-s py-xs rounded-4xl font-bold text-caption-sm bg-success-container text-on-success-container">
             {ready.length} ready
@@ -162,7 +162,7 @@ export default function KitchenPage() {
               onAction={(id) => handleUpdateStatus(id, "PREPARING")}
             />
             <KitchenColumn
-              title="Cooking"
+              title="Preparing"
               accent="warning"
               orders={inProgress}
               ctaLabel="Ready"
