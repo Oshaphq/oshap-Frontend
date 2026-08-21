@@ -113,8 +113,15 @@ export default function InventoryPage() {
           </p>
         </div>
       ) : (
-        <div className="bg-surface-container-low rounded-md overflow-hidden">
-          <div className="hidden sm:grid grid-cols-[2fr_1fr_1fr_1fr_auto] gap-md px-md py-s bg-surface-container-high text-label-l4 font-semibold text-secondary-text">
+        /* One grid for the whole table, with the header and every row as
+           subgrids of it. They were separate grids sharing a template, which
+           is not the same thing: the last track is `auto`, empty in the header
+           but holding two buttons in a row, so each grid sized it differently
+           and every `1fr` column drifted out of step with its own heading.
+           Sharing the tracks makes the alignment structural rather than a
+           coincidence that has to be maintained. */
+        <div className="bg-surface-container-low rounded-md overflow-hidden sm:grid sm:grid-cols-[2fr_1fr_1fr_1fr_auto] sm:gap-x-md">
+          <div className="hidden sm:grid sm:grid-cols-subgrid sm:col-span-5 gap-md px-md py-s bg-surface-container-high text-label-l4 font-semibold text-secondary-text">
             <span>Ingredient</span>
             <span className="text-right">In stock</span>
             <span className="text-right">Alert at</span>
@@ -129,7 +136,7 @@ export default function InventoryPage() {
             return (
               <div
                 key={ingredient.id}
-                className="grid grid-cols-2 sm:grid-cols-[2fr_1fr_1fr_1fr_auto] gap-x-md gap-y-xs px-md py-s border-b border-outline-variant last:border-none items-center"
+                className="grid grid-cols-2 sm:grid-cols-subgrid sm:col-span-5 gap-x-md gap-y-xs px-md py-s border-b border-outline-variant last:border-none items-center"
               >
                 <span className="text-p2 font-semibold text-primary-text">
                   {ingredient.name}
