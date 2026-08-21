@@ -49,6 +49,7 @@ import type {
   ForgotPasswordRequest,
   Ingredient,
   StockMovement,
+  StockReason,
   RecipeLine,
   CreateIngredientRequest,
   UpdateIngredientRequest,
@@ -86,7 +87,7 @@ import type {
   CreateBankAccountRequest,
   UpdateBankAccountRequest,
 } from "../types/index";
-import { AUDIT_ACTIONS } from "../types/index";
+import { AUDIT_ACTIONS, STOCK_REASONS } from "../types/index";
 import { normalizePhone, tryNormalizePhone } from "../utils/phone";
 
 // ---------------------------------------------------------------------------
@@ -450,7 +451,7 @@ function recipeLines(menuItemId: string): RecipeLine[] {
 function moveStock(
   ingredientId: string,
   delta: number,
-  reason: string,
+  reason: StockReason,
   note?: string | null,
   orderId?: string | null,
 ): StockMovement | null {
@@ -2007,7 +2008,7 @@ route("POST", /^\/admin\/ingredients$/, ({ body }) => {
   if (ingredient.stock_qty > 0) {
     const opening = ingredient.stock_qty;
     ingredient.stock_qty = 0;
-    moveStock(ingredient.id, opening, "PURCHASE", "Opening stock");
+    moveStock(ingredient.id, opening, "RESTOCK", "Opening stock");
   }
 
   syncToStorage();
@@ -2038,8 +2039,19 @@ route("POST", /^\/admin\/ingredients\/([^/]+)\/adjust$/, ({ path, body }) => {
     return json(400, { error: "delta must be a number" });
   }
   if (!b.reason?.trim()) return json(400, { error: "reason is required" });
+  // The real API validates against this enum and rejects anything else. The
+  // mock used to take any non-empty string, so a frontend sending its own
+  // invented vocabulary passed every test and failed in production — which is
+  // exactly what happened with PURCHASE, STOCK_TAKE and CORRECTION.
+  if (!(Object.values(STOCK_REASONS) as string[]).includes(b.reason)) {
+    return json(422, {
+      error: `reason: Input should be ${Object.values(STOCK_REASONS)
+        .map((r) => `'${r}'`)
+        .join(", ")}`,
+    });
+  }
 
-  const movement = moveStock(id, b.delta, b.reason, b.note ?? null);
+  const movement = moveStock(id, b.delta, b.reason as StockReason, b.note ?? null);
   if (!movement) return json(404, { error: "Ingredient not found" });
 
   syncToStorage();

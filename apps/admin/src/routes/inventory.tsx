@@ -8,26 +8,35 @@ import {
   useAdminIngredients,
   useAdminStockMovements,
 } from "@oshap/shared";
-import type { Ingredient } from "@oshap/shared";
+import type { StockReason, Ingredient } from "@oshap/shared";
 import { PrimaryButton, SecondaryButton, toast } from "@oshap/shared/ui";
 import QueryError from "../components/QueryError";
 
 const inputClass =
   "px-md py-s rounded-lg bg-surface-container-low border border-outline-variant text-p2 text-primary-text placeholder:text-outline outline-none focus:border-primary transition-colors";
 
-/** Staff-facing wording for the reasons stock moves. */
+/**
+ * Staff-facing wording for the reasons stock moves. The `value` is the
+ * server's enum and cannot be invented — we previously offered `PURCHASE`,
+ * `STOCK_TAKE` and `CORRECTION`, none of which exist, so three of these four
+ * options failed with a raw enum dump in a toast.
+ *
+ * `TRANSFER` is deliberately absent: the adjust endpoint takes no destination,
+ * so offering it would record stock leaving without recording where it went.
+ * `SALE` is absent because the server writes those itself when a recipe
+ * depletes.
+ */
 const REASONS = [
-  { value: "PURCHASE", label: "Delivery received", sign: 1 },
+  { value: "RESTOCK", label: "Delivery received", sign: 1 },
   { value: "WASTAGE", label: "Wastage / spoilage", sign: -1 },
-  { value: "STOCK_TAKE", label: "Stock take", sign: 0 },
-  { value: "CORRECTION", label: "Correction", sign: 0 },
-] as const;
+  { value: "COUNT_CORRECTION", label: "Stock take / correction", sign: 0 },
+] as const satisfies ReadonlyArray<{ value: StockReason; label: string; sign: number }>;
 
-const REASON_LABELS: Record<string, string> = {
-  PURCHASE: "Delivery",
+const REASON_LABELS: Record<StockReason, string> = {
+  RESTOCK: "Delivery",
   WASTAGE: "Wastage",
-  STOCK_TAKE: "Stock take",
-  CORRECTION: "Correction",
+  COUNT_CORRECTION: "Stock take",
+  TRANSFER: "Transfer",
   SALE: "Sold",
 };
 
@@ -285,12 +294,12 @@ function AdjustDialog({
   onClose: () => void;
 }) {
   const adjust = useAdminAdjustStock();
-  const [reason, setReason] = useState<string>("PURCHASE");
+  const [reason, setReason] = useState<StockReason>("RESTOCK");
   const [amount, setAmount] = useState("");
   const [note, setNote] = useState("");
 
   const rule = REASONS.find((r) => r.value === reason);
-  const isCount = rule?.sign === 0 && reason === "STOCK_TAKE";
+  const isCount = rule?.sign === 0;
   const parsed = Number(amount);
   const valid = amount !== "" && !Number.isNaN(parsed);
 
@@ -341,7 +350,7 @@ function AdjustDialog({
           </span>
           <select
             value={reason}
-            onChange={(e) => setReason(e.target.value)}
+            onChange={(e) => setReason(e.target.value as StockReason)}
             className={inputClass}
           >
             {REASONS.map((r) => (
