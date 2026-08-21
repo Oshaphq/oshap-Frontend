@@ -2,9 +2,11 @@ import { useState } from "react";
 import {
   errorMessage,
   formatCurrency,
+  koboToNaira,
   nairaToKobo,
   useAdminAdjustStock,
   useAdminCreateIngredient,
+  useAdminUpdateIngredient,
   useAdminIngredients,
   useAdminStockMovements,
 } from "@oshap/shared";
@@ -48,6 +50,7 @@ function qty(value: number): string {
 export default function InventoryPage() {
   const ingredientsQuery = useAdminIngredients();
   const [adjusting, setAdjusting] = useState<Ingredient | null>(null);
+  const [editing, setEditing] = useState<Ingredient | null>(null);
   const [showLedger, setShowLedger] = useState(false);
   const [showNew, setShowNew] = useState(false);
 
@@ -157,12 +160,26 @@ export default function InventoryPage() {
                     ? "—"
                     : formatCurrency(ingredient.cost_per_unit)}
                 </span>
-                <SecondaryButton
-                  size="md"
-                  onClick={() => setAdjusting(ingredient)}
-                >
-                  Adjust
-                </SecondaryButton>
+                <div className="flex items-center gap-s justify-end">
+                  <SecondaryButton
+                    size="md"
+                    onClick={() => setAdjusting(ingredient)}
+                  >
+                    Adjust
+                  </SecondaryButton>
+                  {/* Adjust moves the quantity; this fixes what the thing *is*
+                      — a typo in the name, the wrong unit, a threshold set
+                      before anyone knew what a normal week looked like. */}
+                  <button
+                    type="button"
+                    onClick={() => setEditing(ingredient)}
+                    aria-label={`Edit ${ingredient.name}`}
+                    title="Edit name, unit, threshold or cost"
+                    className="p-xs rounded-lg text-secondary-text hover:bg-surface-container-high hover:text-primary-text transition-colors"
+                  >
+                    <i className="mgc_edit_line text-lg" />
+                  </button>
+                </div>
               </div>
             );
           })}
@@ -170,6 +187,12 @@ export default function InventoryPage() {
       )}
 
       {showLedger && <MovementsLedger />}
+      {editing && (
+        <EditIngredientDialog
+          ingredient={editing}
+          onClose={() => setEditing(null)}
+        />
+      )}
       {adjusting && (
         <AdjustDialog
           ingredient={adjusting}
@@ -502,6 +525,146 @@ function NewIngredientDialog({ onClose }: { onClose: () => void }) {
             disabled={!name.trim() || create.isPending}
           >
             {create.isPending ? "Adding…" : "Add"}
+          </PrimaryButton>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/**
+ * Correcting what an ingredient *is*, as distinct from how much of it there is.
+ *
+ * Adjust moves the quantity and writes a ledger entry, because a quantity
+ * change is a physical event someone has to account for. This changes the
+ * record — a misspelled name, the wrong unit, a threshold set before anyone
+ * knew what a normal week looked like — and deliberately leaves no movement
+ * behind, because nothing moved.
+ *
+ * `stock_qty` is absent for the same reason: the API will not take it here, and
+ * it should not. Setting a level silently is how a count stops matching the
+ * shelf with no record of who changed it.
+ */
+function EditIngredientDialog({
+  ingredient,
+  onClose,
+}: {
+  ingredient: Ingredient;
+  onClose: () => void;
+}) {
+  const update = useAdminUpdateIngredient();
+  const [name, setName] = useState(ingredient.name);
+  const [unit, setUnit] = useState(ingredient.unit);
+  const [threshold, setThreshold] = useState(
+    ingredient.low_stock_threshold == null ? "" : String(ingredient.low_stock_threshold),
+  );
+  const [cost, setCost] = useState(
+    ingredient.cost_per_unit == null ? "" : String(koboToNaira(ingredient.cost_per_unit)),
+  );
+
+  const handleSave = () => {
+    if (!name.trim()) return;
+    update.mutate(
+      {
+        id: ingredient.id,
+        payload: {
+          name: name.trim(),
+          unit: unit.trim() || "unit",
+          low_stock_threshold: threshold === "" ? null : Number(threshold),
+          // Merchants type naira; kobo is the unit everywhere past this line.
+          cost_per_unit: cost === "" ? null : nairaToKobo(Number(cost)),
+        },
+      },
+      {
+        onSuccess: () => {
+          toast.success(`${name.trim()} updated`);
+          onClose();
+        },
+        onError: (e: unknown) => toast.error(errorMessage(e, "save the ingredient")),
+      },
+    );
+  };
+
+  return (
+    <div className="fixed inset-0 z-[100] flex items-center justify-center bg-scrim backdrop-blur-sm p-md">
+      <div className="w-full max-w-[440px] rounded-md bg-surface-container-high p-l flex flex-col gap-md border border-outline-variant shadow-xl">
+        <div className="flex flex-col gap-0.5">
+          <h3 className="font-display text-display-h3 font-semibold text-primary-text">
+            Edit {ingredient.name}
+          </h3>
+          <p className="text-caption-md text-secondary-text">
+            Changing the level is a separate action — use Adjust, so it lands in
+            the ledger.
+          </p>
+        </div>
+
+        <input
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+          placeholder="Name — e.g. Rice"
+          aria-label="Ingredient name"
+          autoFocus
+          className={inputClass}
+        />
+
+        <div className="grid grid-cols-2 gap-s">
+          <label className="flex flex-col gap-xs text-caption-md text-secondary-text">
+            Unit
+            <input
+              value={unit}
+              onChange={(e) => setUnit(e.target.value)}
+              placeholder="kg, L, tin"
+              aria-label="Unit"
+              className={inputClass}
+            />
+          </label>
+          <label className="flex flex-col gap-xs text-caption-md text-secondary-text">
+            Low at
+            <input
+              value={threshold}
+              onChange={(e) => setThreshold(e.target.value)}
+              placeholder="Leave blank for none"
+              inputMode="decimal"
+              aria-label="Low stock threshold"
+              className={inputClass}
+            />
+          </label>
+        </div>
+
+        <label className="flex flex-col gap-xs text-caption-md text-secondary-text">
+          Cost per {unit.trim() || "unit"} (₦)
+          <input
+            value={cost}
+            onChange={(e) => setCost(e.target.value)}
+            placeholder="Leave blank if you don't track it"
+            inputMode="decimal"
+            aria-label="Cost per unit in naira"
+            className={inputClass}
+          />
+        </label>
+
+        {/* Renaming a unit does not convert anything. Someone switching kg to g
+            would otherwise multiply their own stock by a thousand without
+            noticing. */}
+        {unit.trim() !== ingredient.unit && (
+          <p className="text-caption-xs text-warning">
+            Changing the unit relabels {qty(ingredient.stock_qty)} — it
+            doesn&rsquo;t convert it. {qty(ingredient.stock_qty)}{" "}
+            {ingredient.unit} becomes {qty(ingredient.stock_qty)}{" "}
+            {unit.trim() || "unit"}.
+          </p>
+        )}
+
+        <div className="flex justify-end gap-s pt-s">
+          <SecondaryButton size="md" onClick={onClose}>
+            Cancel
+          </SecondaryButton>
+          <PrimaryButton
+            size="md"
+            onClick={handleSave}
+            disabled={!name.trim() || update.isPending}
+          >
+            {update.isPending ? "Saving…" : "Save"}
           </PrimaryButton>
         </div>
       </div>

@@ -27,6 +27,7 @@ export default function GeneralSettings() {
     name: "",
     description: "",
     logo_url: "",
+    cover_image_url: "",
     primary_color: "",
     address: "",
     operating_hours: "",
@@ -38,6 +39,7 @@ export default function GeneralSettings() {
   });
 
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const coverInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     if (settings) {
@@ -45,6 +47,7 @@ export default function GeneralSettings() {
         name: settings.name || "",
         description: settings.description || "",
         logo_url: settings.logo_url || "",
+        cover_image_url: settings.cover_image_url || "",
         primary_color: settings.primary_color || "",
         address: settings.address || "",
         operating_hours: settings.operating_hours || "",
@@ -92,6 +95,7 @@ export default function GeneralSettings() {
         name: form.name,
         description: form.description || null,
         logo_url: form.logo_url || null,
+        cover_image_url: form.cover_image_url || null,
         primary_color: form.primary_color || null,
         address: form.address || null,
         operating_hours: form.operating_hours || null,
@@ -108,6 +112,29 @@ export default function GeneralSettings() {
         },
       }
     );
+  };
+
+  const handleCoverUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const problem = validateImageFile(file);
+    if (problem) {
+      toast.error(problem);
+      e.target.value = "";
+      return;
+    }
+
+    uploadImage.mutate(file, {
+      onSuccess: (res) => {
+        setForm((prev) => ({ ...prev, cover_image_url: res.url }));
+        toast.success("Cover photo uploaded — remember to save");
+      },
+      onError: (err) => {
+        toast.error(errorMessage(err, "upload the cover photo"));
+      },
+    });
+    e.target.value = "";
   };
 
   const handleLogoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -276,6 +303,62 @@ export default function GeneralSettings() {
             />
           </div>
         </div>
+      </div>
+
+      {/* Sits with the logo and the brand colour: the three things that make
+          the guest's menu look like this restaurant rather than like ours. */}
+      <div className="bg-surface-container-low rounded-md p-l flex flex-col gap-md">
+        <div className="flex flex-col gap-0.5">
+          <h3 className="font-bold text-primary-text">Cover photo</h3>
+          <p className="text-caption-xs text-secondary-text">
+            Shown across the top of your guests&rsquo; menu, with your name over
+            it. Landscape works best. Leave it empty and the menu simply starts
+            at the food.
+          </p>
+        </div>
+
+        <div
+          className="relative w-full h-36 rounded-xl bg-surface-container border border-dashed border-outline-variant flex items-center justify-center overflow-hidden cursor-pointer hover:border-primary transition-colors"
+          onClick={() => coverInputRef.current?.click()}
+        >
+          {form.cover_image_url ? (
+            <>
+              <img
+                src={form.cover_image_url}
+                alt="Cover"
+                className="w-full h-full object-cover"
+              />
+              {/* The same scrim the guest sees, so what is previewed here is
+                  what lands on their phone rather than a cleaner version. */}
+              <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
+              <p className="absolute bottom-md left-md font-display text-display-h4 font-semibold text-white drop-shadow">
+                {form.name || "Your restaurant"}
+              </p>
+            </>
+          ) : (
+            <span className="text-caption-md text-secondary-text">
+              {uploadImage.isPending ? "Uploading…" : "Tap to add a cover photo"}
+            </span>
+          )}
+        </div>
+
+        {form.cover_image_url && (
+          <button
+            type="button"
+            onClick={() => setForm((prev) => ({ ...prev, cover_image_url: "" }))}
+            className="self-start text-caption-sm font-semibold text-error hover:underline"
+          >
+            Remove cover photo
+          </button>
+        )}
+
+        <input
+          type="file"
+          ref={coverInputRef}
+          className="hidden"
+          accept={IMAGE_ACCEPT_ATTR}
+          onChange={handleCoverUpload}
+        />
       </div>
 
       <div className="bg-surface-container-low rounded-md p-l flex flex-col gap-md border border-transparent hover:border-outline-variant transition-colors">
