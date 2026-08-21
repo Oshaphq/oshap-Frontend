@@ -2,7 +2,7 @@
 
 Run this **before every release** and **after any backend integration milestone**.
 
-It's intentionally hand-driven, not automated. Each path here is a JTBD ([`docs/jtbd.md`](jtbd.md)); if any of them break, ship is blocked.
+It's intentionally hand-driven. Automated layers exist (`npm test` — Vitest data-layer/UI, `npm run smoke` — production Playwright), but this checklist is what gates a release: each path here is a JTBD ([`docs/jtbd.md`](jtbd.md)); if any of them break, ship is blocked.
 
 Each test is **pass / fail** in the box. Mark a failure with `[F]` and a one-line note.
 
@@ -63,11 +63,12 @@ Each test is **pass / fail** in the box. Mark a failure with `[F]` and a one-lin
 
 ## Admin app
 
-### Path 1 — PIN login + restaurant resolution
-- [ ] Cold open admin app → PIN screen renders
-- [ ] Enter the configured PIN → dashboard loads, restaurant name visible in nav
-- [ ] Refresh the page → still authenticated (PIN cached in `sessionStorage`)
-- [ ] Click Logout → returns to PIN screen, `sessionStorage` cleared
+### Path 1 — Email/password login + restaurant resolution
+- [ ] Cold open admin app → login screen renders
+- [ ] Enter email + password (`POST /auth/login`) → dashboard loads, restaurant name visible in nav
+- [ ] Refresh the page → still authenticated (tokens cached in `sessionStorage`, session restored via `/auth/me`)
+- [ ] Let the access token expire (or force a 401) → request auto-refreshes once via `/auth/refresh` without logging out
+- [ ] Click Logout → returns to login screen, `sessionStorage` cleared
 
 ### Path 2 — FCM device registration (J-W2)
 - [ ] Browser prompts for notification permission on first login (or auto-grants if previously set)
@@ -130,8 +131,8 @@ Each test is **pass / fail** in the box. Mark a failure with `[F]` and a one-lin
 
 ## Cross-app regression
 
-- [ ] Both apps load on slow 3G under 3 seconds (Lighthouse)
-- [ ] No console errors in either app on any of the above paths
+- [ ] All three apps load on slow 3G under 3 seconds (Lighthouse)
+- [ ] No console errors in any app on any of the above paths
 - [ ] Dark mode renders all routes legibly (no white-on-white or black-on-black text)
 - [ ] No native `alert()` dialogs anywhere — only the new `<Toaster />` toasts
 - [ ] Vercel deploy: refresh on `/menu?table=T1`, `/kitchen`, `/menu/foo` doesn't 404
@@ -142,8 +143,7 @@ Each test is **pass / fail** in the box. Mark a failure with `[F]` and a one-lin
 ## Known limitations (not blockers)
 
 - Mock mode is browser-local: cross-device group-session join won't work until the real backend is wired
-- No automated test suite — this checklist is the only smoke layer
-- `RBAC`, `Analytics`, `Staff Management`, customer Notification Center are all Phase 2
+- Customer Notification Center is built (Phase 5 ✅); for everything else still open, [`docs/phases.md`](phases.md) is the source of truth
 
 If any **blocker** above fails: do not ship.
 If any **known limitation** is hit during a paying-customer flow: open a bug, decide ship/no-ship.
