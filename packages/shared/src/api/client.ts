@@ -207,7 +207,24 @@ function isMockMode(): boolean {
   if (typeof window === "undefined") return false;
 
   const mockFlag = import.meta.env.VITE_MOCK_API;
-  if (mockFlag === "true" || mockFlag === true) return true;
+  if (mockFlag === "true" || mockFlag === true) {
+    // An explicit opt-in is still how a deploy ends up serving a fake
+    // restaurant, so in a production build it is refused unless another
+    // variable — one nobody sets by accident — says otherwise. The E2E suite
+    // is the intended user of that hatch: it builds the real bundle and serves
+    // it from `vite preview` against the mock (see playwright.config.ts).
+    if (import.meta.env.PROD) {
+      if (import.meta.env.VITE_ALLOW_MOCK_IN_PROD !== "true") {
+        throw new Error(
+          "VITE_MOCK_API=true in a production build. The mock API must never " +
+            "serve a deployed app — rebuild without it (or set " +
+            "VITE_ALLOW_MOCK_IN_PROD=true if this really is a test harness).",
+        );
+      }
+      announceMockInProd();
+    }
+    return true;
+  }
 
   if (import.meta.env.VITE_API_BASE_URL) return false;
 
@@ -241,7 +258,6 @@ let warned = false;
 function warnMockOnce(): void {
   if (warned || import.meta.env.PROD) return;
   warned = true;
-  // eslint-disable-next-line no-console
   console.warn(
     "%c OSHAP: using the in-memory MOCK API ",
     "background:#B24700;color:#fff;font-weight:700;padding:2px 4px;border-radius:2px",
@@ -251,6 +267,21 @@ Nothing here reaches a server. Any data you create is imaginary.
 VITE_API_BASE_URL is not set, so the client fell back to the mock. Note that
 Vite reads .env files from the repository root only (see envDir in each app's
 vite.config.ts) — set it there, then restart the dev server.`,
+  );
+}
+
+/**
+ * The prod-build counterpart of `warnMockOnce`, for when the mock was allowed
+ * on purpose (VITE_ALLOW_MOCK_IN_PROD=true — the E2E harness). Unlike dev, it
+ * is never suppressed: if such a bundle ever reaches a real URL, the console
+ * should say what it is from the first page load.
+ */
+function announceMockInProd(): void {
+  console.error(
+    "%c OSHAP: MOCK API in a PRODUCTION BUILD ",
+    "background:#B00020;color:#fff;font-weight:700;padding:2px 4px;border-radius:2px",
+    "Nothing here reaches a server. If this is not a test harness, rebuild " +
+      "without VITE_MOCK_API.",
   );
 }
 

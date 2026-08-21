@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build && node scripts/assert-no-token.mjs",
-    "preview": "vite preview --port 5175",
+    "preview": "vite preview --port 5177",
     "typecheck": "tsc -b --noEmit",
     "lint": "eslint ."
   },

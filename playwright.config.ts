@@ -66,6 +66,10 @@ export default defineConfig({
       // It has to be set for the *build*, since Vite inlines import.meta.env
       // at build time rather than reading it when the page loads.
       VITE_MOCK_API: "true",
+      // A production build with the mock now refuses to run unless this is
+      // also set (the guard against a deploy silently serving fake data).
+      // This suite is the intended user of that hatch.
+      VITE_ALLOW_MOCK_IN_PROD: "true",
     },
   },
 });

@@ -25,6 +25,7 @@ const BACKEND_EVENTS = [
   "payment_rejected",
   "table_closed",
   "waiter_called",
+  "notification_resolved",
   "pos_requested",
   "session_started",
   "session_joined",
@@ -84,6 +85,14 @@ describe("SSE event map", () => {
   it("treats waiter_called as recognised with no cache impact", () => {
     expect(EVENT_CACHE_KEYS["waiter_called"]).toEqual([]);
     expect(EVENT_CACHE_KEYS["waiter_called"]).not.toBe(UNKNOWN_EVENT_KEYS);
+  });
+
+  // A claim quiets the other waiters' cards through the bus (AlertCenter);
+  // no query cache holds notifications yet. Unlisted, every claim would
+  // blanket-invalidate everything.
+  it("treats notification_resolved as recognised with no cache impact", () => {
+    expect(EVENT_CACHE_KEYS["notification_resolved"]).toEqual([]);
+    expect(EVENT_CACHE_KEYS["notification_resolved"]).not.toBe(UNKNOWN_EVENT_KEYS);
   });
 
   it("falls back broadly for an event we don't know yet", () => {
