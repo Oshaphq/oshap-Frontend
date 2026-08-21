@@ -1010,6 +1010,8 @@ export interface AdminUpdateSettingsRequest {
   logo_url?: string | null;
   /** Brand colour as a hex string; the customer app derives its palette from it. */
   primary_color?: string | null;
+  /** Hero photo above the guest's menu. */
+  cover_image_url?: string | null;
   address?: string | null;
   operating_hours?: string | null;
   whatsapp_number?: string | null;

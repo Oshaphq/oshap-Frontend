@@ -1404,6 +1404,7 @@ route("PATCH", /^\/admin\/settings$/, ({ body }) => {
   if (b.description !== undefined) _restaurant.description = b.description;
   if (b.logo_url !== undefined) _restaurant.logo_url = b.logo_url;
   if (b.primary_color !== undefined) _restaurant.primary_color = b.primary_color;
+  if (b.cover_image_url !== undefined) _restaurant.cover_image_url = b.cover_image_url;
   if (b.address !== undefined) _restaurant.address = b.address;
   if (b.operating_hours !== undefined) _restaurant.operating_hours = b.operating_hours;
   if (b.whatsapp_number !== undefined) _restaurant.whatsapp_number = b.whatsapp_number;
