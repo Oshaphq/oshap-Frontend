@@ -15,11 +15,13 @@ What is missing is entirely on our side:
 | Field | Backend | Our `Restaurant` type | Any screen reads it |
 |---|---|---|---|
 | `logo_url` | ✅ | ✅ | ✅ customer header, receipts, QR sheets |
-| `primary_color` | ✅ | ❌ not declared | ❌ |
-| `cover_image_url` | ✅ | ❌ not declared | ❌ |
+| `primary_color` | ✅ | ✅ declared (`types/index.ts`) | ❌ not read yet |
+| `cover_image_url` | ✅ | ✅ declared (`types/index.ts`) | ❌ not read yet |
 
 So the data is being delivered to the guest and thrown away. **This phase needs no backend
-work at all** — one exception, noted at the end.
+work at all** — one exception, noted at the end. (Build-order step 1 — declaring the two
+fields in `types/index.ts` and `openapi.yaml` — is already done; what remains is reading
+and applying them.)
 
 ## Scope: the guest's app, and nothing else
 
@@ -140,9 +142,9 @@ switcher, no resolution logic, no decision.
 
 ## Build order
 
-1. Declare `primary_color` and `cover_image_url` on `Restaurant` in
+1. ~~Declare `primary_color` and `cover_image_url` on `Restaurant` in
    [`types/index.ts`](../packages/shared/src/types/index.ts) and in
-   [`openapi.yaml`](openapi.yaml) — they are returned today and undocumented on our side.
+   [`openapi.yaml`](openapi.yaml)~~ — done; both are declared.
 2. Palette derivation as a pure function in `packages/shared/src/utils/`, with tests. This
    is the piece worth getting right; everything after it is wiring.
 3. Apply on a wrapper in the customer app, plus the `sessionStorage` cache.

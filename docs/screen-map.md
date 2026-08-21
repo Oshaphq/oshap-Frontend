@@ -20,7 +20,7 @@ Base: <https://oshap-frontend-customer.vercel.app> · No auth header. Screens ne
 |---|---|---|---|---|
 | Menu | `/menu?table=:id` | [open ↗][c-menu] | `GET /table/{id}`, `GET /menu?restaurant_id=` | ❓ |
 | Checkout | `/checkout?table=:id` | [open ↗][c-checkout] | `GET /table/{id}`, `POST /orders` | ❓ |
-| Orders | `/orders?table=:id` | [open ↗][c-orders] | `GET /session/orders`, `POST /session`, `POST /orders/confirm` | ❓ |
+| Orders | `/orders?table=:id` | [open ↗][c-orders] | `GET /session/orders`, `POST /session` | ❓ |
 | Pay | `/pay?table=:id` | [open ↗][c-pay] | `GET /table/{id}`, `POST /payment/confirm`, `POST /table/{id}/request-pos`, `POST /table/{id}/call-waiter` | ❓ |
 
 [c-menu]:     https://oshap-frontend-customer.vercel.app/menu?table=T1

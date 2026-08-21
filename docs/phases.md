@@ -1,6 +1,6 @@
 # Oshap — Implementation Phases
 
-**Last updated:** 2026-06-03
+**Last updated:** 2026-08-21
 **Companion docs:** [`PRD.md`](../PRD.md) · [`docs/jtbd.md`](jtbd.md) · [`docs/smoke-test.md`](smoke-test.md)
 
 ---
@@ -150,22 +150,29 @@
 ### [x] Phase 6: Per-user Accounts + RBAC
 
 **Goal:** Replace the shared PIN with individual staff accounts and role-separated access.
-**Status:** ⬜ Not started
+**Status:** 🔄 In progress — see correction below
 **Effort:** 3–5 weeks
 **Dependencies:** Phase 1
+
+> **Correction.** This phase was long marked "not started," but most of it has since
+> shipped alongside the auth rework: email/password login (`POST /auth/login`) replaced
+> the PIN screen (`AuthGate.tsx`), `RoleGate` guards routes by role (`App.tsx`), kitchen
+> and bartender station views split orders by role (`kitchen.tsx`), Staff Management UI
+> lives at `/settings/staff`, and an audit trail page exists at `/audit`. Remaining work
+> is verification against the real backend and any gaps (e.g. a dedicated cashier view).
 
 **Roles to implement:** Owner, Manager, Cashier, Waiter, Kitchen Staff, Bartender
 
 **Tasks:**
-- Backend: `User` entity, `Role` enum, per-user sessions (JWT or session token)
-- Admin app: replace PIN screen with email/password login
-- Permission middleware: per-route access gates
-- Staff Management UI: add/remove/assign role
-- Kitchen view: show food orders only (currently shows all)
-- Bartender view: show drink orders only (currently no split)
-- Owner-only: analytics, settings, staff management
-- Cashier: payment-only dashboard view
-- Audit log for payment verification actions
+- Backend: `User` entity, `Role` enum, per-user sessions (JWT or session token) ✅ (per spec)
+- Admin app: replace PIN screen with email/password login ✅
+- Permission middleware: per-route access gates ✅ (`RoleGate`)
+- Staff Management UI: add/remove/assign role ✅ (`/settings/staff`)
+- Kitchen view: show food orders only ✅
+- Bartender view: show drink orders only ✅
+- Owner-only: analytics, settings, staff management ✅
+- Cashier: payment-only dashboard view ⬜ (verify whether needed)
+- Audit log for payment verification actions ✅ (`/audit`)
 
 ---
 
@@ -290,7 +297,7 @@
 
 | Sub-phase | Scope | Status |
 |---|---|---|
-| (contract sync) | OpenAPI spec updated to match the API layer: `/admin/login`, `/admin/staff*`, `/admin/tables` POST+DELETE, `/admin/inventory*`, `/admin/group*`, `/platform/*`, `branch_id` param, `MenuItem` inventory fields, `/admin/me` `user`; added `platformToken` scheme | ✅ |
+| (contract sync) | OpenAPI spec updated to match the API layer: `/auth/login`, `/admin/staff*`, `/admin/tables` POST+DELETE, `/admin/inventory*`, `/admin/group*`, `/platform/*`, `branch_id` param, `MenuItem` inventory fields, `/auth/me` `user`; added `platformToken` scheme | ✅ |
 | A — Design system | Chart colors → token CSS vars; platform raw buttons → shared `PrimaryButton`/`SecondaryButton`; spacing utilities → DS tokens (exact-px) | ✅ |
 | B — Data layer | `queryKeys` factory extended to staff/analytics/inventory/group/platform; all inline keys routed through it; `PlatformRestaurantsResponse` moved to `types/` | ✅ |
 | C — Functional | Branch switcher wired (client appends `branch_id` to admin GETs; `AuthContext` owns state + invalidates; mock scopes by branch); CSV export escaping; mock WS relay guarded; `owner_name` handling documented | ✅ |
@@ -307,15 +314,15 @@
 ```
 Phase 0    ✅  Handoff polish
 Phase 0.5  ✅  ESLint setup
-Phase 1    ⬜  Backend integration         ← current priority
+Phase 1    🔄  Backend integration         ← current priority
 Phase 2    ⬜  Pilot prep
 Phase 3    ⬜  Pilot launch
 Phase 4    ✅  Restaurant Settings UI
-Phase 5    ✅  Customer Notification Center← can start immediately
-Phase 6    ⬜  Per-user accounts + RBAC    ← after Phase 1
-Phase 7    ⬜  Analytics dashboard         ← after Phase 6
+Phase 5    ✅  Customer Notification Center
+Phase 6    🔄  Per-user accounts + RBAC    ← mostly shipped, verify vs backend
+Phase 7    🔄  Analytics dashboard
 Phase 8    ⬜  Payment gateway + tip       ← after Phase 1
-Phase 9    ⬜  Real-time push (SSE)        ← after Phase 1
+Phase 9    🔄  Real-time push (SSE)
 Phase 10   ⬜  Loyalty + CRM              ← after Phase 6
 Phase 11   ⬜  Reservations + pre-ordering ← after Phase 6
 Phase 12   ✅  Inventory + multi-branch + platform admin
