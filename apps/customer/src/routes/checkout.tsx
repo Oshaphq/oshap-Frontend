@@ -95,7 +95,7 @@ function CheckoutView({ tableId }: { tableId: string }) {
 
   if (items.length === 0) {
     return (
-      <div className="min-h-screen bg-surface-container-low pb-20">
+      <div className="min-h-screen bg-surface-container-low pb-[var(--app-bottom-inset)]">
         <CustomerHeader
           tableId={tableId}
           title="Confirm Order"
@@ -132,7 +132,7 @@ function CheckoutView({ tableId }: { tableId: string }) {
   }
 
   return (
-    <div className="min-h-screen bg-surface-container-low pb-20">
+    <div className="min-h-screen bg-surface-container-low pb-[var(--app-bottom-inset)]">
       <CustomerHeader
         tableId={tableId}
         title="Confirm Order"
