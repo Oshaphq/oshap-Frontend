@@ -103,7 +103,7 @@ export default function PayPage() {
 
   if (tableQuery.isLoading) {
     return (
-      <div className="min-h-screen bg-surface-container-low pb-20">
+      <div className="min-h-screen bg-surface-container-low pb-[var(--app-bottom-inset)]">
         <CustomerHeader
           tableId={tableId}
           title="Pay Bill"
@@ -174,7 +174,7 @@ export default function PayPage() {
     const isPaid = receipt?.status === "CONFIRMED";
 
     return (
-      <div className="min-h-screen bg-surface-container-low pb-20">
+      <div className="min-h-screen bg-surface-container-low pb-[var(--app-bottom-inset)]">
         <CustomerHeader
           tableId={tableId}
           title="Pay Bill"
@@ -244,7 +244,7 @@ export default function PayPage() {
   if (!unpaidOrder && pendingPayments) {
     const isPos = posRequested;
     return (
-      <div className="min-h-screen bg-surface-container-low pb-20">
+      <div className="min-h-screen bg-surface-container-low pb-[var(--app-bottom-inset)]">
         <CustomerHeader
           tableId={tableId}
           title="Pay Bill"
@@ -281,7 +281,7 @@ export default function PayPage() {
   const total = unpaidOrder?.total ?? 0;
 
   return (
-    <div className="min-h-screen bg-surface-container-low pb-20">
+    <div className="min-h-screen bg-surface-container-low pb-[var(--app-bottom-inset)]">
       <CustomerHeader
         tableId={tableId}
         title="Pay Bill"

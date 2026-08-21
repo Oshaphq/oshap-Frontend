@@ -66,7 +66,7 @@ function MenuView({ tableId }: { tableId: string }) {
   const isLoading = menuQuery.isLoading || tableQuery.isLoading;
 
   return (
-    <div className="min-h-screen bg-surface pb-20">
+    <div className="min-h-screen bg-surface pb-[var(--app-bottom-inset)]">
       <CustomerHeader tableId={tableId} />
 
       {/* The restaurant's own photograph, when they have uploaded one. Absent

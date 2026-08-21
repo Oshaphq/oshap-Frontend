@@ -6,6 +6,25 @@
   display: none;
 }
 
+:root {
+  /*
+   * How much room everything pinned to the bottom of the guest's app takes up.
+   *
+   * Pages padded `pb-20` (80px), which cleared the nav and nothing else — the
+   * call-waiter button floats from 80px to 128px, so the last dish on every
+   * screen sat underneath it with its ADD button unreachable. Spotted on the
+   * pilot's own menu.
+   *
+   * Written as the sum of its parts rather than the total, so moving the FAB
+   * or resizing the nav updates this instead of quietly reintroducing the
+   * overlap.
+   */
+  --app-bottom-inset: calc(
+    4rem /* bottom nav */ + 1rem /* nav-to-FAB gap */ + 3rem /* FAB */ + 1rem
+      /* breathing room */ + env(safe-area-inset-bottom, 0px)
+  );
+}
+
 html,
 body,
 #root {

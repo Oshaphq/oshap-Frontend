@@ -181,7 +181,7 @@ function OrdersView({ tableId }: { tableId: string }) {
   }, [othersOrders]);
 
   return (
-    <div className="min-h-screen bg-surface-container-low pb-20">
+    <div className="min-h-screen bg-surface-container-low pb-[var(--app-bottom-inset)]">
       <CustomerHeader
         tableId={tableId}
         title="My Orders"
