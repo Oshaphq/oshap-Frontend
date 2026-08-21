@@ -2,35 +2,28 @@ import { usePlatformRestaurants, formatCurrency } from "@oshap/shared";
 import { QueryError } from "@oshap/shared/ui";
 import type { SubscriptionTier } from "@oshap/shared";
 import { Link } from "react-router";
-import { TIER_MONTHLY_KOBO, TIER_ORDER, tierPriceLabel } from "../tiers";
+import {
+  TIER_MONTHLY_KOBO,
+  TIER_ORDER,
+  tierPriceLabel,
+  locationAllowanceLabel,
+  orderAllowanceLabel,
+} from "../tiers";
 
-const TIER_FEATURES: Record<SubscriptionTier, string[]> = {
-  LITE: [
-    "QR Code Menu & Paperless digital menu",
-    "Live menu & price updates",
-    "Instant price controls & Out of Stock toggle",
-    "Up to 3 active staff accounts",
-  ],
-  STANDARD: [
-    "Everything in Lite",
-    "BYOD table & Waiter phone ordering",
-    "Customer self-ordering",
-    "Digital Kitchen Dashboard & KOT",
-    "Manual payment ledger (Transfer/POS/Cash)",
-  ],
-  PRO: [
-    "Everything in Standard",
-    "Inventory management & stock depletion",
-    "End-of-shift Z-reports & reconciliation",
-    "Sales summaries & operational analytics",
-  ],
-  ENTERPRISE: [
-    "Multi-branch master dashboard",
-    "Consolidated financial reporting",
-    "Branch-level performance & franchise mgmt",
-    "Branch settlement & custom integrations",
-  ],
-};
+/**
+ * What each plan includes. Plans differ by **capacity, not capability** —
+ * every tier gets the whole product (docs/plans.md); the only axes are
+ * monthly order volume and locations. Derived from the caps rather than
+ * written out, so copy and data can never disagree. Staff accounts and
+ * tables are unlimited on every tier and are never listed as a limit.
+ */
+function tierCapacityLines(tier: SubscriptionTier): string[] {
+  return [
+    "Every feature included",
+    orderAllowanceLabel(tier),
+    locationAllowanceLabel(tier),
+  ];
+}
 
 const TIER_COLORS: Record<SubscriptionTier, string> = {
   LITE: "bg-surface-container-high text-outline border-outline-variant",
@@ -130,7 +123,7 @@ export default function SubscriptionsPage() {
                 </span>
               )}
               <ul className="flex flex-col gap-s">
-                {TIER_FEATURES[tier].map((f) => (
+                {tierCapacityLines(tier).map((f) => (
                   <li key={f} className="text-caption-xs opacity-75 flex items-start gap-s">
                     <i className="mgc_check_line text-sm shrink-0" />
                     {f}

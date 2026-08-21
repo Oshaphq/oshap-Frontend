@@ -18,7 +18,11 @@ import { AuthProvider, useAuth } from "./context/AuthContext";
 import { useGlobalSSE } from "@oshap/shared";
 
 function GlobalSSE() {
-  useGlobalSSE();
+  // Only stream while signed in. Mounted unconditionally, this used to open
+  // /events on the login screen and retry against an endpoint that rejects
+  // anonymous connections.
+  const { user } = useAuth();
+  useGlobalSSE({ enabled: !!user });
   return null;
 }
 

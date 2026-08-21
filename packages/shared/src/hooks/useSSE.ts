@@ -61,6 +61,11 @@ export const EVENT_CACHE_KEYS: Record<string, CacheKey[]> = {
   // changed, so invalidating anything here would just be noise.
   waiter_called: [],
 
+  // A waiter claimed the call. The alert cards manage their own state through
+  // the realtime bus (see AlertCenter), and no query cache holds notifications
+  // yet — but it must be listed, or every claim blanket-invalidates everything.
+  notification_resolved: [],
+
   // Transport frames, not domain events. They carry no state and must not
   // refetch anything — but they have to be *listed*, because an unrecognised
   // type falls through to a blanket invalidation. `heartbeat` arrives on a
@@ -114,6 +119,29 @@ export function publishRealtimeEvent(event: RealtimeEvent): void {
 }
 
 const RECONNECT_DELAY_MS = 5_000;
+const MAX_RECONNECT_DELAY_MS = 60_000;
+
+/**
+ * Consecutive failed connects before auto-retry gives up.
+ *
+ * EventSource cannot report HTTP status codes, so a permanent 401 (refresh
+ * token dead, clock skew, revoked staff account) is indistinguishable from a
+ * network blip — except that it never succeeds. Without a ceiling, every such
+ * tab retries forever. Eight attempts with exponential backoff spans roughly
+ * ten minutes; after that, reconnecting waits for a real trigger (returning
+ * to the tab, or a fresh token) instead of hammering the endpoint all day.
+ */
+const MAX_RECONNECT_ATTEMPTS = 8;
+
+function reconnectDelay(attempt: number): number {
+  const exponential = Math.min(
+    RECONNECT_DELAY_MS * 2 ** attempt,
+    MAX_RECONNECT_DELAY_MS,
+  );
+  // Jitter so a fleet of tabs that lost the stream together don't retry in
+  // lockstep every interval.
+  return exponential + Math.random() * 1_000;
+}
 
 /**
  * How long a dead stream may go unnoticed.
@@ -129,13 +157,26 @@ const RECONNECT_DELAY_MS = 5_000;
  */
 export const REALTIME_POLL_MS = 20_000;
 
-export function useGlobalSSE() {
+export interface UseGlobalSSEOptions {
+  /**
+   * Open the stream only when true. The admin app passes its auth state so the
+   * login screen doesn't open (and endlessly retry) a stream it can never
+   * authenticate.
+   */
+  enabled?: boolean;
+}
+
+export function useGlobalSSE(options: UseGlobalSSEOptions = {}) {
+  const { enabled = true } = options;
   const queryClient = useQueryClient();
 
   useEffect(() => {
+    if (!enabled) return;
+
     let es: EventSource | null = null;
     let reconnectTimeout: number | null = null;
     let closed = false;
+    let reconnectAttempts = 0;
     // The token the current stream was opened with. Access tokens expire
     // (~15 minutes), and a reconnect that reuses the expired one 401s forever
     // — retrying every 5s against a credential that can never work again.
@@ -145,6 +186,11 @@ export function useGlobalSSE() {
       if (closed) return;
       connectedWith = getAccessToken();
       es = createEventSource("/events");
+
+      es.onopen = () => {
+        // A healthy (re)connect — the backoff ladder starts over.
+        reconnectAttempts = 0;
+      };
 
       es.onmessage = (event) => {
         let parsed: RealtimeEvent;
@@ -172,7 +218,12 @@ export function useGlobalSSE() {
       es.onerror = () => {
         es?.close();
         if (closed) return;
-        reconnectTimeout = window.setTimeout(connect, RECONNECT_DELAY_MS);
+        reconnectAttempts += 1;
+        if (reconnectAttempts > MAX_RECONNECT_ATTEMPTS) return;
+        reconnectTimeout = window.setTimeout(
+          connect,
+          reconnectDelay(reconnectAttempts - 1),
+        );
       };
     }
 
@@ -209,5 +260,5 @@ export function useGlobalSSE() {
       if (reconnectTimeout) clearTimeout(reconnectTimeout);
       es?.close();
     };
-  }, [queryClient]);
+  }, [queryClient, enabled]);
 }

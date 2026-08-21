@@ -3,9 +3,10 @@ import {
   useAdminUpdateKitchenStatus,
   formatCurrency,
   useAdminMenu,
+  errorMessage,
 } from "@oshap/shared";
 import type { OrderWithItems } from "@oshap/shared";
-import { PrimaryButton } from "@oshap/shared/ui";
+import { PrimaryButton, toast } from "@oshap/shared/ui";
 import QueryError from "../components/QueryError";
 import { Link } from "react-router";
 import { useAuth } from "../context/AuthContext";
@@ -45,10 +46,16 @@ export default function KitchenPage() {
     orderId: string,
     newStatus: "PREPARING" | "READY",
   ) => {
-    await updateStatus.mutateAsync({
-      order_id: orderId,
-      status: newStatus,
-    });
+    try {
+      await updateStatus.mutateAsync({
+        order_id: orderId,
+        status: newStatus,
+      });
+    } catch (err) {
+      // A dropped connection during service must not leave a ticket stuck in
+      // place with no feedback — the board only advances on explicit taps.
+      toast.error(errorMessage(err, "update the order status"));
+    }
   };
 
   if (kitchenQuery.isLoading || menuQuery.isLoading) {

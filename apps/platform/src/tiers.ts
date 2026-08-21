@@ -85,3 +85,10 @@ export function locationAllowanceLabel(tier: SubscriptionTier): string {
   if (cap == null) return "Unlimited locations";
   return `${cap} location${cap === 1 ? "" : "s"}`;
 }
+
+/** e.g. `10,000 orders / month` / `Unlimited orders / month`. */
+export function orderAllowanceLabel(tier: SubscriptionTier): string {
+  const cap = TIER_MONTHLY_ORDER_CAP[tier];
+  if (cap == null) return "Unlimited orders / month";
+  return `${cap.toLocaleString()} orders / month`;
+}

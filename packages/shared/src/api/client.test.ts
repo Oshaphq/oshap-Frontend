@@ -443,9 +443,25 @@ describe("client — a production build never falls back to the mock", () => {
     expect((err as Error).message).toContain("VITE_API_BASE_URL");
   });
 
-  it("still honours an explicit opt-in, so E2E and demos keep working", async () => {
+  it("refuses an explicit mock opt-in in a production build", async () => {
+    // The accident this guards: VITE_MOCK_API=true left in a hosting
+    // provider's env. The bundle works perfectly and reaches nothing.
     vi.stubEnv("VITE_API_BASE_URL", "");
     vi.stubEnv("VITE_MOCK_API", "true");
+    vi.stubEnv("PROD", true);
+
+    const err = await request("/menu").catch((e) => e);
+
+    expect(err).toBeInstanceOf(Error);
+    expect((err as Error).message).toContain("VITE_MOCK_API");
+  });
+
+  it("still honours the explicit opt-in when the test-harness hatch is set", async () => {
+    // The E2E suite builds the real bundle and serves it from `vite preview`
+    // against the mock (playwright.config.ts) — deliberate, so allowed.
+    vi.stubEnv("VITE_API_BASE_URL", "");
+    vi.stubEnv("VITE_MOCK_API", "true");
+    vi.stubEnv("VITE_ALLOW_MOCK_IN_PROD", "true");
     vi.stubEnv("PROD", true);
 
     const items = await request<unknown[]>("/menu");
