@@ -69,6 +69,30 @@ function MenuView({ tableId }: { tableId: string }) {
     <div className="min-h-screen bg-surface pb-20">
       <CustomerHeader tableId={tableId} />
 
+      {/* The restaurant's own photograph, when they have uploaded one. Absent
+          means no hero rather than a grey placeholder — an empty box says
+          "something failed to load", which is worse than saying nothing. */}
+      {tableQuery.data?.restaurant?.cover_image_url && (
+        <div className="relative h-36 sm:h-48 w-full overflow-hidden bg-surface-container">
+          <img
+            src={tableQuery.data.restaurant.cover_image_url}
+            alt=""
+            className="w-full h-full object-cover"
+            onError={(e) => {
+              // A stored URL that stops resolving should remove the hero, not
+              // leave a broken-image glyph across the top of the menu.
+              e.currentTarget.parentElement?.remove();
+            }}
+          />
+          {/* The name sits over the photo, so it needs a floor to stay legible
+              no matter what the picture is doing underneath it. */}
+          <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
+          <p className="absolute bottom-md left-md font-display text-display-h3 font-semibold text-white drop-shadow">
+            {tableQuery.data.restaurant.name}
+          </p>
+        </div>
+      )}
+
       <div className="px-md bg-surface border-b border-outline-variant">
         <CategoryTabs
           categories={categories}
