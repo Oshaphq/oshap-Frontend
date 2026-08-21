@@ -59,6 +59,7 @@ export default function MenuPage() {
   const [form, setForm] = useState<MenuFormState>(EMPTY_FORM);
   const [stockEditId, setStockEditId] = useState<string | null>(null);
   const [stockInput, setStockInput] = useState<string>("");
+  const [thresholdInput, setThresholdInput] = useState<string>("");
   const [showImport, setShowImport] = useState(false);
   const [showGroups, setShowGroups] = useState(false);
   const [optionsFor, setOptionsFor] = useState<MenuItem | null>(null);
@@ -154,12 +155,48 @@ export default function MenuPage() {
     }
   };
 
+  /**
+   * Saving a blank box means "stop counting this dish" — a real thing to want,
+   * and the reason this said "Stock updated" while the badge stayed
+   * "Untracked". That reads as a failed save rather than a successful one, so
+   * the two outcomes now say what they actually are.
+   *
+   * `parseInt` also turned anything unparseable into NaN, which serialises to
+   * null — so a stray character silently untracked the dish and reported
+   * success. Rejected now instead.
+   */
   const handleSaveStock = async (item: MenuItem) => {
-    const count = stockInput === "" ? null : parseInt(stockInput, 10);
+    const raw = stockInput.trim();
+    const parsed = raw === "" ? null : Number(raw);
+
+    if (parsed !== null && (!Number.isFinite(parsed) || parsed < 0)) {
+      toast.error("Stock has to be a number, or blank to stop counting.");
+      return;
+    }
+
+    const count = parsed === null ? null : Math.floor(parsed);
+    const threshold = thresholdInput.trim();
+    const parsedThreshold = threshold === "" ? null : Number(threshold);
+
+    if (parsedThreshold !== null && (!Number.isFinite(parsedThreshold) || parsedThreshold < 0)) {
+      toast.error("The low-stock number has to be a number.");
+      return;
+    }
+
     try {
-      await updateStock.mutateAsync({ id: item.id, payload: { stock_count: count } });
+      await updateStock.mutateAsync({
+        id: item.id,
+        payload: {
+          stock_count: count,
+          ...(parsedThreshold === null ? {} : { low_stock_threshold: Math.floor(parsedThreshold) }),
+        },
+      });
       setStockEditId(null);
-      toast.success(`Stock updated for ${item.name}`);
+      toast.success(
+        count === null
+          ? `${item.name} is no longer counted`
+          : `${item.name}: ${count} in stock`,
+      );
     } catch (err) {
       toast.error(errorMessage(err, "update the stock count"));
     }
@@ -259,8 +296,14 @@ export default function MenuPage() {
               item={item}
               isStockEditing={stockEditId === item.id}
               stockInput={stockInput}
-              onStockEditStart={() => { setStockEditId(item.id); setStockInput(item.stock_count !== null ? String(item.stock_count) : ""); }}
+              thresholdInput={thresholdInput}
+              onStockEditStart={() => {
+                setStockEditId(item.id);
+                setStockInput(item.stock_count !== null ? String(item.stock_count) : "");
+                setThresholdInput(String(item.low_stock_threshold ?? ""));
+              }}
               onStockInputChange={setStockInput}
+              onThresholdInputChange={setThresholdInput}
               onStockSave={() => handleSaveStock(item)}
               onStockCancel={() => setStockEditId(null)}
               onToggle={() => handleToggleAvailable(item.id, item.available)}
@@ -304,7 +347,9 @@ interface ItemRowProps {
   item: MenuItem;
   isStockEditing: boolean;
   stockInput: string;
+  thresholdInput: string;
   onStockEditStart: () => void;
+  onThresholdInputChange: (v: string) => void;
   onStockInputChange: (v: string) => void;
   onStockSave: () => void;
   onStockCancel: () => void;
@@ -315,7 +360,7 @@ interface ItemRowProps {
   onDelete: () => void;
 }
 
-function MenuItemRow({ item, isStockEditing, stockInput, onStockEditStart, onStockInputChange, onStockSave, onStockCancel, onToggle, onEdit, onEditOptions, onEditRecipe, onDelete }: ItemRowProps) {
+function MenuItemRow({ item, isStockEditing, stockInput, thresholdInput, onStockEditStart, onStockInputChange, onThresholdInputChange, onStockSave, onStockCancel, onToggle, onEdit, onEditOptions, onEditRecipe, onDelete }: ItemRowProps) {
   const isLow = item.stock_count !== null && item.stock_count <= item.low_stock_threshold;
   const isOut = item.stock_count !== null && item.stock_count === 0;
 
@@ -353,18 +398,47 @@ function MenuItemRow({ item, isStockEditing, stockInput, onStockEditStart, onSto
               )}
               {/* Stock badge / inline editor */}
               {isStockEditing ? (
-                <div className="flex items-center gap-s mt-xs">
-                  <input
-                    type="number"
-                    min={0}
-                    value={stockInput}
-                    placeholder="Count (blank = untracked)"
-                    onChange={(e) => onStockInputChange(e.target.value)}
-                    className="w-32 px-s py-xs rounded-md border border-outline-variant bg-surface-container-low text-caption-md text-primary-text outline-none focus:border-primary"
-                    autoFocus
-                  />
-                  <button type="button" onClick={onStockSave} className="text-caption-sm font-bold text-success hover:underline">Save</button>
-                  <button type="button" onClick={onStockCancel} className="text-caption-sm text-outline hover:underline">Cancel</button>
+                <div className="flex flex-wrap items-end gap-s mt-xs">
+                  <label className="flex flex-col gap-xs text-caption-xs text-secondary-text">
+                    Plates left
+                    <input
+                      type="number"
+                      min={0}
+                      value={stockInput}
+                      placeholder="Blank = don't count"
+                      aria-label={`Stock count for ${item.name}`}
+                      onChange={(e) => onStockInputChange(e.target.value)}
+                      onKeyDown={(e) => {
+                        // Typing a number and pressing Enter is the whole
+                        // interaction; without this it silently did nothing.
+                        if (e.key === "Enter") onStockSave();
+                        if (e.key === "Escape") onStockCancel();
+                      }}
+                      className="w-28 px-s py-xs rounded-md border border-outline-variant bg-surface-container-low text-caption-md text-primary-text outline-none focus:border-primary"
+                      autoFocus
+                    />
+                  </label>
+                  {/* The threshold was settable through the API and nowhere in
+                      the UI, so every dish sat on whatever default it was
+                      created with. */}
+                  <label className="flex flex-col gap-xs text-caption-xs text-secondary-text">
+                    Warn at
+                    <input
+                      type="number"
+                      min={0}
+                      value={thresholdInput}
+                      placeholder="e.g. 5"
+                      aria-label={`Low stock warning level for ${item.name}`}
+                      onChange={(e) => onThresholdInputChange(e.target.value)}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter") onStockSave();
+                        if (e.key === "Escape") onStockCancel();
+                      }}
+                      className="w-24 px-s py-xs rounded-md border border-outline-variant bg-surface-container-low text-caption-md text-primary-text outline-none focus:border-primary"
+                    />
+                  </label>
+                  <button type="button" onClick={onStockSave} className="text-caption-sm font-bold text-success hover:underline pb-xs">Save</button>
+                  <button type="button" onClick={onStockCancel} className="text-caption-sm text-outline hover:underline pb-xs">Cancel</button>
                 </div>
               ) : (
                 <button
