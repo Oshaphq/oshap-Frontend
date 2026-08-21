@@ -6,7 +6,7 @@ import {
   useAdminAuditLogs,
 } from "@oshap/shared";
 import type { AuditLogEntry } from "@oshap/shared";
-import { SecondaryButton } from "@oshap/shared/ui";
+import { SecondaryButton, Select } from "@oshap/shared/ui";
 import QueryError from "../components/QueryError";
 
 /**
@@ -110,18 +110,17 @@ export default function AuditPage() {
             Every change to a bill, newest first.
           </p>
         </div>
-        <select
+        <Select
           value={action}
           onChange={(e) => setFilter(e.target.value)}
           aria-label="Filter by action"
-          className="px-md py-s rounded-lg bg-surface-container-low border border-outline-variant text-p2 text-primary-text outline-none focus:border-primary transition-colors"
         >
           {ACTIONS.map((a) => (
             <option key={a.value} value={a.value}>
               {a.label}
             </option>
           ))}
-        </select>
+        </Select>
       </header>
 
       {logs.isLoading ? (

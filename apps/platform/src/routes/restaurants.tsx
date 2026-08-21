@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { QueryError } from "@oshap/shared/ui";
+import { QueryError, Select } from "@oshap/shared/ui";
 import { Link } from "react-router";
 import { formatPhone, usePlatformRestaurants } from "@oshap/shared";
 // Every tier, not just the ones on sale — an existing Enterprise restaurant
@@ -60,33 +60,25 @@ export default function RestaurantsPage() {
           onChange={(e) => setSearch(e.target.value)}
           className="px-md py-s rounded-lg border border-outline-variant bg-surface-container-low text-p2 text-primary-text placeholder:text-outline outline-none focus:border-primary transition-colors flex-1 min-w-[180px] max-w-[320px]"
         />
-        <div className="relative">
-          <select
-            aria-label="Filter by subscription tier"
-            value={tierFilter}
-            onChange={(e) => setTierFilter(e.target.value as SubscriptionTier | "ALL")}
-            className="pl-s pr-xl py-s rounded-lg border border-outline-variant bg-surface-container-low text-p2 text-primary-text outline-none focus:border-primary appearance-none cursor-pointer"
-          >
-            <option value="ALL">All Tiers</option>
-            {TIER_ORDER.map((t) => (
-              <option key={t} value={t}>{t}</option>
-            ))}
-          </select>
-          <i className="mgc_down_line absolute right-s top-1/2 -translate-y-1/2 text-outline pointer-events-none text-sm" aria-hidden />
-        </div>
-        <div className="relative">
-          <select
-            aria-label="Filter by status"
-            value={statusFilter}
-            onChange={(e) => setStatusFilter(e.target.value as "ALL" | "ACTIVE" | "INACTIVE")}
-            className="pl-s pr-xl py-s rounded-lg border border-outline-variant bg-surface-container-low text-p2 text-primary-text outline-none focus:border-primary appearance-none cursor-pointer"
-          >
-            <option value="ALL">All Status</option>
-            <option value="ACTIVE">Active</option>
-            <option value="INACTIVE">Inactive</option>
-          </select>
-          <i className="mgc_down_line absolute right-s top-1/2 -translate-y-1/2 text-outline pointer-events-none text-sm" aria-hidden />
-        </div>
+        <Select
+          aria-label="Filter by subscription tier"
+          value={tierFilter}
+          onChange={(e) => setTierFilter(e.target.value as SubscriptionTier | "ALL")}
+        >
+          <option value="ALL">All Tiers</option>
+          {TIER_ORDER.map((t) => (
+            <option key={t} value={t}>{t}</option>
+          ))}
+        </Select>
+        <Select
+          aria-label="Filter by status"
+          value={statusFilter}
+          onChange={(e) => setStatusFilter(e.target.value as "ALL" | "ACTIVE" | "INACTIVE")}
+        >
+          <option value="ALL">All Status</option>
+          <option value="ACTIVE">Active</option>
+          <option value="INACTIVE">Inactive</option>
+        </Select>
       </div>
 
       {query.isLoading && (

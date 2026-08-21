@@ -11,7 +11,7 @@ import {
   useAdminStockMovements,
 } from "@oshap/shared";
 import type { StockReason, Ingredient } from "@oshap/shared";
-import { PrimaryButton, SecondaryButton, toast } from "@oshap/shared/ui";
+import { PrimaryButton, SecondaryButton, Select, toast } from "@oshap/shared/ui";
 import QueryError from "../components/QueryError";
 
 const inputClass =
@@ -224,14 +224,13 @@ function MovementsLedger() {
         <h2 className="text-label-l2 font-semibold text-primary-text">
           Stock movements
         </h2>
-        <select
+        <Select
           value={reason}
           onChange={(e) => {
             setReason(e.target.value);
             setPage(1);
           }}
           aria-label="Filter by reason"
-          className={inputClass}
         >
           <option value="">Everything</option>
           {Object.entries(REASON_LABELS).map(([value, label]) => (
@@ -239,7 +238,7 @@ function MovementsLedger() {
               {label}
             </option>
           ))}
-        </select>
+        </Select>
       </div>
 
       {movements.isLoading ? (
@@ -371,17 +370,17 @@ function AdjustDialog({
           <span className="text-caption-md font-semibold text-primary-text">
             What happened?
           </span>
-          <select
+          <Select
             value={reason}
             onChange={(e) => setReason(e.target.value as StockReason)}
-            className={inputClass}
+            wrapperClassName="block w-full"
           >
             {REASONS.map((r) => (
               <option key={r.value} value={r.value}>
                 {r.label}
               </option>
             ))}
-          </select>
+          </Select>
         </label>
 
         <label className="flex flex-col gap-xs">

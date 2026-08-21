@@ -7,7 +7,7 @@ import {
 } from "@oshap/shared/hooks";
 import { Role, StaffMember } from "@oshap/shared/types";
 import { errorMessage, formatPhone, tryNormalizePhone } from "@oshap/shared";
-import { PrimaryButton, SecondaryButton, toast } from "@oshap/shared/ui";
+import { PrimaryButton, SecondaryButton, Select, toast } from "@oshap/shared/ui";
 import { useAuth } from "../../context/AuthContext";
 
 export default function StaffSettings() {
@@ -247,24 +247,18 @@ export default function StaffSettings() {
               </div>
               <div>
                 <label className={labelClass}>Role</label>
-                <div className="relative">
-                  <select
-                    value={form.role}
-                    onChange={(e) => setForm({ ...form, role: e.target.value as Role })}
-                    className={`${inputClass} appearance-none pr-10`}
-                  >
-                    <option value="OWNER">Owner</option>
-                    <option value="MANAGER">Manager</option>
-                    <option value="WAITER">Waiter</option>
-                    <option value="CASHIER">Cashier</option>
-                    <option value="KITCHEN">Kitchen Staff</option>
-                    <option value="BARTENDER">Bartender</option>
-                  </select>
-                  <i
-                    className="mgc_down_line absolute right-md top-1/2 -translate-y-1/2 text-outline pointer-events-none"
-                    aria-hidden
-                  />
-                </div>
+                <Select
+                  value={form.role}
+                  onChange={(e) => setForm({ ...form, role: e.target.value as Role })}
+                  wrapperClassName="block w-full"
+                >
+                  <option value="OWNER">Owner</option>
+                  <option value="MANAGER">Manager</option>
+                  <option value="WAITER">Waiter</option>
+                  <option value="CASHIER">Cashier</option>
+                  <option value="KITCHEN">Kitchen Staff</option>
+                  <option value="BARTENDER">Bartender</option>
+                </Select>
               </div>
               <div>
                 <label className={labelClass}>

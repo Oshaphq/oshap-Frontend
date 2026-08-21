@@ -6,7 +6,7 @@ import {
   getAdminRestaurantName,
   useAdminBranches,
 } from "@oshap/shared";
-import { PrimaryButton, ThemeToggle } from "@oshap/shared/ui";
+import { PrimaryButton, Select, ThemeToggle } from "@oshap/shared/ui";
 import { initFCM } from "../utils/fcm";
 import AlertCenter from "./AlertCenter";
 import { useAuth } from "../context/AuthContext";
@@ -246,22 +246,21 @@ export default function AuthGate() {
           {/* Right controls — always visible */}
           <div className="flex items-center gap-s shrink-0 ml-auto lg:ml-0">
             {showBranchSelector && (
-              <div className="relative">
-                <select
-                  aria-label="Active branch"
-                  value={activeBranchId}
-                  onChange={(e) => setActiveBranch(e.target.value)}
-                  className="pl-s pr-xl py-xs rounded-lg border border-outline-variant bg-surface-container-low text-caption-md text-primary-text font-semibold outline-none focus:border-primary appearance-none cursor-pointer max-w-[160px]"
-                >
-                  <option value="">All Branches</option>
-                  {branches.map((b) => (
-                    <option key={b.id} value={b.id}>
-                      {b.name}
-                    </option>
-                  ))}
-                </select>
-                <i className="mgc_down_line absolute right-s top-1/2 -translate-y-1/2 text-outline pointer-events-none text-sm" aria-hidden />
-              </div>
+              <Select
+                aria-label="Active branch"
+                density="sm"
+                value={activeBranchId}
+                onChange={(e) => setActiveBranch(e.target.value)}
+                className="font-semibold"
+                wrapperClassName="max-w-[160px]"
+              >
+                <option value="">All Branches</option>
+                {branches.map((b) => (
+                  <option key={b.id} value={b.id}>
+                    {b.name}
+                  </option>
+                ))}
+              </Select>
             )}
             <ThemeToggle />
             <div className="hidden md:flex flex-col items-end mr-s">
