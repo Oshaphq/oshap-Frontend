@@ -12,6 +12,7 @@ import {
   IMAGE_ACCEPT_ATTR,
 } from "@oshap/shared";
 import { PrimaryButton, toast } from "@oshap/shared/ui";
+import BrandColourField from "../../components/BrandColourField";
 import { useAuth } from "../../context/AuthContext";
 import BankAccountsSection from "../../components/BankAccountsSection";
 
@@ -26,6 +27,7 @@ export default function GeneralSettings() {
     name: "",
     description: "",
     logo_url: "",
+    primary_color: "",
     address: "",
     operating_hours: "",
     whatsapp_number: "",
@@ -43,6 +45,7 @@ export default function GeneralSettings() {
         name: settings.name || "",
         description: settings.description || "",
         logo_url: settings.logo_url || "",
+        primary_color: settings.primary_color || "",
         address: settings.address || "",
         operating_hours: settings.operating_hours || "",
         whatsapp_number: settings.whatsapp_number || "",
@@ -89,6 +92,7 @@ export default function GeneralSettings() {
         name: form.name,
         description: form.description || null,
         logo_url: form.logo_url || null,
+        primary_color: form.primary_color || null,
         address: form.address || null,
         operating_hours: form.operating_hours || null,
         whatsapp_number: form.whatsapp_number || null,
@@ -293,6 +297,13 @@ export default function GeneralSettings() {
       </div>
 
       <BankAccountsSection canEdit={isOwner} />
+
+      <div className="bg-surface-container-low rounded-md p-md">
+        <BrandColourField
+          value={form.primary_color}
+          onChange={(hex) => setForm((prev) => ({ ...prev, primary_color: hex }))}
+        />
+      </div>
 
       <div className="flex justify-end pt-s">
         <PrimaryButton 

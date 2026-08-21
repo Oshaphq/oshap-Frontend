@@ -83,6 +83,18 @@ export interface Restaurant {
   operating_hours?: string | null;
   whatsapp_number?: string | null;
   /**
+   * The restaurant's brand colour, as a hex string.
+   *
+   * Free text on the API rather than a validated hex, so it is parsed at the
+   * boundary and anything unusable falls back to the default theme — see
+   * `deriveBrandPalette`. Applies to the customer app only; the admin stays
+   * Oshap orange, because a group owner switching branches should not have the
+   * tool they work in change colour mid-shift.
+   */
+  primary_color?: string | null;
+  /** Hero image above the menu. Optional; absent means no hero, not a grey box. */
+  cover_image_url?: string | null;
+  /**
    * Tax and service charge in **integer basis points**, not percentages:
    * `750` = 7.5%, `1000` = 10%. Kept as integers for the same reason money is —
    * a percentage float would reintroduce drift into VAT.
@@ -996,6 +1008,8 @@ export interface AdminUpdateSettingsRequest {
   name?: string;
   description?: string | null;
   logo_url?: string | null;
+  /** Brand colour as a hex string; the customer app derives its palette from it. */
+  primary_color?: string | null;
   address?: string | null;
   operating_hours?: string | null;
   whatsapp_number?: string | null;

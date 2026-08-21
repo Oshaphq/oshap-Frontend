@@ -239,6 +239,18 @@ components:
             recognises rather than a postal-formatted line.
         operating_hours: { type: string, nullable: true }
         whatsapp_number: { type: string, nullable: true }
+        primary_color:
+          type: string
+          nullable: true
+          description: >
+            Brand colour as a hex string. Returned to the customer app, which
+            derives a full token set from it — see `docs/branding.md`. Not
+            validated server-side, so the client treats anything unparseable as
+            absent rather than trusting it.
+        cover_image_url:
+          type: string
+          nullable: true
+          description: Hero image above the guest's menu.
         vat_rate:
           type: integer
           description: >

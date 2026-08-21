@@ -1,6 +1,13 @@
 import { defineConfig } from "vitest/config";
 
 export default defineConfig({
+  // Set here rather than left to tsconfig discovery. esbuild reads the nearest
+  // `tsconfig.json`, and the app ones are solution-style files that only hold
+  // references — so `jsx` lives in `tsconfig.app.json` where esbuild never
+  // looks, and a .tsx test under apps/ silently compiled to the classic runtime
+  // and failed with "React is not defined". Package tests worked, which made it
+  // look like a test bug rather than a config gap.
+  esbuild: { jsx: "automatic" },
   test: {
     // jsdom: the mock API and client touch window/localStorage/WebSocket.
     environment: "jsdom",
