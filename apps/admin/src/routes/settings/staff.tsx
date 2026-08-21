@@ -269,7 +269,7 @@ export default function StaffSettings() {
                     type={showPassword ? "text" : "password"}
                     value={form.password}
                     onChange={(e) => setForm({ ...form, password: e.target.value })}
-                    placeholder={editingId ? "Leave blank to keep current" : "default: password"}
+                    placeholder={editingId ? "Leave blank to keep current" : "Choose a password"}
                     className={`${inputClass} pr-12`}
                   />
                   <button

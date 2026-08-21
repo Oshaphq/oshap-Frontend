@@ -574,6 +574,11 @@ export interface SetMenuItemModifierGroupsRequest {
   group_ids: string[];
 }
 
+/** The item's groups after the write, so the cache can be updated in place. */
+export interface MenuItemGroupsResponse {
+  modifier_groups: ModifierGroup[];
+}
+
 // --- Ingredients & recipes -------------------------------------------------
 // Dish-level `stock_count` counts plates; this counts what plates are made of.
 // Quantities are fractional (2.5 kg of rice), unlike the integer plate counts,
@@ -664,7 +669,7 @@ export interface StockMovementsResponse {
 }
 
 export interface StockMovementQuery {
-  reason?: string;
+  reason?: StockReason;
   page?: number;
   per_page?: number;
 }
@@ -850,10 +855,6 @@ export interface UpdateOrderItemRequest {
 // Paper trail
 // ---------------------------------------------------------------------------
 
-/**
- * A receipt is composed server-side rather than assembled from the live order,
- * because it has to reflect the restaurant and prices *at the time of sale* —
- * a name or VAT-rate change afterwards must not rewrite history.
 /** A receipt line. Note there is no id — key on position when rendering. */
 export interface ReceiptItem {
   name: string;

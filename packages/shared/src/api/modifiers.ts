@@ -2,6 +2,7 @@ import { request } from "./client";
 import type {
   CreateModifierGroupRequest,
   CreateModifierOptionRequest,
+  MenuItemGroupsResponse,
   ModifierGroup,
   ModifierOption,
   SetMenuItemModifierGroupsRequest,
@@ -86,9 +87,4 @@ export function setMenuItemGroups(
     `/admin/menu/${encodeURIComponent(itemId)}/modifier-groups`,
     { method: "PUT", body: payload, admin: true },
   );
-}
-
-/** The item's groups after the write, so the cache can be updated in place. */
-export interface MenuItemGroupsResponse {
-  modifier_groups: ModifierGroup[];
 }

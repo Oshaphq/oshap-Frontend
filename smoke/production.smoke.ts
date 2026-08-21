@@ -28,14 +28,13 @@ const V1 = `${API}/api/v1`;
 /**
  * Tier the ordering walk runs on.
  *
- * Every plan is *sold* as including ordering now (docs/plans.md), so this
- * should be LITE — and will be, once the backend replaces tier gates with the
- * two capacity caps. Today Lite still 403s on `/admin/tables`, so pointing this
- * at LITE would break a check that is otherwise green and tell us nothing we
- * do not already know. The gap is asserted deliberately in the plans block
- * below rather than smuggled in as a failure here.
+ * Every plan is *sold* as including ordering now (docs/plans.md), so this is
+ * LITE — deliberately the cheapest tier. The feature gates that used to 403
+ * Lite tenants on `/admin/tables` are gone (verified live by the backend
+ * team); running the walk on anything else would prove nothing about the plan
+ * most customers actually buy.
  */
-const ORDERING_TIER = "STANDARD" as const;
+const ORDERING_TIER = "LITE" as const;
 
 /** Unmistakably test data, and greppable if a cleanup ever fails. */
 const stamp = Date.now().toString().slice(-6);
@@ -177,9 +176,8 @@ test.describe("the API contract still matches what we send", () => {
           name: TENANT_NAME,
           owner_name: "Smoke Check",
           owner_phone: OWNER_PHONE,
-          // Ordering is a Standard feature — Lite is menu-only, by design.
-          // Running this on Lite would assert that a plan can do something it
-          // is explicitly not sold as doing.
+          // The cheapest plan takes the walk: every tier gets the whole
+          // product (docs/plans.md).
           subscription_tier: ORDERING_TIER,
           table_count: 2,
         },
@@ -264,15 +262,10 @@ test.describe("plans grant what they are sold as granting", () => {
   // Plans differ by capacity, not capability: every tier gets the whole
   // product, and Lite is capped only on monthly order volume (10,000) and
   // locations (1). Staff accounts and tables are unlimited on every tier. So
-  // the assertion is no longer "Lite is denied X" — it is that Lite is denied
-  // nothing. See docs/plans.md.
-  // Fails today: gating is still live on the backend. Observed on a fresh Lite
-  // tenant, 19 Aug — /admin/menu 200, /admin/settings 200, /admin/staff 200,
-  // but /admin/tables 403, /admin/kitchen 403, /admin/ingredients 403. The
-  // tables 403 is the sharp one: a QR code is per table, so a Lite restaurant
-  // cannot currently produce the codes that are the entire product.
-  // Un-fixme when the caps replace the gates (docs/plans.md §Enforcement).
-  test.fixme("Lite gets the whole product", async () => {
+  // the assertion is "Lite is denied nothing". See docs/plans.md.
+  // The feature gates this used to skip around are gone — verified live by
+  // the backend team (Lite 200 on tables/kitchen/ingredients/branches).
+  test("Lite gets the whole product", async () => {
     const api = await pwRequest.newContext();
     let id: string | null = null;
 
