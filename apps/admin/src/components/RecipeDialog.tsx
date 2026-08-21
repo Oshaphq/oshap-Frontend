@@ -6,7 +6,7 @@ import {
   useAdminSetRecipe,
 } from "@oshap/shared";
 import type { MenuItem } from "@oshap/shared";
-import { PrimaryButton, SecondaryButton, toast } from "@oshap/shared/ui";
+import { PrimaryButton, SecondaryButton, Select, toast } from "@oshap/shared/ui";
 
 const inputClass =
   "px-md py-s rounded-lg bg-surface-container border border-outline-variant text-p2 text-primary-text placeholder:text-outline outline-none focus:border-primary transition-colors";
@@ -126,7 +126,7 @@ export default function RecipeDialog({ item, onClose }: Props) {
               );
               return (
                 <div key={line.ingredient_id} className="flex items-center gap-s">
-                  <select
+                  <Select
                     value={line.ingredient_id}
                     onChange={(e) =>
                       setLines((prev) =>
@@ -138,7 +138,7 @@ export default function RecipeDialog({ item, onClose }: Props) {
                       )
                     }
                     aria-label="Ingredient"
-                    className={`${inputClass} flex-1 min-w-0`}
+                    wrapperClassName="flex-1 min-w-0"
                   >
                     {/* Its own value plus anything not already used, so the
                         same ingredient can't appear on two lines. */}
@@ -149,7 +149,7 @@ export default function RecipeDialog({ item, onClose }: Props) {
                           {i.name}
                         </option>
                       ))}
-                  </select>
+                  </Select>
                   <input
                     value={line.qty_per_serving}
                     onChange={(e) =>

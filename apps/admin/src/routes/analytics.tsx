@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Link } from "react-router";
 import { useAdminAnalytics, useAdminGroup } from "@oshap/shared/hooks";
 import { formatCurrency } from "@oshap/shared";
-import { PrimaryButton } from "@oshap/shared/ui";
+import { PrimaryButton, Select } from "@oshap/shared/ui";
 import {
   AreaChart,
   Area,
@@ -123,10 +123,8 @@ export default function Analytics() {
           </div>
 
           <div className="flex items-center gap-s">
-            <div className="relative">
-              <select
+              <Select
                 aria-label="Date range preset"
-                className="px-md py-s rounded-md bg-surface-container-low border border-outline-variant text-p2 text-primary-text outline-none focus:border-primary appearance-none pr-10"
                 onChange={(e) => {
                   const days = parseInt(e.target.value, 10);
                   if (isNaN(days)) return;
@@ -148,12 +146,7 @@ export default function Analytics() {
                     {p.label}
                   </option>
                 ))}
-              </select>
-              <i
-                className="mgc_down_line absolute right-md top-1/2 -translate-y-1/2 text-outline pointer-events-none"
-                aria-hidden="true"
-              />
-            </div>
+              </Select>
 
             <PrimaryButton size="md" onClick={handleExportCSV} disabled={!data}>
               Export CSV

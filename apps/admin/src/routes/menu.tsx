@@ -18,7 +18,7 @@ import {
   IMAGE_ACCEPT_ATTR,
 } from "@oshap/shared";
 import type { MenuItem } from "@oshap/shared";
-import { PrimaryButton, SecondaryButton, toast } from "@oshap/shared/ui";
+import { PrimaryButton, SecondaryButton, Select, toast } from "@oshap/shared/ui";
 import QueryError from "../components/QueryError";
 import LowStockBanner from "../components/LowStockBanner";
 import MenuImportDialog from "../components/MenuImportDialog";
@@ -507,21 +507,15 @@ function MenuItemForm({
           value={form.price}
           onChange={(e) => setForm({ ...form, price: e.target.value })}
         />
-        <div className="relative">
-          <select
-            className={`${inputClass} appearance-none w-full pr-10`}
-            value={form.category}
-            onChange={(e) => setForm({ ...form, category: e.target.value })}
-          >
-            {CATEGORIES.map((c) => (
-              <option key={c}>{c}</option>
-            ))}
-          </select>
-          <i
-            className="mgc_down_line absolute right-md top-1/2 -translate-y-1/2 text-outline pointer-events-none"
-            aria-hidden
-          />
-        </div>
+        <Select
+          value={form.category}
+          onChange={(e) => setForm({ ...form, category: e.target.value })}
+          wrapperClassName="block w-full"
+        >
+          {CATEGORIES.map((c) => (
+            <option key={c}>{c}</option>
+          ))}
+        </Select>
         <input
           className={inputClass}
           placeholder="Description"
