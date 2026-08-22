@@ -45,7 +45,7 @@ export default function DashboardPage() {
   // Two-step, because rejecting is destructive from the guest's side: their
   // bill returns to unpaid and the account they used is marked down.
   const [rejectingTableId, setRejectingTableId] = useState<string | null>(null);
-  const [cashTableId, setCashTableId] = useState<string | null>(null);
+  const [cashTable, setCashTable] = useState<AdminTableStatus | null>(null);
 
   if (tablesQuery.isLoading) {
     return (
@@ -293,7 +293,7 @@ export default function DashboardPage() {
               {isUnpaid && !isPending && (
                 <SecondaryButton
                   className="w-full"
-                  onClick={() => setCashTableId(table.id)}
+                  onClick={() => setCashTable(table)}
                 >
                   <i className="mgc_cash_line" /> Take Cash
                 </SecondaryButton>
@@ -368,7 +368,7 @@ export default function DashboardPage() {
                     type="button"
                     onClick={() => {
                       setClearPromptTable(null);
-                      setCashTableId(table.id);
+                      setCashTable(table);
                     }}
                     className="flex items-center justify-center gap-s py-s rounded-lg font-bold text-caption-md bg-success text-on-success transition-all hover:opacity-90 active:scale-[0.98]"
                   >
@@ -412,10 +412,10 @@ export default function DashboardPage() {
         </div>
       )}
 
-      {cashTableId && (
+      {cashTable && (
         <CashPaymentDialog
-          tableId={cashTableId}
-          onClose={() => setCashTableId(null)}
+          table={cashTable}
+          onClose={() => setCashTable(null)}
         />
       )}
     </main>

@@ -2,15 +2,15 @@ import { useState } from "react";
 import {
   errorMessage,
   formatCurrency,
-  getDeviceToken,
   nairaToKobo,
   useAdminRecordCash,
-  useTable,
 } from "@oshap/shared";
+import type { AdminTableStatus } from "@oshap/shared";
 import { PrimaryButton, SecondaryButton, toast } from "@oshap/shared/ui";
 
 interface Props {
-  tableId: string;
+  /** The table as the dashboard already knows it — no second fetch. */
+  table: AdminTableStatus;
   onClose: () => void;
 }
 
@@ -23,24 +23,23 @@ const QUICK_NOTES = [500, 1000, 2000, 5000, 10000];
  * Unlike transfers there's nothing to verify — a staff member is standing there
  * with the money — so this settles the bill outright.
  *
- * The order ids come from the public table endpoint. The admin tables response
- * carries totals but not order ids, so this is one extra round-trip; adding
- * `unpaid_order_ids` to `AdminTableStatus` would remove it.
+ * Reads the table the dashboard already has, rather than fetching one.
+ * It used to call `GET /table/{id}`, which is the **guest's** endpoint: it
+ * scopes `unpaid_order` to the device asking. The admin browser has never
+ * ordered anything, so every table came back with no bill and the dialog said
+ * "This table has no unpaid bill" over a card reading ₦75,061.88.
+ *
+ * `unpaid_order_ids` is on `AdminTableStatus` now, which is what that old
+ * round-trip existed to work around.
  */
-export default function CashPaymentDialog({ tableId, onClose }: Props) {
+export default function CashPaymentDialog({ table, onClose }: Props) {
   const recordCash = useAdminRecordCash();
-  const tableQuery = useTable({ tableId, deviceToken: getDeviceToken() });
 
   const [tendered, setTendered] = useState("");
 
-  // `tableId` is the table's uuid — that is what the API resolves. The name a
-  // cashier recognises comes back with the table, so read it from there rather
-  // than printing a uuid on screen.
-  const tableName = tableQuery.data?.table_id ?? "";
-
-  const unpaid = tableQuery.data?.unpaid_order ?? null;
-  const total = unpaid?.total ?? 0;
-  const orderIds = unpaid?.combined_order_ids ?? (unpaid ? [unpaid.id] : []);
+  const tableName = table.table_id;
+  const total = table.unpaidTotal;
+  const orderIds = table.unpaid_order_ids ?? [];
 
   // The endpoint accepts what was handed over, so it's recorded rather than
   // only used to work out change.
@@ -98,11 +97,8 @@ export default function CashPaymentDialog({ tableId, onClose }: Props) {
           </button>
         </div>
 
-        {tableQuery.isLoading ? (
-          <div className="flex justify-center py-xl">
-            <div className="oshap-spinner" />
-          </div>
-        ) : orderIds.length === 0 ? (
+        {/* No spinner: the table is passed in, so there is nothing to wait for. */}
+        {orderIds.length === 0 ? (
           <p className="text-p2 text-secondary-text py-l text-center">
             This table has no unpaid bill.
           </p>
