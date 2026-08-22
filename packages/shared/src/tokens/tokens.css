@@ -105,6 +105,8 @@
   --color-success-100: #ffffff;
 
   --color-warning-0: #000000;
+  /* -10 and -20 are both #654301 in the Figma source
+     (tokens/primitive_colors.json) — not a transcription slip. */
   --color-warning-10: #654301;
   --color-warning-20: #654301;
   --color-warning-30: #8e5d01;
@@ -453,6 +455,9 @@
   --ds-inverse-on-surface: #f2f2f2;
   --ds-surface-dim: #e6e5e6;
   --ds-surface-bright: #fafafa;
+  /* lowest and low are deliberately both white: the Figma source
+     (tokens/color_roles.json) maps both to {neutral.Neutral100} in light
+     mode. Cards separate from the page via shadow and border, not tone. */
   --ds-surface-container-lowest: #ffffff;
   --ds-surface-container-low: #ffffff;
   --ds-surface-container: #f0eff0;

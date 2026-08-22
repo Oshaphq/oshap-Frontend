@@ -24,8 +24,6 @@ import type {
   CreateBankAccountRequest,
   UpdateBankAccountRequest,
   CreateMenuItemRequest,
-  RefreshTokenRequest,
-  RefreshTokenResponse,
   CreateStaffRequest,
   KitchenUpdateRequest,
   MenuImportResponse,
@@ -95,20 +93,6 @@ export function forgotPassword(
   return request<{ message: string }>("/auth/forgot-password", {
     method: "POST",
     body: payload,
-  });
-}
-
-/**
- * `skipAuthRefresh` so a failed refresh can't trigger another refresh — the
- * client's retry path calls this endpoint directly for the same reason.
- */
-export function adminRefreshToken(
-  payload: RefreshTokenRequest,
-): Promise<RefreshTokenResponse> {
-  return request<RefreshTokenResponse>("/auth/refresh", {
-    method: "POST",
-    body: payload,
-    skipAuthRefresh: true,
   });
 }
 

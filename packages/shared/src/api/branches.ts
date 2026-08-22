@@ -44,20 +44,3 @@ export function adminUpdateBranch(
     },
   );
 }
-
-/**
- * Closing a venue is deactivation, never deletion — the API offers no DELETE
- * and should not. Its orders, takings and audit trail have to outlive it, and
- * a branch that reopens keeps its history.
- */
-export function adminDeactivateBranch(
-  branchId: string,
-): Promise<RestaurantBranch> {
-  return adminUpdateBranch(branchId, { is_active: false });
-}
-
-export function adminReactivateBranch(
-  branchId: string,
-): Promise<RestaurantBranch> {
-  return adminUpdateBranch(branchId, { is_active: true });
-}
