@@ -8,6 +8,7 @@ import CartBar from "../components/CartBar";
 import CartDrawer from "../components/CartDrawer";
 import CategoryTabs from "../components/CategoryTabs";
 import MenuCard from "../components/MenuCard";
+import { QueryError } from "@oshap/shared/ui";
 import CustomerHeader from "../components/CustomerHeader";
 
 export default function MenuPage() {
@@ -63,7 +64,12 @@ function MenuView({ tableId }: { tableId: string }) {
     [menuItems, activeCategory, searchQuery],
   );
 
-  const isLoading = menuQuery.isLoading || tableQuery.isLoading;
+  /**
+   * The menu cannot be requested until the table says which restaurant this
+   * is, so a guest waiting on either call is still waiting for the menu.
+   */
+  const isLoading = tableQuery.isLoading || menuQuery.isLoading;
+  const failed = tableQuery.isError || menuQuery.isError;
 
   return (
     <div className="min-h-screen bg-surface pb-[var(--app-bottom-inset)]">
@@ -138,6 +144,19 @@ function MenuView({ tableId }: { tableId: string }) {
             <div className="oshap-spinner" />
             <p>Loading menu...</p>
           </div>
+        ) : failed ? (
+          /* Without this a failed request fell through to "No items found in
+             this category" — a guest at a table with a working kitchen being
+             told the restaurant serves nothing. An empty menu and a broken
+             request look identical and mean opposite things. */
+          <QueryError
+            error={tableQuery.error ?? menuQuery.error}
+            action="load the menu"
+            onRetry={() => {
+              tableQuery.refetch();
+              menuQuery.refetch();
+            }}
+          />
         ) : (
           <div className="flex flex-col gap-s">
             {filteredItems.map((item) => (
