@@ -168,7 +168,10 @@ test.describe("customer ordering", () => {
   });
 
   test("survives a reload with the cart intact", async ({ page }) => {
-    await openMenu(page, "T7");
+    // `tbl-t7`, not `T7`. A QR code encodes the uuid and `GET /table/{id}`
+    // 422s on a name — this line passed only because the menu used to load
+    // without a restaurant id at all, so a failed table lookup went unnoticed.
+    await openMenu(page, "tbl-t7");
 
     await dishCard(page, "Zobo")
       .getByRole("button", { name: /Choose options/i })
