@@ -212,7 +212,7 @@ export default function InventoryPage() {
 }
 
 function MovementsLedger() {
-  const [reason, setReason] = useState("");
+  const [reason, setReason] = useState<StockReason | "">("");
   const [page, setPage] = useState(1);
   const movements = useAdminStockMovements({
     reason: reason || undefined,
@@ -234,7 +234,7 @@ function MovementsLedger() {
         <Select
           value={reason}
           onChange={(e) => {
-            setReason(e.target.value);
+            setReason(e.target.value as StockReason | "");
             setPage(1);
           }}
           aria-label="Filter by reason"
