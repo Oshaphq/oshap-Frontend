@@ -94,9 +94,18 @@ export default function DashboardPage() {
     }
   };
 
-  const handleVerify = async (tableId: string) => {
+  /**
+   * Takes the table, not an id, because the table has two of them and only one
+   * is right here.
+   *
+   * `table.id` is the uuid a QR code encodes and `GET /table/{id}` takes.
+   * `table.table_id` is the name staff read. Body fields take the **name** —
+   * this sent the uuid, so every verify 404'd and reported "that bill was
+   * already settled", which is what a 404 means everywhere else on this screen.
+   */
+  const handleVerify = async (table: AdminTableStatus) => {
     try {
-      await verifyPayment.mutateAsync({ table_id: tableId });
+      await verifyPayment.mutateAsync({ table_id: table.table_id });
       // Without this the row just leaves the pending list, which is
       // indistinguishable from the click never registering.
       toast.success("Payment verified");
@@ -119,10 +128,11 @@ export default function DashboardPage() {
    * marked `payment_method: CASH`. Closing a table and taking payment are
    * different acts and were sharing a button.
    */
-  const handleAbandon = async (tableId: string) => {
+  const handleAbandon = async (table: AdminTableStatus) => {
     setClearPromptTable(null);
     try {
-      await closeTable.mutateAsync({ table_id: tableId, reason: "abandoned" });
+      // The name again, for the same reason as verify above.
+      await closeTable.mutateAsync({ table_id: table.table_id, reason: "abandoned" });
       toast.success("Table cleared — recorded as unpaid");
     } catch (err) {
       toast.error(errorMessage(err, "clear the table"));
@@ -277,6 +287,9 @@ export default function DashboardPage() {
                 )}
               </div>
 
+              {/* `table.id` — the uuid — is right here: the cash dialog fetches
+                  GET /table/{id}, which is a path param. Verify and close take
+                  the name instead. */}
               {isUnpaid && !isPending && (
                 <SecondaryButton
                   className="w-full"
@@ -313,7 +326,7 @@ export default function DashboardPage() {
                   <div className="flex gap-s">
                     <PrimaryButton
                       className="flex-1"
-                      onClick={() => handleVerify(table.id)}
+                      onClick={() => handleVerify(table)}
                       disabled={isVerifying}
                     >
                       {isVerifying ? "Verifying..." : "Verify Payment"}
@@ -364,7 +377,7 @@ export default function DashboardPage() {
                   </button>
                   <button
                     type="button"
-                    onClick={() => handleAbandon(table.id)}
+                    onClick={() => handleAbandon(table)}
                     className="flex items-center justify-center gap-s py-s rounded-lg font-bold text-caption-md border border-error text-error bg-transparent transition-all hover:bg-error/10 active:scale-[0.98]"
                   >
                     <i className="mgc_exit_line" />

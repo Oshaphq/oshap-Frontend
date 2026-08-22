@@ -1906,3 +1906,67 @@ describe("mock API — branches", () => {
     expect(res.status).toBe(404);
   });
 });
+
+/**
+ * A table has two identifiers and they are not interchangeable: `id` is the
+ * uuid a QR code encodes, `table_id` is the name staff read. Path params take
+ * the uuid; **body fields take the name**.
+ *
+ * The dashboard sent `table.id` — the uuid — in the body of `/admin/verify`,
+ * so every verify 404'd and the screen reported "that bill was already
+ * settled", because a 404 means exactly that everywhere else on it. Verify had
+ * never worked from that button.
+ *
+ * Nothing caught it: the mock agrees with the API, but no test had ever called
+ * verify the way the dashboard calls it.
+ */
+describe("mock API — a table's two identifiers are not interchangeable", () => {
+  async function claimOnT7() {
+    const menu = await mockRequest("/menu", "GET", null, q(), false);
+    const item = (menu.body as Array<{ name: string; price: number }>)[0]!;
+    const order = await mockRequest(
+      "/orders",
+      "POST",
+      {
+        table: "T7",
+        restaurant_id: HOME_RESTAURANT,
+        items: [{ name: item.name, qty: 1, price: item.price }],
+      },
+      q(),
+      false,
+    );
+    const orderId = (order.body as { order_id: string }).order_id;
+    await mockRequest("/payment/confirm", "POST", { order_id: orderId }, q(), false);
+  }
+
+  it("verifies when given the name, which is what a body field takes", async () => {
+    await claimOnT7();
+    const res = await mockRequest("/admin/verify", "POST", { table_id: "T7" }, q(), true);
+    expect(res.status).toBe(200);
+  });
+
+  it("finds nothing when given the uuid — the shape that shipped", async () => {
+    await claimOnT7();
+    const res = await mockRequest("/admin/verify", "POST", { table_id: "tbl-t7" }, q(), true);
+    // 404, which the dashboard renders as "already settled" — a true statement
+    // about the response and a false one about the bill.
+    expect(res.status).toBe(404);
+  });
+
+  it("closes on the name too", async () => {
+    await claimOnT7();
+    const res = await mockRequest(
+      "/admin/close",
+      "POST",
+      { table_id: "T7", reason: "abandoned" },
+      q(),
+      true,
+    );
+    expect(res.status).toBe(200);
+  });
+
+  it("still takes the uuid on the path, where it belongs", async () => {
+    const res = await mockRequest("/table/tbl-t7", "GET", null, q(), false);
+    expect(res.status).toBe(200);
+  });
+});
