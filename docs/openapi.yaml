@@ -266,11 +266,18 @@ components:
         name: { type: string }
         description: { type: string, nullable: true }
         logo_url: { type: string, nullable: true }
+        primary_color:
+          type: string
+          nullable: true
+          description: >
+            Brand colour as a hex string; the customer app derives its palette
+            from it (see `docs/branding.md`).
+        cover_image_url:
+          type: string
+          nullable: true
+          description: Hero photo above the guest's menu.
         address: { type: string, nullable: true }
         operating_hours: { type: string, nullable: true }
-        bank_name: { type: string, nullable: true }
-        account_number: { type: string, nullable: true }
-        account_name: { type: string, nullable: true }
         whatsapp_number: { type: string, nullable: true }
         vat_rate:
           type: integer
@@ -512,7 +519,7 @@ components:
         reason:
           type: string
           description: >
-            PURCHASE, WASTAGE, STOCK_TAKE or CORRECTION from staff. SALE is
+            RESTOCK, WASTAGE, COUNT_CORRECTION or TRANSFER from staff. SALE is
             written by the server when an order depletes a recipe.
         note: { type: string, nullable: true }
       required: [delta, reason]
@@ -702,6 +709,11 @@ components:
           type: array
           items: { $ref: "#/components/schemas/OrderItem" }
         total: { type: integer }
+        subtotal: { type: integer, nullable: true }
+        discount: { type: integer, nullable: true }
+        service_charge: { type: integer, nullable: true }
+        vat: { type: integer, nullable: true }
+        tip: { type: integer, nullable: true }
         status: { $ref: "#/components/schemas/OrderStatus" }
         reference: { type: string }
         payment:
@@ -729,7 +741,14 @@ components:
         pendingTotal: { type: integer }
         hasPending: { type: boolean }
         hasUnpaid: { type: boolean }
-      required: [id, status, unpaidTotal, pendingTotal, hasPending, hasUnpaid]
+        unpaid_order_ids:
+          type: array
+          items: { type: string, format: uuid }
+          description: >
+            The open bills on this table. Settlement is per-order — two guests
+            at one table pay separately — so this is how staff act on one bill
+            rather than the whole table.
+      required: [id, status, unpaidTotal, pendingTotal, hasPending, hasUnpaid, unpaid_order_ids]
 
     AdminHistoryOrder:
       allOf:
@@ -823,6 +842,14 @@ components:
           type: array
           items: { type: string, format: uuid }
         proof_url: { type: string }
+        bank_account_id:
+          type: string
+          format: uuid
+          description: >
+            The account the customer says they paid into. Verifying increments
+            its success count and rejecting increments its failure count, which
+            is how the ranking improves — omitting it means the ranking never
+            learns.
       # at least one of order_id or combined_order_ids required
 
     ClaimPaymentResponse:
@@ -1304,7 +1331,7 @@ components:
     # ---- Platform admin ----
     SubscriptionTier:
       type: string
-      enum: [FREE, STARTER, PRO, ENTERPRISE]
+      enum: [LITE, STANDARD, PRO, ENTERPRISE]
 
     BillingPeriod:
       type: string
@@ -1322,7 +1349,14 @@ components:
             billing_period: { $ref: "#/components/schemas/BillingPeriod" }
             is_active: { type: boolean }
             created_at: { type: string, format: date-time }
-            owner_email: { type: string, format: email }
+            owner_phone:
+              type: string
+              nullable: true
+              description: The owner's identity field — they may have no email at all.
+            owner_email:
+              type: string
+              format: email
+              nullable: true
             table_count: { type: integer }
             monthly_orders:
               type: integer
@@ -1330,7 +1364,7 @@ components:
                 Orders this calendar month. Lite is sold with a 10,000 ceiling,
                 so this is what the platform app measures usage against — see
                 `docs/plans.md`. Nothing enforces it yet.
-          required: [subscription_tier, billing_period, is_active, created_at, owner_email, table_count, monthly_orders]
+          required: [subscription_tier, billing_period, is_active, created_at, owner_phone, table_count, monthly_orders]
 
     PlatformRestaurantsResponse:
       type: object
@@ -1372,7 +1406,7 @@ components:
         bank_name: { type: string }
         account_number: { type: string }
         account_name: { type: string }
-      required: [name, owner_name, owner_email, subscription_tier, table_count]
+      required: [name, owner_name, owner_phone, subscription_tier, table_count]
 
     PlatformUpdateRestaurantRequest:
       type: object
@@ -2303,7 +2337,13 @@ paths:
     get:
       tags: [Admin]
       summary: What needs a person, and what was missed
+      x-status: planned
       description: >
+        **Not yet implemented on the backend** (tracked as backend Phase B3.4).
+        The frontend ships no client for these paths until it exists — the
+        contract is written down now so both sides build to the same shape.
+
+
         The durable record behind the in-app alert. An alert lives for five
         seconds; this is what a waiter opens to ask what happened while they
         were in the kitchen.
@@ -2369,7 +2409,11 @@ paths:
     post:
       tags: [Admin]
       summary: Mark notifications read for the calling staff member
+      x-status: planned
       description: >
+        **Not yet implemented on the backend** (tracked as backend Phase B3.4).
+
+
         Read state is **per person**, not per restaurant: it describes one
         member of staff's attention, not whether the work is done. Two waiters
         can both read the same call.
@@ -2408,7 +2452,11 @@ paths:
     post:
       tags: [Admin]
       summary: Claim a notification — "I'll go"
+      x-status: planned
       description: >
+        **Not yet implemented on the backend** (tracked as backend Phase B3.4).
+
+
         Marks the work as taken, for the whole restaurant, so three waiters do
         not walk to the same table. Sets `resolved_at` and `resolved_by`, and
         publishes `notification_resolved` so a colleague already walking sees it
@@ -2547,9 +2595,14 @@ paths:
             schema:
               type: object
               properties:
-                table_id: { type: string }
+                order_id:
+                  type: string
+                  format: uuid
+                  description: >
+                    Rejection is per-order, not per-table — two guests at one
+                    table settle separately, so a table id identifies nothing.
                 reason: { type: string }
-              required: [table_id]
+              required: [order_id]
       responses:
         "200":
           description: Payment rejected
@@ -2561,7 +2614,7 @@ paths:
                   success: { type: boolean, example: true }
                   rejected: { type: integer }
         "404":
-          description: No pending payments on that table
+          description: No pending payment on that order
           content:
             application/json:
               schema: { $ref: "#/components/schemas/Error" }
@@ -2986,7 +3039,7 @@ paths:
     get:
       tags: [Admin]
       summary: List ingredients
-      security: [{ bearerAuth: [] }]
+      security: [{ adminPin: [] }]
       responses:
         "200":
           description: Ingredients
@@ -3000,9 +3053,9 @@ paths:
       tags: [Admin]
       summary: Create an ingredient
       description: >
-        A non-zero stock_qty is recorded as an opening PURCHASE movement, so the
+        A non-zero stock_qty is recorded as an opening RESTOCK movement, so the
         ledger accounts for every unit rather than starting mid-air.
-      security: [{ bearerAuth: [] }]
+      security: [{ adminPin: [] }]
       requestBody:
         required: true
         content:
@@ -3021,7 +3074,7 @@ paths:
     get:
       tags: [Admin]
       summary: Stock movement ledger
-      security: [{ bearerAuth: [] }]
+      security: [{ adminPin: [] }]
       parameters:
         - { name: reason, in: query, required: false, schema: { type: string } }
         - { name: page, in: query, required: false, schema: { type: integer, default: 1 } }
@@ -3038,7 +3091,7 @@ paths:
     patch:
       tags: [Admin]
       summary: Update an ingredient's details
-      security: [{ bearerAuth: [] }]
+      security: [{ adminPin: [] }]
       parameters:
         - name: ingredient_id
           in: path
@@ -3066,7 +3119,7 @@ paths:
         The only way a level changes. Stock is never assigned a value, so the
         ledger can always explain how a level was reached - a stock take is
         therefore also expressed as a delta.
-      security: [{ bearerAuth: [] }]
+      security: [{ adminPin: [] }]
       parameters:
         - name: ingredient_id
           in: path
@@ -3090,7 +3143,7 @@ paths:
     get:
       tags: [Admin]
       summary: What one serving of a dish consumes
-      security: [{ bearerAuth: [] }]
+      security: [{ adminPin: [] }]
       parameters:
         - name: item_id
           in: path
@@ -3106,7 +3159,7 @@ paths:
     put:
       tags: [Admin]
       summary: Replace a dish's recipe
-      security: [{ bearerAuth: [] }]
+      security: [{ adminPin: [] }]
       parameters:
         - name: item_id
           in: path
@@ -3195,7 +3248,7 @@ paths:
     get:
       tags: [Admin]
       summary: List the restaurant's modifier groups
-      security: [{ bearerAuth: [] }]
+      security: [{ adminPin: [] }]
       responses:
         "200":
           description: Groups with their options
@@ -3209,7 +3262,7 @@ paths:
       tags: [Admin]
       summary: Create a modifier group
       description: Options may be supplied inline; later edits address them individually.
-      security: [{ bearerAuth: [] }]
+      security: [{ adminPin: [] }]
       requestBody:
         required: true
         content:
@@ -3228,7 +3281,7 @@ paths:
     patch:
       tags: [Admin]
       summary: Update a modifier group
-      security: [{ bearerAuth: [] }]
+      security: [{ adminPin: [] }]
       parameters:
         - name: group_id
           in: path
@@ -3251,7 +3304,7 @@ paths:
       tags: [Admin]
       summary: Delete a modifier group
       description: Also detaches it from every menu item that referenced it.
-      security: [{ bearerAuth: [] }]
+      security: [{ adminPin: [] }]
       parameters:
         - name: group_id
           in: path
@@ -3271,7 +3324,7 @@ paths:
     post:
       tags: [Admin]
       summary: Add an option to a group
-      security: [{ bearerAuth: [] }]
+      security: [{ adminPin: [] }]
       parameters:
         - name: group_id
           in: path
@@ -3299,7 +3352,7 @@ paths:
         Setting `available: false` keeps the option visible to guests but
         unselectable — a choice that vanishes reads as an omission rather than
         as something the kitchen has run out of.
-      security: [{ bearerAuth: [] }]
+      security: [{ adminPin: [] }]
       parameters:
         - name: option_id
           in: path
@@ -3321,7 +3374,7 @@ paths:
     delete:
       tags: [Admin]
       summary: Delete a modifier option
-      security: [{ bearerAuth: [] }]
+      security: [{ adminPin: [] }]
       parameters:
         - name: option_id
           in: path
@@ -3344,7 +3397,7 @@ paths:
       description: >
         Replaces the whole attachment set rather than applying a delta, so the
         caller sends every group id it wants to keep.
-      security: [{ bearerAuth: [] }]
+      security: [{ adminPin: [] }]
       parameters:
         - name: item_id
           in: path
