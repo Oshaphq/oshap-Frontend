@@ -1975,3 +1975,139 @@ describe("mock API — a table's two identifiers are not interchangeable", () =>
     expect(res.status).toBe(200);
   });
 });
+
+describe("mock API — notifications", () => {
+  type Row = {
+    id: string;
+    type: string;
+    table_name: string | null;
+    read: boolean;
+    resolved_at: string | null;
+    resolved_by_name: string | null;
+  };
+  type List = {
+    notifications: Row[];
+    total: number;
+    unread_total: number;
+    unresolved_total: number;
+  };
+
+  const list = async (qs = "") =>
+    (await mockRequest("/admin/notifications", "GET", null, q(qs), true))
+      .body as List;
+
+  it("a waiter call leaves a row behind, not just a toast", async () => {
+    // The whole reason this exists: the alert used to be a five-second toast in
+    // component state, so a call nobody happened to be looking at vanished.
+    await mockRequest("/table/tbl-t1/call-waiter", "POST", {}, q(), false);
+
+    const rows = (await list()).notifications;
+    const call = rows.find((n) => n.type === "waiter_called");
+    expect(call).toBeDefined();
+    expect(call!.resolved_at).toBeNull();
+  });
+
+  it("resolves the table's name at write time", async () => {
+    // The stream carries only a uuid. A row read back three hours later must
+    // not depend on what the browser had cached at the time.
+    await mockRequest("/table/tbl-t2/call-waiter", "POST", {}, q(), false);
+    const call = (await list()).notifications.find(
+      (n) => n.type === "waiter_called" && n.table_name === "T2",
+    );
+    expect(call).toBeDefined();
+  });
+
+  it("counts totals over the whole scope, not the page", async () => {
+    await mockRequest("/table/tbl-t3/call-waiter", "POST", {}, q(), false);
+    const page = await list("page=1&per_page=1");
+    expect(page.notifications).toHaveLength(1);
+    // A badge that changed when you turned a page would stop meaning
+    // "work outstanding".
+    expect(page.unresolved_total).toBeGreaterThan(1);
+  });
+
+  it("claiming a call records who went", async () => {
+    await mockRequest("/table/tbl-t4/call-waiter", "POST", {}, q(), false);
+    const call = (await list("unresolved_only=true")).notifications.find(
+      (n) => n.type === "waiter_called",
+    )!;
+
+    const res = await mockRequest(
+      `/admin/notifications/${call.id}/resolve`,
+      "POST",
+      null,
+      q(),
+      true,
+    );
+    expect(res.status).toBe(200);
+    expect((res.body as Row).resolved_at).not.toBeNull();
+    expect((res.body as Row).resolved_by_name).toBeTruthy();
+  });
+
+  it("a second waiter tapping at once sees who got there first, not an error", async () => {
+    await mockRequest("/table/tbl-t5/call-waiter", "POST", {}, q(), false);
+    const call = (await list("unresolved_only=true")).notifications.find(
+      (n) => n.type === "waiter_called",
+    )!;
+    const path = `/admin/notifications/${call.id}/resolve`;
+
+    const first = await mockRequest(path, "POST", null, q(), true);
+    const second = await mockRequest(path, "POST", null, q(), true);
+
+    expect(second.status).toBe(200);
+    expect((second.body as Row).resolved_at).toBe((first.body as Row).resolved_at);
+  });
+
+  it("refuses to let a person hand-close a derived notification", async () => {
+    // `new_order` closes itself when the order leaves CREATED. Closing it by
+    // hand would put this list out of step with the kitchen board.
+    await mockRequest(
+      "/orders",
+      "POST",
+      {
+        table: "T1",
+        restaurant_id: HOME_RESTAURANT,
+        items: [{ name: "Jollof Rice", qty: 1, price: 350000 }],
+      },
+      q(),
+      false,
+    );
+    const order = (await list()).notifications.find((n) => n.type === "new_order")!;
+
+    const res = await mockRequest(
+      `/admin/notifications/${order.id}/resolve`,
+      "POST",
+      null,
+      q(),
+      true,
+    );
+    // 409, not 403 — the caller is allowed here, this row is just not that kind.
+    expect(res.status).toBe(409);
+  });
+
+  it("marking read is idempotent and does not touch the unresolved count", async () => {
+    const before = await list();
+    const ids = before.notifications.slice(0, 2).map((n) => n.id);
+
+    await mockRequest("/admin/notifications/read", "POST", { ids }, q(), true);
+    const once = await list();
+    await mockRequest("/admin/notifications/read", "POST", { ids }, q(), true);
+    const twice = await list();
+
+    expect(twice.unread_total).toBe(once.unread_total);
+    // Reading a call you cannot act on must not clear the badge for the person
+    // who can.
+    expect(twice.unresolved_total).toBe(once.unresolved_total);
+  });
+
+  it("marks everything read with { all: true }", async () => {
+    const res = await mockRequest(
+      "/admin/notifications/read",
+      "POST",
+      { all: true },
+      q(),
+      true,
+    );
+    expect((res.body as { unread_total: number }).unread_total).toBe(0);
+  });
+});

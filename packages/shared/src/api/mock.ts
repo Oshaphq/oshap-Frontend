@@ -33,6 +33,13 @@ import type {
   UpdateOrderItemRequest,
   AuditLogEntry,
   AuditLogResponse,
+  // Aliased: `Notification` is a DOM global, and the unaliased import
+  // resolves to that one without erroring.
+  Notification as StoredNotification,
+  NotificationType,
+  NotificationsResponse,
+  NotificationsMarkReadRequest,
+  NotificationsMarkReadResponse,
   ReceiptResponse,
   BankAccount,
   ClaimPaymentRequest,
@@ -2288,6 +2295,138 @@ function audit(
   });
 }
 
+// ---------------------------------------------------------------------------
+// Notifications
+// ---------------------------------------------------------------------------
+
+/**
+ * Written by `recordNotification` below, from the same place the mock
+ * publishes an SSE event — which is what the real backend does inside one
+ * transaction. Anything else lets the list and the toast disagree.
+ */
+const _notifications: StoredNotification[] = [];
+
+/** Which stream events leave a row behind, and which resolve one. */
+const NOTIFIED: Record<string, NotificationType> = {
+  waiter_called: "waiter_called",
+  pos_requested: "pos_requested",
+  new_order: "new_order",
+  order_ready: "order_ready",
+  payment_claimed: "payment_claimed",
+};
+
+/**
+ * The four derived types close themselves when the thing they describe moves.
+ * A person can only claim `waiter_called` and `pos_requested`, which have no
+ * entity to watch.
+ */
+const RESOLVED_BY: Record<string, NotificationType[]> = {
+  order_preparing: ["new_order"],
+  payment_verified: ["payment_claimed"],
+  payment_rejected: ["payment_claimed"],
+  table_closed: ["order_ready"],
+};
+
+function recordNotification(eventType: string, path: string, body: unknown) {
+  const tableUuid = /^\/table\/([^/]+)\//.exec(path)?.[1] ?? null;
+  const table =
+    _tables.find((t) => t.uuid === tableUuid) ??
+    _tables.find((t) => t.name === (body as { table?: string } | null)?.table);
+
+  for (const type of RESOLVED_BY[eventType] ?? []) {
+    for (const n of _notifications) {
+      if (n.type === type && !n.resolved_at && (!table || n.table_id === table.uuid)) {
+        n.resolved_at = new Date().toISOString();
+        n.resolved_by_name = "System";
+      }
+    }
+  }
+
+  const type = NOTIFIED[eventType];
+  if (!type) return;
+
+  _notifications.unshift({
+    id: uid(),
+    type,
+    branch_id: null,
+    branch_name: null,
+    table_id: table?.uuid ?? null,
+    // Resolved at write time. The client must never have to look this up —
+    // a row read three hours later cannot depend on a warm cache.
+    table_name: table?.name ?? null,
+    order_id: null,
+    order_reference: null,
+    amount: null,
+    menu_item_id: null,
+    menu_item_name: null,
+    created_at: new Date().toISOString(),
+    read: false,
+    resolved_at: null,
+    resolved_by_name: null,
+  });
+}
+
+/** Claimable by a person. The rest resolve themselves. */
+const CLAIMABLE: NotificationType[] = ["waiter_called", "pos_requested"];
+
+route("GET", /^\/admin\/notifications$/, ({ query }) => {
+  const page = Number(query.get("page")) || 1;
+  const perPage = Number(query.get("per_page")) || 20;
+  const type = query.get("type");
+
+  let rows = _notifications;
+  if (type) rows = rows.filter((n) => n.type === type);
+  if (query.get("unread_only") === "true") rows = rows.filter((n) => !n.read);
+  if (query.get("unresolved_only") === "true") {
+    rows = rows.filter((n) => !n.resolved_at);
+  }
+
+  const start = (page - 1) * perPage;
+  return json(200, {
+    notifications: rows.slice(start, start + perPage),
+    total: rows.length,
+    // Scope totals, not page totals — a badge that moved when you turned a
+    // page would stop meaning "work outstanding".
+    unread_total: _notifications.filter((n) => !n.read).length,
+    unresolved_total: _notifications.filter((n) => !n.resolved_at).length,
+    page,
+    per_page: perPage,
+  } satisfies NotificationsResponse);
+});
+
+route("POST", /^\/admin\/notifications\/read$/, ({ body }) => {
+  const b = (body ?? {}) as NotificationsMarkReadRequest;
+  for (const n of _notifications) {
+    if (b.all || b.ids?.includes(n.id)) n.read = true;
+  }
+  return json(200, {
+    unread_total: _notifications.filter((n) => !n.read).length,
+  } satisfies NotificationsMarkReadResponse);
+});
+
+route("POST", /^\/admin\/notifications\/[^/]+\/resolve$/, ({ path }) => {
+  const id = path.split("/admin/notifications/")[1]!.split("/")[0]!;
+  const row = _notifications.find((n) => n.id === id);
+  if (!row) return json(404, { error: "Notification not found" });
+
+  if (!CLAIMABLE.includes(row.type)) {
+    // 409, not 403 — the caller is allowed here, this row just is not the kind
+    // a person closes.
+    return json(409, {
+      error: "This notification resolves itself when the order or payment moves",
+    });
+  }
+
+  // Already claimed answers 200 with who got there first. Two waiters tapping
+  // at once is the normal case, not an error.
+  if (!row.resolved_at) {
+    row.resolved_at = new Date().toISOString();
+    row.resolved_by_name =
+      [..._staff.values()].find((st) => st.role === "OWNER")?.name ?? "You";
+  }
+  return json(200, row);
+});
+
 route("GET", /^\/admin\/audit-logs$/, ({ query }) => {
   const page = Number(query.get("page")) || 1;
   const perPage = Number(query.get("per_page")) || 25;
@@ -2973,7 +3112,11 @@ export async function mockRequest(
       // Persist after mutations only; GET handlers don't change state.
       if (method !== "GET") {
         syncToStorage();
-        dispatchMockEvent(sseEventFor(path, body));
+        const eventType = sseEventFor(path, body);
+        // Row first, then the event — the real backend writes both in one
+        // transaction so the list and the toast can never disagree.
+        recordNotification(eventType, path, body);
+        dispatchMockEvent(eventType);
       }
       return result;
     }

@@ -10,6 +10,7 @@ import {
 import { PrimaryButton, Select, ThemeToggle } from "@oshap/shared/ui";
 import { initFCM } from "../utils/fcm";
 import AlertCenter from "./AlertCenter";
+import NotificationBell from "./NotificationBell";
 import { useAuth } from "../context/AuthContext";
 
 export default function AuthGate() {
@@ -287,6 +288,7 @@ export default function AuthGate() {
                 ))}
               </Select>
             )}
+            <NotificationBell />
             <ThemeToggle />
             <div className="hidden md:flex flex-col items-end mr-s">
               <span className="text-label-l4 font-semibold text-primary-text">{user.name}</span>

@@ -12,3 +12,4 @@ export * as devicesApi from "./devices";
 export * as modifiersApi from "./modifiers";
 export * as ingredientsApi from "./ingredients";
 export * as platformApi from "./platform";
+export * as notificationsApi from "./notifications";
