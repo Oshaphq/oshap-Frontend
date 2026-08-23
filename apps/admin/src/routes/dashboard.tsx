@@ -45,6 +45,10 @@ export default function DashboardPage() {
   // Two-step, because rejecting is destructive from the guest's side: their
   // bill returns to unpaid and the account they used is marked down.
   const [rejectingTableId, setRejectingTableId] = useState<string | null>(null);
+  // Verifying says money arrived that may not have. It was a single tap on the
+  // largest button on the card, next to Reject — one slip settles a bill
+  // nobody paid, and the board then shows the table as square.
+  const [verifyingTableId, setVerifyingTableId] = useState<string | null>(null);
   const [cashTable, setCashTable] = useState<AdminTableStatus | null>(null);
 
   if (tablesQuery.isLoading) {
@@ -106,10 +110,15 @@ export default function DashboardPage() {
   const handleVerify = async (table: AdminTableStatus) => {
     try {
       await verifyPayment.mutateAsync({ table_id: table.table_id });
+      setVerifyingTableId(null);
       // Without this the row just leaves the pending list, which is
       // indistinguishable from the click never registering.
       toast.success("Payment verified");
     } catch (err) {
+      // Close the prompt either way. Leaving it open under a failure toast
+      // invites a second confirm, which is how one refusal becomes two
+      // attempts at the same bill.
+      setVerifyingTableId(null);
       toast.error(settledElsewhere(err) ? ALREADY_SETTLED : errorMessage(err, "verify the payment"));
     }
   };
@@ -322,14 +331,43 @@ export default function DashboardPage() {
                       </PrimaryButton>
                     </div>
                   </div>
+                ) : verifyingTableId === table.id ? (
+                  /* Confirming the *amount*, not the action. "Are you sure?"
+                     invites a reflex yes; a figure asks the one question that
+                     matters — is that what actually arrived in the account. */
+                  <div className="flex flex-col gap-s">
+                    <p className="text-caption-md text-secondary-text">
+                      Confirm{" "}
+                      <span className="font-bold text-primary-text">
+                        {formatCurrency(table.pendingTotal)}
+                      </span>{" "}
+                      has landed in the account. This settles the bill and
+                      cannot be undone from here.
+                    </p>
+                    <div className="flex gap-s">
+                      <SecondaryButton
+                        className="flex-1"
+                        onClick={() => setVerifyingTableId(null)}
+                      >
+                        Cancel
+                      </SecondaryButton>
+                      <PrimaryButton
+                        className="flex-1"
+                        onClick={() => handleVerify(table)}
+                        disabled={isVerifying}
+                      >
+                        {isVerifying ? "Verifying…" : "Yes, it's in"}
+                      </PrimaryButton>
+                    </div>
+                  </div>
                 ) : (
                   <div className="flex gap-s">
                     <PrimaryButton
                       className="flex-1"
-                      onClick={() => handleVerify(table)}
+                      onClick={() => setVerifyingTableId(table.id)}
                       disabled={isVerifying}
                     >
-                      {isVerifying ? "Verifying..." : "Verify Payment"}
+                      Verify Payment
                     </PrimaryButton>
                     <SecondaryButton
                       onClick={() => setRejectingTableId(table.id)}
