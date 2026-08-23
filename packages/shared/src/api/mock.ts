@@ -1192,6 +1192,15 @@ route("GET", /^\/session\/orders$/, ({ query }) => {
 
 // -------------------- Customer: Claim Payment --------------------
 
+/**
+ * Which orders were claimed as one payment.
+ *
+ * The stored `Payment` is per order and has nowhere to record that three of
+ * them settle together, so the bundle is kept alongside — the board needs it to
+ * show "put theirs on mine" as a single bill.
+ */
+const _combined = new Map<string, string[]>();
+
 route("POST", /^\/payment\/confirm$/, ({ body }) => {
   const b = body as ClaimPaymentRequest;
   const ids = b.combined_order_ids?.length ? b.combined_order_ids : b.order_id ? [b.order_id] : [];
@@ -1199,6 +1208,7 @@ route("POST", /^\/payment\/confirm$/, ({ body }) => {
   if (!ids.length) return json(400, { error: "Missing order_id or combined_order_ids" });
 
   for (const oid of ids) {
+    if (ids.length > 1) _combined.set(oid, ids);
     const order = _orders.get(oid);
     if (!order) continue;
 
@@ -1523,6 +1533,19 @@ route("GET", /^\/admin\/tables$/, ({ query }) => {
       // Every open bill on the table, claimed or not — settlement acts on one
       // of these, never on the table as a whole.
       unpaid_order_ids: [...unpaid, ...pending].map((o) => o.id),
+      // The same orders with who they belong to attached, so the board can
+      // show two guests on one table as two bills rather than one total.
+      live_orders: [...unpaid, ...pending].map((o) => ({
+        order_id: o.id,
+        session_id: o.session_id ?? null,
+        device_token: o.device_token ?? null,
+        customer_name: o.customer_name ?? null,
+        total: o.total,
+        status: o.status,
+        payment_state: o.status === "PAYMENT_PENDING" ? "CLAIMED" : "NOT_PAID",
+        combined_order_ids: _combined.get(o.id) ?? null,
+        created_at: o.created_at,
+      })),
     };
   });
 
@@ -2735,8 +2758,17 @@ route("POST", /^\/admin\/reject$/, ({ body }) => {
 
 route("POST", /^\/admin\/verify$/, ({ body }) => {
   const b = body as AdminVerifyRequest;
+  /**
+   * One bill when `order_id` says so, otherwise every claim on the table.
+   *
+   * The table-wide form is what the board used to send, and on a shared table
+   * it settled a claim belonging to somebody else — one guest's transfer
+   * closing another guest's bill. The board names the order now.
+   */
   const pendingOrders = [..._orders.values()].filter(
-    (o) => o.table_id === b.table_id && o.status === "PAYMENT_PENDING",
+    (o) =>
+      o.status === "PAYMENT_PENDING" &&
+      (b.order_id ? o.id === b.order_id : o.table_id === b.table_id),
   );
 
   if (pendingOrders.length === 0) {
@@ -2752,17 +2784,20 @@ route("POST", /^\/admin\/verify$/, ({ body }) => {
     audit("payment.verify", o, { amount: o.total });
   }
 
-  // Auto-close if no unpaid remain
+  // Auto-close only when nothing is left owing anywhere on that table —
+  // including the other guest's bill, which is the case this used to get
+  // wrong by closing the table out from under them.
+  const tableName = pendingOrders[0]!.table_id;
   const hasUnpaid = [..._orders.values()].some(
     (o) =>
-      o.table_id === b.table_id &&
-      ["CREATED", "PREPARING", "READY"].includes(o.status),
+      o.table_id === tableName &&
+      ["CREATED", "PREPARING", "READY", "PAYMENT_PENDING"].includes(o.status),
   );
 
   let autoClosed = false;
   if (!hasUnpaid) {
     for (const [sid, s] of _sessions) {
-      if (s.table_id === b.table_id) _sessions.delete(sid);
+      if (s.table_id === tableName) _sessions.delete(sid);
     }
     autoClosed = true;
   }
