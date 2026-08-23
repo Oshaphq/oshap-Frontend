@@ -1,4 +1,4 @@
-import { describe, it, expect, afterEach, vi } from "vitest";
+import { describe, it, expect, afterEach, beforeEach, vi } from "vitest";
 import {
   request,
   ApiError,
@@ -475,5 +475,72 @@ describe("client — a production build never falls back to the mock", () => {
 
     const items = await request<unknown[]>("/menu");
     expect(Array.isArray(items)).toBe(true);
+  });
+});
+
+/**
+ * The admin froze after fifteen minutes: the browser sat on a pending request
+ * and only a hard reload cleared it.
+ *
+ * Nothing had a timeout. The worst case was the refresh — every 401 waits on a
+ * single in-flight refresh, so one stalled refresh froze every admin query at
+ * once. A request that fails is recoverable; one that never settles is not.
+ */
+describe("a request that never answers", () => {
+  beforeEach(() => {
+    vi.useFakeTimers();
+    setAuthTokens({ access_token: "tok", refresh_token: "ref", expires_in: 900 });
+  });
+  afterEach(() => {
+    vi.useRealTimers();
+    vi.unstubAllGlobals();
+    setAuthTokens(null);
+  });
+
+  it("gives up rather than hanging, and says why", async () => {
+    vi.stubEnv("VITE_API_BASE_URL", "https://api.test");
+    // A fetch that resolves only when its signal aborts — a stalled connection.
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(
+        (_url: string, init?: RequestInit) =>
+          new Promise((_resolve, reject) => {
+            init?.signal?.addEventListener("abort", () =>
+              reject(new DOMException("Aborted", "AbortError")),
+            );
+          }),
+      ),
+    );
+
+    // Assert before advancing: the rejection lands during the advance, and a
+    // handler attached after it is a leaked rejection rather than a failure.
+    const settled = expect(
+      request("/admin/menu", { admin: true }),
+    ).rejects.toThrow(/took too long/i);
+    await vi.advanceTimersByTimeAsync(31_000);
+    await settled;
+  });
+
+  it("still lets a caller abort on purpose without being relabelled", async () => {
+    vi.stubEnv("VITE_API_BASE_URL", "https://api.test");
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(
+        (_url: string, init?: RequestInit) =>
+          new Promise((_resolve, reject) => {
+            init?.signal?.addEventListener("abort", () =>
+              reject(new DOMException("Aborted", "AbortError")),
+            );
+          }),
+      ),
+    );
+
+    const controller = new AbortController();
+    // A caller's own abort is theirs, not "the server took too long".
+    const settled = expect(
+      request("/admin/menu", { admin: true, signal: controller.signal }),
+    ).rejects.toThrow(/abort/i);
+    controller.abort();
+    await settled;
   });
 });

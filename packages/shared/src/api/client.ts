@@ -52,6 +52,19 @@ export const ADMIN_UNAUTHORIZED_EVENT = "oshap:admin-unauthorized";
 // spares the user from re-entering a password every 15 minutes.
 // ---------------------------------------------------------------------------
 
+/**
+ * A ceiling on "forever". Generous, because the API's own first byte runs
+ * 1.4-2.3s and an import is slower — this is not a performance budget.
+ */
+const REQUEST_TIMEOUT_MS = 30_000;
+
+/** Tighter: every 401 in the app queues behind a single in-flight refresh. */
+const REFRESH_TIMEOUT_MS = 10_000;
+
+/** Refresh this long before expiry rather than waiting for a 401. */
+const TOKEN_REFRESH_MARGIN_MS = 60_000;
+
+const ACCESS_TOKEN_EXPIRY_KEY = "oshap-access-token-expires-at";
 const ACCESS_TOKEN_STORAGE_KEY = "oshap-access-token";
 const REFRESH_TOKEN_STORAGE_KEY = "oshap-refresh-token";
 const RESTAURANT_STORAGE_KEY = "oshap-admin-restaurant";
@@ -87,12 +100,44 @@ function readRestaurantFromStorage(): Restaurant | null {
 export function setAuthTokens(tokens: {
   access_token: string;
   refresh_token: string;
+  expires_in?: number;
 } | null): void {
   accessToken = tokens?.access_token ?? null;
   refreshToken = tokens?.refresh_token ?? null;
   writeSession(ACCESS_TOKEN_STORAGE_KEY, accessToken);
   writeSession(REFRESH_TOKEN_STORAGE_KEY, refreshToken);
+  setAccessTokenExpiry(tokens?.expires_in);
   if (!tokens) setAdminRestaurant(null);
+}
+
+/**
+ * When the access token stops working, as an absolute time.
+ *
+ * `expires_in` has come back on every login since JWT auth landed and was
+ * ignored, so the only way we learned a token had expired was a 401 — after a
+ * click, in front of a waiter, mid-service. Recording it lets the refresh
+ * happen before anything breaks.
+ */
+function setAccessTokenExpiry(expiresIn: number | undefined): void {
+  if (!expiresIn) {
+    writeSession(ACCESS_TOKEN_EXPIRY_KEY, null);
+    return;
+  }
+  writeSession(ACCESS_TOKEN_EXPIRY_KEY, String(Date.now() + expiresIn * 1000));
+}
+
+/**
+ * True when the token is close enough to expiry that using it is a coin flip.
+ *
+ * The margin covers the round trip plus a slow connection: a token with eight
+ * seconds left will not survive a request that takes two.
+ */
+function accessTokenNearlyExpired(): boolean {
+  const raw = readSession(ACCESS_TOKEN_EXPIRY_KEY);
+  if (!raw) return false;
+  const expiresAt = Number(raw);
+  if (!Number.isFinite(expiresAt)) return false;
+  return Date.now() > expiresAt - TOKEN_REFRESH_MARGIN_MS;
 }
 
 /** Replaces just the access token, after a refresh. */
@@ -548,21 +593,43 @@ export async function request<T>(
     const url = buildUrl(path, query);
 
     let response: Response;
+    /**
+     * Nothing here had a timeout, so a stalled connection hung forever. The
+     * worst case was the token refresh: every 401 waits on the same in-flight
+     * refresh, so one stalled refresh froze every admin query at once, left
+     * the browser showing a pending request, and cleared only on a hard
+     * reload.
+     *
+     * Generous rather than tight — the API's own first byte runs 1.4-2.3s, and
+     * a menu import is slower still. This is a floor under "forever", not a
+     * performance budget.
+     */
+    const timeout = new AbortController();
+    const timer = setTimeout(() => timeout.abort(), REQUEST_TIMEOUT_MS);
     try {
       response = await fetch(url, {
         method,
         headers,
         body,
-        signal: options.signal,
+        signal: options.signal ?? timeout.signal,
       });
     } catch (cause) {
+      clearTimeout(timer);
       // An aborted request is a caller's own doing, not a failure to reach.
-      if (cause instanceof DOMException && cause.name === "AbortError") throw cause;
+      if (cause instanceof DOMException && cause.name === "AbortError") {
+        if (options.signal?.aborted) throw cause;
+        throw new NetworkError(
+          "The server took too long to answer. It may be under load — try again.",
+          cause,
+        );
+      }
       throw new NetworkError(
         "Could not reach the server. This is usually a connection problem, or a CORS policy that does not allow this origin.",
         cause,
       );
     }
+
+    clearTimeout(timer);
 
     const contentType = response.headers.get("content-type") ?? "";
     const isJson = contentType.includes("application/json");
@@ -572,6 +639,20 @@ export async function request<T>(
 
     return { response, payload, isJson };
   };
+
+  /**
+   * Refresh before spending the token, not after a 401.
+   *
+   * Reacting to the 401 works, but the cost lands on a person: four queries
+   * fail at once, each waits on the refresh, and the screen sits there while a
+   * waiter is holding a card machine. Doing it a minute early makes the whole
+   * thing invisible.
+   */
+  if (options.admin && !options.skipAuthRefresh && accessTokenNearlyExpired()) {
+    // `send()` reads the token when it builds headers, so the retry below and
+    // this both pick up whatever the refresh just stored.
+    await refreshAccessToken();
+  }
 
   let { response, payload, isJson } = await send();
 
@@ -623,11 +704,17 @@ async function refreshAccessToken(): Promise<string | null> {
   if (!token) return null;
 
   refreshInFlight = (async () => {
+    // Shorter than an ordinary request, because every 401 in the app is
+    // queued behind this one. A refresh that hangs does not fail a request —
+    // it freezes all of them.
+    const timeout = new AbortController();
+    const timer = setTimeout(() => timeout.abort(), REFRESH_TIMEOUT_MS);
     try {
       const res = await fetch(buildUrl("/auth/refresh", undefined), {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ refresh_token: token }),
+        signal: timeout.signal,
       });
       if (!res.ok) return null;
 
@@ -639,12 +726,19 @@ async function refreshAccessToken(): Promise<string | null> {
 
       if (typeof next !== "string" || !next) return null;
       setAccessToken(next);
+      const ttl =
+        typeof parsed === "object" && parsed !== null
+          ? (parsed as { expires_in?: unknown }).expires_in
+          : undefined;
+      setAccessTokenExpiry(typeof ttl === "number" ? ttl : undefined);
       return next;
     } catch {
-      // Network failure — treated the same as a rejected refresh. The caller
-      // surfaces the original 401 and the user signs in again.
+      // Network failure or timeout — treated the same as a rejected refresh.
+      // The caller surfaces the original 401 and the user signs in again,
+      // which is a bad outcome and still far better than hanging.
       return null;
     } finally {
+      clearTimeout(timer);
       refreshInFlight = null;
     }
   })();
