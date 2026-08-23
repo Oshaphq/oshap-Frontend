@@ -34,6 +34,25 @@ describe("every type has copy", () => {
     }
   });
 
+  it("says the table is missing rather than pretending it is fine", () => {
+    // The old copy read "A table needs attention", which is calm, grammatical
+    // and useless — it tells a waiter to check every table in the room, and it
+    // looks enough like normal copy that nobody reports the missing data.
+    for (const type of ALL_TYPES) {
+      if (type === "low_stock") continue; // Not about a table at all.
+      expect(NOTIFICATION_META[type].body({ table_name: null })).toContain(
+        "table not recorded",
+      );
+    }
+  });
+
+  it("still leads with the amount on a claimed payment with no table", () => {
+    // The cashier can at least match it against the bank app.
+    expect(
+      NOTIFICATION_META.payment_claimed.body({ table_name: null, amount: 1_240_000 }),
+    ).toContain("12,400");
+  });
+
   it("uses the table name when there is one", () => {
     expect(NOTIFICATION_META.waiter_called.body({ table_name: "T4" })).toContain("T4");
   });
