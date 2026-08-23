@@ -51,6 +51,10 @@ export const queryKeys = {
     stockMovements: (page: number, perPage: number, reason?: string) =>
       ["admin", "stock-movements", page, perPage, reason] as const,
     recipe: (menuItemId: string) => ["admin", "recipe", menuItemId] as const,
+    notifications: (query?: Record<string, unknown>) =>
+      ["admin", "notifications", query ?? {}] as const,
+    /** The badge. Kept separate so paging the list never disturbs it. */
+    notificationBadge: () => ["admin", "notifications", "badge"] as const,
   },
   platform: {
     all: ["platform"] as const,

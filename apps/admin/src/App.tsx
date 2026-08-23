@@ -11,6 +11,7 @@ import InventoryPage from "./routes/inventory";
 import SettingsPage from "./routes/settings";
 import AnalyticsPage from "./routes/analytics";
 import ZReportPage from "./routes/z-report";
+import NotificationsPage from "./routes/notifications";
 import OrderDetailPage from "./routes/order-detail";
 import AuditPage from "./routes/audit";
 import GroupAnalyticsPage from "./routes/group-analytics";
@@ -47,6 +48,11 @@ export default function App() {
           {/* Default routes based on role */}
           <Route element={<RoleGate allowedRoles={["OWNER", "MANAGER", "WAITER", "CASHIER", "KITCHEN", "BARTENDER"]} />}>
             <Route index element={<IndexRoute />} />
+            {/* Every role, deliberately. The endpoint filters by role
+                server-side, so a bartender's list is already a bartender's
+                list — hiding the page too would just mean some staff have no
+                way to see what they were paged for. */}
+            <Route path="/notifications" element={<NotificationsPage />} />
           </Route>
 
           {/* Kitchen / Bar orders */}

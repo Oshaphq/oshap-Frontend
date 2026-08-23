@@ -9,3 +9,4 @@ export * from "./useInventory";
 export * from "./usePlatform";
 export * from "./useModifiers";
 export * from "./useIngredients";
+export * from "./useNotifications";

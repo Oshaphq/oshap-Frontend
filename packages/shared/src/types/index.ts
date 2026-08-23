@@ -1252,3 +1252,86 @@ export interface PlatformUpdateRestaurantRequest {
   billing_period?: BillingPeriod;
   is_active?: boolean;
 }
+
+// ---------- Notifications ----------
+
+/**
+ * The six things staff are told about, per `docs/notifications.md`.
+ *
+ * Same vocabulary as the realtime event stream, deliberately: a stored row and
+ * the toast that fired when it happened are the same fact, and the client
+ * composes the wording for both from one place.
+ */
+export type NotificationType =
+  | "waiter_called"
+  | "pos_requested"
+  | "new_order"
+  | "order_ready"
+  | "payment_claimed"
+  | "low_stock";
+
+/**
+ * A stored notification.
+ *
+ * The server sends facts and the client writes the sentence — there is no
+ * `title` or `body` here on purpose. The alternative drifts: the same event
+ * would read one way as a toast and another way as a row, and nobody would
+ * notice until a waiter did.
+ *
+ * `table_name` is resolved server-side at write time. The SSE payload carries
+ * only a uuid, so the live toast has to look the name up in a cache and
+ * degrades to "a table" when that cache is cold. A row read back three hours
+ * later has no such excuse.
+ *
+ * `read` is per staff member; `resolved_at` is per restaurant. Two waiters can
+ * both read a call — only one needs to walk over.
+ */
+export interface Notification {
+  id: string;
+  type: NotificationType;
+  branch_id?: string | null;
+  branch_name?: string | null;
+  table_id?: string | null;
+  table_name?: string | null;
+  order_id?: string | null;
+  order_reference?: string | null;
+  /** Kobo, like every other amount. */
+  amount?: number | null;
+  menu_item_id?: string | null;
+  menu_item_name?: string | null;
+  created_at: string;
+  read: boolean;
+  resolved_at?: string | null;
+  resolved_by_name?: string | null;
+}
+
+export interface NotificationQuery {
+  page?: number;
+  per_page?: number;
+  unread_only?: boolean;
+  unresolved_only?: boolean;
+  type?: NotificationType;
+}
+
+/**
+ * `unread_total` and `unresolved_total` count the caller's whole scope, not the
+ * page — a badge that changed when you turned a page would be lying.
+ */
+export interface NotificationsResponse {
+  notifications: Notification[];
+  total: number;
+  unread_total: number;
+  unresolved_total: number;
+  page: number;
+  per_page: number;
+}
+
+/** Mark specific rows read, or the lot. */
+export interface NotificationsMarkReadRequest {
+  ids?: string[];
+  all?: boolean;
+}
+
+export interface NotificationsMarkReadResponse {
+  unread_total: number;
+}
