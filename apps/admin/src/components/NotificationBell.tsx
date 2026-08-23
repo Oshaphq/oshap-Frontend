@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Link } from "react-router";
 import {
+  useAdminTables,
   useMarkNotificationsRead,
   useNotificationBadge,
   useAdminNotifications,
@@ -146,6 +147,7 @@ export function NotificationRow({
   const meta = NOTIFICATION_META[n.type];
   const resolve = useResolveNotification();
   const ref = useMarkReadWhenSeen(n);
+  const tableName = useResolvedTableName(n);
 
   if (!meta) return null;
 
@@ -165,7 +167,7 @@ export function NotificationRow({
       />
       <div className="flex flex-col gap-0.5 min-w-0 flex-1">
         <span className="text-label-l5 font-semibold text-primary-text">
-          {meta.body(n)}
+          {meta.body({ ...n, table_name: tableName })}
         </span>
         <span className="text-caption-xs text-secondary-text">
           {timeAgo(n.created_at)}
@@ -205,6 +207,26 @@ export function NotificationRow({
       )}
     </div>
   );
+}
+
+/**
+ * The table's name, falling back to the board when the row does not carry one.
+ *
+ * `table_name` is meant to be resolved server-side when the row is written, and
+ * today it comes back null on every notification — so every row read "A table
+ * needs attention", which tells a waiter to check the whole room.
+ *
+ * This is a stopgap, and a worse one than the server doing it: the tables list
+ * only covers the active branch and only holds tables that still exist, so a
+ * row from another venue or from a since-deleted table still cannot be named.
+ * That is exactly why the spec asks for the name to be stamped at write time.
+ * Remove this when the backend sends it.
+ */
+function useResolvedTableName(n: Notification): string | null {
+  const { data } = useAdminTables();
+  if (n.table_name) return n.table_name;
+  if (!n.table_id) return null;
+  return data?.tables.find((t) => t.id === n.table_id)?.table_id ?? null;
 }
 
 /**

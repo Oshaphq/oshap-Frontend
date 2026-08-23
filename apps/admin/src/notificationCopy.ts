@@ -1,4 +1,4 @@
-import { formatCurrency } from "@oshap/shared";
+import { formatCurrency, parseApiDate } from "@oshap/shared";
 import type { NotificationType } from "@oshap/shared";
 
 /**
@@ -33,9 +33,18 @@ export interface NotificationMeta {
   claimable: boolean;
 }
 
-/** Falls back to "a table" rather than printing a uuid at a busy waiter. */
-const at = (table?: string | null) => table ?? "A table";
-const to = (table?: string | null) => table ?? "the table";
+/**
+ * What to say when we genuinely do not know which table.
+ *
+ * The old fallback read "A table needs attention", which is calm, grammatical
+ * and useless — it tells a waiter to check every table in the room. Worse, it
+ * looks like normal copy, so nobody reports it.
+ *
+ * A notification without a table is broken data, and it should read that way.
+ * `NotificationRow` resolves the name from `table_id` against the tables cache
+ * before falling back here, so this only fires when both fields are missing.
+ */
+const NO_TABLE = "table not recorded";
 
 export const NOTIFICATION_META: Record<NotificationType, NotificationMeta> = {
   waiter_called: {
@@ -43,7 +52,10 @@ export const NOTIFICATION_META: Record<NotificationType, NotificationMeta> = {
     iconColorClass: "text-primary",
     chime: true,
     title: "Waiter requested",
-    body: (f) => `${at(f.table_name)} needs attention`,
+    body: (f) =>
+      f.table_name
+        ? `${f.table_name} needs attention`
+        : `A waiter was called — ${NO_TABLE}`,
     claimable: true,
   },
   pos_requested: {
@@ -51,7 +63,10 @@ export const NOTIFICATION_META: Record<NotificationType, NotificationMeta> = {
     iconColorClass: "text-primary",
     chime: true,
     title: "POS requested",
-    body: (f) => `Take the card machine to ${to(f.table_name)}`,
+    body: (f) =>
+      f.table_name
+        ? `Take the card machine to ${f.table_name}`
+        : `Card machine requested — ${NO_TABLE}`,
     claimable: true,
   },
   new_order: {
@@ -59,7 +74,10 @@ export const NOTIFICATION_META: Record<NotificationType, NotificationMeta> = {
     iconColorClass: "text-primary",
     chime: true,
     title: "New order",
-    body: (f) => `${at(f.table_name)} placed an order`,
+    body: (f) =>
+      f.table_name
+        ? `${f.table_name} placed an order`
+        : `An order came in — ${NO_TABLE}`,
     claimable: false,
   },
   order_ready: {
@@ -70,7 +88,7 @@ export const NOTIFICATION_META: Record<NotificationType, NotificationMeta> = {
     body: (f) =>
       f.table_name
         ? `Run ${f.table_name}'s food before it dies`
-        : "Food is up — run it before it dies",
+        : `Food is up — ${NO_TABLE}`,
     claimable: false,
   },
   payment_claimed: {
@@ -79,12 +97,13 @@ export const NOTIFICATION_META: Record<NotificationType, NotificationMeta> = {
     chime: true,
     title: "Payment to verify",
     body: (f) => {
-      const who = f.table_name ?? "A guest";
       // The amount is the whole point of this one — it is what the cashier
-      // checks against the bank app before anyone leaves.
-      return f.amount != null
-        ? `${who} says they have paid ${formatCurrency(f.amount)}`
-        : `${who} says they have paid`;
+      // checks against the bank app before anyone leaves. The table is what
+      // tells them who to check it against.
+      const paid = f.amount != null ? ` ${formatCurrency(f.amount)}` : "";
+      return f.table_name
+        ? `${f.table_name} says they have paid${paid}`
+        : `A payment of${paid || " an unknown amount"} was claimed — ${NO_TABLE}`;
     },
     claimable: false,
   },
@@ -108,7 +127,7 @@ export const NOTIFICATION_META: Record<NotificationType, NotificationMeta> = {
  * a timestamp does, and the panel is only ever showing today.
  */
 export function timeAgo(iso: string, now: number = Date.now()): string {
-  const seconds = Math.floor((now - new Date(iso).getTime()) / 1000);
+  const seconds = Math.floor((now - parseApiDate(iso).getTime()) / 1000);
   if (seconds < 45) return "now";
   const minutes = Math.round(seconds / 60);
   if (minutes < 60) return `${minutes}m`;
@@ -127,7 +146,7 @@ export type TimeBucket = "Now" | "Earlier today" | "Yesterday" | "Older";
  * and put last night's service in with this morning's.
  */
 export function timeBucket(iso: string, now: number = Date.now()): TimeBucket {
-  const then = new Date(iso).getTime();
+  const then = parseApiDate(iso).getTime();
   if (now - then < 5 * 60_000) return "Now";
 
   const startOfToday = new Date(now);
