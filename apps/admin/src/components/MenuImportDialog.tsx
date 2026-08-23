@@ -111,6 +111,20 @@ export default function MenuImportDialog({ onClose }: Props) {
             rows without one create a new item. Export first to get a file with the
             ids already filled in.
           </p>
+          {/* The menu once imported at a hundredth of its prices, so this is
+              stated at the point of upload rather than left to a doc. */}
+          <p className="text-caption-md text-secondary-text">
+            <span className="font-semibold">Prices are in naira.</span> Write{" "}
+            <span className="font-mono">3500</span> for ₦3,500 — not the kobo figure.
+          </p>
+          <p className="text-caption-md text-secondary-text">
+            Counting stock for the whole menu is far quicker here than item by
+            item: export, fill in{" "}
+            <span className="font-semibold">stock_count</span> and{" "}
+            <span className="font-semibold">low_stock_threshold</span> in a
+            spreadsheet, and upload it back. A blank cell leaves that value as
+            it is, so you only need to fill the rows you counted.
+          </p>
         </div>
 
         <div>
