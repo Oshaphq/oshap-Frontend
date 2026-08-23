@@ -11,6 +11,7 @@ import CallWaiterFab from "./components/CallWaiterFab";
 import { getDeviceToken, useGlobalSSE, useTable } from "@oshap/shared";
 import { useSession } from "./context/SessionContext";
 import { BrandTheme } from "./context/BrandTheme";
+import { OrderWatch } from "./context/OrderWatch";
 
 function GlobalSSE() {
   useGlobalSSE();
@@ -39,6 +40,7 @@ function AppContent() {
     <NotificationProvider tableId={tableId}>
       <BrandTheme tableId={tableId} primaryColor={primaryColor}>
       <GlobalSSE />
+      <OrderWatch tableId={tableId} />
       <Routes>
         <Route path="/" element={<Navigate to={`/menu?table=${tableId}`} replace />} />
         <Route path="/menu" element={<MenuPage />} />

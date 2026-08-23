@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState, useRef } from "react";
+import { useMemo, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router";
 import {
   formatCurrency,
@@ -13,7 +13,7 @@ import BottomNav from "../components/BottomNav";
 import CartBar from "../components/CartBar";
 import CartDrawer from "../components/CartDrawer";
 import { useDragToDismiss } from "../hooks/useDragToDismiss";
-import { PrimaryButton, SecondaryButton, toast } from "@oshap/shared/ui";
+import { PrimaryButton, SecondaryButton } from "@oshap/shared/ui";
 import PinChip from "../components/PinChip";
 import AddButton from "../components/AddButton";
 import CustomerHeader from "../components/CustomerHeader";
@@ -142,21 +142,9 @@ function OrdersView({ tableId }: { tableId: string }) {
     [myOrders],
   );
 
-  const prevStatuses = useRef<Record<string, OrderStatus>>({});
-
-  useEffect(() => {
-    myOrders.forEach((o) => {
-      const oldStatus = prevStatuses.current[o.id];
-      if (oldStatus && oldStatus !== o.status) {
-        if (o.status === "PREPARING") {
-          toast.info("Your order is being prepared!");
-        } else if (o.status === "READY") {
-          toast.success("Your order is ready!");
-        }
-      }
-      prevStatuses.current[o.id] = o.status;
-    });
-  }, [myOrders]);
+  // Status announcements moved to `OrderWatch`, mounted app-wide — they were
+  // firing only on this screen, which is the one place the statuses are
+  // already visible.
 
   const groupTotal = useMemo(
     () => orders.reduce((sum, o) => sum + o.total, 0),

@@ -23,6 +23,26 @@ export function useOrder(orderId: string | undefined) {
   });
 }
 
+/** Matches `useTable` — the guest's only way of learning anything changed. */
+const LIVE_POLL_MS = 10_000;
+
+/** An order still moving through the kitchen or waiting to be paid for. */
+const IN_PROGRESS: ReadonlySet<string> = new Set([
+  "CREATED",
+  "PREPARING",
+  "READY",
+  "PAYMENT_PENDING",
+]);
+
+/**
+ * Every order on this table, for the guest.
+ *
+ * **Polls only while an order is still moving.** The screen already knows how
+ * to say "Your order is ready" the moment a status changes — that code has
+ * existed all along and has never had anything to react to, because nothing
+ * ever refetched. Once every order is settled or cancelled there is nothing
+ * left to watch, so it stops.
+ */
 export function useSessionOrders(
   params: GetSessionOrdersParams,
   enabled = true,
@@ -36,6 +56,13 @@ export function useSessionOrders(
     queryFn: () => getSessionOrders(params),
     enabled:
       enabled && Boolean(params.sessionId ?? params.tableId),
+    refetchInterval: (query) => {
+      const orders = query.state.data?.orders ?? [];
+      return orders.some((o) => IN_PROGRESS.has(o.status)) ? LIVE_POLL_MS : false;
+    },
+    // Coming back to the app after locking the phone is exactly when a guest
+    // wants to know whether the food is up.
+    refetchOnWindowFocus: true,
   });
 }
 
