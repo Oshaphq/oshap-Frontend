@@ -5,6 +5,7 @@ import {
   getAdminRestaurantId,
   getAdminRestaurantName,
   useAdminBranches,
+  useAdminKitchen,
 } from "@oshap/shared";
 import { PrimaryButton, Select, ThemeToggle } from "@oshap/shared/ui";
 import { initFCM } from "../utils/fcm";
@@ -15,6 +16,12 @@ export default function AuthGate() {
   const navigate = useNavigate();
   const { user, isAuthenticated, isLoading, login, logout, activeBranchId, setActiveBranch } = useAuth();
   const branchesQuery = useAdminBranches();
+  /**
+   * Tickets the kitchen has not finished. `useAdminKitchen` already polls and
+   * already invalidates on the realtime events, so this costs nothing extra —
+   * the board and the badge read the same cache.
+   */
+  const kitchenQuery = useAdminKitchen();
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -180,6 +187,11 @@ export default function AuthGate() {
   // manager an empty board and no way to tell why. Reopening it in Settings
   // brings it back.
   const branches = (branchesQuery.data ?? []).filter((b) => b.is_active);
+  // READY is deliberately excluded: the food is made, and the job left is
+  // carrying it out, which is a waiter's task rather than a kitchen backlog.
+  const waitingTickets = (kitchenQuery.data ?? []).filter(
+    (o) => o.status === "CREATED" || o.status === "PREPARING",
+  ).length;
   // One venue is the normal case, and a switcher offering a single choice is
   // furniture. It appears when there is actually something to switch between.
   const showBranchSelector = user?.role === "OWNER" && branches.length > 1;
@@ -194,7 +206,10 @@ export default function AuthGate() {
     tabs.push({ to: "/inventory", label: "Inventory" });
   }
   if (["OWNER", "MANAGER", "KITCHEN", "BARTENDER"].includes(user.role)) {
-    tabs.push({ to: "/kitchen", label: "Orders" });
+    // The count is the point: a manager on Settings has no way of knowing
+    // three tickets are waiting, and the kitchen board is the one screen where
+    // being a tab away costs a guest their food going cold.
+    tabs.push({ to: "/kitchen", label: "Orders", count: waitingTickets });
   }
   if (["OWNER", "MANAGER", "CASHIER"].includes(user.role)) {
     tabs.push({ to: "/z-report", label: "Close" });
@@ -239,6 +254,16 @@ export default function AuthGate() {
                 }
               >
                 {tab.label}
+                {tab.count ? (
+                  <span
+                    // Inherits the tab's own colours so it reads as part of the
+                    // label rather than an alert pinned to it — this counts
+                    // work in hand, it is not a warning.
+                    className="ml-xs inline-flex items-center justify-center min-w-5 h-5 px-1 rounded-4xl bg-current/15 text-caption-xs font-bold tabular-nums"
+                  >
+                    {tab.count}
+                  </span>
+                ) : null}
               </NavLink>
             ))}
           </div>

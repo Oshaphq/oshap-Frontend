@@ -236,10 +236,16 @@ export default function DashboardPage() {
           const isPending = table.hasPending;
           const isUnpaid = table.hasUnpaid;
           const isEmpty = !isPending && !isUnpaid;
+          // Compared against the **name**, because that is what the request
+          // carries. It was checking `table.id` — the uuid — so this was always
+          // false: the button never showed progress and never disabled, which
+          // leaves a settling payment tappable twice.
           const isVerifying =
-            verifyPayment.isPending && verifyPayment.variables?.table_id === table.id;
+            verifyPayment.isPending &&
+            verifyPayment.variables?.table_id === table.table_id;
           const isClosing =
-            closeTable.isPending && closeTable.variables?.table_id === table.id;
+            closeTable.isPending &&
+            closeTable.variables?.table_id === table.table_id;
 
           const cardCls = isPending
             ? "bg-warning-container border-warning"
