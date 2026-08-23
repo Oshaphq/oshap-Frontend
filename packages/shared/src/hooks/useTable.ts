@@ -24,6 +24,19 @@ import type {
 const LIVE_POLL_MS = 10_000;
 
 /**
+ * Exported so the condition is a test rather than a claim. A refetch interval
+ * that quietly returns `false` looks identical to a feature that was never
+ * wired: the screen just never updates.
+ */
+export function tablePollMs(
+  data: { unpaid_order?: unknown; pending_payments?: unknown } | undefined,
+): number | false {
+  // No data yet means we have not looked, not that there is nothing to watch.
+  if (!data) return LIVE_POLL_MS;
+  return data.unpaid_order || data.pending_payments ? LIVE_POLL_MS : false;
+}
+
+/**
  * The table a guest is sitting at.
  *
  * **Polls only while something is actually happening.** A guest reading a menu
@@ -42,11 +55,7 @@ export function useTable(params: GetTableParams, enabled = true) {
     ),
     queryFn: () => getTable(params),
     enabled: enabled && Boolean(params.tableId),
-    refetchInterval: (query) => {
-      const table = query.state.data;
-      const live = Boolean(table?.unpaid_order ?? table?.pending_payments);
-      return live ? LIVE_POLL_MS : false;
-    },
+    refetchInterval: (query) => tablePollMs(query.state.data),
     /**
      * A guest who locks their phone while waiting for food and comes back
      * should see the current state, not a ten-second-old one. The customer app
