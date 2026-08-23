@@ -2111,3 +2111,105 @@ describe("mock API — notifications", () => {
     expect((res.body as { unread_total: number }).unread_total).toBe(0);
   });
 });
+
+describe("mock API — a shared table settles one bill at a time", () => {
+  type LiveOrder = {
+    order_id: string;
+    device_token: string | null;
+    customer_name: string | null;
+    total: number;
+    payment_state: string;
+  };
+  const tableOf = async (name: string) => {
+    const res = await mockRequest("/admin/tables", "GET", null, q(), true);
+    return (res.body as { tables: Array<{ table_id: string; live_orders?: LiveOrder[] }> })
+      .tables.find((t) => t.table_id === name)!;
+  };
+  const orderFor = async (device: string, who: string, table: string) => {
+    const res = await mockRequest(
+      "/orders",
+      "POST",
+      {
+        table,
+        restaurant_id: HOME_RESTAURANT,
+        device_token: device,
+        customer_name: who,
+        items: [{ name: "Jollof Rice", qty: 1, price: 350000 }],
+      },
+      q(),
+      false,
+    );
+    return (res.body as { order_id: string }).order_id;
+  };
+
+  it("returns each guest's bill separately", async () => {
+    const adaOrder = await orderFor("phone-ada", "Ada", "T9");
+    const bolaOrder = await orderFor("phone-bola", "Bola", "T9");
+
+    const live = (await tableOf("T9")).live_orders ?? [];
+    // Scoped to the two orders this test placed — other tests share the board.
+    const ada = live.find((o) => o.order_id === adaOrder)!;
+    const bola = live.find((o) => o.order_id === bolaOrder)!;
+
+    expect(ada.customer_name).toBe("Ada");
+    expect(bola.customer_name).toBe("Bola");
+    // Who each bill belongs to is what makes settling one of them possible.
+    expect(ada.device_token).toBe("phone-ada");
+    expect(bola.device_token).toBe("phone-bola");
+  });
+
+  it("verifying Ada's transfer leaves Bola still owing", async () => {
+    // The bug this whole screen was rebuilt for: verify took a table, so one
+    // guest paying closed the table while the other was still eating.
+    const ada = await orderFor("phone-ada2", "Ada", "T10");
+    await orderFor("phone-bola2", "Bola", "T10");
+
+    await mockRequest("/payment/confirm", "POST", { order_id: ada }, q(), false);
+    const res = await mockRequest(
+      "/admin/verify",
+      "POST",
+      { table_id: "T10", order_id: ada },
+      q(),
+      true,
+    );
+
+    expect(res.status).toBe(200);
+    expect((res.body as { verified_count: number }).verified_count).toBe(1);
+    // The table must not close out from under the guest still eating.
+    expect((res.body as { auto_closed: boolean }).auto_closed).toBe(false);
+
+    const table = await tableOf("T10");
+    const live = table.live_orders ?? [];
+    expect(live.map((o) => o.order_id)).not.toContain(ada);
+    expect(live.some((o) => o.customer_name === "Bola")).toBe(true);
+  });
+
+  it("settles every claim on the table when no order is named", async () => {
+    // The old table-wide form still works — it is "settle everything here".
+    const a = await orderFor("phone-x", "X", "T11");
+    const b = await orderFor("phone-y", "Y", "T11");
+    await mockRequest("/payment/confirm", "POST", { order_id: a }, q(), false);
+    await mockRequest("/payment/confirm", "POST", { order_id: b }, q(), false);
+
+    const res = await mockRequest("/admin/verify", "POST", { table_id: "T11" }, q(), true);
+    expect((res.body as { verified_count: number }).verified_count).toBe(2);
+    expect((res.body as { auto_closed: boolean }).auto_closed).toBe(true);
+  });
+
+  it("keeps a combined payment together as one bill", async () => {
+    const a = await orderFor("phone-p", "Pat", "T12");
+    const b = await orderFor("phone-r", "Remi", "T12");
+    await mockRequest(
+      "/payment/confirm",
+      "POST",
+      { order_id: a, combined_order_ids: [a, b] },
+      q(),
+      false,
+    );
+
+    const live = (await tableOf("T12")).live_orders ?? [];
+    const bundled = live.find((o) => o.order_id === a)!;
+    expect((bundled as unknown as { combined_order_ids: string[] }).combined_order_ids)
+      .toEqual([a, b]);
+  });
+});

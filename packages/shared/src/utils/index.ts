@@ -8,3 +8,4 @@ export * from "./brandPalette";
 export * from "./stock";
 export * from "./cashTender";
 export * from "./datetime";
+export * from "./bills";

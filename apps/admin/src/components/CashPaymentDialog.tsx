@@ -7,12 +7,21 @@ import {
   nairaToKobo,
   useAdminRecordCash,
 } from "@oshap/shared";
-import type { AdminTableStatus } from "@oshap/shared";
 import { PrimaryButton, SecondaryButton, toast } from "@oshap/shared/ui";
 
 interface Props {
-  /** The table as the dashboard already knows it — no second fetch. */
-  table: AdminTableStatus;
+  /** The name staff read, for the heading. */
+  tableName: string;
+  /**
+   * The orders this payment settles.
+   *
+   * Scoped by the caller, because a table can hold two guests' bills and
+   * taking cash from one of them must not settle the other's. The dashboard
+   * passes one bill's orders; there is no table-wide default here on purpose.
+   */
+  orderIds: string[];
+  /** What those orders come to, in kobo. */
+  total: number;
   onClose: () => void;
 }
 
@@ -25,23 +34,24 @@ const QUICK_NOTES = [500, 1000, 2000, 5000, 10000];
  * Unlike transfers there's nothing to verify — a staff member is standing there
  * with the money — so this settles the bill outright.
  *
- * Reads the table the dashboard already has, rather than fetching one.
- * It used to call `GET /table/{id}`, which is the **guest's** endpoint: it
- * scopes `unpaid_order` to the device asking. The admin browser has never
- * ordered anything, so every table came back with no bill and the dialog said
- * "This table has no unpaid bill" over a card reading ₦75,061.88.
+ * Takes the orders it is given rather than fetching anything. It used to call
+ * `GET /table/{id}`, which is the **guest's** endpoint: it scopes the bill to
+ * the device asking. The admin browser has never ordered anything, so every
+ * table came back empty and the dialog said "This table has no unpaid bill"
+ * over a card reading ₦75,061.88.
  *
- * `unpaid_order_ids` is on `AdminTableStatus` now, which is what that old
- * round-trip existed to work around.
+ * Now scoped to one bill, because a table can hold two of them and cash from
+ * one guest must not settle the other's.
  */
-export default function CashPaymentDialog({ table, onClose }: Props) {
+export default function CashPaymentDialog({
+  tableName,
+  orderIds,
+  total,
+  onClose,
+}: Props) {
   const recordCash = useAdminRecordCash();
 
   const [tendered, setTendered] = useState("");
-
-  const tableName = table.table_id;
-  const total = table.unpaidTotal;
-  const orderIds = table.unpaid_order_ids ?? [];
 
   // The endpoint accepts what was handed over, so it's recorded rather than
   // only used to work out change.

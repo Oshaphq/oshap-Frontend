@@ -734,11 +734,52 @@ export interface AdminTableStatus {
   hasPending: boolean;
   hasUnpaid: boolean;
   /**
-   * The open bills on this table. Returned by the API and, until it also
-   * returns each bill's guest and payment state, the only way to act on one
-   * order rather than the whole table — which is what settlement actually is.
+   * The open bills on this table, as bare ids. Superseded by `live_orders`,
+   * which carries the same orders with the guest and payment state attached —
+   * kept because it is still what the cash dialog posts.
    */
   unpaid_order_ids: string[];
+  /**
+   * Every open bill on the table, with who it belongs to and where its money
+   * has got to.
+   *
+   * This is what makes a shared table workable. Two guests ordering separately
+   * is the ordinary case, and until this arrived the board could only show one
+   * total and one set of buttons for the whole table — so verifying one guest's
+   * transfer settled a bill and left the table lit for the other's, which read
+   * as a broken button rather than as the correct answer it was.
+   *
+   * Optional because a deployment may predate it; the card falls back to the
+   * table-level totals when it is missing.
+   */
+  live_orders?: AdminTableLiveOrder[] | null;
+}
+
+/**
+ * One open bill on a table.
+ *
+ * `session_id` groups a party who ordered together — one guest starts a session
+ * and reads out a PIN, others join. It is optional, so when it is null the
+ * `device_token` is the party: one phone, one bill. `combined_order_ids` is
+ * stronger than either, and means these orders were deliberately bundled to
+ * pay as one.
+ */
+export interface AdminTableLiveOrder {
+  order_id: string;
+  session_id?: string | null;
+  device_token?: string | null;
+  customer_name?: string | null;
+  total: number;
+  /**
+   * Where the kitchen has got to. Typed as a string by the API rather than as
+   * `OrderStatus`, so treat an unrecognised value as data we do not understand
+   * rather than assuming.
+   */
+  status: string;
+  /** Where the money has got to. Same caveat as `status`. */
+  payment_state: string;
+  combined_order_ids?: string[] | null;
+  created_at?: string;
 }
 
 export interface AdminTablesResponse {
@@ -944,8 +985,20 @@ export const AUDIT_ACTIONS = {
   itemComp: "item.comp",
 } as const;
 
+/**
+ * Settles a claimed payment.
+ *
+ * `order_id` settles one guest's bill and is what the board sends now that it
+ * can show them separately. Without it the server settled every claim on the
+ * table, which on a shared table meant one guest's transfer closing another
+ * guest's bill.
+ *
+ * `table_id` is the **name**, not the uuid — body fields take names throughout
+ * this API. It stays as the "settle every claim here" form.
+ */
 export interface AdminVerifyRequest {
   table_id: string;
+  order_id?: string;
 }
 
 /**

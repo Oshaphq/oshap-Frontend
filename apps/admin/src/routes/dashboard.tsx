@@ -6,15 +6,17 @@ import {
   useAdminRejectPayment,
   useAdminCloseTable,
   useAdminInventoryAlerts,
+  groupBills,
   formatCurrency,
   getAdminRestaurantId,
   errorMessage,
   describeError,
 } from "@oshap/shared";
-import type { AdminTableStatus } from "@oshap/shared";
+import type { AdminTableStatus, Bill } from "@oshap/shared";
 import { PrimaryButton, SecondaryButton, toast } from "@oshap/shared/ui";
 import QueryError from "../components/QueryError";
 import CashPaymentDialog from "../components/CashPaymentDialog";
+import TableBills from "../components/TableBills";
 import SetupChecklist from "../components/SetupChecklist";
 
 /**
@@ -42,14 +44,16 @@ export default function DashboardPage() {
   const alertsQuery = useAdminInventoryAlerts();
 
   const [clearPromptTable, setClearPromptTable] = useState<string | null>(null);
-  // Two-step, because rejecting is destructive from the guest's side: their
-  // bill returns to unpaid and the account they used is marked down.
-  const [rejectingTableId, setRejectingTableId] = useState<string | null>(null);
-  // Verifying says money arrived that may not have. It was a single tap on the
-  // largest button on the card, next to Reject — one slip settles a bill
-  // nobody paid, and the board then shows the table as square.
-  const [verifyingTableId, setVerifyingTableId] = useState<string | null>(null);
-  const [cashTable, setCashTable] = useState<AdminTableStatus | null>(null);
+  /**
+   * Keyed by **bill**, not table, so a prompt opened on one guest's row cannot
+   * appear over another's. On a shared table the table id names two bills, and
+   * confirming the wrong one is the mistake this whole screen exists to stop.
+   */
+  const [rejectingBill, setRejectingBill] = useState<string | null>(null);
+  const [verifyingBill, setVerifyingBill] = useState<string | null>(null);
+  const [cashTarget, setCashTarget] = useState<
+    { tableName: string; orderIds: string[]; total: number } | null
+  >(null);
 
   if (tablesQuery.isLoading) {
     return (
@@ -71,72 +75,57 @@ export default function DashboardPage() {
   /**
    * Rejection is per order, because payment is.
    *
-   * Two guests at one table pay separately, so "reject the payment on table 4"
-   * names nothing — which is why the server asks for an `order_id` and why
-   * every rejection was failing. Until the tables endpoint returns each bill,
-   * we can only act when the table has exactly one, and guessing is not an
-   * option here: the wrong choice puts a real guest's bill back to unpaid and
-   * marks down the account they paid from.
+   * "Reject the payment on table 4" names nothing when two guests are sitting
+   * there — which is why the server asks for an `order_id`, and why every
+   * rejection failed while the board could only offer a table. It rejects the
+   * claims on one bill now, so the wrong guest's money is never touched.
    */
-  const handleReject = async (table: AdminTableStatus) => {
-    const orderIds = table.unpaid_order_ids ?? [];
-    if (orderIds.length !== 1) {
-      setRejectingTableId(null);
-      toast.error(
-        orderIds.length === 0
-          ? "There's no open bill on this table to reject."
-          : `${table.table_id} has ${orderIds.length} separate bills. Open the table to reject the right one — rejecting the wrong guest's payment is not something to guess at.`,
-      );
-      return;
-    }
+  const handleReject = async (bill: Bill) => {
     try {
-      await rejectPayment.mutateAsync({ order_id: orderIds[0]! });
-      setRejectingTableId(null);
+      for (const orderId of bill.claimedOrderIds) {
+        await rejectPayment.mutateAsync({ order_id: orderId });
+      }
+      setRejectingBill(null);
       toast.success("Payment rejected — the bill is unpaid again");
     } catch (err) {
+      setRejectingBill(null);
       toast.error(settledElsewhere(err) ? ALREADY_SETTLED : errorMessage(err, "reject the payment"));
     }
   };
 
   /**
-   * Takes the table, not an id, because the table has two of them and only one
-   * is right here.
+   * Settles one bill, naming the order.
    *
-   * `table.id` is the uuid a QR code encodes and `GET /table/{id}` takes.
-   * `table.table_id` is the name staff read. Body fields take the **name** —
-   * this sent the uuid, so every verify 404'd and reported "that bill was
-   * already settled", which is what a 404 means everywhere else on this screen.
+   * `table_id` rides along because the API still wants it, and it is the
+   * **name** rather than the uuid — body fields take names throughout. Sending
+   * the uuid is what made every verify 404 and report "already settled".
+   *
+   * Without `order_id` the server settles every claim on the table, so on a
+   * shared table one guest's transfer closed the other guest's bill.
    */
-  const handleVerify = async (table: AdminTableStatus) => {
+  const handleVerify = async (table: AdminTableStatus, bill: Bill) => {
     try {
-      await verifyPayment.mutateAsync({ table_id: table.table_id });
-      setVerifyingTableId(null);
+      for (const orderId of bill.claimedOrderIds) {
+        await verifyPayment.mutateAsync({
+          table_id: table.table_id,
+          order_id: orderId,
+        });
+      }
+      setVerifyingBill(null);
       // Without this the row just leaves the pending list, which is
       // indistinguishable from the click never registering.
-      toast.success("Payment verified");
+      toast.success(
+        bill.guestName ? `${bill.guestName}'s payment verified` : "Payment verified",
+      );
     } catch (err) {
       // Close the prompt either way. Leaving it open under a failure toast
       // invites a second confirm, which is how one refusal becomes two
       // attempts at the same bill.
-      setVerifyingTableId(null);
+      setVerifyingBill(null);
       toast.error(settledElsewhere(err) ? ALREADY_SETTLED : errorMessage(err, "verify the payment"));
     }
   };
 
-  /**
-   * Only ever "they left without paying" now.
-   *
-   * The other option used to be "Paid (Cash/Transfer)", which called this with
-   * `reason: "paid"`. That does settle the bill — the order moves to CONFIRMED
-   * with a verified payment for the full amount — but it records **how** the
-   * money arrived nowhere, and no tendered amount, so nothing can be
-   * reconciled against a till afterwards.
-   *
-   * Taking money now always goes through the cash dialog, which posts to
-   * `/admin/orders/cash`: per order, with the amount handed over, and the order
-   * marked `payment_method: CASH`. Closing a table and taking payment are
-   * different acts and were sharing a button.
-   */
   const handleAbandon = async (table: AdminTableStatus) => {
     setClearPromptTable(null);
     try {
@@ -236,13 +225,9 @@ export default function DashboardPage() {
           const isPending = table.hasPending;
           const isUnpaid = table.hasUnpaid;
           const isEmpty = !isPending && !isUnpaid;
-          // Compared against the **name**, because that is what the request
-          // carries. It was checking `table.id` — the uuid — so this was always
-          // false: the button never showed progress and never disabled, which
-          // leaves a settling payment tappable twice.
-          const isVerifying =
-            verifyPayment.isPending &&
-            verifyPayment.variables?.table_id === table.table_id;
+          // Empty when the deployment predates `live_orders`; the card falls
+          // back to the table totals below.
+          const bills = groupBills(table.live_orders);
           const isClosing =
             closeTable.isPending &&
             closeTable.variables?.table_id === table.table_id;
@@ -278,7 +263,37 @@ export default function DashboardPage() {
               </div>
 
               <div className="flex flex-col gap-xs flex-1">
-                {!isEmpty ? (
+                {isEmpty ? (
+                  <p className="text-caption-md text-secondary-text">No active orders</p>
+                ) : bills.length > 0 ? (
+                  <TableBills
+                    bills={bills}
+                    renderActions={(bill) => (
+                      <BillActions
+                        bill={bill}
+                        table={table}
+                        rejectingBill={rejectingBill}
+                        verifyingBill={verifyingBill}
+                        setRejectingBill={setRejectingBill}
+                        setVerifyingBill={setVerifyingBill}
+                        onTakeCash={() =>
+                          setCashTarget({
+                            tableName: table.table_id,
+                            orderIds: bill.unpaidOrderIds,
+                            total: bill.total,
+                          })
+                        }
+                        onVerify={() => handleVerify(table, bill)}
+                        onReject={() => handleReject(bill)}
+                        verifyPending={verifyPayment.isPending}
+                        rejectPending={rejectPayment.isPending}
+                      />
+                    )}
+                  />
+                ) : (
+                  /* No `live_orders` — an older deployment. Fall back to the
+                     table totals, which cannot tell two guests apart but is
+                     better than an empty card. */
                   <>
                     {isUnpaid && (
                       <p className="text-caption-md text-secondary-text">
@@ -297,92 +312,8 @@ export default function DashboardPage() {
                       </p>
                     )}
                   </>
-                ) : (
-                  <p className="text-caption-md text-secondary-text">No active orders</p>
                 )}
               </div>
-
-              {/* `table.id` — the uuid — is right here: the cash dialog fetches
-                  GET /table/{id}, which is a path param. Verify and close take
-                  the name instead. */}
-              {isUnpaid && !isPending && (
-                <SecondaryButton
-                  className="w-full"
-                  onClick={() => setCashTable(table)}
-                >
-                  <i className="mgc_cash_line" /> Take Cash
-                </SecondaryButton>
-              )}
-
-              {isPending &&
-                (rejectingTableId === table.id ? (
-                  <div className="flex flex-col gap-s">
-                    <p className="text-caption-md text-secondary-text">
-                      Reject this payment? The bill goes back to unpaid and this
-                      account is marked down.
-                    </p>
-                    <div className="flex gap-s">
-                      <SecondaryButton
-                        className="flex-1"
-                        onClick={() => setRejectingTableId(null)}
-                      >
-                        Cancel
-                      </SecondaryButton>
-                      <PrimaryButton
-                        className="flex-1"
-                        onClick={() => handleReject(table)}
-                        disabled={rejectPayment.isPending}
-                      >
-                        {rejectPayment.isPending ? "Rejecting…" : "Confirm Reject"}
-                      </PrimaryButton>
-                    </div>
-                  </div>
-                ) : verifyingTableId === table.id ? (
-                  /* Confirming the *amount*, not the action. "Are you sure?"
-                     invites a reflex yes; a figure asks the one question that
-                     matters — is that what actually arrived in the account. */
-                  <div className="flex flex-col gap-s">
-                    <p className="text-caption-md text-secondary-text">
-                      Confirm{" "}
-                      <span className="font-bold text-primary-text">
-                        {formatCurrency(table.pendingTotal)}
-                      </span>{" "}
-                      has landed in the account. This settles the bill and
-                      cannot be undone from here.
-                    </p>
-                    <div className="flex gap-s">
-                      <SecondaryButton
-                        className="flex-1"
-                        onClick={() => setVerifyingTableId(null)}
-                      >
-                        Cancel
-                      </SecondaryButton>
-                      <PrimaryButton
-                        className="flex-1"
-                        onClick={() => handleVerify(table)}
-                        disabled={isVerifying}
-                      >
-                        {isVerifying ? "Verifying…" : "Yes, it's in"}
-                      </PrimaryButton>
-                    </div>
-                  </div>
-                ) : (
-                  <div className="flex gap-s">
-                    <PrimaryButton
-                      className="flex-1"
-                      onClick={() => setVerifyingTableId(table.id)}
-                      disabled={isVerifying}
-                    >
-                      Verify Payment
-                    </PrimaryButton>
-                    <SecondaryButton
-                      onClick={() => setRejectingTableId(table.id)}
-                      disabled={isVerifying}
-                    >
-                      Reject
-                    </SecondaryButton>
-                  </div>
-                ))}
 
               {!isEmpty && isClosing && (
                 <div className="py-s text-center text-caption-md font-semibold text-secondary-text">
@@ -408,17 +339,30 @@ export default function DashboardPage() {
                   {/* "Paid" settled the bill but recorded no method and no
                       tendered amount, so a manager could not reconcile it.
                       Taking money now goes through the cash dialog. */}
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setClearPromptTable(null);
-                      setCashTable(table);
-                    }}
-                    className="flex items-center justify-center gap-s py-s rounded-lg font-bold text-caption-md bg-success text-on-success transition-all hover:opacity-90 active:scale-[0.98]"
-                  >
-                    <i className="mgc_wallet_4_line" />
-                    They paid — record it
-                  </button>
+                  {bills.length > 1 ? (
+                    /* Two bills open, so "they paid" names nothing. Sending the
+                       waiter back to the row is the point of this screen. */
+                    <p className="text-caption-xs text-secondary-text text-center">
+                      Taking money? Use the bill above — this table has{" "}
+                      {bills.length} open.
+                    </p>
+                  ) : (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setClearPromptTable(null);
+                        setCashTarget({
+                          tableName: table.table_id,
+                          orderIds: bills[0]?.unpaidOrderIds ?? table.unpaid_order_ids ?? [],
+                          total: bills[0]?.total ?? table.unpaidTotal,
+                        });
+                      }}
+                      className="flex items-center justify-center gap-s py-s rounded-lg font-bold text-caption-md bg-success text-on-success transition-all hover:opacity-90 active:scale-[0.98]"
+                    >
+                      <i className="mgc_wallet_4_line" />
+                      They paid — record it
+                    </button>
+                  )}
                   <button
                     type="button"
                     onClick={() => handleAbandon(table)}
@@ -456,12 +400,119 @@ export default function DashboardPage() {
         </div>
       )}
 
-      {cashTable && (
+      {cashTarget && (
         <CashPaymentDialog
-          table={cashTable}
-          onClose={() => setCashTable(null)}
+          tableName={cashTarget.tableName}
+          orderIds={cashTarget.orderIds}
+          total={cashTarget.total}
+          onClose={() => setCashTarget(null)}
         />
       )}
     </main>
+  );
+}
+
+/**
+ * The one action a bill is ready for, and the confirmation in front of it.
+ *
+ * Both confirmations are keyed by bill rather than table, so a prompt cannot
+ * open over somebody else's row. Verify asks about the **amount** rather than
+ * the action — "are you sure?" invites a reflex yes, while a figure asks the
+ * only question that matters: is that what landed in the account.
+ */
+function BillActions({
+  bill,
+  table,
+  rejectingBill,
+  verifyingBill,
+  setRejectingBill,
+  setVerifyingBill,
+  onTakeCash,
+  onVerify,
+  onReject,
+  verifyPending,
+  rejectPending,
+}: {
+  bill: Bill;
+  table: AdminTableStatus;
+  rejectingBill: string | null;
+  verifyingBill: string | null;
+  setRejectingBill: (key: string | null) => void;
+  setVerifyingBill: (key: string | null) => void;
+  onTakeCash: () => void;
+  onVerify: () => void;
+  onReject: () => void;
+  verifyPending: boolean;
+  rejectPending: boolean;
+}) {
+  if (bill.state === "settled" || bill.state === "unknown") return null;
+
+  if (bill.state === "unpaid") {
+    return (
+      <SecondaryButton size="md" className="w-full" onClick={onTakeCash}>
+        <i className="mgc_cash_line" /> Take Cash
+      </SecondaryButton>
+    );
+  }
+
+  if (rejectingBill === bill.key) {
+    return (
+      <div className="flex flex-col gap-s">
+        <p className="text-caption-xs text-secondary-text">
+          Reject {bill.guestName ? `${bill.guestName}'s` : "this"} payment? The
+          bill goes back to unpaid and this account is marked down.
+        </p>
+        <div className="flex gap-s">
+          <SecondaryButton className="flex-1" onClick={() => setRejectingBill(null)}>
+            Cancel
+          </SecondaryButton>
+          <PrimaryButton className="flex-1" onClick={onReject} disabled={rejectPending}>
+            {rejectPending ? "Rejecting…" : "Confirm Reject"}
+          </PrimaryButton>
+        </div>
+      </div>
+    );
+  }
+
+  if (verifyingBill === bill.key) {
+    return (
+      <div className="flex flex-col gap-s">
+        <p className="text-caption-xs text-secondary-text">
+          Confirm{" "}
+          <span className="font-bold text-primary-text">
+            {formatCurrency(bill.total)}
+          </span>{" "}
+          from {bill.guestName ?? "this guest"} has landed in the account. This
+          settles their bill and cannot be undone from here.
+        </p>
+        <div className="flex gap-s">
+          <SecondaryButton className="flex-1" onClick={() => setVerifyingBill(null)}>
+            Cancel
+          </SecondaryButton>
+          <PrimaryButton className="flex-1" onClick={onVerify} disabled={verifyPending}>
+            {verifyPending ? "Verifying…" : "Yes, it's in"}
+          </PrimaryButton>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="flex gap-s">
+      <PrimaryButton
+        className="flex-1"
+        onClick={() => setVerifyingBill(bill.key)}
+        disabled={verifyPending}
+      >
+        Verify
+      </PrimaryButton>
+      <SecondaryButton
+        onClick={() => setRejectingBill(bill.key)}
+        disabled={verifyPending}
+        aria-label={`Reject ${bill.guestName ?? "this guest"}'s payment on ${table.table_id}`}
+      >
+        Reject
+      </SecondaryButton>
+    </div>
   );
 }
