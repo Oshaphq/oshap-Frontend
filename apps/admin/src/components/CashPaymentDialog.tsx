@@ -1,5 +1,7 @@
 import { useState } from "react";
 import {
+  canSettleCash,
+  cashTender,
   errorMessage,
   formatCurrency,
   nairaToKobo,
@@ -44,12 +46,11 @@ export default function CashPaymentDialog({ table, onClose }: Props) {
   // The endpoint accepts what was handed over, so it's recorded rather than
   // only used to work out change.
   const tenderedKobo = tendered === "" ? null : nairaToKobo(Number(tendered));
-  const change =
-    tenderedKobo !== null && tenderedKobo >= total ? tenderedKobo - total : null;
-  const isShort = tenderedKobo !== null && tenderedKobo < total;
+  const tender = cashTender(tenderedKobo, total);
+  const canSettle = canSettleCash(tender);
 
   const handleConfirm = () => {
-    if (orderIds.length === 0) return;
+    if (orderIds.length === 0 || !canSettle) return;
     recordCash.mutate(
       {
         order_ids: orderIds,
@@ -145,20 +146,29 @@ export default function CashPaymentDialog({ table, onClose }: Props) {
 
             {/* Saves the cashier doing subtraction at a busy till, which is
                 where change mistakes come from. */}
-            {change !== null && (
+            {tender.kind === "change" && (
               <div className="flex items-center justify-between p-md rounded-lg bg-success-container text-on-success-container">
                 <span className="text-label-l4 font-semibold">Change due</span>
                 <span className="font-display text-display-h3 font-semibold tabular-nums">
-                  {formatCurrency(change)}
+                  {formatCurrency(tender.change)}
                 </span>
               </div>
             )}
-            {isShort && (
-              <div className="flex items-center justify-between p-md rounded-lg bg-warning-container text-on-warning-container">
-                <span className="text-label-l4 font-semibold">Still owing</span>
-                <span className="font-display text-display-h3 font-semibold tabular-nums">
-                  {formatCurrency(total - (tenderedKobo ?? 0))}
-                </span>
+            {/* Blocks rather than warns. This used to show the shortfall and
+                settle the full bill anyway, so the missing money left no
+                trace. */}
+            {tender.kind === "short" && (
+              <div className="flex flex-col gap-xs p-md rounded-lg bg-warning-container text-on-warning-container">
+                <div className="flex items-center justify-between">
+                  <span className="text-label-l4 font-semibold">Short by</span>
+                  <span className="font-display text-display-h3 font-semibold tabular-nums">
+                    {formatCurrency(tender.shortfall)}
+                  </span>
+                </div>
+                <p className="text-caption-md">
+                  Cash settles the whole bill — there's no part payment. Take the
+                  rest, or clear the box to settle without recording a figure.
+                </p>
               </div>
             )}
 
@@ -169,7 +179,7 @@ export default function CashPaymentDialog({ table, onClose }: Props) {
               <PrimaryButton
                 size="md"
                 onClick={handleConfirm}
-                disabled={recordCash.isPending}
+                disabled={recordCash.isPending || !canSettle}
               >
                 {recordCash.isPending
                   ? "Recording…"

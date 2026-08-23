@@ -943,6 +943,7 @@ route("POST", /^\/orders$/, ({ body }) => {
   // options' deltas. Adding the deltas client-side too would double-count them.
   const resolved: Array<{
     id: string;
+    menu_item_id?: string | null;
     name: string;
     quantity: number;
     price: number;
@@ -951,6 +952,7 @@ route("POST", /^\/orders$/, ({ body }) => {
   }> = [];
 
   for (const item of b.items) {
+    const dish = _menu.find((m) => m.id === item.menu_item_id || m.name === item.name);
     const mods: OrderItemModifier[] = [];
     for (const chosen of item.modifiers ?? []) {
       const found = findOption(chosen.option_id);
@@ -968,6 +970,9 @@ route("POST", /^\/orders$/, ({ body }) => {
     const delta = mods.reduce((s, m) => s + m.price_delta, 0);
     resolved.push({
       id: uid(),
+      // The dish, as distinct from this line. Reordering needs it, and the
+      // real API has always returned it.
+      menu_item_id: dish?.id ?? item.menu_item_id ?? null,
       name: item.name,
       quantity: item.qty,
       price: item.price + delta,
