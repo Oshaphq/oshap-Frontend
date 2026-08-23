@@ -530,7 +530,15 @@ function ReorderButton({ item }: { item: OrderItem }) {
    * before it did have none — and a line reordered "close enough" puts food on
    * a bill the guest did not pick, which is worse than making them tap twice.
    */
-  const reconstructable = modifiers.every((m) => Boolean(m.option_id));
+  /**
+   * Two things have to be recoverable: which dish this was, and which options.
+   *
+   * `item.id` is the *line's* id, not the dish's — sending it as the menu item
+   * is why reordering failed with "something went wrong". `menu_item_id` is
+   * what the API has always returned for this.
+   */
+  const reconstructable =
+    Boolean(item.menu_item_id) && modifiers.every((m) => Boolean(m.option_id));
 
   if (!reconstructable) {
     return (
@@ -554,7 +562,7 @@ function ReorderButton({ item }: { item: OrderItem }) {
       onClick={() =>
         addItem(
           {
-            menuItemId: item.id,
+            menuItemId: item.menu_item_id!,
             name: item.name,
             basePrice: item.price - deltas,
             modifiers: modifiers.map((m) => ({

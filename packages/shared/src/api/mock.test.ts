@@ -1122,11 +1122,16 @@ describe("mock API — modifiers", () => {
     const line = (
       firstDetail.body as {
         items: Array<{
+          menu_item_id?: string | null;
           price: number;
           modifiers: Array<{ option_id?: string; price_delta: number }> | null;
         }>;
       }
     ).items[0]!;
+
+    // The line's own id is not the dish's. Sending the former as the menu item
+    // is what made reordering fail with "something went wrong".
+    expect(line.menu_item_id).toBe("m-004");
 
     // What the reorder button does: every choice must still have an id, and
     // the base price is the resolved one less the deltas it already includes.

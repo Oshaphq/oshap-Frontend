@@ -193,7 +193,16 @@ export interface OrderItemModifier {
 }
 
 export interface OrderItem {
+  /** The line's own id — not the dish's. */
   id: string;
+  /**
+   * The dish this line was made from.
+   *
+   * Returned by the API all along and undeclared here, so reordering sent the
+   * *line's* id as the menu item and the order failed. Optional because orders
+   * placed before it was read back have none.
+   */
+  menu_item_id?: string | null;
   order_id?: string;
   name: string;
   quantity: number;
