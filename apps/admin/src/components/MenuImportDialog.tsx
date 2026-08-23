@@ -122,7 +122,8 @@ export default function MenuImportDialog({ onClose }: Props) {
             item: export, fill in{" "}
             <span className="font-semibold">stock_count</span> and{" "}
             <span className="font-semibold">low_stock_threshold</span> in a
-            spreadsheet, and upload it back.
+            spreadsheet, and upload it back. A blank cell leaves that value as
+            it is, so you only need to fill the rows you counted.
           </p>
         </div>
 
