@@ -5,3 +5,4 @@ export * from "./phone";
 export * from "./theme";
 export * from "./imageUpload";
 export * from "./brandPalette";
+export * from "./stock";

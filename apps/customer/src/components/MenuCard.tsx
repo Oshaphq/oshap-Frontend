@@ -1,8 +1,9 @@
 import { useState } from "react";
-import { formatCurrency } from "@oshap/shared";
+import { formatCurrency, stockLabel, stockState } from "@oshap/shared";
 import type { MenuItem } from "@oshap/shared";
 import { hasChoices, useCart } from "../context/CartContext";
 import AddButton from "./AddButton";
+import { toast } from "@oshap/shared/ui";
 import ModifierSheet from "./ModifierSheet";
 
 interface MenuCardProps {
@@ -16,10 +17,21 @@ export default function MenuCard({ item }: MenuCardProps) {
   const configurable = hasChoices(item.modifier_groups);
   const quantity = quantityOf(item.id);
 
+  // What is left, counting what this guest already holds. Most dishes are
+  // untracked and unaffected.
+  const stock = stockState(item, quantity);
+  const label = stockLabel(stock);
+
   // Only meaningful for a plain dish, which can occupy at most one line.
   const plainLine = items.find((i) => i.menuItemId === item.id);
 
-  const addPlain = () =>
+  const addPlain = () => {
+    if (!stock.canAddMore) {
+      // Saying the number is the difference between "no" and "no, and here is
+      // why" — the second is something a guest can act on.
+      toast.info(`Only ${item.stock_count} ${item.name} left today.`);
+      return;
+    }
     addItem({
       menuItemId: item.id,
       name: item.name,
@@ -27,6 +39,7 @@ export default function MenuCard({ item }: MenuCardProps) {
       modifiers: [],
       image: item.image_url ?? undefined,
     });
+  };
 
   return (
     <article className="flex gap-md p-md bg-surface-container-low rounded-md border-b border-outline-variant/30 transition-shadow">
@@ -62,9 +75,18 @@ export default function MenuCard({ item }: MenuCardProps) {
             <span className="text-label-l3 font-semibold text-primary-text">
               {formatCurrency(item.price)}
             </span>
-            {configurable && (
+            {configurable && !label && (
               <span className="text-caption-xs text-secondary-text">
                 Choices available
+              </span>
+            )}
+            {label && (
+              <span
+                className={`text-caption-xs font-semibold ${
+                  stock.soldOut ? "text-error" : "text-warning"
+                }`}
+              >
+                {label}
               </span>
             )}
           </div>
@@ -80,10 +102,22 @@ export default function MenuCard({ item }: MenuCardProps) {
                 </span>
               )}
               <AddButton
-                onClick={() => setIsChoosing(true)}
+                onClick={() => {
+                  if (!stock.canAddMore) {
+                    toast.info(`Only ${item.stock_count} ${item.name} left today.`);
+                    return;
+                  }
+                  setIsChoosing(true);
+                }}
                 aria-label={`Choose options for ${item.name}`}
               />
             </div>
+          ) : stock.soldOut ? (
+            /* Nothing to add. The API still lists it, so the guest is told
+               plainly rather than left tapping a button that cannot work. */
+            <span className="text-caption-xs font-semibold text-error">
+              Unavailable
+            </span>
           ) : quantity === 0 ? (
             <AddButton
               onClick={addPlain}
@@ -105,8 +139,14 @@ export default function MenuCard({ item }: MenuCardProps) {
               <button
                 type="button"
                 onClick={() => updateQuantity(plainLine!.lineId, quantity + 1)}
+                disabled={!stock.canAddMore}
                 aria-label={`Increase ${item.name} quantity`}
-                className="w-8 h-8 flex items-center justify-center rounded-4xl bg-surface-container-high text-on-surface text-lg font-bold transition-colors hover:bg-primary hover:text-on-primary"
+                title={
+                  stock.canAddMore
+                    ? undefined
+                    : `Only ${item.stock_count} left today`
+                }
+                className="w-8 h-8 flex items-center justify-center rounded-4xl bg-surface-container-high text-on-surface text-lg font-bold transition-colors hover:bg-primary hover:text-on-primary disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-surface-container-high disabled:hover:text-on-surface"
               >
                 <i className="mgc_add_line" />
               </button>
