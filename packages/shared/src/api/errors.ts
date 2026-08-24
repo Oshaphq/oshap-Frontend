@@ -57,6 +57,9 @@ const USELESS = [
   "unprocessable entity",
 ];
 
+/** Words that mean the subscription, rather than the person. */
+const PLAN_WORDS = ["plan", "tier", "upgrade", "subscription"];
+
 function isUseless(message: string | undefined): boolean {
   if (!message) return true;
   const m = message.trim().toLowerCase();
@@ -120,9 +123,23 @@ export function describeError(err: unknown, action?: string): ErrorDescription {
   }
 
   if (status === 403) {
+    /**
+     * Two very different refusals share this status: the plan does not include
+     * something, or this person's role does not allow it. The title used to
+     * assume the first, so a waiter refused the kitchen board by role read
+     * **"Not available on this plan"** over the server's own words,
+     * *"Insufficient permissions"* — a heading and a message contradicting each
+     * other, and an owner sent to check their subscription over a staff
+     * permission.
+     *
+     * Only claim the plan when the server says something plan-shaped.
+     */
+    const aboutThePlan = PLAN_WORDS.some((word) =>
+      (server ?? "").toLowerCase().includes(word),
+    );
     return {
       kind: "forbidden",
-      title: "Not available on this plan",
+      title: aboutThePlan ? "Not available on this plan" : "You can't open this",
       message:
         server ??
         "This feature isn't included in your current plan, or your role doesn't allow it.",
