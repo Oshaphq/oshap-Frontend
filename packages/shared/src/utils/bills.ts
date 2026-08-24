@@ -77,6 +77,20 @@ const CLAIMED = new Set(["CLAIMED"]);
 /** Owed. `FAILED` belongs here — they tried, it did not work, it is still due. */
 const UNPAID = new Set(["NOT_PAID", "FAILED", "PENDING"]);
 
+/**
+ * Whether this order still owes money.
+ *
+ * `balance_due` decides it where the server sends one, because a part payment
+ * can leave `payment_state` reading CONFIRMED with money still outstanding.
+ * Deriving from the state alone left part-paid orders out of the list the cash
+ * dialog settles, so "Take the rest" opened on an empty selection and reported
+ * that the table had no unpaid bill.
+ */
+export function owesMoney(order: AdminTableLiveOrder): boolean {
+  if (order.balance_due !== undefined) return order.balance_due > 0;
+  return paymentState(order.payment_state) === "unpaid";
+}
+
 export function paymentState(raw: string | null | undefined): BillState {
   const value = (raw ?? "").toUpperCase();
   if (SETTLED.has(value)) return "settled";
@@ -212,9 +226,7 @@ function toBill(orders: AdminTableLiveOrder[]): Bill {
     claimedOrderIds: orders
       .filter((o) => paymentState(o.payment_state) === "claimed")
       .map((o) => o.order_id),
-    unpaidOrderIds: orders
-      .filter((o) => paymentState(o.payment_state) === "unpaid")
-      .map((o) => o.order_id),
+    unpaidOrderIds: orders.filter(owesMoney).map((o) => o.order_id),
   };
 }
 

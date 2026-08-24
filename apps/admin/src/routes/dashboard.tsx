@@ -381,8 +381,7 @@ export default function DashboardPage() {
                     <p className="text-caption-xs text-on-warning-container bg-warning-container rounded-lg p-s text-center">
                       Careful — money has already been taken on this table.
                       Clearing as unpaid cancels the order and leaves that
-                      payment with nothing to match it. Take the rest, or
-                      discount the difference instead.
+                      payment with nothing to match it. Take the rest instead.
                     </p>
                   ) : (
                     <p className="text-caption-xs text-outline text-center">
