@@ -4,6 +4,7 @@ import {
   AUDIT_ACTIONS,
   formatCurrency,
   useAdminAuditLogs,
+  formatApiDateTime,
 } from "@oshap/shared";
 import type { AuditLogEntry } from "@oshap/shared";
 import { SecondaryButton, Select } from "@oshap/shared/ui";
@@ -153,7 +154,7 @@ export default function AuditPage() {
                 className="flex flex-wrap items-baseline gap-x-md gap-y-xs px-md py-s border-b border-outline-variant last:border-none"
               >
                 <span className="text-caption-md text-secondary-text tabular-nums shrink-0">
-                  {new Date(entry.created_at).toLocaleString()}
+                  {formatApiDateTime(entry.created_at)}
                 </span>
                 <span className="text-p2 text-primary-text min-w-0 flex-1">
                   {describe(entry)}

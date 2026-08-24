@@ -1,6 +1,6 @@
 import { useEffect } from "react";
 import { createPortal } from "react-dom";
-import { formatCurrency, useAdminReceipt } from "@oshap/shared";
+import { formatCurrency, formatApiDateTime, useAdminReceipt } from "@oshap/shared";
 import type { PaymentMethod } from "@oshap/shared";
 
 const METHOD_LABELS: Record<PaymentMethod, string> = {
@@ -93,7 +93,7 @@ export default function ReceiptSheet({ orderId, onDone }: Props) {
         <span>Table {data.table_id}</span>
       </div>
       <div style={{ fontSize: "8pt" }}>
-        {new Date(data.paid_at ?? data.created_at).toLocaleString()}
+        {formatApiDateTime(data.paid_at ?? data.created_at)}
       </div>
 
       <div style={{ borderTop: "1px dashed #000", margin: "2mm 0" }} />

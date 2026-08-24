@@ -5,6 +5,7 @@ import {
   getDeviceToken,
   useSessionOrders,
   useTable,
+  parseApiDate,
 } from "@oshap/shared";
 import type { OrderStatus, OrderWithItems, OrderItem } from "@oshap/shared";
 import { CartProvider, useCart } from "../context/CartContext";
@@ -63,7 +64,7 @@ function OrdersView({ tableId }: { tableId: string }) {
   const orders = useMemo(() => {
     const list = sessionOrdersQuery.data?.orders ?? [];
     return [...list].sort(
-      (a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime(),
+      (a, b) => parseApiDate(a.created_at).getTime() - parseApiDate(b.created_at).getTime(),
     );
   }, [sessionOrdersQuery.data]);
 
