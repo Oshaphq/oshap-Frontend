@@ -389,6 +389,21 @@
  * --ds-* indirection layer — light defaults + dark override + mobile swap
  * ========================================================================= */
 :root {
+  /**
+   * Tells the browser which scheme it is painting, so native controls follow
+   * the app rather than the operating system.
+   *
+   * Everything else here swaps on `[data-theme]`, but the parts of a control
+   * the browser draws itself — a date field's text and calendar icon, its
+   * dropdown panel, scrollbars, spin buttons — take no notice of CSS variables.
+   * Without this they follow the OS preference, so the date pickers on
+   * analytics, history and the Z-report stayed dark on a dark machine even with
+   * the app in light mode.
+   *
+   * Inherited, so declaring it once at the root is enough.
+   */
+  color-scheme: light;
+
   /* Semantic colors — light mode */
   --ds-primary: #f56500;
   --ds-primary-10a: #ff69001a;
@@ -497,6 +512,8 @@
 }
 
 [data-theme="dark"] {
+  color-scheme: dark;
+
   --ds-primary: #f56500;
   --ds-primary-10a: #ffc3991a;
   --ds-on-primary: #ffffff;

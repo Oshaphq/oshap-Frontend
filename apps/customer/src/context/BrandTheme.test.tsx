@@ -36,8 +36,22 @@ describe("a restaurant with a brand colour", () => {
         <span>menu</span>
       </BrandTheme>,
     );
+    expect(html).toContain("[data-brand]");
     expect(html).toContain('[data-theme="dark"]');
-    expect(html).toContain("prefers-color-scheme: dark");
+  });
+
+  it("never keys off the OS preference", () => {
+    // It used to, guarded on `:not([data-theme="light"])` — but light mode
+    // *removes* the attribute rather than setting it to "light". So a guest on
+    // a dark phone who switched the app to light got dark brand colours over
+    // light surfaces, which is the contrast failure the palette derivation
+    // exists to prevent. `data-theme` is the single source of truth.
+    const html = render(
+      <BrandTheme tableId="T1" primaryColor="#1a237e">
+        <span>menu</span>
+      </BrandTheme>,
+    );
+    expect(html).not.toContain("prefers-color-scheme");
   });
 });
 
