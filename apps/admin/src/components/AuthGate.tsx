@@ -11,6 +11,7 @@ import { PrimaryButton, Select, ThemeToggle } from "@oshap/shared/ui";
 import { initFCM } from "../utils/fcm";
 import AlertCenter from "./AlertCenter";
 import NotificationBell from "./NotificationBell";
+import { tabsForRole } from "../permissions";
 import { useAuth } from "../context/AuthContext";
 
 export default function AuthGate() {
@@ -197,35 +198,10 @@ export default function AuthGate() {
   // furniture. It appears when there is actually something to switch between.
   const showBranchSelector = user?.role === "OWNER" && branches.length > 1;
 
-  // Role-based tabs
-  const tabs = [];
-  if (["OWNER", "MANAGER", "WAITER", "CASHIER"].includes(user.role)) {
-    tabs.push({ to: "/", label: "Tables", end: true });
-  }
-  if (["OWNER", "MANAGER"].includes(user.role)) {
-    tabs.push({ to: "/menu", label: "Menu" });
-    tabs.push({ to: "/inventory", label: "Inventory" });
-  }
-  if (["OWNER", "MANAGER", "KITCHEN", "BARTENDER"].includes(user.role)) {
-    // The count is the point: a manager on Settings has no way of knowing
-    // three tickets are waiting, and the kitchen board is the one screen where
-    // being a tab away costs a guest their food going cold.
-    tabs.push({ to: "/kitchen", label: "Orders", count: waitingTickets });
-  }
-  if (["OWNER", "MANAGER", "CASHIER"].includes(user.role)) {
-    tabs.push({ to: "/z-report", label: "Close" });
-  }
-  if (["OWNER", "MANAGER"].includes(user.role)) {
-    tabs.push({ to: "/history", label: "History" });
-    tabs.push({ to: "/settings", label: "Settings" });
-  }
-  if (user.role === "OWNER") {
-    tabs.push({ to: "/analytics", label: "Analytics" });
-    // Group analytics compares venues, so it only means anything above one.
-    if (branches.length > 1) {
-      tabs.push({ to: "/analytics/group", label: "Group Analytics" });
-    }
-  }
+  const tabs = tabsForRole(user.role, {
+    branchCount: branches.length,
+    waitingTickets,
+  });
 
   return (
     <div className="min-h-screen bg-surface flex flex-col">

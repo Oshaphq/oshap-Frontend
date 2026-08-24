@@ -55,8 +55,12 @@ export default function App() {
             <Route path="/notifications" element={<NotificationsPage />} />
           </Route>
 
-          {/* Kitchen / Bar orders */}
-          <Route element={<RoleGate allowedRoles={["OWNER", "MANAGER", "KITCHEN", "BARTENDER"]} />}>
+          {/* Kitchen / Bar orders.
+              Waiters too: they are the ones carrying plates, so "is table 6's
+              food up yet" is a question they answer all night, and it is where
+              they mark an order Served. Kitchen and bar stay confined to this
+              board — `IndexRoute` sends them here rather than to Tables. */}
+          <Route element={<RoleGate allowedRoles={["OWNER", "MANAGER", "WAITER", "KITCHEN", "BARTENDER"]} />}>
             <Route path="/kitchen" element={<KitchenPage />} />
           </Route>
 

@@ -9,6 +9,7 @@ import type { OrderWithItems } from "@oshap/shared";
 import { PrimaryButton, toast } from "@oshap/shared/ui";
 import QueryError from "../components/QueryError";
 import ServeDialog from "../components/ServeDialog";
+import { canAdvanceKitchenTickets } from "../permissions";
 import { Link } from "react-router";
 import { useAuth } from "../context/AuthContext";
 import { useState } from "react";
@@ -116,6 +117,8 @@ export default function KitchenPage() {
 
 
   const isStationRole = user?.role === "BARTENDER" || user?.role === "KITCHEN";
+
+  const canAdvanceTickets = user ? canAdvanceKitchenTickets(user.role) : false;
   // Orders exist but this station sees none of them — usually a category-name
   // mismatch rather than a quiet service.
   const hiddenByStationFilter =
@@ -167,7 +170,7 @@ export default function KitchenPage() {
               title="New"
               accent="primary"
               orders={newOrders}
-              ctaLabel="Start"
+              ctaLabel={canAdvanceTickets ? "Start" : null}
               ctaDisabledLabel="..."
               isUpdatingId={
                 updateStatus.isPending ? updateStatus.variables?.order_id : null
@@ -178,7 +181,7 @@ export default function KitchenPage() {
               title="Preparing"
               accent="warning"
               orders={inProgress}
-              ctaLabel="Ready"
+              ctaLabel={canAdvanceTickets ? "Ready" : null}
               ctaDisabledLabel="..."
               isUpdatingId={
                 updateStatus.isPending ? updateStatus.variables?.order_id : null
