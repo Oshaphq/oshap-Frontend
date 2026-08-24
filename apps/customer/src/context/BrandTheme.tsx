@@ -82,12 +82,21 @@ export function BrandTheme({
         .join(";");
     const light = decl(brandCssVars(palette.light));
     const dark = decl(brandCssVars(palette.dark));
-    return (
-      `[data-brand]{${light}}` +
-      `[data-theme="dark"] [data-brand]{${dark}}` +
-      `@media (prefers-color-scheme: dark){` +
-      `:root:not([data-theme="light"]) [data-brand]{${dark}}}`
-    );
+    /**
+     * Keyed on `data-theme` alone, deliberately.
+     *
+     * There used to be a `prefers-color-scheme` block guarded on
+     * `:not([data-theme="light"])`, which assumed light mode sets that
+     * attribute. It does not — `setTheme` **removes** the attribute for light.
+     * So a guest on a dark phone who switched the app to light got dark brand
+     * colours painted over light surfaces, which is exactly the contrast
+     * failure the palette derivation exists to prevent.
+     *
+     * Nothing is lost by dropping it: the boot script already reads the OS
+     * preference and sets `data-theme` from it, so the attribute is the single
+     * source of truth its own comment claims it is.
+     */
+    return `[data-brand]{${light}}` + `[data-theme="dark"] [data-brand]{${dark}}`;
   }, [palette]);
 
   return (
