@@ -1981,16 +1981,11 @@ describe("mock API — notifications", () => {
     id: string;
     type: string;
     table_name: string | null;
-    read: boolean;
+    is_unread: boolean;
+    is_unresolved: boolean;
     resolved_at: string | null;
-    resolved_by_name: string | null;
   };
-  type List = {
-    notifications: Row[];
-    total: number;
-    unread_total: number;
-    unresolved_total: number;
-  };
+  type List = { notifications: Row[]; total: number };
 
   const list = async (qs = "") =>
     (await mockRequest("/admin/notifications", "GET", null, q(qs), true))
@@ -2017,16 +2012,20 @@ describe("mock API — notifications", () => {
     expect(call).toBeDefined();
   });
 
-  it("counts totals over the whole scope, not the page", async () => {
+  it("gives the badge its count without dragging back the rows", async () => {
+    // The agreed contract had `unresolved_total` on every response. It did not
+    // ship, so the badge asks for unresolved rows one at a time and reads
+    // `total` — which counts the filtered set, not the page. That keeps the
+    // property that mattered: paging the list never disturbs the badge.
     await mockRequest("/table/tbl-t3/call-waiter", "POST", {}, q(), false);
-    const page = await list("page=1&per_page=1");
-    expect(page.notifications).toHaveLength(1);
-    // A badge that changed when you turned a page would stop meaning
-    // "work outstanding".
-    expect(page.unresolved_total).toBeGreaterThan(1);
+    await mockRequest("/table/tbl-t6/call-waiter", "POST", {}, q(), false);
+
+    const badge = await list("page=1&per_page=1&unresolved_only=true");
+    expect(badge.notifications).toHaveLength(1);
+    expect(badge.total).toBeGreaterThan(1);
   });
 
-  it("claiming a call records who went", async () => {
+  it("claiming a call takes it off the outstanding list", async () => {
     await mockRequest("/table/tbl-t4/call-waiter", "POST", {}, q(), false);
     const call = (await list("unresolved_only=true")).notifications.find(
       (n) => n.type === "waiter_called",
@@ -2041,7 +2040,9 @@ describe("mock API — notifications", () => {
     );
     expect(res.status).toBe(200);
     expect((res.body as Row).resolved_at).not.toBeNull();
-    expect((res.body as Row).resolved_by_name).toBeTruthy();
+    // The API carries no `resolved_by_name`, so a claimed call can say it was
+    // taken but not by whom. That has gone back to the backend.
+    expect((res.body as Row).is_unresolved).toBe(false);
   });
 
   it("a second waiter tapping at once sees who got there first, not an error", async () => {
@@ -2089,15 +2090,20 @@ describe("mock API — notifications", () => {
     const before = await list();
     const ids = before.notifications.slice(0, 2).map((n) => n.id);
 
-    await mockRequest("/admin/notifications/read", "POST", { ids }, q(), true);
-    const once = await list();
-    await mockRequest("/admin/notifications/read", "POST", { ids }, q(), true);
-    const twice = await list();
+    const unreadCount = async () =>
+      (await list("per_page=1&unread_only=true")).total;
+    const unresolvedCount = async () =>
+      (await list("per_page=1&unresolved_only=true")).total;
 
-    expect(twice.unread_total).toBe(once.unread_total);
+    await mockRequest("/admin/notifications/read", "POST", { ids }, q(), true);
+    const onceUnread = await unreadCount();
+    const onceUnresolved = await unresolvedCount();
+    await mockRequest("/admin/notifications/read", "POST", { ids }, q(), true);
+
+    expect(await unreadCount()).toBe(onceUnread);
     // Reading a call you cannot act on must not clear the badge for the person
     // who can.
-    expect(twice.unresolved_total).toBe(once.unresolved_total);
+    expect(await unresolvedCount()).toBe(onceUnresolved);
   });
 
   it("marks everything read with { all: true }", async () => {

@@ -1360,38 +1360,40 @@ export type NotificationType =
   | "low_stock";
 
 /**
- * A stored notification.
+ * A stored notification, as the API actually returns it.
  *
- * The server sends facts and the client writes the sentence — there is no
- * `title` or `body` here on purpose. The alternative drifts: the same event
- * would read one way as a toast and another way as a row, and nobody would
- * notice until a waiter did.
+ * This differs from `docs/notifications.md` in ways worth knowing, because the
+ * bell was built against the document and quietly did nothing until it was
+ * mapped onto the real shape:
  *
- * `table_name` is resolved server-side at write time. The SSE payload carries
- * only a uuid, so the live toast has to look the name up in a cache and
- * degrades to "a table" when that cache is cold. A row read back three hours
- * later has no such excuse.
- *
- * `read` is per staff member; `resolved_at` is per restaurant. Two waiters can
- * both read a call — only one needs to walk over.
+ * - **`is_unread`, not `read`.** Inverted, so reading the wrong one leaves
+ *   every row looking unread forever.
+ * - **No `resolved_by_name`.** We can say a call was claimed but not by whom,
+ *   which was half the point of claiming it. Asked for.
+ * - **`title` and `message` come from the server**, though the agreed design
+ *   was that the server sends facts and the client writes sentences. We still
+ *   compose our own from `type`, and fall back to `message` only for a type we
+ *   do not recognise — so a new event still says something rather than nothing.
+ * - **The facts live in `payload`**, freeform, rather than as named fields.
  */
 export interface Notification {
   id: string;
-  type: NotificationType;
-  branch_id?: string | null;
-  branch_name?: string | null;
+  type: NotificationType | string;
+  /** Server-composed. Preferred only when we cannot compose our own. */
+  title?: string;
+  message?: string;
+  /** Freeform. Where `amount`, `menu_item_name` and the rest ended up. */
+  payload?: Record<string, unknown> | null;
   table_id?: string | null;
   table_name?: string | null;
-  order_id?: string | null;
-  order_reference?: string | null;
-  /** Kobo, like every other amount. */
-  amount?: number | null;
-  menu_item_id?: string | null;
-  menu_item_name?: string | null;
-  created_at: string;
-  read: boolean;
+  /** Which roles this was routed to, and whether the caller is one of them. */
+  audience_roles?: string[];
+  for_my_role?: boolean;
+  is_unread: boolean;
+  is_unresolved: boolean;
+  read_at?: string | null;
   resolved_at?: string | null;
-  resolved_by_name?: string | null;
+  created_at?: string | null;
 }
 
 export interface NotificationQuery {

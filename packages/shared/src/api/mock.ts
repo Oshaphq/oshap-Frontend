@@ -2402,7 +2402,7 @@ function recordNotification(eventType: string, path: string, body: unknown) {
     for (const n of _notifications) {
       if (n.type === type && !n.resolved_at && (!table || n.table_id === table.uuid)) {
         n.resolved_at = new Date().toISOString();
-        n.resolved_by_name = "System";
+        n.is_unresolved = false;
       }
     }
   }
@@ -2413,21 +2413,23 @@ function recordNotification(eventType: string, path: string, body: unknown) {
   _notifications.unshift({
     id: uid(),
     type,
-    branch_id: null,
-    branch_name: null,
+    // The server composes these too. We prefer our own wording and fall back
+    // to them only for a type we do not recognise.
+    title: type.replace(/_/g, " "),
+    message: table?.name ? `${table.name} needs attention` : "Needs attention",
+    // Freeform, which is where the named fields ended up on the real API.
+    payload: {},
     table_id: table?.uuid ?? null,
     // Resolved at write time. The client must never have to look this up —
     // a row read three hours later cannot depend on a warm cache.
     table_name: table?.name ?? null,
-    order_id: null,
-    order_reference: null,
-    amount: null,
-    menu_item_id: null,
-    menu_item_name: null,
+    audience_roles: ["OWNER", "MANAGER", "WAITER"],
+    for_my_role: true,
     created_at: new Date().toISOString(),
-    read: false,
+    is_unread: true,
+    is_unresolved: true,
+    read_at: null,
     resolved_at: null,
-    resolved_by_name: null,
   });
 }
 
@@ -2441,31 +2443,33 @@ route("GET", /^\/admin\/notifications$/, ({ query }) => {
 
   let rows = _notifications;
   if (type) rows = rows.filter((n) => n.type === type);
-  if (query.get("unread_only") === "true") rows = rows.filter((n) => !n.read);
+  if (query.get("unread_only") === "true") rows = rows.filter((n) => n.is_unread);
   if (query.get("unresolved_only") === "true") {
-    rows = rows.filter((n) => !n.resolved_at);
+    rows = rows.filter((n) => n.is_unresolved);
   }
 
   const start = (page - 1) * perPage;
+  // `total` counts the filtered set, not the page — which is what lets the
+  // badge ask for `unresolved_only` with `per_page=1` and read the count off
+  // it. The agreed scope totals never shipped.
   return json(200, {
     notifications: rows.slice(start, start + perPage),
     total: rows.length,
-    // Scope totals, not page totals — a badge that moved when you turned a
-    // page would stop meaning "work outstanding".
-    unread_total: _notifications.filter((n) => !n.read).length,
-    unresolved_total: _notifications.filter((n) => !n.resolved_at).length,
     page,
     per_page: perPage,
-  } satisfies NotificationsResponse);
+  } as NotificationsResponse);
 });
 
 route("POST", /^\/admin\/notifications\/read$/, ({ body }) => {
   const b = (body ?? {}) as NotificationsMarkReadRequest;
   for (const n of _notifications) {
-    if (b.all || b.ids?.includes(n.id)) n.read = true;
+    if (b.all || b.ids?.includes(n.id)) {
+      n.is_unread = false;
+      n.read_at = new Date().toISOString();
+    }
   }
   return json(200, {
-    unread_total: _notifications.filter((n) => !n.read).length,
+    unread_total: _notifications.filter((n) => n.is_unread).length,
   } satisfies NotificationsMarkReadResponse);
 });
 
@@ -2474,7 +2478,7 @@ route("POST", /^\/admin\/notifications\/[^/]+\/resolve$/, ({ path }) => {
   const row = _notifications.find((n) => n.id === id);
   if (!row) return json(404, { error: "Notification not found" });
 
-  if (!CLAIMABLE.includes(row.type)) {
+  if (!CLAIMABLE.includes(row.type as NotificationType)) {
     // 409, not 403 — the caller is allowed here, this row just is not the kind
     // a person closes.
     return json(409, {
@@ -2486,8 +2490,7 @@ route("POST", /^\/admin\/notifications\/[^/]+\/resolve$/, ({ path }) => {
   // at once is the normal case, not an error.
   if (!row.resolved_at) {
     row.resolved_at = new Date().toISOString();
-    row.resolved_by_name =
-      [..._staff.values()].find((st) => st.role === "OWNER")?.name ?? "You";
+    row.is_unresolved = false;
   }
   return json(200, row);
 });

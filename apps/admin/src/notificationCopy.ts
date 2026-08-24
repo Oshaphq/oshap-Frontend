@@ -1,5 +1,5 @@
 import { formatCurrency, parseApiDate } from "@oshap/shared";
-import type { NotificationType } from "@oshap/shared";
+import type { Notification, NotificationType } from "@oshap/shared";
 
 /**
  * One place that turns a notification into words.
@@ -163,3 +163,26 @@ export const TIME_BUCKETS: TimeBucket[] = [
   "Yesterday",
   "Older",
 ];
+
+/**
+ * Pulls the facts a message needs out of a stored notification.
+ *
+ * The agreed contract named them — `amount`, `menu_item_name`,
+ * `order_reference`. What shipped puts them in a freeform `payload`, so they
+ * are read out here rather than at every call site, and a missing one simply
+ * drops the clause it would have filled.
+ */
+export function notificationFacts(n: Notification): NotificationFacts {
+  const payload = (n.payload ?? {}) as Record<string, unknown>;
+  const str = (key: string) =>
+    typeof payload[key] === "string" ? (payload[key] as string) : null;
+  const num = (key: string) =>
+    typeof payload[key] === "number" ? (payload[key] as number) : null;
+
+  return {
+    table_name: n.table_name ?? str("table_name"),
+    order_reference: str("order_reference"),
+    amount: num("amount"),
+    menu_item_name: str("menu_item_name") ?? str("item_name"),
+  };
+}

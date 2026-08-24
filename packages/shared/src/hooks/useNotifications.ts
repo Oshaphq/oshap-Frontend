@@ -32,21 +32,22 @@ export function useAdminNotifications(query: NotificationQuery = {}) {
 /**
  * The badge's own query.
  *
- * Deliberately not read off the list: the list pages, and a badge that changed
- * when someone turned a page would stop meaning "work outstanding". One row is
- * fetched purely so the totals come back — they count the caller's whole scope,
- * not the page.
+ * The agreed contract returned `unresolved_total` on every list response. It
+ * did not ship, so the badge read `undefined` and the bell never lit — a
+ * notification centre whose only always-visible part was permanently blank.
+ *
+ * `total` is the count for the query asked, so asking for unresolved rows with
+ * `per_page=1` makes `total` exactly the number wanted, without dragging back
+ * twenty rows to count them. It also keeps the property that mattered: the
+ * badge counts the whole scope, so paging the list never disturbs it.
  */
 export function useNotificationBadge() {
   return useQuery({
     queryKey: queryKeys.admin.notificationBadge(),
-    queryFn: () => adminNotifications({ page: 1, per_page: 1 }),
+    queryFn: () => adminNotifications({ page: 1, per_page: 1, unresolved_only: true }),
     refetchInterval: POLL_MS,
     refetchOnWindowFocus: true,
-    select: (data) => ({
-      unresolved: data.unresolved_total,
-      unread: data.unread_total,
-    }),
+    select: (data) => ({ unresolved: data.total }),
   });
 }
 
