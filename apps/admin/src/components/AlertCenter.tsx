@@ -6,7 +6,7 @@ import {
   type RealtimeEvent,
 } from "@oshap/shared";
 import type { AdminTablesResponse } from "@oshap/shared";
-import { playChime } from "../utils/chime";
+import { playChime, listenForFirstGesture } from "../utils/chime";
 import { NOTIFICATION_META } from "../notificationCopy";
 import type { NotificationType } from "@oshap/shared";
 
@@ -59,6 +59,11 @@ export default function AlertCenter() {
   const [alerts, setAlerts] = useState<Alert[]>([]);
   const nextIdRef = useRef(1);
   const queryClient = useQueryClient();
+
+  // Arms the audio on the first tap or keypress anywhere in the app. Without
+  // it the context is first created inside an SSE handler, where the browser
+  // refuses to start it — so the chime never sounded, silently.
+  useEffect(listenForFirstGesture, []);
 
   useEffect(() => {
     const timers: number[] = [];

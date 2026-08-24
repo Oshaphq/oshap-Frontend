@@ -3,6 +3,7 @@ import { Link } from "react-router";
 import {
   useAdminTables,
   useMarkNotificationsRead,
+  useNotificationCount,
   useNotificationBadge,
   useAdminNotifications,
   useResolveNotification,
@@ -72,6 +73,8 @@ function NotificationPanel({ onClose }: { onClose: () => void }) {
   // Memoised because `?? []` is a fresh array every render, which would make
   // the grouping below re-run for nothing.
   const rows = useMemo(() => data?.notifications ?? [], [data?.notifications]);
+  const markRead = useMarkNotificationsRead();
+  const unreadCount = useNotificationCount("unread").data ?? 0;
 
   // Escape closes, and a click anywhere else does too — this is a popover over
   // a working screen, not a modal, so it must never trap anyone.
@@ -97,13 +100,25 @@ function NotificationPanel({ onClose }: { onClose: () => void }) {
           <span className="text-label-l4 font-semibold font-display text-primary-text">
             Notifications
           </span>
-          <Link
-            to="/notifications"
-            onClick={onClose}
-            className="text-caption-md font-semibold text-primary no-underline hover:underline"
-          >
-            See all
-          </Link>
+          <div className="flex items-center gap-md">
+            {/* Clearing the lot is the commonest thing to want from a glance at
+                the bell, and it used to mean opening the full page first. */}
+            <button
+              type="button"
+              disabled={markRead.isPending || unreadCount === 0}
+              onClick={() => markRead.mutate({ all: true })}
+              className="text-caption-md font-semibold text-primary bg-transparent border-none cursor-pointer p-0 hover:underline disabled:text-outline disabled:cursor-default disabled:no-underline"
+            >
+              {markRead.isPending ? "Marking…" : "Mark all read"}
+            </button>
+            <Link
+              to="/notifications"
+              onClick={onClose}
+              className="text-caption-md font-semibold text-primary no-underline hover:underline"
+            >
+              See all
+            </Link>
+          </div>
         </div>
 
         <div className="flex-1 overflow-y-auto p-s flex flex-col gap-s">

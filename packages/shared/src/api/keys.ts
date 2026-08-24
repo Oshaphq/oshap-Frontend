@@ -53,8 +53,9 @@ export const queryKeys = {
     recipe: (menuItemId: string) => ["admin", "recipe", menuItemId] as const,
     notifications: (query?: Record<string, unknown>) =>
       ["admin", "notifications", query ?? {}] as const,
-    /** The badge. Kept separate so paging the list never disturbs it. */
-    notificationBadge: () => ["admin", "notifications", "badge"] as const,
+    /** Counts. Kept separate so paging the list never disturbs them. */
+    notificationCount: (filter: string) =>
+      ["admin", "notifications", "count", filter] as const,
   },
   platform: {
     all: ["platform"] as const,

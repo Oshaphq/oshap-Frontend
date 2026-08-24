@@ -1,5 +1,9 @@
 import { useMemo, useState } from "react";
-import { useAdminNotifications, useMarkNotificationsRead } from "@oshap/shared";
+import {
+  useAdminNotifications,
+  useMarkNotificationsRead,
+  useNotificationCount,
+} from "@oshap/shared";
 import type { NotificationType } from "@oshap/shared";
 import { SecondaryButton, Select } from "@oshap/shared/ui";
 import QueryError from "../components/QueryError";
@@ -39,6 +43,9 @@ export default function Notifications() {
     unresolved_only: unresolvedOnly || undefined,
   });
   const markRead = useMarkNotificationsRead();
+  // Its own query. Reading a count off the loaded page would disable the
+  // button whenever page 1 happened to be read, while page 3 was not.
+  const unread = useNotificationCount("unread");
 
   const rows = useMemo(
     () => query.data?.notifications ?? [],
@@ -70,7 +77,10 @@ export default function Notifications() {
         </div>
         <SecondaryButton
           size="md"
-          disabled={markRead.isPending || (query.data?.unread_total ?? 0) === 0}
+          // `unread_total` was on the agreed contract and never shipped, so
+          // this read `undefined`, fell back to 0, and disabled the button
+          // permanently — a dead control that looked deliberate.
+          disabled={markRead.isPending || (unread.data ?? 0) === 0}
           onClick={() => markRead.mutate({ all: true })}
         >
           {markRead.isPending ? "Marking…" : "Mark all read"}
