@@ -9,6 +9,7 @@ import {
   useAdminUpdateIngredient,
   useAdminIngredients,
   useAdminStockMovements,
+  formatApiDateTime,
 } from "@oshap/shared";
 import type { StockReason, Ingredient } from "@oshap/shared";
 import { PrimaryButton, SecondaryButton, Select, toast } from "@oshap/shared/ui";
@@ -264,7 +265,7 @@ function MovementsLedger() {
               className="flex flex-wrap items-baseline gap-x-md gap-y-xs px-md py-s border-b border-outline-variant last:border-none"
             >
               <span className="text-caption-md text-secondary-text tabular-nums shrink-0">
-                {new Date(movement.created_at).toLocaleString()}
+                {formatApiDateTime(movement.created_at)}
               </span>
               <span className="text-p2 text-primary-text flex-1 min-w-0">
                 {REASON_LABELS[movement.reason] ?? movement.reason}

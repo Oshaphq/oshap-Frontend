@@ -1,25 +1,19 @@
 import { useState } from "react";
 import { Link } from "react-router";
-import { useAdminHistory, formatCurrency } from "@oshap/shared";
+import {
+  useAdminHistory,
+  formatCurrency,
+  formatApiDate,
+  formatApiTime,
+} from "@oshap/shared";
 import { SecondaryButton } from "@oshap/shared/ui";
 import QueryError from "../components/QueryError";
 
-function formatDate(dateStr: string) {
-  const d = new Date(dateStr);
-  return d.toLocaleDateString("en-NG", {
-    day: "numeric",
-    month: "short",
-    year: "numeric",
-  });
-}
-
-function formatTime(dateStr: string) {
-  const d = new Date(dateStr);
-  return d.toLocaleTimeString("en-NG", {
-    hour: "2-digit",
-    minute: "2-digit",
-  });
-}
+// Both read the API's zoneless timestamps as local time, which in Lagos put
+// every order an hour early — and pushed a late-evening one onto the previous
+// day, the same way the Z-report buckets it wrong.
+const formatDate = formatApiDate;
+const formatTime = formatApiTime;
 
 export default function HistoryPage() {
   const [page, setPage] = useState(1);

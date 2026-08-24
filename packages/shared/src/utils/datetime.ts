@@ -22,3 +22,43 @@ export function parseApiDate(value: string): Date {
   const hasZone = /(?:Z|[+-]\d{2}:?\d{2})$/i.test(value);
   return new Date(isDateTime && !hasZone ? `${value}Z` : value);
 }
+
+/**
+ * Date and time as staff read it, from an API timestamp.
+ *
+ * Exists so call sites stop reaching for `new Date(x).toLocaleString()`, which
+ * is how the zoneless-timestamp bug reached five screens without anyone
+ * noticing: an hour is invisible on a receipt or an audit row in a way it is
+ * not on a waiter call placed a minute ago.
+ */
+export function formatApiDateTime(value: string): string {
+  return parseApiDate(value).toLocaleString();
+}
+
+/**
+ * Day only.
+ *
+ * Worth parsing correctly even here — arguably especially here. An order at
+ * 23:30 in Lagos read as UTC lands on the previous day, so a whole row moves
+ * date rather than merely shifting an hour.
+ */
+export function formatApiDate(
+  value: string,
+  locale = "en-NG",
+  options: Intl.DateTimeFormatOptions = {
+    day: "numeric",
+    month: "short",
+    year: "numeric",
+  },
+): string {
+  return parseApiDate(value).toLocaleDateString(locale, options);
+}
+
+/** Clock time only. */
+export function formatApiTime(
+  value: string,
+  locale = "en-NG",
+  options: Intl.DateTimeFormatOptions = { hour: "2-digit", minute: "2-digit" },
+): string {
+  return parseApiDate(value).toLocaleTimeString(locale, options);
+}

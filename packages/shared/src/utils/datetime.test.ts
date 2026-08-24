@@ -1,5 +1,10 @@
 import { describe, it, expect } from "vitest";
-import { parseApiDate } from "./datetime";
+import {
+  formatApiDate,
+  formatApiDateTime,
+  formatApiTime,
+  parseApiDate,
+} from "./datetime";
 
 /**
  * From the pilot: a waiter call placed seconds earlier showed as "1h". The
@@ -41,5 +46,27 @@ describe("timestamps that already say what they mean are left alone", () => {
   it("leaves a date-only string alone — those are already UTC", () => {
     // Appending a marker to one produces an invalid date, not a corrected one.
     expect(parseApiDate("2026-08-23").toISOString()).toBe("2026-08-23T00:00:00.000Z");
+  });
+});
+
+describe("the formatters go through the same guard", () => {
+  // These exist so call sites stop writing `new Date(x).toLocaleString()`,
+  // which is how one zoneless-timestamp bug reached five screens. If they ever
+  // stop parsing correctly, so does every screen at once.
+  const naive = "2026-08-23T22:30:00";
+  const zoned = "2026-08-23T22:30:00Z";
+
+  it("formatApiDateTime reads a naive timestamp as UTC", () => {
+    expect(formatApiDateTime(naive)).toBe(formatApiDateTime(zoned));
+  });
+
+  it("formatApiTime reads a naive timestamp as UTC", () => {
+    expect(formatApiTime(naive)).toBe(formatApiTime(zoned));
+  });
+
+  it("formatApiDate keeps a late-evening order on the right day", () => {
+    // The sharper half of the bug: an hour's drift moves a 23:30 order onto the
+    // previous date, so a whole history row files under the wrong day.
+    expect(formatApiDate(naive)).toBe(formatApiDate(zoned));
   });
 });

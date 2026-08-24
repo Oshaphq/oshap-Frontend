@@ -11,6 +11,7 @@ import {
   usePlatformRestaurant,
   usePlatformUpdateRestaurant,
   errorMessage,
+  parseApiDate,
 } from "@oshap/shared";
 import type { BillingPeriod, SubscriptionTier } from "@oshap/shared";
 import { toast } from "@oshap/shared/ui";
@@ -164,7 +165,7 @@ export default function RestaurantDetailPage() {
             Onboarded
           </span>
           <span className="font-bold text-p text-primary-text">
-            {new Date(r.created_at).toLocaleDateString()}
+            {parseApiDate(r.created_at).toLocaleDateString()}
           </span>
         </div>
       </div>
