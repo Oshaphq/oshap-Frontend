@@ -1,6 +1,7 @@
 import { describe, it, expect } from "vitest";
 import {
   NOTIFICATION_META,
+  notificationFacts,
   timeAgo,
   timeBucket,
   TIME_BUCKETS,
@@ -138,5 +139,44 @@ describe("timeBucket groups by the day, not by elapsed hours", () => {
       const then = new Date(now - days * 86_400_000).toISOString();
       expect(TIME_BUCKETS).toContain(timeBucket(then, now));
     }
+  });
+});
+
+describe("reading facts out of the shipped shape", () => {
+  const row = (over: Partial<Parameters<typeof notificationFacts>[0]> = {}) =>
+    notificationFacts({
+      id: "n1",
+      type: "waiter_called",
+      is_unread: true,
+      is_unresolved: true,
+      ...over,
+    });
+
+  it("prefers the resolved table name on the row", () => {
+    expect(row({ table_name: "T4" }).table_name).toBe("T4");
+  });
+
+  it("falls back to the payload, which is where the API puts the rest", () => {
+    // The agreed contract named `amount` and `menu_item_name` as fields. What
+    // shipped puts them in a freeform `payload`, so they are read out once here
+    // rather than at every call site.
+    const facts = row({
+      payload: { amount: 1_240_000, menu_item_name: "Suya", table_name: "T7" },
+    });
+    expect(facts.amount).toBe(1_240_000);
+    expect(facts.menu_item_name).toBe("Suya");
+    expect(facts.table_name).toBe("T7");
+  });
+
+  it("drops a fact of the wrong type rather than printing it", () => {
+    // `payload` is untyped, so a string where a number belongs is possible —
+    // and "paid ₦NaN" is worse than saying nothing about the amount.
+    expect(row({ payload: { amount: "lots" } }).amount).toBeNull();
+  });
+
+  it("survives a missing payload", () => {
+    const facts = row();
+    expect(facts.amount).toBeNull();
+    expect(facts.table_name).toBeNull();
   });
 });

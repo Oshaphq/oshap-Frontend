@@ -7,10 +7,12 @@ import {
   useAdminNotifications,
   useResolveNotification,
 } from "@oshap/shared";
-import type { Notification } from "@oshap/shared";
+import type { Notification, NotificationType } from "@oshap/shared";
 import { toast } from "@oshap/shared/ui";
 import {
   NOTIFICATION_META,
+  notificationFacts,
+  type NotificationMeta,
   TIME_BUCKETS,
   timeAgo,
   timeBucket,
@@ -144,15 +146,15 @@ export function NotificationRow({
   notification: Notification;
   onNavigate?: () => void;
 }) {
-  const meta = NOTIFICATION_META[n.type];
+  const meta = NOTIFICATION_META[n.type as NotificationType] as
+    | NotificationMeta
+    | undefined;
   const resolve = useResolveNotification();
   const ref = useMarkReadWhenSeen(n);
   const tableName = useResolvedTableName(n);
 
-  if (!meta) return null;
-
   const claimed = Boolean(n.resolved_at);
-  const canClaim = meta.claimable && !claimed;
+  const canClaim = Boolean(meta?.claimable) && !claimed;
 
   return (
     <div
@@ -162,17 +164,22 @@ export function NotificationRow({
       }`}
     >
       <i
-        className={`${claimed ? "mgc_check_circle_line text-on-surface-variant" : `${meta.iconClass} ${meta.iconColorClass}`} text-xl shrink-0 mt-0.5`}
+        className={`${claimed ? "mgc_check_circle_line text-on-surface-variant" : `${meta?.iconClass ?? "mgc_notification_line"} ${meta?.iconColorClass ?? "text-on-surface-variant"}`} text-xl shrink-0 mt-0.5`}
         aria-hidden
       />
       <div className="flex flex-col gap-0.5 min-w-0 flex-1">
         <span className="text-label-l5 font-semibold text-primary-text">
-          {meta.body({ ...n, table_name: tableName })}
+          {/* Our own wording for a type we know; the server's for one we do
+              not, so a newly added event still says something. */}
+          {meta
+            ? meta.body({ ...notificationFacts(n), table_name: tableName })
+            : n.message || n.title || "Something needs attention"}
         </span>
         <span className="text-caption-xs text-secondary-text">
-          {timeAgo(n.created_at)}
-          {claimed && n.resolved_by_name ? ` · Claimed by ${n.resolved_by_name}` : ""}
-          {n.branch_name ? ` · ${n.branch_name}` : ""}
+          {n.created_at ? timeAgo(n.created_at) : ""}
+          {/* No `resolved_by_name` on the API, so this can say a call was
+              claimed but not by whom — which was half the point. Asked for. */}
+          {claimed ? " · Claimed" : ""}
         </span>
       </div>
 
@@ -182,11 +189,9 @@ export function NotificationRow({
           disabled={resolve.isPending}
           onClick={() =>
             resolve.mutate(n.id, {
-              // Someone else may have got there first. The endpoint answers 200
-              // with their name rather than an error, so this reads as news.
-              onSuccess: (row) =>
-                row.resolved_by_name &&
-                toast.success(`Claimed by ${row.resolved_by_name}`),
+              // Someone else may already have gone. The endpoint answers 200
+              // with the existing record rather than an error.
+              onSuccess: () => toast.success("Yours — on your way"),
             })
           }
           className="shrink-0 px-s py-0.5 rounded-4xl bg-primary text-on-primary text-caption-xs font-semibold hover:opacity-90 active:scale-[0.97] disabled:opacity-50 focus-visible:outline-2 focus-visible:outline-primary focus-visible:outline-offset-2 transition"
@@ -195,7 +200,7 @@ export function NotificationRow({
         </button>
       )}
 
-      {!meta.claimable && n.table_id && (
+      {!meta?.claimable && n.table_id && (
         <Link
           to="/"
           onClick={onNavigate}
@@ -241,7 +246,7 @@ function useMarkReadWhenSeen(n: Notification) {
   const fired = useRef(false);
 
   useEffect(() => {
-    if (n.read || fired.current || !ref.current) return;
+    if (!n.is_unread || fired.current || !ref.current) return;
     // No IntersectionObserver (jsdom, old browsers) — leave it unread rather
     // than marking something read that may never have been seen.
     if (typeof IntersectionObserver === "undefined") return;
@@ -269,7 +274,7 @@ function useMarkReadWhenSeen(n: Notification) {
     // `markRead` is a stable mutation handle; re-running on it would restart
     // the timer on every render.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [n.id, n.read]);
+  }, [n.id, n.is_unread]);
 
   return ref;
 }
@@ -280,7 +285,9 @@ export function groupByTime(
 ): Array<[TimeBucket, Notification[]]> {
   const buckets = new Map<TimeBucket, Notification[]>();
   for (const n of rows) {
-    const key = timeBucket(n.created_at, now);
+    // `created_at` is nullable on the API. A row with no time is still real
+    // work, so it sits in Older rather than being dropped.
+    const key = n.created_at ? timeBucket(n.created_at, now) : "Older";
     const list = buckets.get(key);
     if (list) list.push(n);
     else buckets.set(key, [n]);
