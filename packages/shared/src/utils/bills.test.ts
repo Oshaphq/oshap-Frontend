@@ -297,3 +297,61 @@ describe("a cancelled order is not an open bill", () => {
     expect(bills[0]!.orders[0]!.order_id).toBe("b");
   });
 });
+
+describe("a bill that owes money can always be acted on", () => {
+  /**
+   * The invariant, rather than another example.
+   *
+   * This broke twice in a row the same way: the bill's *state* learned to read
+   * `balance_due`, but the list of orders the cash dialog settles still came
+   * from `payment_state`. A part payment leaves that reading CONFIRMED, so
+   * "Take the rest" opened on an empty selection and announced that the table
+   * had no unpaid bill.
+   *
+   * Any bill showing money owed must name at least one order to take it
+   * against, whichever field the server chose to be inconsistent about.
+   */
+  const cases: Array<[string, Partial<AdminTableLiveOrder>]> = [
+    ["part paid, state says confirmed", {
+      payment_state: "CONFIRMED", total: 4_108_650, amount_paid: 4_000_000, balance_due: 108_650,
+    }],
+    ["part paid, state says not paid", {
+      payment_state: "NOT_PAID", total: 1000, amount_paid: 400, balance_due: 600,
+    }],
+    ["part paid, state unreadable", {
+      payment_state: "SOMETHING_NEW", total: 1000, amount_paid: 400, balance_due: 600,
+    }],
+    ["nothing paid, balance reported", {
+      payment_state: "NOT_PAID", total: 1000, amount_paid: 0, balance_due: 1000,
+    }],
+    ["nothing paid, no balance reported", { payment_state: "NOT_PAID", total: 1000 }],
+  ];
+
+  it.each(cases)("%s", (_name, over) => {
+    const bill = groupBills([order({ order_id: "a", device_token: "p1", ...over })])[0]!;
+    if (bill.state === "part" || bill.state === "unpaid") {
+      expect(bill.balanceDue).toBeGreaterThan(0);
+      expect(bill.unpaidOrderIds).not.toHaveLength(0);
+    }
+  });
+
+  it("takes the rest against only the orders that still owe", () => {
+    // A party where one order is settled and the other is half paid: the
+    // dialog must not re-charge the settled one.
+    const bill = groupBills([
+      order({ order_id: "done", session_id: "s1", total: 1000, amount_paid: 1000, balance_due: 0 }),
+      order({ order_id: "owing", session_id: "s1", total: 2000, amount_paid: 500, balance_due: 1500 }),
+    ])[0]!;
+
+    expect(bill.state).toBe("part");
+    expect(bill.unpaidOrderIds).toEqual(["owing"]);
+    expect(bill.balanceDue).toBe(1500);
+  });
+
+  it("a settled bill names nothing to settle", () => {
+    const bill = groupBills([
+      order({ order_id: "a", device_token: "p1", payment_state: "VERIFIED", total: 1000, amount_paid: 1000, balance_due: 0 }),
+    ])[0]!;
+    expect(bill.unpaidOrderIds).toEqual([]);
+  });
+});
