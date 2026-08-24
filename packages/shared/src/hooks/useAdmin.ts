@@ -45,6 +45,7 @@ import {
   adminCompOrderItem,
   adminOrderReceipt,
   adminAuditLogs,
+  adminBulkDeleteMenuItems,
 } from "../api/admin";
 import type {
   AdminHistoryQuery,
@@ -227,6 +228,19 @@ export function useAdminDeleteMenuItem() {
     mutationFn: (id: string) => adminDeleteMenuItem(id),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: queryKeys.admin.menu() });
+      queryClient.invalidateQueries({ queryKey: queryKeys.menu.all });
+    },
+  });
+}
+
+export function useAdminBulkDeleteMenuItems() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (ids: string[]) => adminBulkDeleteMenuItems(ids),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: queryKeys.admin.menu() });
+      // The guest's menu too — a dish removed mid-service must stop being
+      // orderable, not wait for a cache to expire.
       queryClient.invalidateQueries({ queryKey: queryKeys.menu.all });
     },
   });

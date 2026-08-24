@@ -700,6 +700,42 @@ export interface SetRecipeRequest {
   lines: Array<{ ingredient_id: string; qty_per_serving: number }>;
 }
 
+/**
+ * Removing several dishes at once.
+ *
+ * The endpoint has been live since the backend shipped it and nothing had ever
+ * called it, because the menu screen offered no way to select more than one
+ * item. Clearing out a seasonal section one dish at a time is the kind of chore
+ * that quietly stops people tidying their menu at all.
+ */
+export interface BulkDeleteRequest {
+  /** At least one. The server rejects an empty list. */
+  item_ids: string[];
+}
+
+/** A dish the server would not remove, and why. */
+export interface BulkDeleteError {
+  item_id: string;
+  message: string;
+}
+
+/**
+ * Deliberately tolerant.
+ *
+ * The API types this response as an untyped object, so we cannot rely on any
+ * particular key being present — the caller treats a missing `deleted` as
+ * "however many we asked for" rather than reporting zero at a merchant who
+ * just watched several dishes disappear.
+ *
+ * `errors` matters more than the count. A dish that appears on a past order
+ * may be refused by a foreign key, and "3 of 5 removed" without naming the two
+ * survivors sends someone hunting through the list to work out which.
+ */
+export interface BulkDeleteResponse {
+  deleted?: number;
+  errors?: BulkDeleteError[];
+}
+
 /** One rejected row from a bulk import, addressed so a merchant can find it. */
 export interface MenuImportError {
   row: number;

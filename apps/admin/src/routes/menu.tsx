@@ -6,6 +6,7 @@ import {
   useAdminUpdateMenuItem,
   useAdminToggleMenuItem,
   useAdminDeleteMenuItem,
+  useAdminBulkDeleteMenuItems,
   useAdminUploadImage,
   useAdminInventoryAlerts,
   useAdminUpdateStock,
@@ -50,6 +51,7 @@ export default function MenuPage() {
   const updateItem = useAdminUpdateMenuItem();
   const toggleItem = useAdminToggleMenuItem();
   const deleteItem = useAdminDeleteMenuItem();
+  const bulkDelete = useAdminBulkDeleteMenuItems();
   const uploadImage = useAdminUploadImage();
   const updateStock = useAdminUpdateStock();
   const exportMenu = useAdminExportMenu();
@@ -58,6 +60,15 @@ export default function MenuPage() {
   const [showNewForm, setShowNewForm] = useState(false);
   const [form, setForm] = useState<MenuFormState>(EMPTY_FORM);
   const [stockEditId, setStockEditId] = useState<string | null>(null);
+  /**
+   * Off by default. Checkboxes on every row all the time would put a
+   * destructive control next to the ordinary ones on a screen staff open to
+   * change a price — turning selection on is a small deliberate step before
+   * anything can be removed in bulk.
+   */
+  const [selecting, setSelecting] = useState(false);
+  const [selected, setSelected] = useState<Set<string>>(new Set());
+  const [confirmBulk, setConfirmBulk] = useState(false);
   const [stockInput, setStockInput] = useState<string>("");
   const [thresholdInput, setThresholdInput] = useState<string>("");
   const [showImport, setShowImport] = useState(false);
@@ -155,6 +166,59 @@ export default function MenuPage() {
     }
   };
 
+  const toggleSelected = (id: string) => {
+    setSelected((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  };
+
+  const leaveSelection = () => {
+    setSelecting(false);
+    setSelected(new Set());
+    setConfirmBulk(false);
+  };
+
+  /**
+   * Reports what survived, by name.
+   *
+   * A dish on a past order cannot be erased without the receipt losing its
+   * meaning, so the server can refuse individual items. "3 of 5 removed" would
+   * leave a merchant scanning the list to work out which two are still there.
+   */
+  const handleBulkDelete = async (chosen: MenuItem[]) => {
+    const ids = chosen.map((i) => i.id);
+    try {
+      const result = await bulkDelete.mutateAsync(ids);
+      const failed = result.errors ?? [];
+      // The endpoint's response is untyped, so a missing count means "we do not
+      // know" — not zero. Reporting zero at someone who just watched dishes
+      // disappear is worse than assuming the ask went through.
+      const removed = result.deleted ?? ids.length - failed.length;
+
+      leaveSelection();
+
+      if (failed.length === 0) {
+        toast.success(removed === 1 ? "Dish deleted" : `${removed} dishes deleted`);
+        return;
+      }
+
+      const nameOf = (id: string) =>
+        chosen.find((i) => i.id === id)?.name ?? "one dish";
+      const kept = failed.map((e) => nameOf(e.item_id));
+      toast.error(
+        removed > 0
+          ? `${removed} deleted. Kept ${listNames(kept)} — ${failed[0]!.message.toLowerCase()}.`
+          : `Nothing was deleted. ${failed[0]!.message}`,
+      );
+    } catch (err) {
+      setConfirmBulk(false);
+      toast.error(errorMessage(err, "delete those dishes"));
+    }
+  };
+
   /**
    * Saving a blank box means "stop counting this dish" — a real thing to want,
    * and the reason this said "Stock updated" while the badge stayed
@@ -239,6 +303,15 @@ export default function MenuPage() {
           <SecondaryButton size="md" onClick={() => setShowGroups(true)}>
             <i className="mgc_list_check_line" /> Options
           </SecondaryButton>
+          {items.length > 0 && (
+            <SecondaryButton
+              size="md"
+              onClick={() => (selecting ? leaveSelection() : setSelecting(true))}
+            >
+              <i className={selecting ? "mgc_close_line" : "mgc_check_2_line"} />{" "}
+              {selecting ? "Done" : "Select"}
+            </SecondaryButton>
+          )}
           <PrimaryButton
             size="md"
             onClick={() => {
@@ -253,6 +326,19 @@ export default function MenuPage() {
       </header>
 
       <LowStockBanner />
+
+      {selecting && (
+        <SelectionBar
+          items={items}
+          selected={selected}
+          setSelected={setSelected}
+          confirming={confirmBulk}
+          setConfirming={setConfirmBulk}
+          pending={bulkDelete.isPending}
+          onDelete={handleBulkDelete}
+          onCancel={leaveSelection}
+        />
+      )}
 
       <div className="flex flex-col gap-md">
         {showNewForm && (
@@ -311,6 +397,9 @@ export default function MenuPage() {
               onEditOptions={() => setOptionsFor(item)}
               onEditRecipe={() => setRecipeFor(item)}
               onDelete={() => handleDelete(item.id)}
+              selecting={selecting}
+              isSelected={selected.has(item.id)}
+              onSelect={() => toggleSelected(item.id)}
             />
           );
         })}
@@ -358,9 +447,12 @@ interface ItemRowProps {
   onEditOptions: () => void;
   onEditRecipe: () => void;
   onDelete: () => void;
+  selecting: boolean;
+  isSelected: boolean;
+  onSelect: () => void;
 }
 
-function MenuItemRow({ item, isStockEditing, stockInput, thresholdInput, onStockEditStart, onStockInputChange, onThresholdInputChange, onStockSave, onStockCancel, onToggle, onEdit, onEditOptions, onEditRecipe, onDelete }: ItemRowProps) {
+function MenuItemRow({ item, isStockEditing, stockInput, thresholdInput, onStockEditStart, onStockInputChange, onThresholdInputChange, onStockSave, onStockCancel, onToggle, onEdit, onEditOptions, onEditRecipe, onDelete, selecting, isSelected, onSelect }: ItemRowProps) {
   const isLow = item.stock_count !== null && item.stock_count <= item.low_stock_threshold;
   const isOut = item.stock_count !== null && item.stock_count === 0;
 
@@ -373,6 +465,15 @@ function MenuItemRow({ item, isStockEditing, stockInput, thresholdInput, onStock
       <div className="p-md flex flex-col gap-s">
         <div className="flex items-start justify-between gap-md">
           <div className="flex items-start gap-md flex-1 min-w-0">
+            {selecting && (
+              <input
+                type="checkbox"
+                checked={isSelected}
+                onChange={onSelect}
+                aria-label={`Select ${item.name}`}
+                className="w-4 h-4 mt-1 shrink-0 accent-primary"
+              />
+            )}
             {item.image_url ? (
               <img
                 src={item.image_url}
@@ -644,6 +745,99 @@ function MenuItemForm({
           {submitting ? "Saving..." : submitLabel}
         </PrimaryButton>
       </div>
+    </div>
+  );
+}
+
+/** "Suya", "Suya and Jollof", "Suya, Jollof and 2 more". */
+export function listNames(names: string[]): string {
+  if (names.length <= 1) return names[0] ?? "";
+  if (names.length === 2) return `${names[0]} and ${names[1]}`;
+  return `${names[0]}, ${names[1]} and ${names.length - 2} more`;
+}
+
+/**
+ * What is selected, and the one destructive thing that can be done with it.
+ *
+ * The confirmation names the dishes rather than counting them. "Delete 6
+ * items?" is a number a tired person says yes to; seeing *Suya, Jollof and 4
+ * more* is what catches the row that got ticked by accident.
+ */
+function SelectionBar({
+  items,
+  selected,
+  setSelected,
+  confirming,
+  setConfirming,
+  pending,
+  onDelete,
+  onCancel,
+}: {
+  items: MenuItem[];
+  selected: Set<string>;
+  setSelected: (next: Set<string>) => void;
+  confirming: boolean;
+  setConfirming: (next: boolean) => void;
+  pending: boolean;
+  onDelete: (chosen: MenuItem[]) => void;
+  onCancel: () => void;
+}) {
+  const chosen = items.filter((i) => selected.has(i.id));
+  const allSelected = items.length > 0 && chosen.length === items.length;
+
+  return (
+    <div className="sticky top-0 z-20 flex flex-col gap-s p-md rounded-md bg-surface-container-high border border-outline-variant shadow-lg">
+      <div className="flex items-center justify-between gap-md flex-wrap">
+        <label className="flex items-center gap-s text-caption-md font-semibold text-primary-text cursor-pointer select-none">
+          <input
+            type="checkbox"
+            checked={allSelected}
+            onChange={() =>
+              setSelected(allSelected ? new Set() : new Set(items.map((i) => i.id)))
+            }
+            className="w-4 h-4 accent-primary"
+          />
+          {chosen.length === 0
+            ? "Select dishes to remove"
+            : `${chosen.length} selected`}
+        </label>
+
+        <div className="flex items-center gap-s">
+          <SecondaryButton size="md" onClick={onCancel}>
+            Cancel
+          </SecondaryButton>
+          <PrimaryButton
+            size="md"
+            disabled={chosen.length === 0 || pending}
+            onClick={() => setConfirming(true)}
+          >
+            <i className="mgc_delete_2_line" /> Delete
+          </PrimaryButton>
+        </div>
+      </div>
+
+      {confirming && chosen.length > 0 && (
+        <div className="flex flex-col gap-s pt-s border-t border-outline-variant">
+          <p className="text-caption-md text-secondary-text">
+            Delete{" "}
+            <span className="font-semibold text-primary-text">
+              {listNames(chosen.map((i) => i.name))}
+            </span>
+            ? Guests will stop seeing{" "}
+            {chosen.length === 1 ? "it" : "them"} straight away.
+          </p>
+          <div className="flex gap-s justify-end">
+            <SecondaryButton size="md" onClick={() => setConfirming(false)}>
+              Keep them
+            </SecondaryButton>
+            <PrimaryButton size="md" disabled={pending} onClick={() => onDelete(chosen)}>
+              {pending
+                ? "Deleting…"
+                : `Yes, delete ${chosen.length === 1 ? "it" : `all ${chosen.length}`}`}
+            </PrimaryButton>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

@@ -2213,3 +2213,77 @@ describe("mock API — a shared table settles one bill at a time", () => {
       .toEqual([a, b]);
   });
 });
+
+describe("mock API — bulk delete", () => {
+  const newDish = async (name: string) => {
+    const res = await mockRequest(
+      "/admin/menu",
+      "POST",
+      { name, price: 250000, category: "Sides", available: true },
+      q(),
+      true,
+    );
+    return (res.body as { id: string }).id;
+  };
+  const bulkDelete = (ids: string[]) =>
+    mockRequest("/admin/menu/bulk-delete", "POST", { item_ids: ids }, q(), true);
+
+  it("removes several dishes in one call", async () => {
+    const a = await newDish("Bulk A");
+    const b = await newDish("Bulk B");
+
+    const res = await bulkDelete([a, b]);
+    expect(res.status).toBe(200);
+    expect((res.body as { deleted: number }).deleted).toBe(2);
+
+    const menu = (await mockRequest("/admin/menu", "GET", null, q(), true)).body as Array<{
+      id: string;
+    }>;
+    expect(menu.map((i) => i.id)).not.toContain(a);
+    expect(menu.map((i) => i.id)).not.toContain(b);
+  });
+
+  it("refuses an empty selection", async () => {
+    expect((await bulkDelete([])).status).toBe(400);
+  });
+
+  it("keeps a dish that appears on a past order, and says which", async () => {
+    // A receipt has to keep meaning something, so an ordered dish cannot just
+    // be erased. The screen has to cope with a partial result.
+    const keep = await newDish("Ordered Dish");
+    const go = await newDish("Untouched Dish");
+    await mockRequest(
+      "/orders",
+      "POST",
+      {
+        table: "T1",
+        restaurant_id: HOME_RESTAURANT,
+        items: [{ name: "Ordered Dish", qty: 1, price: 250000, menu_item_id: keep }],
+      },
+      q(),
+      false,
+    );
+
+    const body = (await bulkDelete([keep, go])).body as {
+      deleted: number;
+      errors: Array<{ item_id: string; message: string }>;
+    };
+
+    expect(body.deleted).toBe(1);
+    // Naming the survivor is the point — "1 of 2 removed" sends a merchant
+    // hunting through the list to work out which one stayed.
+    expect(body.errors.map((e) => e.item_id)).toEqual([keep]);
+    expect(body.errors[0]!.message).toBeTruthy();
+  });
+
+  it("reports a dish that was already gone rather than failing the batch", async () => {
+    const a = await newDish("Vanishing Dish");
+    await bulkDelete([a]);
+    const body = (await bulkDelete([a])).body as {
+      deleted: number;
+      errors: Array<{ item_id: string }>;
+    };
+    expect(body.deleted).toBe(0);
+    expect(body.errors.map((e) => e.item_id)).toEqual([a]);
+  });
+});
