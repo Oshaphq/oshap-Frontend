@@ -2434,9 +2434,16 @@ describe("mock API — serving food", () => {
     return row?.live_orders ?? [];
   };
 
-  it("serving without a method leaves the bill open", async () => {
-    // The "not yet" branch. Food is out, money is not in, and that is an
-    // ordinary thing to record rather than an omission.
+  it("serving without a method must leave the bill open", async () => {
+    /**
+     * The "not yet" branch, and the contract the live API is currently
+     * breaking: in service it cancelled the order and cleared the table,
+     * taking a ₦26,638.50 bill with it.
+     *
+     * Kept passing against the mock, which behaves correctly, so this states
+     * the behaviour being asked for. The client cannot reach this path today —
+     * `ServeOrderRequest.method` is required until the server agrees.
+     */
     const { order_id, total } = await orderOn("T2");
     const body = (await serve(order_id)).body as {
       status: string;
@@ -2447,6 +2454,8 @@ describe("mock API — serving food", () => {
     expect(body.status).toBe("SERVED");
     expect(body.settled).toBe(false);
     expect(body.balance_due).toBe(total);
+    // The bill must survive. This is the assertion that matters.
+    expect(body.status).not.toBe("CANCELLED");
   });
 
   it("a served but unpaid bill stays on the board", async () => {

@@ -245,7 +245,7 @@ export function useAdminDeleteMenuItem() {
 export function useAdminServeOrder() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: (vars: { orderId: string; method?: ServeOrderRequest["method"] }) =>
+    mutationFn: (vars: { orderId: string; method: ServeOrderRequest["method"] }) =>
       adminServeOrder(vars.orderId, vars.method),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: queryKeys.admin.kitchen() });

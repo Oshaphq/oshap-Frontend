@@ -371,17 +371,19 @@ export function adminCompOrderItem(orderId: string, itemId: string): Promise<Ord
  * for an hour with no way to tell a plate going cold on the pass from a waiter
  * who forgot to tap.
  *
- * Omitting `method` is the "not yet" branch: served, still owed, table stays
- * lit, guest can still pay from their phone.
+ * The "not yet" branch — omitting `method` for served-but-unpaid — is what
+ * this endpoint is for, and it currently **cancels the order and clears the
+ * table**. So `method` is required here until that is fixed, rather than left
+ * available for a waiter to lose a bill with.
  */
 export function adminServeOrder(
   orderId: string,
-  method?: ServeOrderRequest["method"],
+  method: ServeOrderRequest["method"],
 ): Promise<ServeOrderResponse> {
   return request<ServeOrderResponse>(`${orderPath(orderId)}/serve`, {
     method: "POST",
     admin: true,
-    body: (method ? { method } : {}) satisfies ServeOrderRequest,
+    body: { method } satisfies ServeOrderRequest,
   });
 }
 

@@ -16,9 +16,11 @@ import { SecondaryButton, toast } from "@oshap/shared/ui";
  * arrives instead, so there is no inferred payment anywhere in the flow — and
  * no way for a guest to be charged twice for the same meal.
  *
- * *Not yet* is a real answer, not an omission. The food is out, the bill stays
- * open, the table stays lit, and the guest's own pay screen keeps working so
- * they can settle after eating.
+ * *Not yet* — served, still owed — is the branch this was built around, and it
+ * is withdrawn for now: the endpoint cancels the order and clears the table
+ * when no method is given, which loses the bill. Until that is fixed, food can
+ * only be marked served together with payment, and an unpaid table is settled
+ * from the board instead.
  */
 
 type Method = NonNullable<ServeOrderRequest["method"]>;
@@ -39,9 +41,9 @@ interface Props {
 
 export default function ServeDialog({ orderId, tableName, total, onClose }: Props) {
   const serve = useAdminServeOrder();
-  const [choice, setChoice] = useState<Method | "later" | null>(null);
+  const [choice, setChoice] = useState<Method | null>(null);
 
-  const confirm = (method?: Method) => {
+  const confirm = (method: Method) => {
     serve.mutate(
       { orderId, method },
       {
@@ -122,34 +124,21 @@ export default function ServeDialog({ orderId, tableName, total, onClose }: Prop
             </button>
           ))}
 
-          {/* Not a lesser option. A guest paying after their meal is ordinary,
-              and recording it honestly is what keeps the bill collectable. */}
-          <button
-            type="button"
-            disabled={serve.isPending}
-            onClick={() => {
-              setChoice("later");
-              confirm();
-            }}
-            className="flex items-center justify-between gap-s px-md py-s rounded-lg border border-outline-variant text-primary-text text-label-l5 font-semibold hover:bg-surface-container active:scale-[0.99] disabled:opacity-50 focus-visible:outline-2 focus-visible:outline-primary focus-visible:outline-offset-2 transition"
-          >
-            <span className="flex items-center gap-s">
-              <i className="mgc_time_line text-xl text-on-surface-variant" aria-hidden />
-              Not yet
-            </span>
-            <span className="text-caption-md text-secondary-text">
-              {serve.isPending && choice === "later"
-                ? "Recording…"
-                : "Bill stays open"}
-            </span>
-          </button>
+          {/* "Not yet" is missing on purpose, and it is the branch this whole
+              flow was built around.
+
+              Serving without a method is what the endpoint is for — food out,
+              bill still open — and in service it cancelled the order and
+              cleared the table, taking a ₦26,638.50 bill with it. A button that
+              destroys a bill is worse than no button, so it is gone until the
+              server keeps the bill open. `ServeOrderRequest.method` is required
+              in the meantime, so nothing can reach that path by accident. */}
         </div>
 
-        {/* The gap worth naming, so nobody records a card payment as cash. */}
         <p className="text-caption-xs text-outline">
-          Paid on the card machine? Choose <span className="font-semibold">Not yet</span>{" "}
-          and take it from the table board — the card option isn't available here
-          yet.
+          Not paying yet, or paying by card? Leave this and take it from the
+          table board instead — marking food served without payment is
+          temporarily unavailable.
         </p>
 
         <div className="flex justify-end">

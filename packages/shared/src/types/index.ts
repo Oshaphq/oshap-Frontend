@@ -914,7 +914,19 @@ export interface RecordCashRequest {
  * Raised with the backend.
  */
 export interface ServeOrderRequest {
-  method?: Extract<PaymentMethod, "CASH" | "MANUAL_TRANSFER">;
+  /**
+   * **Required, for now.**
+   *
+   * The contract allows omitting it to mean "served, not yet paid" — the whole
+   * point of the flow. In service that cancelled the order and cleared the
+   * table, taking a ₦26,638.50 bill with it. Until the server keeps the bill
+   * open, the type refuses to let anything call this without a method, so no
+   * screen can reach that path by accident.
+   *
+   * Make it optional again when the backend is fixed; the dialog has the
+   * matching branch waiting behind one comment.
+   */
+  method: Extract<PaymentMethod, "CASH" | "MANUAL_TRANSFER">;
 }
 
 export interface ServeOrderResponse {
