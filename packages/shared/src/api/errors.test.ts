@@ -144,3 +144,46 @@ describe("a server fault is never blamed on the network", () => {
     expect(d.title).toBe("Something went wrong");
   });
 });
+
+describe("a 403 says which kind of no it is", () => {
+  /**
+   * Seen in service: a waiter opened the kitchen board and got
+   * **"Not available on this plan"** as the heading, with the server's own
+   * *"Insufficient permissions"* underneath. The heading and the message
+   * contradicted each other, and it sends an owner to check their subscription
+   * over what is really a staff permission.
+   */
+  const forbidden = (message: string) =>
+    describeError(new ApiError(403, message, null));
+
+  it("names the plan only when the server does", () => {
+    expect(forbidden("Upgrade your plan to use branches").title).toBe(
+      "Not available on this plan",
+    );
+  });
+
+  it.each([
+    "Insufficient permissions",
+    "Your role does not allow this",
+    "Forbidden",
+  ])("does not blame the plan for %o", (message) => {
+    expect(forbidden(message).title).toBe("You can't open this");
+  });
+
+  it("passes the server's own words through either way", () => {
+    expect(forbidden("Insufficient permissions").message).toBe(
+      "Insufficient permissions",
+    );
+  });
+
+  it("covers both causes when the server says nothing useful", () => {
+    const d = forbidden("");
+    expect(d.message).toContain("plan");
+    expect(d.message).toContain("role");
+  });
+
+  it("is never retryable — waiting changes neither a plan nor a role", () => {
+    expect(forbidden("Insufficient permissions").canRetry).toBe(false);
+    expect(forbidden("Insufficient permissions").isOurFault).toBe(false);
+  });
+});
