@@ -149,3 +149,68 @@ describe("edges", () => {
     expect(later[0]!.key).toBe(first[0]!.key);
   });
 });
+
+describe("a bill that has been part paid", () => {
+  // ₦40,000 against ₦41,086.50 at Jobiz. This used to settle the whole bill and
+  // lose the difference; then we refused the money outright. Now it records,
+  // and the board has to show what is still owed.
+  const partPaid = () =>
+    groupBills([
+      order({
+        order_id: "a",
+        device_token: "p1",
+        total: 4_108_650,
+        amount_paid: 4_000_000,
+        balance_due: 108_650,
+      }),
+    ])[0]!;
+
+  it("is neither unpaid nor settled", () => {
+    expect(partPaid().state).toBe("part");
+  });
+
+  it("carries what is left, not what it started at", () => {
+    expect(partPaid().balanceDue).toBe(108_650);
+    expect(partPaid().total).toBe(4_108_650);
+    expect(partPaid().amountPaid).toBe(4_000_000);
+  });
+
+  it("trusts the server's balance over its own arithmetic", () => {
+    // A refund or an adjustment can make total-minus-paid disagree, and the
+    // server's number is the one that counts.
+    const bill = groupBills([
+      order({ order_id: "a", device_token: "p1", total: 1000, amount_paid: 100, balance_due: 750 }),
+    ])[0]!;
+    expect(bill.balanceDue).toBe(750);
+  });
+
+  it("falls back to the whole total when no balance is sent", () => {
+    // Safer direction: money shown as owed when it is not gets corrected at the
+    // table; a bill shown as square when it is not is simply lost.
+    const bill = groupBills([order({ order_id: "a", device_token: "p1", total: 5000 })])[0]!;
+    expect(bill.balanceDue).toBe(5000);
+    expect(bill.state).toBe("unpaid");
+  });
+
+  it("sums a balance across a party's orders", () => {
+    const bill = groupBills([
+      order({ order_id: "a", session_id: "s1", total: 1000, amount_paid: 1000, balance_due: 0 }),
+      order({ order_id: "b", session_id: "s1", total: 2000, amount_paid: 500, balance_due: 1500 }),
+    ])[0]!;
+    expect(bill.balanceDue).toBe(1500);
+    expect(bill.state).toBe("part");
+  });
+});
+
+describe("how the bill is being paid", () => {
+  it("carries the method, so a card request and a transfer stop looking alike", () => {
+    const bill = groupBills([
+      order({ order_id: "a", device_token: "p1", payment_state: "CLAIMED", payment_method: "POS" }),
+    ])[0]!;
+    expect(bill.paymentMethod).toBe("POS");
+  });
+
+  it("is null until somebody has said", () => {
+    expect(groupBills([order({ order_id: "a", device_token: "p1" })])[0]!.paymentMethod).toBeNull();
+  });
+});

@@ -17,6 +17,8 @@ export type OrderStatus =
   | "CREATED"
   | "PREPARING"
   | "READY"
+  /** Food reached the table. Says nothing about the money. */
+  | "SERVED"
   | "PAYMENT_PENDING"
   | "CONFIRMED"
   | "CANCELLED"
@@ -789,6 +791,11 @@ export interface AdminTableStatus {
    * table-level totals when it is missing.
    */
   live_orders?: AdminTableLiveOrder[] | null;
+  /**
+   * Still owing across the table, in kobo. Distinct from `unpaidTotal`, which
+   * counts bills not yet paid at all — this nets off part payments.
+   */
+  outstanding_total?: number;
 }
 
 /**
@@ -815,6 +822,16 @@ export interface AdminTableLiveOrder {
   /** Where the money has got to. Same caveat as `status`. */
   payment_state: string;
   combined_order_ids?: string[] | null;
+  /**
+   * How this bill is being paid, once anyone has said. The difference matters
+   * on the floor: a card request means carry the machine over, a transfer
+   * means check the account and verify.
+   */
+  payment_method?: PaymentMethod | string | null;
+  /** Taken so far, in kobo. */
+  amount_paid?: number;
+  /** Still owing, in kobo. Zero once settled. */
+  balance_due?: number;
   created_at?: string;
 }
 
@@ -862,16 +879,43 @@ export interface AdminHistoryResponse {
  */
 export interface RecordCashRequest {
   order_ids: string[];
-  /** Cash tendered, in kobo. Recorded for the drawer, not used to settle. */
+  /**
+   * How the money arrived. Defaults to cash server-side, but a waiter who
+   * carried the machine over or watched a transfer land should say so — a
+   * method recorded wrongly is a reconciliation that cannot be done.
+   */
+  method?: PaymentMethod;
+  /**
+   * What was handed over, in kobo.
+   *
+   * Below the total this now leaves a balance owing rather than settling the
+   * order, which is the whole reason the dialog used to refuse a short tender:
+   * ₦40,000 against a ₦41,086.50 bill booked the full amount and the
+   * ₦1,086.50 left no trace.
+   */
   amount?: number;
+}
+
+/** What one order's share of a payment did. */
+export interface SettlementResult {
+  order_id: string;
+  settled: boolean;
+  amount_applied: number;
+  /** Still owing on that order, in kobo. Zero when settled. */
+  balance_due: number;
 }
 
 export interface RecordCashResponse {
   success: true;
-  /** Orders settled. */
+  /** Orders **fully** settled. A part payment does not count here. */
   paid: number;
-  /** Total settled, in kobo. */
+  /** Total applied, in kobo. */
   amount: number;
+  /**
+   * Per order, so a short payment can be reported as what it is. Optional
+   * because it arrived after the endpoint did.
+   */
+  results?: SettlementResult[];
 }
 
 /**

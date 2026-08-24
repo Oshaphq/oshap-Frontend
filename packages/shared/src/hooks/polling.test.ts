@@ -73,3 +73,20 @@ describe("every order on the table", () => {
     expect(sessionOrdersPollMs(undefined)).toBe(10_000);
   });
 });
+
+describe("a served order is still live", () => {
+  // SERVED says the food arrived, not that the bill is paid. A guest who pays
+  // after eating still needs to watch it settle — stopping here would freeze
+  // the screen at the exact moment they pick their phone back up.
+  it("keeps polling the order", () => {
+    expect(orderDetailPollMs({ status: "SERVED" })).toBeGreaterThan(0);
+  });
+
+  it("keeps polling the session", () => {
+    expect(sessionOrdersPollMs({ orders: [{ status: "SERVED" }] })).toBeGreaterThan(0);
+  });
+
+  it("still stops once it is confirmed", () => {
+    expect(orderDetailPollMs({ status: "CONFIRMED" })).toBe(false);
+  });
+});

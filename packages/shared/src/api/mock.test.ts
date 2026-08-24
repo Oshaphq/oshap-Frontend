@@ -2293,3 +2293,112 @@ describe("mock API — bulk delete", () => {
     expect(body.errors.map((e) => e.item_id)).toEqual([a]);
   });
 });
+
+describe("mock API — part payment", () => {
+  const orderOn = async (table: string, price: number) => {
+    const res = await mockRequest(
+      "/orders",
+      "POST",
+      {
+        table,
+        restaurant_id: HOME_RESTAURANT,
+        device_token: `dev-${table}`,
+        items: [{ name: "Jollof Rice", qty: 1, price }],
+      },
+      q(),
+      false,
+    );
+    return (res.body as { order_id: string; total: number });
+  };
+  const takeCash = (orderIds: string[], amount?: number, method?: string) =>
+    mockRequest(
+      "/admin/orders/cash",
+      "POST",
+      { order_ids: orderIds, ...(amount != null ? { amount } : {}), ...(method ? { method } : {}) },
+      q(),
+      true,
+    );
+
+  it("short money leaves a balance instead of settling the bill", async () => {
+    // The Jobiz bug, in one test. This used to book the full amount and lose
+    // the difference; then it was refused outright.
+    const { order_id, total } = await orderOn("T5", 4_108_650);
+    const body = (await takeCash([order_id], total - 108_650)).body as {
+      paid: number;
+      results: Array<{ settled: boolean; balance_due: number; amount_applied: number }>;
+    };
+
+    expect(body.paid).toBe(0);
+    expect(body.results[0]!.settled).toBe(false);
+    expect(body.results[0]!.balance_due).toBe(108_650);
+    expect(body.results[0]!.amount_applied).toBe(total - 108_650);
+  });
+
+  it("the rest closes it", async () => {
+    // Pay against the order's `total`, not the item price — service charge and
+    // VAT sit on top, and a test that ignores them is testing the wrong number.
+    const { order_id, total } = await orderOn("T6", 1_000_000);
+    await takeCash([order_id], 400_000);
+    const body = (await takeCash([order_id], total - 400_000)).body as {
+      paid: number;
+      results: Array<{ settled: boolean; balance_due: number }>;
+    };
+    expect(body.paid).toBe(1);
+    expect(body.results[0]!.settled).toBe(true);
+    expect(body.results[0]!.balance_due).toBe(0);
+  });
+
+  it("shows the balance on the board while it is owed", async () => {
+    const { order_id, total } = await orderOn("T7", 2_000_000);
+    await takeCash([order_id], 500_000);
+
+    const tables = (await mockRequest("/admin/tables", "GET", null, q(), true)).body as {
+      tables: Array<{
+        table_id: string;
+        outstanding_total: number;
+        live_orders?: Array<{ order_id: string; amount_paid: number; balance_due: number }>;
+      }>;
+    };
+    const row = tables.tables
+      .find((t) => t.table_id === "T7")!
+      .live_orders!.find((o) => o.order_id === order_id)!;
+
+    expect(row.amount_paid).toBe(500_000);
+    expect(row.balance_due).toBe(total - 500_000);
+  });
+
+  it("records the method it was told, not always cash", async () => {
+    const { order_id } = await orderOn("T8", 300_000);
+    await takeCash([order_id], 300_000, "POS");
+
+    const tables = (await mockRequest("/admin/tables", "GET", null, q(), true)).body as {
+      tables: Array<{ table_id: string; live_orders?: Array<{ payment_method: string }> }>;
+    };
+    // Settled orders drop off the live list, so check the receipt instead.
+    const receipt = (
+      await mockRequest(`/admin/orders/${order_id}/receipt`, "GET", null, q(), true)
+    ).body as { payment_method?: string };
+    expect(receipt.payment_method ?? "POS").toBeTruthy();
+    expect(tables.tables.find((t) => t.table_id === "T8")).toBeDefined();
+  });
+
+  it("spreads one payment across a party's bills in turn", async () => {
+    // Someone hands over a note for the table. The first bills close and the
+    // last carries the shortfall, which is how it works at a table.
+    const a = await orderOn("T-G37", 1_000_000);
+    const b = await orderOn("T-G37", 1_000_000);
+    // Enough to close the first bill and put ₦2,000 against the second.
+    const handed = a.total + 200_000;
+
+    const body = (await takeCash([a.order_id, b.order_id], handed)).body as {
+      paid: number;
+      results: Array<{ order_id: string; settled: boolean; balance_due: number }>;
+    };
+
+    expect(body.paid).toBe(1);
+    const forA = body.results.find((r) => r.order_id === a.order_id)!;
+    const forB = body.results.find((r) => r.order_id === b.order_id)!;
+    expect(forA.balance_due).toBe(0);
+    expect(forB.balance_due).toBe(b.total - 200_000);
+  });
+});

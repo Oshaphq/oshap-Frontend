@@ -31,7 +31,13 @@ import type { AdminTableLiveOrder } from "../types";
  * at all. Guessing "unpaid" would invite a waiter to take cash for a bill
  * already settled, which is the one error here that costs a guest money.
  */
-export type BillState = "claimed" | "unpaid" | "settled" | "unknown";
+export type BillState =
+  | "claimed"
+  /** Some money in, a balance still owing. */
+  | "part"
+  | "unpaid"
+  | "settled"
+  | "unknown";
 
 export interface Bill {
   /** Stable across refetches, so React keeps the row and its open prompts. */
@@ -39,11 +45,28 @@ export interface Bill {
   orders: AdminTableLiveOrder[];
   /** The name a guest gave, if any of their orders carried one. */
   guestName: string | null;
+  /** What the bill came to, before anything was paid. */
   total: number;
+  /** Taken so far, in kobo. */
+  amountPaid: number;
+  /**
+   * Still owing, in kobo.
+   *
+   * Falls back to the whole total where the API sends no balance, which is the
+   * safe direction: showing money as owed when it is not gets corrected at the
+   * table, while showing a bill as square when it is not loses it.
+   */
+  balanceDue: number;
   state: BillState;
+  /**
+   * How it is being paid, where anyone has said. A card request and a transfer
+   * need opposite things from staff — carry the machine over, or check the
+   * account and verify — and they used to look identical on the board.
+   */
+  paymentMethod: string | null;
   /** Orders whose money is claimed but unverified — what Verify acts on. */
   claimedOrderIds: string[];
-  /** Orders still owed — what Take Cash acts on. */
+  /** Orders still owed — what taking payment acts on. */
   unpaidOrderIds: string[];
 }
 
@@ -130,6 +153,16 @@ export function groupBills(orders: AdminTableLiveOrder[] | null | undefined): Bi
 
 function toBill(orders: AdminTableLiveOrder[]): Bill {
   const states = orders.map((o) => paymentState(o.payment_state));
+  const total = orders.reduce((sum, o) => sum + (o.total ?? 0), 0);
+  const amountPaid = orders.reduce((sum, o) => sum + (o.amount_paid ?? 0), 0);
+  // `balance_due` is authoritative where it is sent. Summing per order rather
+  // than subtracting from the total, because a refund or an adjustment can
+  // make those two disagree and the server's number is the one that counts.
+  const balanceDue = orders.some((o) => o.balance_due !== undefined)
+    ? orders.reduce((sum, o) => sum + (o.balance_due ?? 0), 0)
+    : total - amountPaid;
+
+  const base = billState(states);
 
   return {
     // The earliest order id in the bill, so the key does not move when a guest
@@ -137,8 +170,14 @@ function toBill(orders: AdminTableLiveOrder[]): Bill {
     key: [...orders.map((o) => o.order_id)].sort()[0]!,
     orders,
     guestName: orders.find((o) => o.customer_name)?.customer_name ?? null,
-    total: orders.reduce((sum, o) => sum + (o.total ?? 0), 0),
-    state: billState(states),
+    total,
+    amountPaid,
+    balanceDue,
+    // A bill with money against it and a balance left is neither unpaid nor
+    // settled, and calling it either would send a waiter for the wrong amount.
+    state: base === "unpaid" && amountPaid > 0 && balanceDue > 0 ? "part" : base,
+    paymentMethod:
+      orders.find((o) => o.payment_method)?.payment_method?.toString() ?? null,
     claimedOrderIds: orders
       .filter((o) => paymentState(o.payment_state) === "claimed")
       .map((o) => o.order_id),

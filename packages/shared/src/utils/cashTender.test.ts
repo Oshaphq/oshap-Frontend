@@ -1,11 +1,11 @@
 import { describe, it, expect } from "vitest";
-import { cashTender, canSettleCash } from "./cashTender";
+import { cashTender, settlesBill } from "./cashTender";
 
 /**
- * From the pilot: ₦40,000 was entered against a ₦41,086.50 bill. The dialog
- * showed "still owing ₦1,086.50" and settled the table anyway, because the
- * cash endpoint marks orders CONFIRMED for their full amount and has no notion
- * of a part payment. The shortfall left no trace.
+ * From the pilot: ₦40,000 was entered against a ₦41,086.50 bill and the table
+ * settled in full, because the endpoint had no notion of a part payment. We
+ * blocked short tenders as a stopgap; the endpoint takes them properly now, so
+ * the job here is to say what is still owed rather than to refuse the money.
  */
 describe("a tender that doesn't cover the bill", () => {
   it("is short by the difference", () => {
@@ -15,8 +15,10 @@ describe("a tender that doesn't cover the bill", () => {
     });
   });
 
-  it("cannot settle the bill", () => {
-    expect(canSettleCash(cashTender(4_000_000, 4_108_650))).toBe(false);
+  it("is recorded, but does not close the bill", () => {
+    // Recordable now — but the button must not say "paid" over an amount that
+    // leaves a balance.
+    expect(settlesBill(cashTender(4_000_000, 4_108_650))).toBe(false);
   });
 
   it("is short by a single kobo too — money is money", () => {
@@ -37,7 +39,7 @@ describe("a tender that covers it", () => {
   });
 
   it.each([5_000_000, 4_108_650])("settles at %i", (t) => {
-    expect(canSettleCash(cashTender(t, 4_108_650))).toBe(true);
+    expect(settlesBill(cashTender(t, 4_108_650))).toBe(true);
   });
 });
 
@@ -47,6 +49,6 @@ describe("a blank box", () => {
   it("records nothing and still settles", () => {
     const tender = cashTender(null, 4_108_650);
     expect(tender).toEqual({ kind: "unrecorded" });
-    expect(canSettleCash(tender)).toBe(true);
+    expect(settlesBill(tender)).toBe(true);
   });
 });

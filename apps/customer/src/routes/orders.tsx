@@ -492,6 +492,12 @@ const ORDER_STATUS_META: Record<OrderStatus, { label: string; cls: string }> = {
     label: "Ready",
     cls: "bg-success-container text-on-success-container",
   },
+  SERVED: {
+    // Says nothing about the money on purpose — a guest who has not paid yet
+    // still sees this, and still has the pay button.
+    label: "Served",
+    cls: "bg-success-container text-on-success-container",
+  },
   PAYMENT_PENDING: {
     label: "Awaiting payment",
     cls: "bg-warning-container text-on-warning-container",

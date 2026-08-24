@@ -276,11 +276,13 @@ export default function DashboardPage() {
                         verifyingBill={verifyingBill}
                         setRejectingBill={setRejectingBill}
                         setVerifyingBill={setVerifyingBill}
-                        onTakeCash={() =>
+                        onTakePayment={() =>
                           setCashTarget({
                             tableName: table.table_id,
                             orderIds: bill.unpaidOrderIds,
-                            total: bill.total,
+                            // The balance, so a part paid bill asks for what is
+                            // left rather than for the whole thing again.
+                            total: bill.balanceDue,
                           })
                         }
                         onVerify={() => handleVerify(table, bill)}
@@ -427,7 +429,7 @@ function BillActions({
   verifyingBill,
   setRejectingBill,
   setVerifyingBill,
-  onTakeCash,
+  onTakePayment,
   onVerify,
   onReject,
   verifyPending,
@@ -439,7 +441,7 @@ function BillActions({
   verifyingBill: string | null;
   setRejectingBill: (key: string | null) => void;
   setVerifyingBill: (key: string | null) => void;
-  onTakeCash: () => void;
+  onTakePayment: () => void;
   onVerify: () => void;
   onReject: () => void;
   verifyPending: boolean;
@@ -447,13 +449,22 @@ function BillActions({
 }) {
   if (bill.state === "settled" || bill.state === "unknown") return null;
 
-  if (bill.state === "unpaid") {
+  if (bill.state === "unpaid" || bill.state === "part") {
     return (
-      <SecondaryButton size="md" className="w-full" onClick={onTakeCash}>
-        <i className="mgc_cash_line" /> Take Cash
+      <SecondaryButton size="md" className="w-full" onClick={onTakePayment}>
+        <i className="mgc_cash_line" />{" "}
+        {bill.state === "part" ? "Take the rest" : "Take payment"}
       </SecondaryButton>
     );
   }
+
+  /**
+   * A card request and a bank transfer need opposite things from staff, and
+   * used to show the same tag and the same button. A waiter who guessed wrong
+   * either walked a POS to a table that never asked for one, or left somebody
+   * standing with a card in their hand.
+   */
+  const isCard = bill.paymentMethod === "POS";
 
   if (rejectingBill === bill.key) {
     return (
@@ -478,12 +489,25 @@ function BillActions({
     return (
       <div className="flex flex-col gap-s">
         <p className="text-caption-xs text-secondary-text">
-          Confirm{" "}
-          <span className="font-bold text-primary-text">
-            {formatCurrency(bill.total)}
-          </span>{" "}
-          from {bill.guestName ?? "this guest"} has landed in the account. This
-          settles their bill and cannot be undone from here.
+          {isCard ? (
+            <>
+              Confirm{" "}
+              <span className="font-bold text-primary-text">
+                {formatCurrency(bill.balanceDue)}
+              </span>{" "}
+              went through on the machine for{" "}
+              {bill.guestName ?? "this guest"}.
+            </>
+          ) : (
+            <>
+              Confirm{" "}
+              <span className="font-bold text-primary-text">
+                {formatCurrency(bill.balanceDue)}
+              </span>{" "}
+              from {bill.guestName ?? "this guest"} has landed in the account.
+            </>
+          )}{" "}
+          This settles their bill and cannot be undone from here.
         </p>
         <div className="flex gap-s">
           <SecondaryButton className="flex-1" onClick={() => setVerifyingBill(null)}>
@@ -504,7 +528,8 @@ function BillActions({
         onClick={() => setVerifyingBill(bill.key)}
         disabled={verifyPending}
       >
-        Verify
+        <i className={isCard ? "mgc_card_pay_line" : "mgc_bank_line"} />{" "}
+        {isCard ? "POS paid" : "Verify"}
       </PrimaryButton>
       <SecondaryButton
         onClick={() => setRejectingBill(bill.key)}
