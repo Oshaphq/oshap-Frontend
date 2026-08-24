@@ -1,12 +1,13 @@
 import { useState } from "react";
 import {
-  canSettleCash,
   cashTender,
+  settlesBill,
   errorMessage,
   formatCurrency,
   nairaToKobo,
   useAdminRecordCash,
 } from "@oshap/shared";
+import type { PaymentMethod } from "@oshap/shared";
 import { PrimaryButton, SecondaryButton, toast } from "@oshap/shared/ui";
 
 interface Props {
@@ -24,6 +25,12 @@ interface Props {
   total: number;
   onClose: () => void;
 }
+
+const METHODS: Array<{ value: PaymentMethod; label: string; icon: string }> = [
+  { value: "CASH", label: "Cash", icon: "mgc_cash_line" },
+  { value: "POS", label: "Card", icon: "mgc_card_pay_line" },
+  { value: "MANUAL_TRANSFER", label: "Transfer", icon: "mgc_bank_line" },
+];
 
 /** Notes a cashier is likely to be handed. */
 const QUICK_NOTES = [500, 1000, 2000, 5000, 10000];
@@ -52,25 +59,42 @@ export default function CashPaymentDialog({
   const recordCash = useAdminRecordCash();
 
   const [tendered, setTendered] = useState("");
+  /**
+   * Cash by default because that is what this is usually for, but a waiter who
+   * carried the machine over or watched a transfer land should say so. A method
+   * recorded wrongly is a reconciliation nobody can do afterwards.
+   */
+  const [method, setMethod] = useState<PaymentMethod>("CASH");
 
   // The endpoint accepts what was handed over, so it's recorded rather than
   // only used to work out change.
   const tenderedKobo = tendered === "" ? null : nairaToKobo(Number(tendered));
   const tender = cashTender(tenderedKobo, total);
-  const canSettle = canSettleCash(tender);
+  const settles = settlesBill(tender);
 
   const handleConfirm = () => {
-    if (orderIds.length === 0 || !canSettle) return;
+    if (orderIds.length === 0) return;
     recordCash.mutate(
       {
         order_ids: orderIds,
+        method,
         // Only sent when it was actually entered — a blank field is "didn't
         // record it", not "nothing was handed over".
         ...(tenderedKobo != null ? { amount: tenderedKobo } : {}),
       },
       {
-        onSuccess: () => {
-          toast.success(`Cash recorded for ${tableName}`);
+        onSuccess: (result) => {
+          // Report the balance the server worked out rather than our own
+          // arithmetic — a second guest may have paid while this was open.
+          const owing = (result.results ?? []).reduce(
+            (sum, r) => sum + r.balance_due,
+            0,
+          );
+          toast.success(
+            owing > 0
+              ? `Recorded. ${formatCurrency(owing)} still owing on ${tableName}`
+              : `${tableName} settled`,
+          );
           onClose();
         },
         onError: (err) =>
@@ -124,12 +148,35 @@ export default function CashPaymentDialog({
               </span>
             </div>
 
+            <div className="flex flex-col gap-xs">
+              <span className="text-caption-md font-semibold text-primary-text">
+                How did they pay?
+              </span>
+              <div className="flex gap-xs">
+                {METHODS.map((m) => (
+                  <button
+                    key={m.value}
+                    type="button"
+                    onClick={() => setMethod(m.value)}
+                    aria-pressed={method === m.value}
+                    className={`flex-1 flex items-center justify-center gap-xs px-s py-s rounded-lg text-caption-md font-semibold transition-colors ${
+                      method === m.value
+                        ? "bg-primary text-on-primary"
+                        : "bg-surface-container text-on-surface-variant hover:bg-surface-container-highest"
+                    }`}
+                  >
+                    <i className={m.icon} aria-hidden /> {m.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+
             <div className="flex flex-col gap-s">
               <label
                 className="text-caption-md font-semibold text-primary-text"
                 htmlFor="tendered"
               >
-                Cash received (optional)
+                Amount received (optional)
               </label>
               <input
                 id="tendered"
@@ -164,20 +211,20 @@ export default function CashPaymentDialog({
                 </span>
               </div>
             )}
-            {/* Blocks rather than warns. This used to show the shortfall and
-                settle the full bill anyway, so the missing money left no
-                trace. */}
+            {/* A part payment is a normal thing to take now. This used to
+                refuse it, because the endpoint booked the full amount either
+                way and the shortfall vanished. */}
             {tender.kind === "short" && (
               <div className="flex flex-col gap-xs p-md rounded-lg bg-warning-container text-on-warning-container">
                 <div className="flex items-center justify-between">
-                  <span className="text-label-l4 font-semibold">Short by</span>
+                  <span className="text-label-l4 font-semibold">Still owing</span>
                   <span className="font-display text-display-h3 font-semibold tabular-nums">
                     {formatCurrency(tender.shortfall)}
                   </span>
                 </div>
                 <p className="text-caption-md">
-                  Cash settles the whole bill — there's no part payment. Take the
-                  rest, or clear the box to settle without recording a figure.
+                  Recorded as a part payment. The bill stays open for the rest,
+                  and the table stays lit.
                 </p>
               </div>
             )}
@@ -189,11 +236,14 @@ export default function CashPaymentDialog({
               <PrimaryButton
                 size="md"
                 onClick={handleConfirm}
-                disabled={recordCash.isPending || !canSettle}
+                disabled={recordCash.isPending}
               >
                 {recordCash.isPending
                   ? "Recording…"
-                  : `Mark ${formatCurrency(total)} paid`}
+                  : settles
+                    ? `Mark ${formatCurrency(total)} paid`
+                    : // Never "paid" over an amount that leaves a balance.
+                      `Take ${formatCurrency(tenderedKobo ?? 0)}`}
               </PrimaryButton>
             </div>
           </>

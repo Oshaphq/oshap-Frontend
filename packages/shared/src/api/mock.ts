@@ -33,6 +33,7 @@ import type {
   UpdateOrderItemRequest,
   AuditLogEntry,
   AuditLogResponse,
+  SettlementResult,
   BulkDeleteRequest,
   BulkDeleteError,
   BulkDeleteResponse,
@@ -548,6 +549,13 @@ type StoredOrder = Order & {
 
 let _menu: MenuItem[] = [...SEED_MENU];
 const _orders: Map<string, StoredOrder> = new Map();
+/**
+ * How much has been taken against each order so far.
+ *
+ * The stored `Payment` is one row per order, so it cannot hold a running total
+ * across two visits to the till. The real API tracks this on the order itself.
+ */
+const _amountPaid: Map<string, number> = new Map();
 const _payments: Map<string, Payment> = new Map();
 const _sessions: Map<string, TableSession> = new Map();
 const _staff: Map<string, StaffMember> = new Map();
@@ -1536,6 +1544,11 @@ route("GET", /^\/admin\/tables$/, ({ query }) => {
       // Every open bill on the table, claimed or not — settlement acts on one
       // of these, never on the table as a whole.
       unpaid_order_ids: [...unpaid, ...pending].map((o) => o.id),
+      // Nets off part payments, unlike `unpaidTotal` which counts whole bills.
+      outstanding_total: [...unpaid, ...pending].reduce(
+        (sum, o) => sum + Math.max(0, o.total - (_amountPaid.get(o.id) ?? 0)),
+        0,
+      ),
       // The same orders with who they belong to attached, so the board can
       // show two guests on one table as two bills rather than one total.
       live_orders: [...unpaid, ...pending].map((o) => ({
@@ -1546,6 +1559,9 @@ route("GET", /^\/admin\/tables$/, ({ query }) => {
         total: o.total,
         status: o.status,
         payment_state: o.status === "PAYMENT_PENDING" ? "CLAIMED" : "NOT_PAID",
+        payment_method: _payments.get(o.id)?.method ?? null,
+        amount_paid: _amountPaid.get(o.id) ?? 0,
+        balance_due: Math.max(0, o.total - (_amountPaid.get(o.id) ?? 0)),
         combined_order_ids: _combined.get(o.id) ?? null,
         created_at: o.created_at,
       })),
@@ -2744,32 +2760,79 @@ route("POST", /^\/admin\/orders\/cash$/, ({ body }) => {
 
   let paid = 0;
   let amount = 0;
+  const results: SettlementResult[] = [];
+  const method = b.method ?? "CASH";
+
+  /**
+   * Spread across the orders in turn rather than all-or-nothing.
+   *
+   * A tender below the total now leaves a balance instead of settling the lot,
+   * which is what ₦40,000 against a ₦41,086.50 bill should always have done.
+   * Applying it in order means the first bills close and the last carries the
+   * shortfall, which is how a person hands over money at a table.
+   */
+  let remaining = b.amount ?? Number.POSITIVE_INFINITY;
+
   for (const oid of b.order_ids) {
     const order = _orders.get(oid);
     if (!order || order.status === "CONFIRMED") continue;
 
-    // Cash settles outright — a staff member is holding the money, so there is
-    // no claim to verify afterwards.
-    order.status = "CONFIRMED";
-    _payments.set(oid, {
-      id: uid(),
+    const alreadyPaid = _amountPaid.get(oid) ?? 0;
+    const owing = order.total - alreadyPaid;
+    const applied = Math.max(0, Math.min(owing, remaining));
+    remaining -= applied;
+
+    const nowPaid = alreadyPaid + applied;
+    _amountPaid.set(oid, nowPaid);
+    const balance = order.total - nowPaid;
+
+    if (balance <= 0) {
+      order.status = "CONFIRMED";
+      _payments.set(oid, {
+        id: uid(),
+        order_id: oid,
+        amount: order.total,
+        status: "VERIFIED",
+        proof_url: null,
+        bank_account_id: null,
+        method,
+        created_at: now(),
+      });
+      paid++;
+    } else {
+      // Part paid: the order stays open and the table stays lit, which is the
+      // entire point of recording it rather than refusing it.
+      _payments.set(oid, {
+        id: uid(),
+        order_id: oid,
+        amount: nowPaid,
+        status: "CLAIMED",
+        proof_url: null,
+        bank_account_id: null,
+        method,
+        created_at: now(),
+      });
+    }
+
+    if (applied > 0) audit(AUDIT_ACTIONS.cashPaid, order, { amount: applied });
+    amount += applied;
+    results.push({
       order_id: oid,
-      amount: order.total,
-      status: "VERIFIED",
-      proof_url: null,
-      bank_account_id: null,
-      method: "CASH",
-      created_at: now(),
+      settled: balance <= 0,
+      amount_applied: applied,
+      balance_due: Math.max(0, balance),
     });
-    audit(AUDIT_ACTIONS.cashPaid, order, { amount: order.total });
-    paid++;
-    amount += order.total;
   }
 
-  if (paid === 0) return json(404, { error: "No unpaid orders found" });
+  if (results.length === 0) return json(404, { error: "No unpaid orders found" });
 
   syncToStorage();
-  return json(200, { success: true as const, paid, amount } satisfies RecordCashResponse);
+  return json(200, {
+    success: true as const,
+    paid,
+    amount,
+    results,
+  } satisfies RecordCashResponse);
 });
 
 route("POST", /^\/admin\/reject$/, ({ body }) => {

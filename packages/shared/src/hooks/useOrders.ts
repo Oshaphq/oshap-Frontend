@@ -18,11 +18,19 @@ import {
 /** Matches `useTable` — the guest's only way of learning anything changed. */
 const LIVE_POLL_MS = 10_000;
 
-/** An order still moving through the kitchen or waiting to be paid for. */
+/**
+ * An order still moving through the kitchen or waiting to be paid for.
+ *
+ * `SERVED` belongs here even though the food has arrived: it says nothing about
+ * the money, and a guest who pays after eating still needs to watch their bill
+ * settle. Leaving it out would stop polling at the exact moment the guest picks
+ * their phone back up to pay.
+ */
 const IN_PROGRESS: ReadonlySet<string> = new Set([
   "CREATED",
   "PREPARING",
   "READY",
+  "SERVED",
   "PAYMENT_PENDING",
 ]);
 

@@ -22,6 +22,10 @@ const STATE_META: Record<
     label: "Says paid",
     cls: "bg-warning text-on-warning",
   },
+  part: {
+    label: "Part paid",
+    cls: "bg-warning-container text-on-warning-container",
+  },
   unpaid: {
     label: "Owes",
     cls: "bg-error-container text-on-error-container",
@@ -35,6 +39,19 @@ const STATE_META: Record<
     cls: "bg-surface-container-high text-on-surface-variant",
   },
 };
+
+/**
+ * Named only where it changes what staff do.
+ *
+ * A card request means carry the machine over; a transfer means check the
+ * account and verify. Cash needs no label — it is the default and saying so
+ * adds noise to every row.
+ */
+function methodLabel(method: string | null): string {
+  if (method === "POS") return " · card machine";
+  if (method === "MANUAL_TRANSFER") return " · transfer";
+  return "";
+}
 
 interface Props {
   bills: Bill[];
@@ -64,15 +81,22 @@ export default function TableBills({ bills, renderActions }: Props) {
                 <span className="text-label-l5 font-semibold text-primary-text truncate">
                   {bill.guestName ?? "Guest"}
                 </span>
-                {bill.orders.length > 1 && (
-                  <span className="text-caption-xs text-secondary-text">
-                    {bill.orders.length} orders
-                  </span>
-                )}
+                <span className="text-caption-xs text-secondary-text">
+                  {bill.state === "part" &&
+                    `${formatCurrency(bill.amountPaid)} of ${formatCurrency(bill.total)} paid`}
+                  {bill.state !== "part" && bill.orders.length > 1
+                    ? `${bill.orders.length} orders`
+                    : ""}
+                  {methodLabel(bill.paymentMethod)}
+                </span>
               </div>
               <div className="flex items-center gap-s shrink-0">
                 <span className="text-label-l5 font-semibold tabular-nums text-primary-text">
-                  {formatCurrency(bill.total)}
+                  {/* The balance, not the total. A waiter collecting on a part
+                      paid bill needs the number they are about to ask for. */}
+                  {formatCurrency(
+                    bill.state === "settled" ? bill.total : bill.balanceDue,
+                  )}
                 </span>
                 <span
                   className={`px-s py-0.5 rounded-4xl font-bold text-caption-xs uppercase tracking-wider whitespace-nowrap ${meta.cls}`}
