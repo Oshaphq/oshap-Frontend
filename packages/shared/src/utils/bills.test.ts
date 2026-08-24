@@ -214,3 +214,86 @@ describe("how the bill is being paid", () => {
     expect(groupBills([order({ order_id: "a", device_token: "p1" })])[0]!.paymentMethod).toBeNull();
   });
 });
+
+describe("money owing outranks the payment state", () => {
+  // Seen at Jobiz: a part payment left `payment_state` reading CONFIRMED while
+  // a balance remained. The bill rendered as Paid with no action, so the only
+  // button left was Clear Table — and that wrote two part-paid orders off as
+  // abandoned with the money already taken.
+  const partPaidButMarkedPaid = () =>
+    groupBills([
+      order({
+        order_id: "a",
+        device_token: "p1",
+        payment_state: "CONFIRMED",
+        total: 4_108_650,
+        amount_paid: 4_000_000,
+        balance_due: 108_650,
+      }),
+    ])[0]!;
+
+  it("does not read as settled", () => {
+    expect(partPaidButMarkedPaid().state).toBe("part");
+  });
+
+  it("still offers a way to take the rest", () => {
+    expect(partPaidButMarkedPaid().balanceDue).toBe(108_650);
+  });
+
+  it("settles once the balance reaches zero", () => {
+    const bill = groupBills([
+      order({
+        order_id: "a",
+        device_token: "p1",
+        payment_state: "CONFIRMED",
+        total: 1000,
+        amount_paid: 1000,
+        balance_due: 0,
+      }),
+    ])[0]!;
+    expect(bill.state).toBe("settled");
+  });
+
+  it("leaves a claim alone — that needs verifying, not collecting", () => {
+    const bill = groupBills([
+      order({
+        order_id: "a",
+        device_token: "p1",
+        payment_state: "CLAIMED",
+        total: 1000,
+        balance_due: 1000,
+      }),
+    ])[0]!;
+    expect(bill.state).toBe("claimed");
+  });
+
+  it("will not infer a balance the server never sent", () => {
+    // Turning an unreadable payment state into a confident "unpaid" would offer
+    // Take Payment on a settled bill, and charging a guest twice is the one
+    // error here that cannot be undone at the table.
+    const bill = groupBills([
+      order({ order_id: "a", device_token: "p1", payment_state: "WHO_KNOWS", total: 1000 }),
+    ])[0]!;
+    expect(bill.state).toBe("unknown");
+  });
+});
+
+describe("a cancelled order is not an open bill", () => {
+  // At Jobiz the same two orders showed as open bills on the board and as
+  // CANCELLED in history at once, so the table sat lit with rows nobody could
+  // act on.
+  it.each(["CANCELLED", "REFUNDED"])("drops a %s order", (status) => {
+    expect(
+      groupBills([order({ order_id: "a", device_token: "p1", status })]),
+    ).toEqual([]);
+  });
+
+  it("keeps the rest of the table", () => {
+    const bills = groupBills([
+      order({ order_id: "a", device_token: "p1", status: "CANCELLED" }),
+      order({ order_id: "b", device_token: "p2", status: "READY" }),
+    ]);
+    expect(bills).toHaveLength(1);
+    expect(bills[0]!.orders[0]!.order_id).toBe("b");
+  });
+});
