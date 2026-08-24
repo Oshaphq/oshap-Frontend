@@ -33,6 +33,8 @@ import type {
   UpdateOrderItemRequest,
   AuditLogEntry,
   AuditLogResponse,
+  ServeOrderRequest,
+  ServeOrderResponse,
   SettlementResult,
   BulkDeleteRequest,
   BulkDeleteError,
@@ -548,6 +550,16 @@ type StoredOrder = Order & {
 };
 
 let _menu: MenuItem[] = [...SEED_MENU];
+/**
+ * An order still owed for. `SERVED` is here because delivering food settles
+ * nothing — the guest may pay after eating, and a bill that vanished from the
+ * board the moment the plate landed is a bill nobody collects.
+ */
+const UNPAID_STATUSES = ["CREATED", "PREPARING", "READY", "SERVED"];
+
+/** Still on the table at all, claimed payments included. */
+const OPEN_STATUSES = [...UNPAID_STATUSES, "PAYMENT_PENDING"];
+
 const _orders: Map<string, StoredOrder> = new Map();
 /**
  * How much has been taken against each order so far.
@@ -800,7 +812,7 @@ route("GET", /^\/table\/(.+)$/, ({ path, query }) => {
   const tableOrders = [..._orders.values()].filter(
     (o) =>
       o.table_id === tableId &&
-      ["CREATED", "PREPARING", "READY", "PAYMENT_PENDING"].includes(o.status),
+      OPEN_STATUSES.includes(o.status),
   );
 
   let scopedOrders = tableOrders;
@@ -816,7 +828,7 @@ route("GET", /^\/table\/(.+)$/, ({ path, query }) => {
     scopedOrders = tableOrders.filter((o) => o.device_token === deviceToken);
   }
 
-  const createdOrders = scopedOrders.filter((o) => ["CREATED", "PREPARING", "READY"].includes(o.status));
+  const createdOrders = scopedOrders.filter((o) => UNPAID_STATUSES.includes(o.status));
   const pendingOrders = scopedOrders.filter((o) => o.status === "PAYMENT_PENDING");
 
   /**
@@ -889,7 +901,7 @@ route("POST", /^\/table\/(.+)\/request-pos$/, ({ path, body }) => {
 
   // Scope CREATED/PREPARING/READY orders to this device/session
   const createdOrders = [..._orders.values()].filter((o) => {
-    if (o.table_id !== tableId || !["CREATED", "PREPARING", "READY"].includes(o.status)) return false;
+    if (o.table_id !== tableId || !UNPAID_STATUSES.includes(o.status)) return false;
     if (sessionId && deviceToken) {
       return (
         o.session_id === sessionId ||
@@ -1166,7 +1178,7 @@ route("GET", /^\/session\/orders$/, ({ query }) => {
   const deviceToken = query.get("device_token");
 
   let orders = [..._orders.values()].filter((o) =>
-    ["CREATED", "PREPARING", "READY", "PAYMENT_PENDING"].includes(o.status),
+    OPEN_STATUSES.includes(o.status),
   );
 
   if (sessionId && tableId) {
@@ -1525,12 +1537,12 @@ route("POST", /^\/admin\/settings\/upload$/, () => {
 route("GET", /^\/admin\/tables$/, ({ query }) => {
   if (isOtherBranch(query)) return json(200, { tables: [] } satisfies AdminTablesResponse);
   const allOrders = [..._orders.values()].filter((o) =>
-    ["CREATED", "PREPARING", "READY", "PAYMENT_PENDING"].includes(o.status),
+    OPEN_STATUSES.includes(o.status),
   );
 
   const tables = _tables.map(({ uuid, name: tableId }) => {
     const tOrders = allOrders.filter((o) => o.table_id === tableId);
-    const unpaid = tOrders.filter((o) => ["CREATED", "PREPARING", "READY"].includes(o.status));
+    const unpaid = tOrders.filter((o) => UNPAID_STATUSES.includes(o.status));
     const pending = tOrders.filter((o) => o.status === "PAYMENT_PENDING");
 
     return {
@@ -1585,7 +1597,7 @@ route("DELETE", /^\/admin\/tables\/(.+)$/, ({ path }) => {
   const tableId = decodeURIComponent(path.replace(/^\/admin\/tables\//, ""));
   if (!findTableByName(tableId)) return json(404, { error: "Table not found" });
   const activeOrders = [..._orders.values()].filter(
-    (o) => o.table_id === tableId && ["CREATED", "PREPARING", "READY", "PAYMENT_PENDING"].includes(o.status),
+    (o) => o.table_id === tableId && OPEN_STATUSES.includes(o.status),
   );
   if (activeOrders.length > 0) return json(409, { error: "Cannot delete a table with active orders" });
   _tables = _tables.filter((t) => t.uuid !== tableId && t.name !== tableId);
@@ -1596,7 +1608,7 @@ route("DELETE", /^\/admin\/tables\/(.+)$/, ({ path }) => {
 route("GET", /^\/admin\/kitchen$/, ({ query }) => {
   if (isOtherBranch(query)) return json(200, []);
   const orders = [..._orders.values()]
-    .filter((o) => ["CREATED", "PREPARING", "READY"].includes(o.status))
+    .filter((o) => UNPAID_STATUSES.includes(o.status))
     .sort((a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime());
 
   return json(200, orders);
@@ -2835,6 +2847,50 @@ route("POST", /^\/admin\/orders\/cash$/, ({ body }) => {
   } satisfies RecordCashResponse);
 });
 
+route("POST", /^\/admin\/orders\/[^/]+\/serve$/, ({ path, body }) => {
+  const orderId = path.split("/admin/orders/")[1]!.split("/")[0]!;
+  const order = _orders.get(orderId);
+  if (!order) return json(404, { error: "Order not found" });
+  if (order.status === "CANCELLED") {
+    return json(409, { error: "That order was cancelled" });
+  }
+
+  const method = (body as ServeOrderRequest | null)?.method;
+
+  /**
+   * Served first, paid second — and the two are recorded separately on
+   * purpose. Without a method the order stays SERVED and open: the food is out,
+   * the money is not in, and the table stays lit. Nothing is assumed.
+   */
+  order.status = "SERVED";
+
+  if (method) {
+    const alreadyPaid = _amountPaid.get(orderId) ?? 0;
+    _amountPaid.set(orderId, order.total);
+    _payments.set(orderId, {
+      id: uid(),
+      order_id: orderId,
+      amount: order.total,
+      status: "VERIFIED",
+      proof_url: null,
+      bank_account_id: null,
+      method,
+      created_at: now(),
+    });
+    order.status = "CONFIRMED";
+    audit(AUDIT_ACTIONS.cashPaid, order, { amount: order.total - alreadyPaid });
+  }
+
+  syncToStorage();
+  return json(200, {
+    success: true as const,
+    order_id: orderId,
+    status: order.status,
+    settled: Boolean(method),
+    balance_due: method ? 0 : order.total - (_amountPaid.get(orderId) ?? 0),
+  } satisfies ServeOrderResponse);
+});
+
 route("POST", /^\/admin\/reject$/, ({ body }) => {
   const b = body as AdminRejectRequest;
   // Per order, matching the real API: two guests at one table pay separately.
@@ -2899,7 +2955,7 @@ route("POST", /^\/admin\/verify$/, ({ body }) => {
   const hasUnpaid = [..._orders.values()].some(
     (o) =>
       o.table_id === tableName &&
-      ["CREATED", "PREPARING", "READY", "PAYMENT_PENDING"].includes(o.status),
+      OPEN_STATUSES.includes(o.status),
   );
 
   let autoClosed = false;
@@ -2929,7 +2985,7 @@ route("POST", /^\/admin\/close$/, ({ body }) => {
   const activeOrders = [..._orders.values()].filter(
     (o) =>
       o.table_id === b.table_id &&
-      ["CREATED", "PREPARING", "READY", "PAYMENT_PENDING"].includes(o.status),
+      OPEN_STATUSES.includes(o.status),
   );
 
   for (const o of activeOrders) {

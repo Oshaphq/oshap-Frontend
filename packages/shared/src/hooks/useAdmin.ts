@@ -46,6 +46,7 @@ import {
   adminOrderReceipt,
   adminAuditLogs,
   adminBulkDeleteMenuItems,
+  adminServeOrder,
 } from "../api/admin";
 import type {
   AdminHistoryQuery,
@@ -62,6 +63,7 @@ import type {
   RefundRequest,
   UpdateOrderItemRequest,
   AuditLogQuery,
+  ServeOrderRequest,
 } from "../types/index";
 
 // ---------- Settings ----------
@@ -229,6 +231,27 @@ export function useAdminDeleteMenuItem() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: queryKeys.admin.menu() });
       queryClient.invalidateQueries({ queryKey: queryKeys.menu.all });
+    },
+  });
+}
+
+/**
+ * Marks an order served, optionally settling it in the same tap.
+ *
+ * Invalidates the kitchen board, the table board and the guest's own view: the
+ * food leaving the pass, the bill on the card and the status on the guest's
+ * phone are the same event seen from three places.
+ */
+export function useAdminServeOrder() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (vars: { orderId: string; method?: ServeOrderRequest["method"] }) =>
+      adminServeOrder(vars.orderId, vars.method),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: queryKeys.admin.kitchen() });
+      queryClient.invalidateQueries({ queryKey: queryKeys.admin.tables() });
+      queryClient.invalidateQueries({ queryKey: queryKeys.orders.all });
+      queryClient.invalidateQueries({ queryKey: queryKeys.tables.all });
     },
   });
 }

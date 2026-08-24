@@ -896,6 +896,37 @@ export interface RecordCashRequest {
   amount?: number;
 }
 
+/**
+ * Marking food as delivered, and saying how it was paid for in the same tap.
+ *
+ * `method` omitted means **not yet** — the food is out, the bill is still open,
+ * and the guest's pay screen stays live so they can settle after eating. That
+ * is a state worth recording rather than an omission: before serving, an unpaid
+ * bill means you can hold the food; after serving, the only leverage left is
+ * the guest still being in the building.
+ *
+ * Nothing is ever assumed paid. The waiter says how the money arrived at the
+ * moment it arrives, which is why there is no assumed-payment state anywhere in
+ * this flow.
+ *
+ * `POS` is missing from what the endpoint accepts, though the cash endpoint
+ * takes it — so a waiter who carried the machine over cannot say so here yet.
+ * Raised with the backend.
+ */
+export interface ServeOrderRequest {
+  method?: Extract<PaymentMethod, "CASH" | "MANUAL_TRANSFER">;
+}
+
+export interface ServeOrderResponse {
+  success: true;
+  order_id: string;
+  status: OrderStatus | string;
+  /** False when it was served without payment — the ordinary "not yet" case. */
+  settled: boolean;
+  /** Still owing, in kobo. */
+  balance_due: number;
+}
+
 /** What one order's share of a payment did. */
 export interface SettlementResult {
   order_id: string;
