@@ -9,6 +9,7 @@ import {
   useTable,
 } from "@oshap/shared";
 import { PrimaryButton, SecondaryButton, toast } from "@oshap/shared/ui";
+import { readLastOrder } from "../lastOrder";
 import BottomNav from "../components/BottomNav";
 import CustomerHeader from "../components/CustomerHeader";
 import BillBreakdown from "../components/BillBreakdown";
@@ -36,39 +37,18 @@ export default function PayPage() {
   const [selectedAccountId, setSelectedAccountId] = useState<string | null>(null);
 
   /**
-   * `/session/orders` only returns active orders, so once a bill settles the
-   * guest has no way back to it. Remembering the id lets us fetch it from the
-   * public order endpoint and show a receipt.
+   * What to show a receipt for, once nothing is outstanding.
    *
-   * **Tracks whatever order is currently live**, not just one claimed by tap.
-   * It used to be written only when the guest said "I've sent the money", which
-   * had two consequences: a guest whose bill was settled by staff — cash at the
-   * table, or the new Served flow — got no receipt at all, and the id from an
-   * earlier order stayed put. So a second order at the same table settled and
-   * the screen showed the *previous* order's receipt, surviving a refresh
-   * because sessionStorage does.
+   * Read on every render rather than held in state, because the value is
+   * written by `OrderWatch` — mounted app-wide, so it sees an order whichever
+   * screen the guest is on. Holding a copy here is what broke it before: this
+   * screen only recorded an order while it was being looked at, so a bill
+   * served and settled at the table left the previous order's receipt in place,
+   * through a reload.
    */
-  const settledOrderKey = `oshap-settled-order-${tableId}`;
-  const [settledOrderId, setSettledOrderId] = useState<string | null>(() => {
-    if (typeof window === "undefined") return null;
-    return window.sessionStorage.getItem(settledOrderKey);
-  });
-
+  const settledOrderId =
+    tableQuery.data?.unpaid_order?.id ?? readLastOrder(tableId);
   const settledOrder = useOrder(settledOrderId ?? undefined);
-
-  /**
-   * Remember whichever order is live as soon as we see it, so however it
-   * settles — guest claim, cash at the table, or the Served flow — the receipt
-   * is the right one, and a new order supersedes the last.
-   *
-   * Above the early returns on purpose: hooks cannot run conditionally.
-   */
-  const liveOrderId = tableQuery.data?.unpaid_order?.id ?? null;
-  useEffect(() => {
-    if (!liveOrderId || liveOrderId === settledOrderId) return;
-    window.sessionStorage.setItem(settledOrderKey, liveOrderId);
-    setSettledOrderId(liveOrderId);
-  }, [liveOrderId, settledOrderId, settledOrderKey]);
 
   const posFlagKey = `oshap-pos-requested-${tableId}`;
   const [posRequested, setPosRequested] = useState<boolean>(() => {
@@ -118,7 +98,9 @@ export default function PayPage() {
     } catch {
       // Clipboard unavailable
     }
-  }, []);
+    // `setCopiedField` is stable, but the compiler will not assume it — and an
+    // unlisted dependency makes it bail out of optimising the whole screen.
+  }, [setCopiedField]);
 
   if (tableQuery.isLoading) {
     return (
