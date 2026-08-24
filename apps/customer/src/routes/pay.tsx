@@ -37,11 +37,16 @@ export default function PayPage() {
 
   /**
    * `/session/orders` only returns active orders, so once a bill settles the
-   * customer has no way back to it. Remembering the id at claim time lets us
-   * fetch it from the public order endpoint and show a receipt.
+   * guest has no way back to it. Remembering the id lets us fetch it from the
+   * public order endpoint and show a receipt.
    *
-   * Cash is settled by staff without the customer's phone claiming anything,
-   * so a cash-paying guest won't have this — they get the paper receipt.
+   * **Tracks whatever order is currently live**, not just one claimed by tap.
+   * It used to be written only when the guest said "I've sent the money", which
+   * had two consequences: a guest whose bill was settled by staff — cash at the
+   * table, or the new Served flow — got no receipt at all, and the id from an
+   * earlier order stayed put. So a second order at the same table settled and
+   * the screen showed the *previous* order's receipt, surviving a refresh
+   * because sessionStorage does.
    */
   const settledOrderKey = `oshap-settled-order-${tableId}`;
   const [settledOrderId, setSettledOrderId] = useState<string | null>(() => {
@@ -50,6 +55,20 @@ export default function PayPage() {
   });
 
   const settledOrder = useOrder(settledOrderId ?? undefined);
+
+  /**
+   * Remember whichever order is live as soon as we see it, so however it
+   * settles — guest claim, cash at the table, or the Served flow — the receipt
+   * is the right one, and a new order supersedes the last.
+   *
+   * Above the early returns on purpose: hooks cannot run conditionally.
+   */
+  const liveOrderId = tableQuery.data?.unpaid_order?.id ?? null;
+  useEffect(() => {
+    if (!liveOrderId || liveOrderId === settledOrderId) return;
+    window.sessionStorage.setItem(settledOrderKey, liveOrderId);
+    setSettledOrderId(liveOrderId);
+  }, [liveOrderId, settledOrderId, settledOrderKey]);
 
   const posFlagKey = `oshap-pos-requested-${tableId}`;
   const [posRequested, setPosRequested] = useState<boolean>(() => {
@@ -135,6 +154,7 @@ export default function PayPage() {
     bankAccounts.find((a) => a.id === selectedAccountId) ?? bankAccounts[0] ?? null;
 
   const unpaidOrder = tableQuery.data?.unpaid_order ?? null;
+
   const pendingPayments = tableQuery.data?.pending_payments ?? null;
   const reference = refParam ?? unpaidOrder?.reference ?? "";
 
@@ -148,8 +168,6 @@ export default function PayPage() {
         // the ranking never learns which accounts actually work.
         bank_account_id: selectedAccount?.id,
       });
-      window.sessionStorage.setItem(settledOrderKey, unpaidOrder.id);
-      setSettledOrderId(unpaidOrder.id);
       // Saying "I've sent the money" is a transfer, and it is the most recent
       // thing the guest has told us. Without this the POS flag from an earlier
       // tap survives and the waiting screen announces "POS On The Way" to
@@ -200,11 +218,7 @@ export default function PayPage() {
               </span>
               <span className="text-p2 text-secondary-text">
                 {formatCurrency(receipt.total)} received
-                {receipt.payment?.method === "CASH"
-                  ? " in cash"
-                  : receipt.payment?.method === "POS"
-                    ? " by card"
-                    : " by transfer"}
+                {paymentMethodPhrase(receipt.payment?.method)}
               </span>
             </section>
 
@@ -526,4 +540,19 @@ function DetailRow({
 
 function Divider() {
   return <div className="h-px bg-outline-variant" />;
+}
+
+/**
+ * How the money arrived, in words, or nothing when we do not know.
+ *
+ * The last branch used to be "by transfer" for anything unrecognised, which was
+ * a guess dressed as a fact — and it became reachable the moment guests paying
+ * cash at the table started seeing this screen. A receipt that names the wrong
+ * method is worse than one that names none.
+ */
+export function paymentMethodPhrase(method: string | null | undefined): string {
+  if (method === "CASH") return " in cash";
+  if (method === "POS") return " by card";
+  if (method === "MANUAL_TRANSFER") return " by transfer";
+  return "";
 }
