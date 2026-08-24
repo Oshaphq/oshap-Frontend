@@ -39,6 +39,8 @@ import type {
   ReceiptResponse,
   AuditLogQuery,
   AuditLogResponse,
+  BulkDeleteRequest,
+  BulkDeleteResponse,
   Order,
   OrderWithItems,
   Restaurant,
@@ -197,6 +199,23 @@ export function adminDeleteMenuItem(id: string): Promise<{ success: true }> {
   return request<{ success: true }>(`/admin/menu/${encodeURIComponent(id)}`, {
     method: "DELETE",
     admin: true,
+  });
+}
+
+/**
+ * Removes several dishes in one call.
+ *
+ * Not a loop over the single delete: that would half-finish visibly, leaving a
+ * merchant to work out which of twelve dishes went and which did not. One call
+ * gives the server the chance to answer per item.
+ */
+export function adminBulkDeleteMenuItems(
+  itemIds: string[],
+): Promise<BulkDeleteResponse> {
+  return request<BulkDeleteResponse>("/admin/menu/bulk-delete", {
+    method: "POST",
+    admin: true,
+    body: { item_ids: itemIds } satisfies BulkDeleteRequest,
   });
 }
 

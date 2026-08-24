@@ -33,6 +33,9 @@ import type {
   UpdateOrderItemRequest,
   AuditLogEntry,
   AuditLogResponse,
+  BulkDeleteRequest,
+  BulkDeleteError,
+  BulkDeleteResponse,
   // Aliased: `Notification` is a DOM global, and the unaliased import
   // resolves to that one without erroring.
   Notification as StoredNotification,
@@ -1708,6 +1711,45 @@ route("DELETE", /^\/admin\/menu\/([^/]+)$/, ({ path }) => {
   const id = path.split("/admin/menu/")[1]!;
   _menu = _menu.filter((i) => i.id !== id);
   return json(200, { success: true as const });
+});
+
+route("POST", /^\/admin\/menu\/bulk-delete$/, ({ body }) => {
+  const ids = (body as BulkDeleteRequest | null)?.item_ids ?? [];
+  if (ids.length === 0) return json(400, { error: "No items selected" });
+
+  /**
+   * A dish that appears on a past order cannot simply be erased — the receipt
+   * has to keep meaning something. The real API refused these outright for a
+   * while; the mock refuses them individually so the screen has to handle a
+   * partial result rather than assuming everything asked for went.
+   */
+  const ordered = new Set(
+    [..._orders.values()].flatMap((o) =>
+      ((o as StoredOrderWithItems).order_items ?? []).map((i) => i.menu_item_id),
+    ),
+  );
+
+  const errors: BulkDeleteError[] = [];
+  const removable: string[] = [];
+  for (const id of ids) {
+    const item = _menu.find((i) => i.id === id);
+    if (!item) {
+      errors.push({ item_id: id, message: "That dish is already gone" });
+    } else if (ordered.has(id)) {
+      errors.push({
+        item_id: id,
+        message: "It appears on a past order, so it cannot be deleted",
+      });
+    } else {
+      removable.push(id);
+    }
+  }
+
+  _menu = _menu.filter((i) => !removable.includes(i.id));
+  return json(200, {
+    deleted: removable.length,
+    errors,
+  } satisfies BulkDeleteResponse);
 });
 
 // -------------------- Admin: Bulk menu import / export --------------------

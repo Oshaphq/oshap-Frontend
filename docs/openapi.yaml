@@ -3422,6 +3422,61 @@ paths:
                     items:
                       $ref: "#/components/schemas/ModifierGroup"
 
+  /admin/menu/bulk-delete:
+    post:
+      tags: [Admin]
+      summary: Remove several dishes at once
+      description: >
+        Clearing out a seasonal section one dish at a time is the kind of chore
+        that stops people tidying their menu at all.
+
+
+        **Partial success, reported per item.** A dish that appears on a past
+        order cannot simply be erased — the receipt has to keep meaning
+        something — so the server may refuse individual items while removing the
+        rest. Returning a bare count would leave a merchant scanning the list to
+        work out which ones stayed.
+      security: [{ adminPin: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [item_ids]
+              properties:
+                item_ids:
+                  type: array
+                  minItems: 1
+                  items: { type: string, format: uuid }
+      responses:
+        "200":
+          description: What went, and what did not
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  deleted:
+                    type: integer
+                    description: How many were actually removed.
+                  errors:
+                    type: array
+                    description: >
+                      One entry per item the server would not remove. Empty when
+                      everything went.
+                    items:
+                      type: object
+                      properties:
+                        item_id: { type: string, format: uuid }
+                        message:
+                          type: string
+                          description: >
+                            Shown to the merchant as-is, so it must name the
+                            reason in words rather than a constraint.
+        "400":
+          description: Empty selection.
+
   /admin/menu/export:
     get:
       tags: [Admin]
