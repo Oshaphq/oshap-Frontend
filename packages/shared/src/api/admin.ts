@@ -39,6 +39,8 @@ import type {
   ReceiptResponse,
   AuditLogQuery,
   AuditLogResponse,
+  ServeOrderRequest,
+  ServeOrderResponse,
   BulkDeleteRequest,
   BulkDeleteResponse,
   Order,
@@ -359,6 +361,27 @@ export function adminCompOrderItem(orderId: string, itemId: string): Promise<Ord
   return request<Order>(`${itemPath(orderId, itemId)}/comp`, {
     method: "POST",
     admin: true,
+  });
+}
+
+/**
+ * Records that food reached the table, and how it was paid for.
+ *
+ * Nothing before this recorded delivery at all, so an order could sit in READY
+ * for an hour with no way to tell a plate going cold on the pass from a waiter
+ * who forgot to tap.
+ *
+ * Omitting `method` is the "not yet" branch: served, still owed, table stays
+ * lit, guest can still pay from their phone.
+ */
+export function adminServeOrder(
+  orderId: string,
+  method?: ServeOrderRequest["method"],
+): Promise<ServeOrderResponse> {
+  return request<ServeOrderResponse>(`${orderPath(orderId)}/serve`, {
+    method: "POST",
+    admin: true,
+    body: (method ? { method } : {}) satisfies ServeOrderRequest,
   });
 }
 

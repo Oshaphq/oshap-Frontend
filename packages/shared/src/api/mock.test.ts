@@ -2402,3 +2402,111 @@ describe("mock API — part payment", () => {
     expect(forB.balance_due).toBe(b.total - 200_000);
   });
 });
+
+describe("mock API — serving food", () => {
+  const orderOn = async (table: string) => {
+    const res = await mockRequest(
+      "/orders",
+      "POST",
+      {
+        table,
+        restaurant_id: HOME_RESTAURANT,
+        device_token: `dev-serve-${table}`,
+        items: [{ name: "Jollof Rice", qty: 1, price: 350000 }],
+      },
+      q(),
+      false,
+    );
+    return res.body as { order_id: string; total: number };
+  };
+  const serve = (orderId: string, method?: string) =>
+    mockRequest(
+      `/admin/orders/${orderId}/serve`,
+      "POST",
+      method ? { method } : {},
+      q(),
+      true,
+    );
+  const liveOn = async (table: string) => {
+    const res = await mockRequest("/admin/tables", "GET", null, q(), true);
+    const row = (res.body as { tables: Array<{ table_id: string; live_orders?: Array<{ order_id: string; balance_due: number }> }> })
+      .tables.find((t) => t.table_id === table);
+    return row?.live_orders ?? [];
+  };
+
+  it("serving without a method leaves the bill open", async () => {
+    // The "not yet" branch. Food is out, money is not in, and that is an
+    // ordinary thing to record rather than an omission.
+    const { order_id, total } = await orderOn("T2");
+    const body = (await serve(order_id)).body as {
+      status: string;
+      settled: boolean;
+      balance_due: number;
+    };
+
+    expect(body.status).toBe("SERVED");
+    expect(body.settled).toBe(false);
+    expect(body.balance_due).toBe(total);
+  });
+
+  it("a served but unpaid bill stays on the board", async () => {
+    // The bill must not vanish the moment the plate lands — after serving, the
+    // only leverage left is the guest still being in the building.
+    const { order_id } = await orderOn("T3");
+    await serve(order_id);
+    expect((await liveOn("T3")).map((o) => o.order_id)).toContain(order_id);
+  });
+
+  it.each(["CASH", "MANUAL_TRANSFER"])("serving with %s settles it there and then", async (method) => {
+    const { order_id } = await orderOn("T4");
+    const body = (await serve(order_id, method)).body as {
+      status: string;
+      settled: boolean;
+      balance_due: number;
+    };
+
+    expect(body.settled).toBe(true);
+    expect(body.balance_due).toBe(0);
+    expect(body.status).toBe("CONFIRMED");
+    expect((await liveOn("T4")).map((o) => o.order_id)).not.toContain(order_id);
+  });
+
+  it("the guest can still pay after eating", async () => {
+    // Served does not mean paid, so the money can arrive later through the
+    // ordinary path and close the bill.
+    const { order_id, total } = await orderOn("T5");
+    await serve(order_id);
+
+    const cash = (await mockRequest(
+      "/admin/orders/cash",
+      "POST",
+      { order_ids: [order_id], amount: total },
+      q(),
+      true,
+    )).body as { results: Array<{ settled: boolean; balance_due: number }> };
+
+    expect(cash.results[0]!.settled).toBe(true);
+    expect(cash.results[0]!.balance_due).toBe(0);
+  });
+
+  it("part payment still works on a served bill", async () => {
+    const { order_id, total } = await orderOn("T6");
+    await serve(order_id);
+    const cash = (await mockRequest(
+      "/admin/orders/cash",
+      "POST",
+      { order_ids: [order_id], amount: total - 50_000 },
+      q(),
+      true,
+    )).body as { results: Array<{ settled: boolean; balance_due: number }> };
+
+    expect(cash.results[0]!.settled).toBe(false);
+    expect(cash.results[0]!.balance_due).toBe(50_000);
+  });
+
+  it("refuses to serve a cancelled order", async () => {
+    const { order_id } = await orderOn("T7");
+    await mockRequest("/admin/close", "POST", { table_id: "T7", reason: "abandoned" }, q(), true);
+    expect((await serve(order_id)).status).toBe(409);
+  });
+});

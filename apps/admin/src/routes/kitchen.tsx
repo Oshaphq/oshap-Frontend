@@ -8,8 +8,10 @@ import {
 import type { OrderWithItems } from "@oshap/shared";
 import { PrimaryButton, toast } from "@oshap/shared/ui";
 import QueryError from "../components/QueryError";
+import ServeDialog from "../components/ServeDialog";
 import { Link } from "react-router";
 import { useAuth } from "../context/AuthContext";
+import { useState } from "react";
 
 function timeAgo(dateStr: string): string {
   const diff = Date.now() - new Date(dateStr).getTime();
@@ -37,6 +39,9 @@ function stripRef(ref: string) {
 const DRINKS_CATEGORY = "Drinks";
 
 export default function KitchenPage() {
+  // The order the serve prompt is open for. Held rather than an id, because
+  // the dialog needs its table and total and the board already has both.
+  const [serving, setServing] = useState<OrderWithItems | null>(null);
   const { user } = useAuth();
   const kitchenQuery = useAdminKitchen();
   const menuQuery = useAdminMenu();
@@ -109,6 +114,7 @@ export default function KitchenPage() {
   const rawOrders = kitchenQuery.data ?? [];
   const orders = rawOrders.filter(filterOrder).map(mapOrderItems);
 
+
   const isStationRole = user?.role === "BARTENDER" || user?.role === "KITCHEN";
   // Orders exist but this station sees none of them — usually a category-name
   // mismatch rather than a quiet service.
@@ -179,18 +185,34 @@ export default function KitchenPage() {
               }
               onAction={(id) => handleUpdateStatus(id, "READY")}
             />
+            {/* Ready used to be the end of the line — an order sat here with
+                no action, so nothing recorded that the food reached the table
+                and a plate going cold on the pass looked exactly like a waiter
+                who forgot to tap. */}
             <KitchenColumn
               title="Ready"
               accent="success"
               orders={ready}
-              ctaLabel={null}
-              ctaDisabledLabel={null}
+              ctaLabel="Served"
+              ctaDisabledLabel="..."
               isUpdatingId={null}
-              onAction={() => {}}
+              onAction={(id) => {
+                const order = ready.find((o) => o.id === id);
+                if (order) setServing(order);
+              }}
             />
           </div>
         )}
       </div>
+
+      {serving && (
+        <ServeDialog
+          orderId={serving.id}
+          tableName={serving.table_id}
+          total={serving.total}
+          onClose={() => setServing(null)}
+        />
+      )}
     </main>
   );
 }
