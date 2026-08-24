@@ -5,7 +5,7 @@ import {
   adminNotifications,
   adminResolveNotification,
 } from "../api/notifications";
-import type { NotificationQuery } from "../types";
+import type { Notification, NotificationQuery } from "../types";
 
 /**
  * Falls back to polling when the stream is quiet.
@@ -30,16 +30,25 @@ export function useAdminNotifications(query: NotificationQuery = {}) {
 }
 
 /**
- * How many notifications match one filter, without fetching them.
+ * How far the badge looks before it gives up and says "lots".
  *
- * The agreed contract put `unread_total` and `unresolved_total` on every list
- * response. Neither shipped, and reading the missing field did not fail loudly
- * — it produced `undefined`, which left the bell permanently unlit and the
- * "Mark all read" button permanently disabled.
+ * The badge caps its display at 9+, so counting past thirty tells nobody
+ * anything — and it keeps this to one small page rather than the whole history.
+ */
+const BADGE_SCAN = 30;
+
+/**
+ * How many notifications match one filter.
  *
- * `total` counts the filtered set rather than the page, so asking for one row
- * makes `total` the answer. It also keeps the property that mattered: paging a
- * list never disturbs a count.
+ * **Counts the rows rather than trusting `total`.** The badge sat at 9+ and
+ * never moved, and the two candidate causes are indistinguishable from here:
+ * either `total` is computed before the filter is applied, or notifications
+ * that should resolve themselves never do. Counting rows we can see, on a field
+ * we can read, is right under both — and self-corrects the moment the server
+ * does.
+ *
+ * The filter still goes on the request, so the server narrows it where it can;
+ * this only stops us believing the number that comes back.
  */
 export function useNotificationCount(filter: "unread" | "unresolved") {
   return useQuery({
@@ -47,15 +56,34 @@ export function useNotificationCount(filter: "unread" | "unresolved") {
     queryFn: () =>
       adminNotifications({
         page: 1,
-        per_page: 1,
+        per_page: BADGE_SCAN,
         ...(filter === "unread"
           ? { unread_only: true }
           : { unresolved_only: true }),
       }),
     refetchInterval: POLL_MS,
     refetchOnWindowFocus: true,
-    select: (data) => data.total,
+    select: (data) => countMatching(data.notifications, filter),
   });
+}
+
+/**
+ * `resolved_at` and `read_at` are facts; `is_unresolved` and `is_unread` are
+ * the server's reading of them and both default to true. Where the two
+ * disagree the timestamp wins, because a row with a resolution time on it has
+ * plainly been resolved.
+ *
+ * Rows routed to somebody else's role never count. Being badged for work you
+ * cannot do is how people learn to ignore a bell.
+ */
+export function countMatching(
+  rows: Notification[],
+  filter: "unread" | "unresolved",
+): number {
+  return rows.filter((n) => {
+    if (n.for_my_role === false) return false;
+    return filter === "unread" ? !n.read_at && n.is_unread : !n.resolved_at;
+  }).length;
 }
 
 /**
@@ -67,7 +95,10 @@ export function useNotificationCount(filter: "unread" | "unresolved") {
  */
 export function useNotificationBadge() {
   const query = useNotificationCount("unresolved");
-  return { ...query, data: query.data === undefined ? undefined : { unresolved: query.data } };
+  return {
+    ...query,
+    data: query.data === undefined ? undefined : { unresolved: query.data },
+  };
 }
 
 export function useMarkNotificationsRead() {
