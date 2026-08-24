@@ -108,8 +108,19 @@ function makeUnion() {
   };
 }
 
+/** An order nobody owes anything on and nobody is waiting for. */
+const CLOSED_STATUSES = new Set(["CANCELLED", "REFUNDED"]);
+
 export function groupBills(orders: AdminTableLiveOrder[] | null | undefined): Bill[] {
-  const rows = orders ?? [];
+  /**
+   * Cancelled and refunded orders are not open bills, whatever the live list
+   * says. Seen at Jobiz: the same two orders showed as open bills on the board
+   * and as CANCELLED in history at the same time, so the table sat lit with two
+   * rows nobody could act on.
+   */
+  const rows = (orders ?? []).filter(
+    (o) => !CLOSED_STATUSES.has((o.status ?? "").toUpperCase()),
+  );
   if (rows.length === 0) return [];
 
   const u = makeUnion();
@@ -158,11 +169,33 @@ function toBill(orders: AdminTableLiveOrder[]): Bill {
   // `balance_due` is authoritative where it is sent. Summing per order rather
   // than subtracting from the total, because a refund or an adjustment can
   // make those two disagree and the server's number is the one that counts.
-  const balanceDue = orders.some((o) => o.balance_due !== undefined)
+  // Whether the server actually told us, as opposed to us inferring it. The
+  // difference decides how much weight the number can carry below.
+  const balanceReported = orders.some((o) => o.balance_due !== undefined);
+  const balanceDue = balanceReported
     ? orders.reduce((sum, o) => sum + (o.balance_due ?? 0), 0)
     : total - amountPaid;
 
-  const base = billState(states);
+  /**
+   * A reported balance beats whatever `payment_state` says.
+   *
+   * A part payment can leave the state reading CONFIRMED while money is still
+   * owed, and trusting it rendered the bill as **Paid** with no action — so the
+   * only button left was Clear Table, which wrote the whole thing off as
+   * abandoned. That is how two part-paid orders at Jobiz ended up CANCELLED
+   * with the money already taken.
+   *
+   * Only when the server *reported* a balance, though. Inferring one from
+   * `total - amountPaid` would turn a payment state we cannot read into a
+   * confident "unpaid", and offering Take Payment on a settled bill charges a
+   * guest twice — the one error here that cannot be undone at the table.
+   */
+  const base =
+    balanceReported && balanceDue > 0 && !states.includes("claimed")
+      ? amountPaid > 0
+        ? "part"
+        : "unpaid"
+      : billState(states);
 
   return {
     // The earliest order id in the bill, so the key does not move when a guest
@@ -173,9 +206,7 @@ function toBill(orders: AdminTableLiveOrder[]): Bill {
     total,
     amountPaid,
     balanceDue,
-    // A bill with money against it and a balance left is neither unpaid nor
-    // settled, and calling it either would send a waiter for the wrong amount.
-    state: base === "unpaid" && amountPaid > 0 && balanceDue > 0 ? "part" : base,
+    state: base,
     paymentMethod:
       orders.find((o) => o.payment_method)?.payment_method?.toString() ?? null,
     claimedOrderIds: orders

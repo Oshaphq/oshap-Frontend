@@ -373,9 +373,28 @@ export default function DashboardPage() {
                     <i className="mgc_exit_line" />
                     Left without paying
                   </button>
-                  <p className="text-caption-xs text-outline text-center">
-                    Clearing as unpaid writes off {formatCurrency(table.unpaidTotal)}.
-                  </p>
+                  {/* Money already taken against an open bill is the case
+                      that bites: writing it off as abandoned cancels the order
+                      and the payment stays on the books with nothing to match
+                      it. Two orders at Jobiz went this way. */}
+                  {bills.some((b) => b.amountPaid > 0 && b.balanceDue > 0) ? (
+                    <p className="text-caption-xs text-on-warning-container bg-warning-container rounded-lg p-s text-center">
+                      Careful — money has already been taken on this table.
+                      Clearing as unpaid cancels the order and leaves that
+                      payment with nothing to match it. Take the rest, or
+                      discount the difference instead.
+                    </p>
+                  ) : (
+                    <p className="text-caption-xs text-outline text-center">
+                      Clearing as unpaid writes off{" "}
+                      {formatCurrency(
+                        bills.length > 0
+                          ? bills.reduce((sum, b) => sum + b.balanceDue, 0)
+                          : table.unpaidTotal,
+                      )}
+                      .
+                    </p>
+                  )}
                   <button
                     type="button"
                     onClick={() => setClearPromptTable(null)}
