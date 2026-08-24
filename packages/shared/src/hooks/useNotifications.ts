@@ -30,25 +30,44 @@ export function useAdminNotifications(query: NotificationQuery = {}) {
 }
 
 /**
- * The badge's own query.
+ * How many notifications match one filter, without fetching them.
  *
- * The agreed contract returned `unresolved_total` on every list response. It
- * did not ship, so the badge read `undefined` and the bell never lit — a
- * notification centre whose only always-visible part was permanently blank.
+ * The agreed contract put `unread_total` and `unresolved_total` on every list
+ * response. Neither shipped, and reading the missing field did not fail loudly
+ * — it produced `undefined`, which left the bell permanently unlit and the
+ * "Mark all read" button permanently disabled.
  *
- * `total` is the count for the query asked, so asking for unresolved rows with
- * `per_page=1` makes `total` exactly the number wanted, without dragging back
- * twenty rows to count them. It also keeps the property that mattered: the
- * badge counts the whole scope, so paging the list never disturbs it.
+ * `total` counts the filtered set rather than the page, so asking for one row
+ * makes `total` the answer. It also keeps the property that mattered: paging a
+ * list never disturbs a count.
  */
-export function useNotificationBadge() {
+export function useNotificationCount(filter: "unread" | "unresolved") {
   return useQuery({
-    queryKey: queryKeys.admin.notificationBadge(),
-    queryFn: () => adminNotifications({ page: 1, per_page: 1, unresolved_only: true }),
+    queryKey: queryKeys.admin.notificationCount(filter),
+    queryFn: () =>
+      adminNotifications({
+        page: 1,
+        per_page: 1,
+        ...(filter === "unread"
+          ? { unread_only: true }
+          : { unresolved_only: true }),
+      }),
     refetchInterval: POLL_MS,
     refetchOnWindowFocus: true,
-    select: (data) => ({ unresolved: data.total }),
+    select: (data) => data.total,
   });
+}
+
+/**
+ * The bell's number.
+ *
+ * Counts **unresolved**, not unread — it should mean "work outstanding", not
+ * "things you haven't looked at". Reading a call you cannot act on must not
+ * clear the badge for the person who can.
+ */
+export function useNotificationBadge() {
+  const query = useNotificationCount("unresolved");
+  return { ...query, data: query.data === undefined ? undefined : { unresolved: query.data } };
 }
 
 export function useMarkNotificationsRead() {
