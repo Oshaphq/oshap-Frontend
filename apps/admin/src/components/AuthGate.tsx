@@ -11,7 +11,7 @@ import { PrimaryButton, Select, ThemeToggle } from "@oshap/shared/ui";
 import { initFCM } from "../utils/fcm";
 import AlertCenter from "./AlertCenter";
 import NotificationBell from "./NotificationBell";
-import { tabsForRole } from "../navTabs";
+import { tabsForRole } from "../permissions";
 import { useAuth } from "../context/AuthContext";
 
 export default function AuthGate() {

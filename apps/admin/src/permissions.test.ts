@@ -1,5 +1,9 @@
 import { describe, it, expect } from "vitest";
-import { tabsForRole } from "./navTabs";
+import {
+  canAdvanceKitchenTickets,
+  canMarkServed,
+  tabsForRole,
+} from "./permissions";
 import type { Role } from "@oshap/shared";
 
 const ctx = { branchCount: 1, waitingTickets: 3 };
@@ -94,4 +98,44 @@ describe("nobody is stranded", () => {
       expect(pathsFor(role).length).toBeGreaterThan(0);
     },
   );
+});
+
+describe("who moves a ticket through the kitchen", () => {
+  it.each<Role>(["OWNER", "MANAGER", "KITCHEN", "BARTENDER"])("%s can", (role) => {
+    expect(canAdvanceKitchenTickets(role)).toBe(true);
+  });
+
+  it("a waiter cannot", () => {
+    // They read the board and run the food. Tapping Ready on a dish still on
+    // the pass tells the floor it is up when it is not, and the person who
+    // finds out is the guest.
+    expect(canAdvanceKitchenTickets("WAITER")).toBe(false);
+  });
+
+  it("a cashier cannot — they never see the board", () => {
+    expect(canAdvanceKitchenTickets("CASHIER")).toBe(false);
+  });
+});
+
+describe("who marks food served", () => {
+  it("a waiter can — they are standing at the table", () => {
+    // The distinction that matters: seeing the board, and driving it, are
+    // different rights. A waiter has the first and half of the second.
+    expect(canMarkServed("WAITER")).toBe(true);
+    expect(canAdvanceKitchenTickets("WAITER")).toBe(false);
+  });
+
+  it.each<Role>(["OWNER", "MANAGER", "KITCHEN", "BARTENDER"])("%s can too", (role) => {
+    expect(canMarkServed(role)).toBe(true);
+  });
+
+  it("everyone who sees the board can mark served", () => {
+    // Otherwise a role gets a column it cannot act on, which is worse than not
+    // seeing it at all.
+    const onTheBoard: Role[] = ["OWNER", "MANAGER", "WAITER", "KITCHEN", "BARTENDER"];
+    for (const role of onTheBoard) {
+      expect(tabsForRole(role, ctx).map((t) => t.to)).toContain("/kitchen");
+      expect(canMarkServed(role)).toBe(true);
+    }
+  });
 });

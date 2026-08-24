@@ -1,7 +1,7 @@
 import type { Role } from "@oshap/shared";
 
 /**
- * Which tabs a role sees in the top nav.
+ * What each role may see and do.
  *
  * Lifted out of `AuthGate` so the whole permission matrix can be asserted
  * rather than read. It is a matrix, and a matrix buried in six `if` statements
@@ -75,4 +75,27 @@ export function tabsForRole(role: Role, ctx: NavContext): NavTab[] {
   }
 
   return tabs;
+}
+
+/**
+ * Who may move a ticket through the kitchen.
+ *
+ * Waiters read this board and mark food **Served** — that part is theirs, they
+ * are the ones carrying the plate. Starting and finishing a dish is not:
+ * tapping Ready on something still on the pass tells the floor the food is up
+ * when it is not, and the person who finds out is the guest.
+ */
+export function canAdvanceKitchenTickets(role: Role): boolean {
+  return ["OWNER", "MANAGER", "KITCHEN", "BARTENDER"].includes(role);
+}
+
+/**
+ * Who may record that food reached the table.
+ *
+ * Deliberately wider than advancing a ticket, and deliberately includes the
+ * waiter: they are standing at the table when it happens, and the payment
+ * prompt behind Served is theirs to answer.
+ */
+export function canMarkServed(role: Role): boolean {
+  return ["OWNER", "MANAGER", "WAITER", "KITCHEN", "BARTENDER"].includes(role);
 }
