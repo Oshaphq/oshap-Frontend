@@ -355,3 +355,54 @@ describe("a bill that owes money can always be acted on", () => {
     expect(bill.unpaidOrderIds).toEqual([]);
   });
 });
+
+describe("a served bill is still a bill", () => {
+  /**
+   * Measured against the live API: serving an order without payment flips
+   * `hasUnpaid` to false and `unpaidTotal` to 0, while `outstanding_total` and
+   * the order's own `balance_due` both still show the money owed.
+   *
+   * The board trusted the flag and printed "No active orders" over a table
+   * owing ₦26,638.50, while the guest's phone still showed the bill.
+   */
+  const served = () =>
+    groupBills([
+      order({
+        order_id: "a",
+        device_token: "p1",
+        status: "SERVED",
+        payment_state: "NOT_PAID",
+        total: 2_663_850,
+        amount_paid: 0,
+        balance_due: 2_663_850,
+      }),
+    ])[0]!;
+
+  it("survives being served", () => {
+    expect(served()).toBeDefined();
+    expect(served().state).toBe("unpaid");
+  });
+
+  it("keeps the money owed", () => {
+    expect(served().balanceDue).toBe(2_663_850);
+  });
+
+  it("still names an order to take payment against", () => {
+    expect(served().unpaidOrderIds).toEqual(["a"]);
+  });
+
+  it("is dropped only once it is actually settled", () => {
+    const settled = groupBills([
+      order({
+        order_id: "a",
+        device_token: "p1",
+        status: "SERVED",
+        payment_state: "CONFIRMED",
+        total: 1000,
+        amount_paid: 1000,
+        balance_due: 0,
+      }),
+    ])[0]!;
+    expect(settled.state).toBe("settled");
+  });
+});

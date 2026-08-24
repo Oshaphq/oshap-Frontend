@@ -9,6 +9,47 @@ import {
 import { SecondaryButton } from "@oshap/shared/ui";
 import QueryError from "../components/QueryError";
 
+/**
+ * What an order's status should read as in history.
+ *
+ * This was `status === "CONFIRMED" ? "Paid" : "Cancelled"` — so **everything
+ * that was not paid was labelled cancelled**, including orders still being
+ * cooked and, once the Served flow shipped, every delivered-but-unpaid bill.
+ *
+ * A guest at T4 could see their order as SERVED on their phone while this
+ * screen called the same order CANCELLED, which is the kind of disagreement
+ * that gets a restaurant accused of losing a bill.
+ */
+function statusChip(status: string): { label: string; cls: string } {
+  const settled = "bg-success-container text-on-success-container";
+  const gone = "bg-error-container text-on-error-container";
+  const working = "bg-warning-container text-on-warning-container";
+  const quiet = "bg-surface-container-high text-on-surface-variant";
+
+  switch (status) {
+    case "CONFIRMED":
+      return { label: "Paid", cls: settled };
+    case "CANCELLED":
+      return { label: "Cancelled", cls: gone };
+    case "REFUNDED":
+      return { label: "Refunded", cls: quiet };
+    case "SERVED":
+      // Food delivered, money not in. The one that was being mislabelled.
+      return { label: "Served · unpaid", cls: working };
+    case "PAYMENT_PENDING":
+      return { label: "Says paid", cls: working };
+    case "CREATED":
+      return { label: "New", cls: quiet };
+    case "PREPARING":
+      return { label: "Preparing", cls: working };
+    case "READY":
+      return { label: "Ready", cls: working };
+    default:
+      // Never guess. A status we do not know is not automatically a bad one.
+      return { label: status.toLowerCase().replace(/_/g, " "), cls: quiet };
+  }
+}
+
 // Both read the API's zoneless timestamps as local time, which in Lagos put
 // every order an hour early — and pushed a late-evening one onto the previous
 // day, the same way the Z-report buckets it wrong.
@@ -131,7 +172,9 @@ export default function HistoryPage() {
                   setExpandedOrder(isExpanded ? null : order.id)
                 }
                 className={`text-left rounded-md p-md flex flex-col gap-md bg-surface-container-low border border-transparent transition-colors hover:border-outline-variant cursor-pointer ${
-                  order.status === "CANCELLED" ? "opacity-55" : ""
+                  order.status === "CANCELLED" || order.status === "REFUNDED"
+                    ? "opacity-55"
+                    : ""
                 }`}
               >
                 <div className="flex items-start justify-between gap-md">
@@ -155,13 +198,9 @@ export default function HistoryPage() {
                       {formatCurrency(order.total)}
                     </span>
                     <span
-                      className={`text-caption-xs font-bold uppercase tracking-wider px-s py-xs rounded-4xl whitespace-nowrap ${
-                        order.status === "CONFIRMED"
-                          ? "bg-success-container text-on-success-container"
-                          : "bg-error-container text-on-error-container"
-                      }`}
+                      className={`text-caption-xs font-bold uppercase tracking-wider px-s py-xs rounded-4xl whitespace-nowrap ${statusChip(order.status).cls}`}
                     >
-                      {order.status === "CONFIRMED" ? "Paid" : "Cancelled"}
+                      {statusChip(order.status).label}
                     </span>
                   </div>
                 </div>

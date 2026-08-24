@@ -69,8 +69,8 @@ export default function DashboardPage() {
   }
 
   const tables = tablesQuery.data?.tables ?? [];
-  const activeTablesCount = tables.filter((t) => t.hasPending || t.hasUnpaid).length;
-  const pendingCount = tables.filter((t) => t.hasPending).length;
+  const activeTablesCount = tables.filter((t) => tableState(t).busy).length;
+  const pendingCount = tables.filter((t) => tableState(t).claimed).length;
 
   /**
    * Rejection is per order, because payment is.
@@ -222,12 +222,9 @@ export default function DashboardPage() {
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-md">
         {tables.map((table) => {
-          const isPending = table.hasPending;
-          const isUnpaid = table.hasUnpaid;
-          const isEmpty = !isPending && !isUnpaid;
-          // Empty when the deployment predates `live_orders`; the card falls
-          // back to the table totals below.
           const bills = groupBills(table.live_orders);
+          const { busy: isUnpaid, claimed: isPending } = tableState(table);
+          const isEmpty = !isUnpaid;
           const isClosing =
             closeTable.isPending &&
             closeTable.variables?.table_id === table.table_id;
@@ -389,7 +386,7 @@ export default function DashboardPage() {
                       {formatCurrency(
                         bills.length > 0
                           ? bills.reduce((sum, b) => sum + b.balanceDue, 0)
-                          : table.unpaidTotal,
+                          : table.outstanding_total ?? table.unpaidTotal,
                       )}
                       .
                     </p>
@@ -430,6 +427,36 @@ export default function DashboardPage() {
       )}
     </main>
   );
+}
+
+/**
+ * Whether a table still needs somebody, and whether anyone has claimed to pay.
+ *
+ * **The bills decide this, not `hasUnpaid`.** That flag goes false the moment
+ * an order is served, even with the money still owed. Measured against the live
+ * API, one order, served without payment:
+ *
+ *     hasUnpaid          false
+ *     unpaidTotal        0
+ *     outstanding_total  564375
+ *     live_orders        [ SERVED, balance_due 564375 ]
+ *
+ * Trusting the flag printed "No active orders" over a table that owed
+ * ₦26,638.50 while the guest's own phone still showed the bill. The flags are
+ * the older, coarser view of a table; `live_orders` is the real one.
+ *
+ * Falls back to the flags only where `live_orders` is absent, which means a
+ * deployment that predates it.
+ */
+function tableState(table: AdminTableStatus): { busy: boolean; claimed: boolean } {
+  const bills = groupBills(table.live_orders);
+  if (bills.length === 0) {
+    return { busy: table.hasUnpaid || table.hasPending, claimed: table.hasPending };
+  }
+  return {
+    busy: bills.some((b) => b.state !== "settled"),
+    claimed: bills.some((b) => b.state === "claimed"),
+  };
 }
 
 /**
