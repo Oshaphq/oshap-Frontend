@@ -8,15 +8,28 @@ import OrdersPage from "./routes/orders";
 import { useSearchParams } from "react-router";
 import { NotificationProvider } from "./context/NotificationContext";
 import CallWaiterFab from "./components/CallWaiterFab";
-import { getDeviceToken, useGlobalSSE, useTable } from "@oshap/shared";
+import { getDeviceToken, useTable } from "@oshap/shared";
 import { useSession } from "./context/SessionContext";
 import { BrandTheme } from "./context/BrandTheme";
 import { OrderWatch } from "./context/OrderWatch";
 
-function GlobalSSE() {
-  useGlobalSSE();
-  return null;
-}
+/**
+ * There is no realtime stream for a guest, so this app no longer opens one.
+ *
+ * `GET /events` authenticates with a staff bearer token and answers a guest
+ * `401` — measured at 2.6s per attempt. `useGlobalSSE` was mounted here
+ * unconditionally, so every guest phone opened a connection that could never
+ * succeed and retried it eight times on a backoff. Nothing in this app ever
+ * subscribed to the stream either, so even a working connection would have
+ * delivered to no one.
+ *
+ * The guest's live updates come from polling instead: `useTable`,
+ * `useSessionOrders` and `useOrder` all refresh while an order is in progress,
+ * which is what makes `OrderWatch` below work.
+ *
+ * Put it back when the backend offers a guest-scoped stream — a device token
+ * on the query string would do it — and give it a listener at the same time.
+ */
 
 function AppContent() {
   const [params] = useSearchParams();
@@ -39,7 +52,6 @@ function AppContent() {
   return (
     <NotificationProvider tableId={tableId}>
       <BrandTheme tableId={tableId} primaryColor={primaryColor}>
-      <GlobalSSE />
       <OrderWatch tableId={tableId} />
       <Routes>
         <Route path="/" element={<Navigate to={`/menu?table=${tableId}`} replace />} />
