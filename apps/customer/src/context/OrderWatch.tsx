@@ -3,6 +3,7 @@ import { getDeviceToken, useSessionOrders, useTable } from "@oshap/shared";
 import type { OrderStatus } from "@oshap/shared";
 import { toast } from "@oshap/shared/ui";
 import { useSession } from "./SessionContext";
+import { newestOrderId, rememberLastOrder } from "../lastOrder";
 
 /**
  * Tells a guest when their order moves, wherever they are in the app.
@@ -44,6 +45,20 @@ export function OrderWatch({ tableId }: { tableId: string }) {
    * started, and one who reloads is told everything again.
    */
   const primed = useRef(false);
+
+  /**
+   * Remember the newest order while it is still live.
+   *
+   * This is the only place that reliably sees one: it is mounted app-wide, so
+   * it watches whether the guest is on the menu, the orders list or the pay
+   * screen. The Pay screen used to record it, which missed every bill served
+   * and settled at the table while the guest was looking elsewhere — and left
+   * that screen showing the previous order's receipt.
+   */
+  useEffect(() => {
+    const id = newestOrderId(ordersQuery.data?.orders);
+    if (id) rememberLastOrder(tableId, id);
+  }, [tableId, ordersQuery.data]);
 
   useEffect(() => {
     const orders = ordersQuery.data?.orders;
