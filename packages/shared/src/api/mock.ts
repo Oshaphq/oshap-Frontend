@@ -2461,9 +2461,6 @@ function recordNotification(eventType: string, path: string, body: unknown) {
   });
 }
 
-/** Claimable by a person. The rest resolve themselves. */
-const CLAIMABLE: NotificationType[] = ["waiter_called", "pos_requested"];
-
 route("GET", /^\/admin\/notifications$/, ({ query }) => {
   const page = Number(query.get("page")) || 1;
   const perPage = Number(query.get("per_page")) || 20;
@@ -2506,13 +2503,15 @@ route("POST", /^\/admin\/notifications\/[^/]+\/resolve$/, ({ path }) => {
   const row = _notifications.find((n) => n.id === id);
   if (!row) return json(404, { error: "Notification not found" });
 
-  if (!CLAIMABLE.includes(row.type as NotificationType)) {
-    // 409, not 403 — the caller is allowed here, this row just is not the kind
-    // a person closes.
-    return json(409, {
-      error: "This notification resolves itself when the order or payment moves",
-    });
-  }
+  /**
+   * Any type can be closed by hand.
+   *
+   * This used to refuse a derived type with 409 — "it resolves itself" — which
+   * held right up until a bug left a batch of them unresolved forever. The
+   * moment that would have closed them had passed, so the badge counted them
+   * for good and nothing in the product could clear them. An escape hatch costs
+   * little; not having one cost a restaurant a permanently lit bell.
+   */
 
   // Already claimed answers 200 with who got there first. Two waiters tapping
   // at once is the normal case, not an error.

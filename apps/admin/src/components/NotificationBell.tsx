@@ -226,6 +226,33 @@ export function NotificationRow({
         </button>
       )}
 
+      {!meta?.claimable && !claimed && (
+        /**
+         * Closes a row nobody is going to walk to.
+         *
+         * These types are meant to close themselves when the order or payment
+         * moves, and they do now — but rows written before that worked never
+         * will, because the moment that would have closed them has passed. The
+         * badge counted them forever and nothing in the product could clear
+         * them.
+         *
+         * `POST /resolve` accepts any type now, so this is one tap per stale
+         * row. It is deliberately quiet, and deliberately not a "clear all":
+         * dismissing a payment waiting to be verified should be a decision
+         * about that payment, not a sweep.
+         */
+        <button
+          type="button"
+          disabled={resolve.isPending}
+          onClick={() => resolve.mutate(n.id)}
+          aria-label={`Dismiss: ${meta ? meta.title : "notification"}`}
+          title="Dismiss"
+          className="shrink-0 w-7 h-7 flex items-center justify-center rounded-4xl text-on-surface-variant hover:bg-surface-container-highest hover:text-primary-text active:scale-[0.97] disabled:opacity-50 focus-visible:outline-2 focus-visible:outline-primary focus-visible:outline-offset-2 transition"
+        >
+          <i className={resolve.isPending ? "mgc_loading_line animate-spin" : "mgc_check_line"} aria-hidden />
+        </button>
+      )}
+
       {!meta?.claimable && n.table_id && (
         <Link
           to="/"

@@ -2061,9 +2061,11 @@ describe("mock API — notifications", () => {
     expect((second.body as Row).resolved_at).toBe((first.body as Row).resolved_at);
   });
 
-  it("refuses to let a person hand-close a derived notification", async () => {
-    // `new_order` closes itself when the order leaves CREATED. Closing it by
-    // hand would put this list out of step with the kitchen board.
+  it("lets a person close a derived notification by hand", async () => {
+    // These close themselves when the order or payment moves, and hand-closing
+    // used to be refused with 409 for that reason. It held until a bug left a
+    // batch unresolved forever: the moment that would have closed them had
+    // passed, so the badge counted them for good and nothing could clear them.
     await mockRequest(
       "/orders",
       "POST",
@@ -2084,8 +2086,12 @@ describe("mock API — notifications", () => {
       q(),
       true,
     );
-    // 409, not 403 — the caller is allowed here, this row is just not that kind.
-    expect(res.status).toBe(409);
+    expect(res.status).toBe(200);
+    expect((res.body as Row).resolved_at).not.toBeNull();
+    // And it leaves the outstanding count — which is the whole point of the
+    // dismiss button on the row.
+    expect((await list("per_page=1&unresolved_only=true")).notifications
+      .map((r) => r.id)).not.toContain(order.id);
   });
 
   it("marking read is idempotent and does not touch the unresolved count", async () => {
