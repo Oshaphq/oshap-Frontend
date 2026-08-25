@@ -1984,6 +1984,7 @@ describe("mock API — notifications", () => {
     is_unread: boolean;
     is_unresolved: boolean;
     resolved_at: string | null;
+    resolved_by_name: string | null;
   };
   type List = { notifications: Row[]; total: number };
 
@@ -2040,9 +2041,10 @@ describe("mock API — notifications", () => {
     );
     expect(res.status).toBe(200);
     expect((res.body as Row).resolved_at).not.toBeNull();
-    // The API carries no `resolved_by_name`, so a claimed call can say it was
-    // taken but not by whom. That has gone back to the backend.
     expect((res.body as Row).is_unresolved).toBe(false);
+    // And says who went — the answer to "has somebody already gone?", which is
+    // what stops a second waiter walking to the same table.
+    expect((res.body as Row).resolved_by_name).toBeTruthy();
   });
 
   it("a second waiter tapping at once sees who got there first, not an error", async () => {
@@ -2508,5 +2510,39 @@ describe("mock API — serving food", () => {
     const { order_id } = await orderOn("T7");
     await mockRequest("/admin/close", "POST", { table_id: "T7", reason: "abandoned" }, q(), true);
     expect((await serve(order_id)).status).toBe(409);
+  });
+});
+
+describe("mock API — serving on the card machine", () => {
+  it("settles when the waiter walked the machine over", async () => {
+    // POS was missing from the serve endpoint for a while, so a waiter had to
+    // record a card as cash or leave a settled bill open. Both were wrong.
+    const placed = await mockRequest(
+      "/orders",
+      "POST",
+      {
+        table: "T2",
+        restaurant_id: HOME_RESTAURANT,
+        device_token: "dev-pos",
+        items: [{ name: "Jollof Rice", qty: 1, price: 350000 }],
+      },
+      q(),
+      false,
+    );
+    const orderId = (placed.body as { order_id: string }).order_id;
+
+    const res = await mockRequest(
+      `/admin/orders/${orderId}/serve`,
+      "POST",
+      { method: "POS" },
+      q(),
+      true,
+    );
+    const body = res.body as { settled: boolean; balance_due: number; status: string };
+
+    expect(res.status).toBe(200);
+    expect(body.settled).toBe(true);
+    expect(body.balance_due).toBe(0);
+    expect(body.status).toBe("CONFIRMED");
   });
 });

@@ -192,9 +192,13 @@ export function NotificationRow({
         </span>
         <span className="text-caption-xs text-secondary-text">
           {n.created_at ? timeAgo(n.created_at) : ""}
-          {/* No `resolved_by_name` on the API, so this can say a call was
-              claimed but not by whom — which was half the point. Asked for. */}
-          {claimed ? " · Claimed" : ""}
+          {/* Naming who went is the point: it is what stops a second waiter
+              walking over to a table somebody is already at. */}
+          {claimed
+            ? n.resolved_by_name
+              ? ` · ${n.resolved_by_name} went`
+              : " · Claimed"
+            : ""}
         </span>
       </div>
 
@@ -205,8 +209,15 @@ export function NotificationRow({
           onClick={() =>
             resolve.mutate(n.id, {
               // Someone else may already have gone. The endpoint answers 200
-              // with the existing record rather than an error.
-              onSuccess: () => toast.success("Yours — on your way"),
+              // with the existing record rather than an error, so the name that
+              // comes back is whoever actually claimed it — not necessarily
+              // the person who just tapped.
+              onSuccess: (row) =>
+                toast.success(
+                  row.resolved_by_name
+                    ? `${row.resolved_by_name} is going`
+                    : "Yours — on your way",
+                ),
             })
           }
           className="shrink-0 px-s py-0.5 rounded-4xl bg-primary text-on-primary text-caption-xs font-semibold hover:opacity-90 active:scale-[0.97] disabled:opacity-50 focus-visible:outline-2 focus-visible:outline-primary focus-visible:outline-offset-2 transition"

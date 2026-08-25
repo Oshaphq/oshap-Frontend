@@ -909,12 +909,13 @@ export interface RecordCashRequest {
  * moment it arrives, which is why there is no assumed-payment state anywhere in
  * this flow.
  *
- * `POS` is missing from what the endpoint accepts, though the cash endpoint
- * takes it — so a waiter who carried the machine over cannot say so here yet.
- * Raised with the backend.
+ * All three methods, so a waiter who walked the card machine over can say so.
+ * `POS` was missing here for a while though the cash endpoint took it, which
+ * left them choosing between recording a card as cash or leaving a settled
+ * bill open.
  */
 export interface ServeOrderRequest {
-  method?: Extract<PaymentMethod, "CASH" | "MANUAL_TRANSFER">;
+  method?: PaymentMethod;
 }
 
 export interface ServeOrderResponse {
@@ -1443,8 +1444,6 @@ export type NotificationType =
  *
  * - **`is_unread`, not `read`.** Inverted, so reading the wrong one leaves
  *   every row looking unread forever.
- * - **No `resolved_by_name`.** We can say a call was claimed but not by whom,
- *   which was half the point of claiming it. Asked for.
  * - **`title` and `message` come from the server**, though the agreed design
  *   was that the server sends facts and the client writes sentences. We still
  *   compose our own from `type`, and fall back to `message` only for a type we
@@ -1468,6 +1467,13 @@ export interface Notification {
   is_unresolved: boolean;
   read_at?: string | null;
   resolved_at?: string | null;
+  /**
+   * Who claimed it. The answer to "has someone already gone?" — which is the
+   * question the claim button exists for, and most of what stops a second
+   * waiter walking over anyway.
+   */
+  resolved_by?: string | null;
+  resolved_by_name?: string | null;
   created_at?: string | null;
 }
 
