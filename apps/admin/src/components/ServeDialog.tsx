@@ -25,6 +25,9 @@ type Method = NonNullable<ServeOrderRequest["method"]>;
 
 const METHODS: Array<{ value: Method; label: string; icon: string }> = [
   { value: "CASH", label: "Cash", icon: "mgc_cash_line" },
+  // The commonest way a card gets paid is a waiter walking the machine over,
+  // often on the same trip as the food.
+  { value: "POS", label: "Card machine", icon: "mgc_card_pay_line" },
   { value: "MANUAL_TRANSFER", label: "Transfer", icon: "mgc_bank_line" },
 ];
 
@@ -144,13 +147,6 @@ export default function ServeDialog({ orderId, tableName, total, onClose }: Prop
             </span>
           </button>
         </div>
-
-        {/* The gap worth naming, so nobody records a card payment as cash. */}
-        <p className="text-caption-xs text-outline">
-          Paid on the card machine? Choose <span className="font-semibold">Not yet</span>{" "}
-          and take it from the table board — the card option isn't available here
-          yet.
-        </p>
 
         <div className="flex justify-end">
           <SecondaryButton size="md" onClick={onClose} disabled={serve.isPending}>

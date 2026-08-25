@@ -2519,6 +2519,11 @@ route("POST", /^\/admin\/notifications\/[^/]+\/resolve$/, ({ path }) => {
   if (!row.resolved_at) {
     row.resolved_at = new Date().toISOString();
     row.is_unresolved = false;
+    // Who went. The API returns this now, and it is the answer to "has somebody
+    // already gone?" — so the mock has to carry it or mock mode never exercises
+    // the row that names them.
+    row.resolved_by_name =
+      [..._staff.values()].find((st) => st.role === "OWNER")?.name ?? "You";
   }
   return json(200, row);
 });
