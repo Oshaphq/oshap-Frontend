@@ -40,6 +40,24 @@ interface Alert {
 
 const VISIBLE_MS = 5_000;
 
+/**
+ * The name staff read, from whichever identifier the event happened to carry.
+ *
+ * Tries the uuid first: names repeat across restaurants and a uuid never does,
+ * so on the vanishing chance a table is literally named after another table's
+ * id, the id wins. Returns null rather than the raw reference — a uuid on
+ * screen tells a waiter nothing.
+ */
+export function resolveTableName(
+  tables: Array<{ id: string; table_id: string }> | undefined,
+  reference: string,
+): string | null {
+  if (!tables?.length || !reference) return null;
+  const byId = tables.find((t) => t.id === reference);
+  if (byId) return byId.table_id;
+  return tables.find((t) => t.table_id === reference)?.table_id ?? null;
+}
+
 /** Events that add a notification, and events that resolve one. */
 const NOTIFYING = new Set([
   "waiter_called",
@@ -83,13 +101,24 @@ export default function AlertCenter() {
       // The stream carries the table's uuid; staff read names. Resolve off the
       // tables cache the dashboard already keeps warm, and degrade to a
       // table-less message rather than printing a uuid at a busy waiter.
-      const tableUuid = event.data?.table_id;
+      //
+      // `table_id` on the stream is a **uuid on some events and a name on
+      // others** — measured on the live stream:
+      //
+      //   waiter_called   table_id: "ace5c88a-aa5e-470b-…"   uuid
+      //   new_order       table_id: "T1"                     name
+      //   pos_requested   table_id: "T1"                     name
+      //
+      // Matching only the uuid meant orders and card requests never resolved a
+      // name and fell through to "table not recorded" — the copy meant for
+      // genuinely broken data, on the two events that carry it perfectly well.
+      const tableRef = event.data?.table_id;
       const cached = queryClient.getQueryData<AdminTablesResponse>(
         queryKeys.admin.tables(),
       );
       const tableName =
-        typeof tableUuid === "string"
-          ? cached?.tables.find((t) => t.id === tableUuid)?.table_id ?? null
+        typeof tableRef === "string"
+          ? resolveTableName(cached?.tables, tableRef)
           : null;
 
       const id = nextIdRef.current++;
