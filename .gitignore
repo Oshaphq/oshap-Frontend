@@ -49,5 +49,7 @@ docs/menu-photo-links.txt
 /playwright-report/
 /blob-report/
 /playwright/.cache/
-
-jsons/
+# Figma extracts — working input, never source of truth. The design lives in
+# Figma and the result lives in the code; a stale copy in between only ever
+# gets read by mistake.
+/jsons/
