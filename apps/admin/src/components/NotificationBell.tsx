@@ -94,7 +94,13 @@ function NotificationPanel({ onClose }: { onClose: () => void }) {
       <div
         role="dialog"
         aria-label="Notifications"
-        className="absolute top-[calc(100%+0.5rem)] right-0 z-[71] w-[min(23rem,calc(100vw-2rem))] max-h-[min(30rem,70vh)] flex flex-col rounded-lg bg-surface-container-low border border-outline-variant shadow-xl overflow-hidden"
+        /* A sheet on a phone, a dropdown from tablet up.
+           A 23rem panel hung off an icon near the right edge has nowhere
+           to go on a 390px screen — it ran past the left edge and cut the
+           heading in half. Pinned to both edges instead, so its width is
+           whatever the screen allows rather than a number that happens to
+           fit some phones. */
+        className="fixed left-md right-md top-[3.75rem] z-[71] sm:absolute sm:left-auto sm:right-0 sm:top-[calc(100%+0.5rem)] sm:w-[23rem] max-h-[min(30rem,70vh)] flex flex-col rounded-lg bg-surface-container-low border border-outline-variant shadow-xl overflow-hidden"
       >
         <div className="flex items-center justify-between gap-s px-md py-s border-b border-outline-variant shrink-0">
           <span className="text-label-l4 font-semibold font-display text-primary-text">

@@ -288,7 +288,9 @@ export default function MenuPage() {
         <h1 className="font-display text-display-h2 font-semibold text-primary-text">
           Menu Management
         </h1>
-        <div className="flex items-center gap-s">
+        {/* Five actions. Without wrapping they run off the right edge of a
+            phone and Export is the only one you can reach. */}
+        <div className="flex items-center gap-s flex-wrap justify-end">
           <SecondaryButton
             size="md"
             onClick={handleExport}
