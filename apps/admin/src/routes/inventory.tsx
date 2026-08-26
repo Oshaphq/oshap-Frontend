@@ -12,7 +12,12 @@ import {
   formatApiDateTime,
 } from "@oshap/shared";
 import type { StockReason, Ingredient } from "@oshap/shared";
-import { PrimaryButton, SecondaryButton, Select, toast } from "@oshap/shared/ui";
+import {
+  PrimaryButton,
+  SecondaryButton,
+  Select,
+  toast,
+} from "@oshap/shared/ui";
 import QueryError from "../components/QueryError";
 
 const inputClass =
@@ -33,7 +38,11 @@ const REASONS = [
   { value: "RESTOCK", label: "Delivery received", sign: 1 },
   { value: "WASTAGE", label: "Wastage / spoilage", sign: -1 },
   { value: "COUNT_CORRECTION", label: "Stock take / correction", sign: 0 },
-] as const satisfies ReadonlyArray<{ value: StockReason; label: string; sign: number }>;
+] as const satisfies ReadonlyArray<{
+  value: StockReason;
+  label: string;
+  sign: number;
+}>;
 
 const REASON_LABELS: Record<StockReason, string> = {
   RESTOCK: "Delivery",
@@ -56,28 +65,41 @@ export default function InventoryPage() {
   const [showNew, setShowNew] = useState(false);
 
   if (ingredientsQuery.isError) {
-    return <QueryError error={ingredientsQuery.error} action="load the inventory" onRetry={() => ingredientsQuery.refetch()} />;
+    return (
+      <QueryError
+        error={ingredientsQuery.error}
+        action="load the inventory"
+        onRetry={() => ingredientsQuery.refetch()}
+      />
+    );
   }
 
   const ingredients = ingredientsQuery.data ?? [];
   const low = ingredients.filter(
-    (i) => i.low_stock_threshold != null && i.stock_qty <= i.low_stock_threshold,
+    (i) =>
+      i.low_stock_threshold != null && i.stock_qty <= i.low_stock_threshold,
   );
 
   return (
-    <main className="p-md flex flex-col gap-l max-w-[64rem]">
-      <header className="flex flex-wrap items-center justify-between gap-md">
+    <main className="p-md flex flex-col gap-md max-w-[64rem]">
+      {/* Title block above the actions, not beside them. */}
+      <header className="flex flex-col gap-s">
         <div className="flex flex-col gap-0.5">
           <h1 className="font-display text-display-h2 font-semibold text-primary-text">
             Inventory
           </h1>
+          {/* Two lines by design, not by wrapping. They are two separate
+              things to know, and running them together as one sentence made
+              the second half read as a qualification of the first. */}
           <p className="text-caption-md text-secondary-text">
-            What your dishes are made of. Plate counts live on the menu screen.
+            <span className="block">What your dishes are made of.</span>
+            <span className="block">Plate counts live on the menu screen.</span>
           </p>
         </div>
-        <div className="flex items-center gap-s">
+        <div className="flex items-center gap-s flex-wrap">
           <SecondaryButton size="md" onClick={() => setShowLedger((v) => !v)}>
-            <i className="mgc_history_line" /> {showLedger ? "Hide" : "Movements"}
+            <i className="mgc_history_line" />{" "}
+            {showLedger ? "Hide" : "Movements"}
           </SecondaryButton>
           <PrimaryButton size="md" onClick={() => setShowNew(true)}>
             + Add ingredient
@@ -86,14 +108,17 @@ export default function InventoryPage() {
       </header>
 
       {low.length > 0 && (
-        <div className="flex items-start gap-s p-md rounded-lg bg-warning-container text-on-warning-container">
-          <i className="mgc_alert_line text-xl shrink-0 mt-0.5" />
-          <p className="text-p2">
-            <span className="font-semibold">
-              {low.length} ingredient{low.length === 1 ? "" : "s"} at or below
-              threshold:
-            </span>{" "}
-            {low.map((i) => i.name).join(", ")}
+        <div
+          role="alert"
+          className="flex items-start gap-s p-md rounded-md bg-warning-container text-on-warning-container"
+        >
+          <i className="mgc_alert_line text-lg shrink-0" />
+          {/* One sentence naming them, rather than a heading with a list under
+              it. At one or two ingredients the list was a paragraph break for
+              five words. */}
+          <p className="text-caption-sm font-semibold">
+            {low.length} ingredient{low.length === 1 ? "" : "s"} at or below
+            threshold: {low.map((i) => i.name).join(", ")}
           </p>
         </div>
       )}
@@ -109,8 +134,8 @@ export default function InventoryPage() {
             No ingredients yet
           </span>
           <p className="text-p2 text-secondary-text max-w-[36rem]">
-            Add what you buy — rice, chicken, oil — then attach them to dishes as
-            recipes. Orders will draw stock down automatically.
+            Add what you buy — rice, chicken, oil — then attach them to dishes
+            as recipes. Orders will draw stock down automatically.
           </p>
         </div>
       ) : (
@@ -134,22 +159,64 @@ export default function InventoryPage() {
               ingredient.low_stock_threshold != null &&
               ingredient.stock_qty <= ingredient.low_stock_threshold;
             const isNegative = ingredient.stock_qty < 0;
+            const stockCls = isNegative
+              ? "text-error"
+              : isLow
+                ? "text-warning"
+                : "text-primary-text";
             return (
               <div
                 key={ingredient.id}
-                className="grid grid-cols-2 sm:grid-cols-subgrid sm:col-span-5 gap-x-md gap-y-xs px-md py-s border-b border-outline-variant last:border-none items-center"
+                /* A table from `sm` up, a stacked card on a phone. Collapsed
+                   to two columns the cells wrapped in reading order with the
+                   headings hidden, so a bare "3 kg" sat under a name with
+                   nothing saying whether it was the count or the alert level
+                   — on the one screen where confusing those two means
+                   ordering the wrong thing. */
+                className="px-md py-md sm:py-s border-b border-outline-variant last:border-none sm:grid sm:grid-cols-subgrid sm:col-span-5 sm:gap-x-md sm:items-center"
               >
-                <span className="text-p2 font-semibold text-primary-text">
+                <div className="flex flex-col gap-s sm:hidden">
+                  <div className="flex items-start justify-between gap-s">
+                    <div className="flex flex-col gap-0.5 min-w-0">
+                      <span className="text-p2 font-semibold text-primary-text truncate">
+                        {ingredient.name}
+                      </span>
+                      {/* Named, not bare. The extract leaves this number on its
+                          own; four extra characters are worth more than the
+                          symmetry. */}
+                      {ingredient.low_stock_threshold != null && (
+                        <span className="text-caption-xs text-secondary-text tabular-nums">
+                          Alert at {qty(ingredient.low_stock_threshold)}{" "}
+                          {ingredient.unit}
+                        </span>
+                      )}
+                    </div>
+                    <div className="flex flex-col gap-0.5 items-end shrink-0">
+                      <span
+                        className={`text-p2 font-semibold tabular-nums ${stockCls}`}
+                      >
+                        {qty(ingredient.stock_qty)} {ingredient.unit}
+                      </span>
+                      {ingredient.cost_per_unit != null && (
+                        <span className="text-caption-xs text-secondary-text tabular-nums">
+                          {formatCurrency(ingredient.cost_per_unit)} /{" "}
+                          {ingredient.unit}
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                  <RowActions
+                    ingredient={ingredient}
+                    onAdjust={() => setAdjusting(ingredient)}
+                    onEdit={() => setEditing(ingredient)}
+                  />
+                </div>
+
+                <span className="hidden sm:block text-p2 font-semibold text-primary-text">
                   {ingredient.name}
                 </span>
                 <span
-                  className={`text-label-l3 font-semibold tabular-nums text-right ${
-                    isNegative
-                      ? "text-error"
-                      : isLow
-                        ? "text-warning"
-                        : "text-primary-text"
-                  }`}
+                  className={`hidden sm:block text-label-l3 font-semibold tabular-nums text-right ${stockCls}`}
                   title={
                     isNegative
                       ? "Negative means more was sold than the count allowed — the recipe or the count is wrong."
@@ -158,35 +225,22 @@ export default function InventoryPage() {
                 >
                   {qty(ingredient.stock_qty)} {ingredient.unit}
                 </span>
-                <span className="text-caption-md text-secondary-text tabular-nums text-right">
+                <span className="hidden sm:block text-caption-md text-secondary-text tabular-nums text-right">
                   {ingredient.low_stock_threshold == null
                     ? "—"
                     : `${qty(ingredient.low_stock_threshold)} ${ingredient.unit}`}
                 </span>
-                <span className="text-caption-md text-secondary-text tabular-nums text-right">
+                <span className="hidden sm:block text-caption-md text-secondary-text tabular-nums text-right">
                   {ingredient.cost_per_unit == null
                     ? "—"
                     : formatCurrency(ingredient.cost_per_unit)}
                 </span>
-                <div className="flex items-center gap-s justify-end">
-                  <SecondaryButton
-                    size="md"
-                    onClick={() => setAdjusting(ingredient)}
-                  >
-                    Adjust
-                  </SecondaryButton>
-                  {/* Adjust moves the quantity; this fixes what the thing *is*
-                      — a typo in the name, the wrong unit, a threshold set
-                      before anyone knew what a normal week looked like. */}
-                  <button
-                    type="button"
-                    onClick={() => setEditing(ingredient)}
-                    aria-label={`Edit ${ingredient.name}`}
-                    title="Edit name, unit, threshold or cost"
-                    className="p-xs rounded-lg text-secondary-text hover:bg-surface-container-high hover:text-primary-text transition-colors"
-                  >
-                    <i className="mgc_edit_line text-lg" />
-                  </button>
+                <div className="hidden sm:flex items-center gap-s justify-end">
+                  <RowActions
+                    ingredient={ingredient}
+                    onAdjust={() => setAdjusting(ingredient)}
+                    onEdit={() => setEditing(ingredient)}
+                  />
                 </div>
               </div>
             );
@@ -209,6 +263,45 @@ export default function InventoryPage() {
       )}
       {showNew && <NewIngredientDialog onClose={() => setShowNew(false)} />}
     </main>
+  );
+}
+
+/**
+ * Adjust and Edit, shared by the phone card and the table row.
+ *
+ * Adjust moves the quantity. Edit fixes what the thing *is* — a typo in the
+ * name, the wrong unit, a threshold set before anyone knew what a normal week
+ * looked like. It used to be a bare pencil with an aria-label, which reads
+ * fine to a screen reader and tells a sighted manager nothing.
+ */
+function RowActions({
+  ingredient,
+  onAdjust,
+  onEdit,
+}: {
+  ingredient: Ingredient;
+  onAdjust: () => void;
+  onEdit: () => void;
+}) {
+  return (
+    <div className="flex items-center gap-s">
+      <button
+        type="button"
+        onClick={onAdjust}
+        className="px-md py-s rounded-s bg-surface-container text-secondary-text text-caption-sm font-semibold hover:bg-surface-container-high hover:text-primary-text transition-colors"
+      >
+        Adjust
+      </button>
+      <button
+        type="button"
+        onClick={onEdit}
+        title="Edit name, unit, threshold or cost"
+        aria-label={`Edit ${ingredient.name}`}
+        className="px-md py-s rounded-s border border-outline-variant bg-transparent text-secondary-text text-caption-sm font-semibold hover:border-primary-text hover:text-primary-text transition-colors"
+      >
+        Edit
+      </button>
+    </div>
   );
 }
 
@@ -270,7 +363,10 @@ function MovementsLedger() {
               <span className="text-p2 text-primary-text flex-1 min-w-0">
                 {REASON_LABELS[movement.reason] ?? movement.reason}
                 {movement.note && (
-                  <span className="text-secondary-text"> · {movement.note}</span>
+                  <span className="text-secondary-text">
+                    {" "}
+                    · {movement.note}
+                  </span>
                 )}
               </span>
               {movement.order_id && (
@@ -350,14 +446,16 @@ function AdjustDialog({
       return;
     }
     adjust.mutate(
-      { id: ingredient.id, payload: { delta, reason, note: note || undefined } },
+      {
+        id: ingredient.id,
+        payload: { delta, reason, note: note || undefined },
+      },
       {
         onSuccess: () => {
           toast.success(`${ingredient.name} updated`);
           onClose();
         },
-        onError: (e: unknown) =>
-          toast.error(errorMessage(e, "adjust stock")),
+        onError: (e: unknown) => toast.error(errorMessage(e, "adjust stock")),
       },
     );
   };
@@ -416,7 +514,8 @@ function AdjustDialog({
 
         <label className="flex flex-col gap-xs">
           <span className="text-caption-md font-semibold text-primary-text">
-            Note <span className="font-normal text-secondary-text">(optional)</span>
+            Note{" "}
+            <span className="font-normal text-secondary-text">(optional)</span>
           </span>
           <input
             value={note}
@@ -563,10 +662,14 @@ function EditIngredientDialog({
   const [name, setName] = useState(ingredient.name);
   const [unit, setUnit] = useState(ingredient.unit);
   const [threshold, setThreshold] = useState(
-    ingredient.low_stock_threshold == null ? "" : String(ingredient.low_stock_threshold),
+    ingredient.low_stock_threshold == null
+      ? ""
+      : String(ingredient.low_stock_threshold),
   );
   const [cost, setCost] = useState(
-    ingredient.cost_per_unit == null ? "" : String(koboToNaira(ingredient.cost_per_unit)),
+    ingredient.cost_per_unit == null
+      ? ""
+      : String(koboToNaira(ingredient.cost_per_unit)),
   );
 
   const handleSave = () => {
@@ -587,7 +690,8 @@ function EditIngredientDialog({
           toast.success(`${name.trim()} updated`);
           onClose();
         },
-        onError: (e: unknown) => toast.error(errorMessage(e, "save the ingredient")),
+        onError: (e: unknown) =>
+          toast.error(errorMessage(e, "save the ingredient")),
       },
     );
   };
