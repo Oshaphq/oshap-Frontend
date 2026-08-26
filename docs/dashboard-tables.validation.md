@@ -54,6 +54,30 @@ Also from the extract: value type is 22px (`text-display-h1`, was
 `text-display-h2` at 20px), label weight semibold (was medium), and card
 padding is `px-s py-md` — 8 horizontal, 12 vertical (was a flat 8 on mobile).
 
+## Bill rows and table cards
+
+Three more deltas from the extract, applied after the stat cards:
+
+4. **The payment method gets its own caption line.** `Transfer` /
+   `Card machine` used to trail the order count inside one span, which read as
+   a single long grey string a waiter had to parse to the end. On its own line
+   it is the instruction — carry the machine over, or check the account —
+   which is the only reason the label exists. Cash stays unlabelled: it is the
+   default and naming it adds noise to every row.
+5. **An empty table card gets a faint border** (`surface-container`) instead of
+   `border-transparent`. A transparent edge made an empty card a floating block,
+   so a row of them ran together. The extract draws the outline on both states
+   and only changes its weight: `surface-container` on T1, `outline-variant` on
+   the busy T4.
+6. **"2 BILLS OPEN" letterSpacing 0.6 — already conformant, no change.**
+   `tracking-wider` is `0.05em`, which is 0.5px at the 10px `caption-xs` size.
+   0.1px off, inside the 0.5px snap tolerance.
+
+`TableBills` had no test at all despite being the settlement screen's whole
+readout. Five added, covering the method lines, the bill count wording and the
+part-paid balance. The structural guard was checked by reverting to the old
+inline shape: two of the five fail against it.
+
 ## Interpretations logged
 
 1. **`color-12` `#331500` on the "SAYS PAID" chip → kept `text-on-warning`.**

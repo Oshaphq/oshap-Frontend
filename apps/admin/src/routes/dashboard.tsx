@@ -51,9 +51,11 @@ export default function DashboardPage() {
    */
   const [rejectingBill, setRejectingBill] = useState<string | null>(null);
   const [verifyingBill, setVerifyingBill] = useState<string | null>(null);
-  const [cashTarget, setCashTarget] = useState<
-    { tableName: string; orderIds: string[]; total: number } | null
-  >(null);
+  const [cashTarget, setCashTarget] = useState<{
+    tableName: string;
+    orderIds: string[];
+    total: number;
+  } | null>(null);
 
   if (tablesQuery.isLoading) {
     return (
@@ -65,7 +67,13 @@ export default function DashboardPage() {
   }
 
   if (tablesQuery.isError) {
-    return <QueryError error={tablesQuery.error} action="load the tables" onRetry={() => tablesQuery.refetch()} />;
+    return (
+      <QueryError
+        error={tablesQuery.error}
+        action="load the tables"
+        onRetry={() => tablesQuery.refetch()}
+      />
+    );
   }
 
   const tables = tablesQuery.data?.tables ?? [];
@@ -89,7 +97,11 @@ export default function DashboardPage() {
       toast.success("Payment rejected — the bill is unpaid again");
     } catch (err) {
       setRejectingBill(null);
-      toast.error(settledElsewhere(err) ? ALREADY_SETTLED : errorMessage(err, "reject the payment"));
+      toast.error(
+        settledElsewhere(err)
+          ? ALREADY_SETTLED
+          : errorMessage(err, "reject the payment"),
+      );
     }
   };
 
@@ -115,14 +127,20 @@ export default function DashboardPage() {
       // Without this the row just leaves the pending list, which is
       // indistinguishable from the click never registering.
       toast.success(
-        bill.guestName ? `${bill.guestName}'s payment verified` : "Payment verified",
+        bill.guestName
+          ? `${bill.guestName}'s payment verified`
+          : "Payment verified",
       );
     } catch (err) {
       // Close the prompt either way. Leaving it open under a failure toast
       // invites a second confirm, which is how one refusal becomes two
       // attempts at the same bill.
       setVerifyingBill(null);
-      toast.error(settledElsewhere(err) ? ALREADY_SETTLED : errorMessage(err, "verify the payment"));
+      toast.error(
+        settledElsewhere(err)
+          ? ALREADY_SETTLED
+          : errorMessage(err, "verify the payment"),
+      );
     }
   };
 
@@ -130,7 +148,10 @@ export default function DashboardPage() {
     setClearPromptTable(null);
     try {
       // The name again, for the same reason as verify above.
-      await closeTable.mutateAsync({ table_id: table.table_id, reason: "abandoned" });
+      await closeTable.mutateAsync({
+        table_id: table.table_id,
+        reason: "abandoned",
+      });
       toast.success("Table cleared — recorded as unpaid");
     } catch (err) {
       toast.error(errorMessage(err, "clear the table"));
@@ -203,7 +224,11 @@ export default function DashboardPage() {
             ? "bg-warning-container border-warning"
             : !isEmpty
               ? "bg-surface-container-low border-outline-variant"
-              : "bg-surface-container-low border-transparent";
+              : /* A faint border rather than none. A transparent one made an
+                   empty table a floating block with no edge, so a row of them
+                   ran together — the extract draws the outline either way and
+                   only changes its weight. */
+                "bg-surface-container-low border-surface-container";
 
           return (
             <div
@@ -231,7 +256,9 @@ export default function DashboardPage() {
 
               <div className="flex flex-col gap-xs flex-1">
                 {isEmpty ? (
-                  <p className="text-caption-md text-secondary-text">No active orders</p>
+                  <p className="text-caption-md text-secondary-text">
+                    No active orders
+                  </p>
                 ) : bills.length > 0 ? (
                   <TableBills
                     bills={bills}
@@ -322,7 +349,10 @@ export default function DashboardPage() {
                         setClearPromptTable(null);
                         setCashTarget({
                           tableName: table.table_id,
-                          orderIds: bills[0]?.unpaidOrderIds ?? table.unpaid_order_ids ?? [],
+                          orderIds:
+                            bills[0]?.unpaidOrderIds ??
+                            table.unpaid_order_ids ??
+                            [],
                           total: bills[0]?.total ?? table.unpaidTotal,
                         });
                       }}
@@ -356,7 +386,7 @@ export default function DashboardPage() {
                       {formatCurrency(
                         bills.length > 0
                           ? bills.reduce((sum, b) => sum + b.balanceDue, 0)
-                          : table.outstanding_total ?? table.unpaidTotal,
+                          : (table.outstanding_total ?? table.unpaidTotal),
                       )}
                       .
                     </p>
@@ -488,10 +518,16 @@ function StatCard({
  * Falls back to the flags only where `live_orders` is absent, which means a
  * deployment that predates it.
  */
-function tableState(table: AdminTableStatus): { busy: boolean; claimed: boolean } {
+function tableState(table: AdminTableStatus): {
+  busy: boolean;
+  claimed: boolean;
+} {
   const bills = groupBills(table.live_orders);
   if (bills.length === 0) {
-    return { busy: table.hasUnpaid || table.hasPending, claimed: table.hasPending };
+    return {
+      busy: table.hasUnpaid || table.hasPending,
+      claimed: table.hasPending,
+    };
   }
   return {
     busy: bills.some((b) => b.state !== "settled"),
@@ -559,10 +595,17 @@ function BillActions({
           bill goes back to unpaid and this account is marked down.
         </p>
         <div className="flex gap-s">
-          <SecondaryButton className="flex-1" onClick={() => setRejectingBill(null)}>
+          <SecondaryButton
+            className="flex-1"
+            onClick={() => setRejectingBill(null)}
+          >
             Cancel
           </SecondaryButton>
-          <PrimaryButton className="flex-1" onClick={onReject} disabled={rejectPending}>
+          <PrimaryButton
+            className="flex-1"
+            onClick={onReject}
+            disabled={rejectPending}
+          >
             {rejectPending ? "Rejecting…" : "Confirm Reject"}
           </PrimaryButton>
         </div>
@@ -580,8 +623,7 @@ function BillActions({
               <span className="font-bold text-primary-text">
                 {formatCurrency(bill.balanceDue)}
               </span>{" "}
-              went through on the machine for{" "}
-              {bill.guestName ?? "this guest"}.
+              went through on the machine for {bill.guestName ?? "this guest"}.
             </>
           ) : (
             <>
@@ -595,10 +637,17 @@ function BillActions({
           This settles their bill and cannot be undone from here.
         </p>
         <div className="flex gap-s">
-          <SecondaryButton className="flex-1" onClick={() => setVerifyingBill(null)}>
+          <SecondaryButton
+            className="flex-1"
+            onClick={() => setVerifyingBill(null)}
+          >
             Cancel
           </SecondaryButton>
-          <PrimaryButton className="flex-1" onClick={onVerify} disabled={verifyPending}>
+          <PrimaryButton
+            className="flex-1"
+            onClick={onVerify}
+            disabled={verifyPending}
+          >
             {verifyPending ? "Verifying…" : "Yes, it's in"}
           </PrimaryButton>
         </div>
