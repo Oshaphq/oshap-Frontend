@@ -8,6 +8,7 @@ import {
 import type { AdminTablesResponse } from "@oshap/shared";
 import { playChime, listenForFirstGesture } from "../utils/chime";
 import { NOTIFICATION_META } from "../notificationCopy";
+import { whenVisible } from "../whenVisible";
 import type { NotificationType } from "@oshap/shared";
 
 /**
@@ -85,6 +86,26 @@ export default function AlertCenter() {
 
   useEffect(() => {
     const timers: number[] = [];
+    // Listeners that outlive a single alert, cleared with the subscription.
+    const cleanups: Array<() => void> = [];
+
+    /**
+     * Starts an alert's five seconds only once somebody can actually see it.
+     *
+     * Staff run the admin board in one tab and the guest app in another — the
+     * same person testing, or a manager watching a table order. An alert that
+     * arrived while the board was hidden used to appear and dismiss itself in
+     * the background, so switching back showed nothing and the feature looked
+     * dead. The bell still counted it, which is how we know it was firing.
+     *
+     * Hidden means the clock has not started, not that the alert is stale.
+     */
+    const dismissWhenSeen = (id: number) => {
+      const drop = () => setAlerts((prev) => prev.filter((a) => a.id !== id));
+      cleanups.push(
+        whenVisible(() => timers.push(window.setTimeout(drop, VISIBLE_MS))),
+      );
+    };
 
     const unsubscribe = subscribeToRealtimeEvents((event: RealtimeEvent) => {
       // Refresh the bell on anything that creates a notification *or* closes
@@ -135,16 +156,13 @@ export default function AlertCenter() {
 
       if (meta.chime) playChime();
 
-      timers.push(
-        window.setTimeout(() => {
-          setAlerts((prev) => prev.filter((a) => a.id !== id));
-        }, VISIBLE_MS),
-      );
+      dismissWhenSeen(id);
     });
 
     return () => {
       unsubscribe();
       timers.forEach(clearTimeout);
+      cleanups.forEach((off) => off());
     };
   }, [queryClient]);
 
