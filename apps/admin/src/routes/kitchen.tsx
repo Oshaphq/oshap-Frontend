@@ -131,11 +131,17 @@ export default function KitchenPage() {
 
   return (
     <main className="h-[calc(100vh-56px)] flex flex-col">
-      <header className="flex items-center justify-between px-md py-s bg-surface border-b border-outline-variant shrink-0 min-h-[56px]">
+      {/* Stacked on a phone: the title and the three counts fought for one
+          row, and the title lost — it shrank to fit beside them. Each gets a
+          line of its own, and they sit back on one row from `sm` up where
+          there is room for both. */}
+      <header className="flex flex-col items-start gap-s px-md py-s sm:flex-row sm:items-center sm:justify-between sm:gap-md bg-surface border-b border-outline-variant shrink-0 sm:min-h-[56px]">
         <h1 className="font-display text-display-h2 font-semibold text-primary-text">
           {user?.role === "BARTENDER" ? "Bar Orders" : "Kitchen Display"}
         </h1>
-        <div className="flex items-center gap-s">
+        {/* Wraps only where three pills genuinely cannot fit, rather than
+            running off the edge of the screen. */}
+        <div className="flex items-center gap-s flex-wrap">
           <span className="px-s py-xs rounded-4xl font-bold text-caption-sm bg-primary-container text-on-primary-container">
             {newOrders.length} new
           </span>
@@ -251,23 +257,28 @@ interface ColumnProps {
   onAction: (orderId: string) => void;
 }
 
+/**
+ * The column's colour, on the header rule and the quantity.
+ *
+ * Not on the card any more. A ticket already sits under a coloured heading in
+ * a single-column phone layout, so a 4px bar down its left edge repeated what
+ * the heading above it had just said and ate the padding on the side where the
+ * table number starts.
+ */
 const ACCENT_CLS: Record<
   ColumnProps["accent"],
-  { headerBorder: string; cardBorder: string; qty: string }
+  { headerBorder: string; qty: string }
 > = {
   primary: {
     headerBorder: "border-b-primary",
-    cardBorder: "border-l-primary",
     qty: "text-primary",
   },
   warning: {
     headerBorder: "border-b-warning",
-    cardBorder: "border-l-warning",
     qty: "text-warning",
   },
   success: {
     headerBorder: "border-b-success",
-    cardBorder: "border-l-success",
     qty: "text-success",
   },
 };
@@ -299,7 +310,7 @@ function KitchenColumn({
             return (
               <div
                 key={order.id}
-                className={`rounded-md p-md flex flex-col gap-s bg-surface-container-low transition-shadow hover:shadow-md border-l-4 ${cls.cardBorder}`}
+                className="rounded-md p-md flex flex-col gap-s bg-surface-container-low transition-shadow hover:shadow-md"
               >
                 <div className="flex items-center justify-between gap-s">
                   <div className="flex items-center gap-s">
