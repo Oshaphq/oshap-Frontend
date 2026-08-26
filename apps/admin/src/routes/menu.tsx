@@ -19,7 +19,12 @@ import {
   IMAGE_ACCEPT_ATTR,
 } from "@oshap/shared";
 import type { MenuItem } from "@oshap/shared";
-import { PrimaryButton, SecondaryButton, Select, toast } from "@oshap/shared/ui";
+import {
+  PrimaryButton,
+  SecondaryButton,
+  Select,
+  toast,
+} from "@oshap/shared/ui";
 import QueryError from "../components/QueryError";
 import LowStockBanner from "../components/LowStockBanner";
 import MenuImportDialog from "../components/MenuImportDialog";
@@ -201,7 +206,9 @@ export default function MenuPage() {
       leaveSelection();
 
       if (failed.length === 0) {
-        toast.success(removed === 1 ? "Dish deleted" : `${removed} dishes deleted`);
+        toast.success(
+          removed === 1 ? "Dish deleted" : `${removed} dishes deleted`,
+        );
         return;
       }
 
@@ -242,7 +249,10 @@ export default function MenuPage() {
     const threshold = thresholdInput.trim();
     const parsedThreshold = threshold === "" ? null : Number(threshold);
 
-    if (parsedThreshold !== null && (!Number.isFinite(parsedThreshold) || parsedThreshold < 0)) {
+    if (
+      parsedThreshold !== null &&
+      (!Number.isFinite(parsedThreshold) || parsedThreshold < 0)
+    ) {
       toast.error("The low-stock number has to be a number.");
       return;
     }
@@ -252,7 +262,9 @@ export default function MenuPage() {
         id: item.id,
         payload: {
           stock_count: count,
-          ...(parsedThreshold === null ? {} : { low_stock_threshold: Math.floor(parsedThreshold) }),
+          ...(parsedThreshold === null
+            ? {}
+            : { low_stock_threshold: Math.floor(parsedThreshold) }),
         },
       });
       setStockEditId(null);
@@ -276,21 +288,28 @@ export default function MenuPage() {
   }
 
   if (menuQuery.isError) {
-    return <QueryError error={menuQuery.error} action="load the menu" onRetry={() => menuQuery.refetch()} />;
+    return (
+      <QueryError
+        error={menuQuery.error}
+        action="load the menu"
+        onRetry={() => menuQuery.refetch()}
+      />
+    );
   }
 
   const items = menuQuery.data ?? [];
   const isSaving = createItem.isPending || updateItem.isPending;
 
   return (
-    <main className="p-md flex flex-col gap-l">
-      <header className="flex items-center justify-between">
+    <main className="p-md flex flex-col gap-md">
+      {/* The title gets its own line. Beside five actions it was the thing
+          that gave way — squeezed on a phone, and pinned to the far left of a
+          wide screen from the buttons it belongs with. */}
+      <header className="flex flex-col gap-s">
         <h1 className="font-display text-display-h2 font-semibold text-primary-text">
           Menu Management
         </h1>
-        {/* Five actions. Without wrapping they run off the right edge of a
-            phone and Export is the only one you can reach. */}
-        <div className="flex items-center gap-s flex-wrap justify-end">
+        <div className="flex items-center gap-s flex-wrap">
           <SecondaryButton
             size="md"
             onClick={handleExport}
@@ -308,9 +327,13 @@ export default function MenuPage() {
           {items.length > 0 && (
             <SecondaryButton
               size="md"
-              onClick={() => (selecting ? leaveSelection() : setSelecting(true))}
+              onClick={() =>
+                selecting ? leaveSelection() : setSelecting(true)
+              }
             >
-              <i className={selecting ? "mgc_close_line" : "mgc_check_2_line"} />{" "}
+              <i
+                className={selecting ? "mgc_close_line" : "mgc_check_2_line"}
+              />{" "}
               {selecting ? "Done" : "Select"}
             </SecondaryButton>
           )}
@@ -387,7 +410,9 @@ export default function MenuPage() {
               thresholdInput={thresholdInput}
               onStockEditStart={() => {
                 setStockEditId(item.id);
-                setStockInput(item.stock_count !== null ? String(item.stock_count) : "");
+                setStockInput(
+                  item.stock_count !== null ? String(item.stock_count) : "",
+                );
                 setThresholdInput(String(item.low_stock_threshold ?? ""));
               }}
               onStockInputChange={setStockInput}
@@ -413,14 +438,17 @@ export default function MenuPage() {
               No menu items yet
             </span>
             <p className="text-p2 text-secondary-text">
-              Click <span className="font-semibold">+ Add Item</span> to create your first menu item.
+              Click <span className="font-semibold">+ Add Item</span> to create
+              your first menu item.
             </p>
           </div>
         )}
       </div>
 
       {showImport && <MenuImportDialog onClose={() => setShowImport(false)} />}
-      {showGroups && <ModifierGroupsDialog onClose={() => setShowGroups(false)} />}
+      {showGroups && (
+        <ModifierGroupsDialog onClose={() => setShowGroups(false)} />
+      )}
       {optionsFor && (
         <ItemModifiersDialog
           item={optionsFor}
@@ -454,8 +482,27 @@ interface ItemRowProps {
   onSelect: () => void;
 }
 
-function MenuItemRow({ item, isStockEditing, stockInput, thresholdInput, onStockEditStart, onStockInputChange, onThresholdInputChange, onStockSave, onStockCancel, onToggle, onEdit, onEditOptions, onEditRecipe, onDelete, selecting, isSelected, onSelect }: ItemRowProps) {
-  const isLow = item.stock_count !== null && item.stock_count <= item.low_stock_threshold;
+function MenuItemRow({
+  item,
+  isStockEditing,
+  stockInput,
+  thresholdInput,
+  onStockEditStart,
+  onStockInputChange,
+  onThresholdInputChange,
+  onStockSave,
+  onStockCancel,
+  onToggle,
+  onEdit,
+  onEditOptions,
+  onEditRecipe,
+  onDelete,
+  selecting,
+  isSelected,
+  onSelect,
+}: ItemRowProps) {
+  const isLow =
+    item.stock_count !== null && item.stock_count <= item.low_stock_threshold;
   const isOut = item.stock_count !== null && item.stock_count === 0;
 
   return (
@@ -499,104 +546,128 @@ function MenuItemRow({ item, isStockEditing, stockInput, thresholdInput, onStock
                   {item.description}
                 </span>
               )}
-              {/* Stock badge / inline editor */}
-              {isStockEditing ? (
-                <div className="flex flex-wrap items-end gap-s mt-xs">
-                  <label className="flex flex-col gap-xs text-caption-xs text-secondary-text">
-                    Plates left
-                    <input
-                      type="number"
-                      min={0}
-                      value={stockInput}
-                      placeholder="Blank = don't count"
-                      aria-label={`Stock count for ${item.name}`}
-                      onChange={(e) => onStockInputChange(e.target.value)}
-                      onKeyDown={(e) => {
-                        // Typing a number and pressing Enter is the whole
-                        // interaction; without this it silently did nothing.
-                        if (e.key === "Enter") onStockSave();
-                        if (e.key === "Escape") onStockCancel();
-                      }}
-                      className="w-28 px-s py-xs rounded-md border border-outline-variant bg-surface-container-low text-caption-md text-primary-text outline-none focus:border-primary"
-                      autoFocus
-                    />
-                  </label>
-                  {/* The threshold was settable through the API and nowhere in
-                      the UI, so every dish sat on whatever default it was
-                      created with. */}
-                  <label className="flex flex-col gap-xs text-caption-xs text-secondary-text">
-                    Warn at
-                    <input
-                      type="number"
-                      min={0}
-                      value={thresholdInput}
-                      placeholder="e.g. 5"
-                      aria-label={`Low stock warning level for ${item.name}`}
-                      onChange={(e) => onThresholdInputChange(e.target.value)}
-                      onKeyDown={(e) => {
-                        if (e.key === "Enter") onStockSave();
-                        if (e.key === "Escape") onStockCancel();
-                      }}
-                      className="w-24 px-s py-xs rounded-md border border-outline-variant bg-surface-container-low text-caption-md text-primary-text outline-none focus:border-primary"
-                    />
-                  </label>
-                  <button type="button" onClick={onStockSave} className="text-caption-sm font-bold text-success hover:underline pb-xs">Save</button>
-                  <button type="button" onClick={onStockCancel} className="text-caption-sm text-outline hover:underline pb-xs">Cancel</button>
-                </div>
-              ) : (
-                <button
-                  type="button"
-                  onClick={onStockEditStart}
-                  className={`mt-xs w-fit px-s py-xs rounded-md text-caption-xs font-bold flex items-center gap-xs transition-colors ${
-                    isOut
-                      ? "bg-error-container text-on-error-container"
-                      : isLow
-                      ? "bg-warning-container text-on-warning-container"
-                      : item.stock_count === null
-                      ? "bg-surface-container-high text-outline"
-                      : "bg-success-container text-on-success-container"
-                  }`}
-                >
-                  <i className={`text-sm ${ isOut ? "mgc_box_3_line" : isLow ? "mgc_alert_line" : "mgc_inventory_line" }`} />
-                  {isOut
-                    ? "Out of stock"
-                    : item.stock_count === null
-                    ? "Untracked — click to set stock"
-                    : `${item.stock_count} in stock`}
-                </button>
-              )}
             </div>
           </div>
-          <div className="flex items-center gap-s shrink-0">
-            <span
-              className={`w-2 h-2 rounded-full ${
-                item.available ? "bg-success" : "bg-error"
-              }`}
-            />
-            <span className="text-caption-sm font-medium text-secondary-text">
-              {item.available ? "Available" : "Unavailable"}
-            </span>
-          </div>
+          {/* A pill, matching the chips on the board and the bill rows. An 8px
+              dot beside grey text was the quietest thing on the card, and it
+              carried the one fact a guest can see from the menu. Unavailable
+              goes neutral rather than red — it is a choice, not a fault, and
+              the card already dims. */}
+          <span
+            className={`shrink-0 px-s py-0.5 rounded-4xl font-bold text-caption-xs uppercase tracking-wider whitespace-nowrap ${
+              item.available
+                ? "bg-success-container text-on-success-container"
+                : "bg-surface-container-high text-outline"
+            }`}
+          >
+            {item.available ? "Available" : "Unavailable"}
+          </span>
         </div>
+        {/* Its own line. Nested in the name column it sat beside a 64px
+            thumbnail in whatever width was left, so on a phone the count
+            a manager taps to restock was the narrowest thing on the card. */}
+        {isStockEditing ? (
+          <div className="flex flex-wrap items-end gap-s">
+            <label className="flex flex-col gap-xs text-caption-xs text-secondary-text">
+              Plates left
+              <input
+                type="number"
+                min={0}
+                value={stockInput}
+                placeholder="Blank = don't count"
+                aria-label={`Stock count for ${item.name}`}
+                onChange={(e) => onStockInputChange(e.target.value)}
+                onKeyDown={(e) => {
+                  // Typing a number and pressing Enter is the whole
+                  // interaction; without this it silently did nothing.
+                  if (e.key === "Enter") onStockSave();
+                  if (e.key === "Escape") onStockCancel();
+                }}
+                className="w-28 px-s py-xs rounded-md border border-outline-variant bg-surface-container-low text-caption-md text-primary-text outline-none focus:border-primary"
+                autoFocus
+              />
+            </label>
+            {/* The threshold was settable through the API and nowhere in
+                the UI, so every dish sat on whatever default it was
+                created with. */}
+            <label className="flex flex-col gap-xs text-caption-xs text-secondary-text">
+              Warn at
+              <input
+                type="number"
+                min={0}
+                value={thresholdInput}
+                placeholder="e.g. 5"
+                aria-label={`Low stock warning level for ${item.name}`}
+                onChange={(e) => onThresholdInputChange(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") onStockSave();
+                  if (e.key === "Escape") onStockCancel();
+                }}
+                className="w-24 px-s py-xs rounded-md border border-outline-variant bg-surface-container-low text-caption-md text-primary-text outline-none focus:border-primary"
+              />
+            </label>
+            <button
+              type="button"
+              onClick={onStockSave}
+              className="text-caption-sm font-bold text-success hover:underline pb-xs"
+            >
+              Save
+            </button>
+            <button
+              type="button"
+              onClick={onStockCancel}
+              className="text-caption-sm text-outline hover:underline pb-xs"
+            >
+              Cancel
+            </button>
+          </div>
+        ) : (
+          <button
+            type="button"
+            onClick={onStockEditStart}
+            className={`w-fit px-s py-0.5 rounded-4xl text-caption-xs font-bold flex items-center gap-xs transition-colors ${
+              isOut
+                ? "bg-error-container text-on-error-container"
+                : isLow
+                  ? "bg-warning-container text-on-warning-container"
+                  : item.stock_count === null
+                    ? "bg-surface-container-high text-outline"
+                    : "bg-success-container text-on-success-container"
+            }`}
+          >
+            <i
+              className={`text-sm ${isOut ? "mgc_box_3_line" : isLow ? "mgc_alert_line" : "mgc_inventory_line"}`}
+            />
+            {isOut
+              ? "Out of stock"
+              : item.stock_count === null
+                ? "Untracked — click to set stock"
+                : `${item.stock_count} in stock`}
+          </button>
+        )}
+        {/* Filled, not outlined. Five outlined buttons in a row is five sets
+            of lines competing at the same weight, and Delete — the only one
+            that cannot be undone — looked no different from Recipe. It is the
+            outlined one now, so the dangerous button is the odd one out. */}
         <div className="flex items-center gap-s flex-wrap">
           <button
             type="button"
             onClick={onToggle}
-            className="px-md py-s rounded-lg border border-outline-variant bg-transparent text-secondary-text text-caption-sm font-semibold hover:border-primary-text hover:text-primary-text transition-all"
+            className="px-md py-s rounded-s bg-surface-container text-secondary-text text-caption-sm font-semibold hover:bg-surface-container-high hover:text-primary-text transition-colors"
           >
             {item.available ? "Mark Unavailable" : "Mark Available"}
           </button>
           <button
             type="button"
             onClick={onEdit}
-            className="px-md py-s rounded-lg border border-primary bg-transparent text-primary text-caption-sm font-bold hover:bg-primary hover:text-on-primary transition-all"
+            className="px-md py-s rounded-s bg-surface-container text-secondary-text text-caption-sm font-semibold hover:bg-surface-container-high hover:text-primary-text transition-colors"
           >
             Edit
           </button>
           <button
             type="button"
             onClick={onEditOptions}
-            className="px-md py-s rounded-lg border border-outline-variant bg-transparent text-secondary-text text-caption-sm font-semibold hover:border-primary-text hover:text-primary-text transition-all"
+            className="px-md py-s rounded-s bg-surface-container text-secondary-text text-caption-sm font-semibold hover:bg-surface-container-high hover:text-primary-text transition-colors"
           >
             Options
             {(item.modifier_groups?.length ?? 0) > 0 && (
@@ -608,14 +679,14 @@ function MenuItemRow({ item, isStockEditing, stockInput, thresholdInput, onStock
           <button
             type="button"
             onClick={onEditRecipe}
-            className="px-md py-s rounded-lg border border-outline-variant bg-transparent text-secondary-text text-caption-sm font-semibold hover:border-primary-text hover:text-primary-text transition-all"
+            className="px-md py-s rounded-s bg-surface-container text-secondary-text text-caption-sm font-semibold hover:bg-surface-container-high hover:text-primary-text transition-colors"
           >
             Recipe
           </button>
           <button
             type="button"
             onClick={onDelete}
-            className="px-md py-s rounded-lg border border-error bg-transparent text-error text-caption-sm font-bold hover:bg-error hover:text-on-error transition-all"
+            className="px-md py-s rounded-s border border-error bg-transparent text-error text-caption-sm font-bold hover:bg-error hover:text-on-error transition-all"
           >
             Delete
           </button>
@@ -795,7 +866,9 @@ function SelectionBar({
             type="checkbox"
             checked={allSelected}
             onChange={() =>
-              setSelected(allSelected ? new Set() : new Set(items.map((i) => i.id)))
+              setSelected(
+                allSelected ? new Set() : new Set(items.map((i) => i.id)),
+              )
             }
             className="w-4 h-4 accent-primary"
           />
@@ -825,14 +898,18 @@ function SelectionBar({
             <span className="font-semibold text-primary-text">
               {listNames(chosen.map((i) => i.name))}
             </span>
-            ? Guests will stop seeing{" "}
-            {chosen.length === 1 ? "it" : "them"} straight away.
+            ? Guests will stop seeing {chosen.length === 1 ? "it" : "them"}{" "}
+            straight away.
           </p>
           <div className="flex gap-s justify-end">
             <SecondaryButton size="md" onClick={() => setConfirming(false)}>
               Keep them
             </SecondaryButton>
-            <PrimaryButton size="md" disabled={pending} onClick={() => onDelete(chosen)}>
+            <PrimaryButton
+              size="md"
+              disabled={pending}
+              onClick={() => onDelete(chosen)}
+            >
               {pending
                 ? "Deleting…"
                 : `Yes, delete ${chosen.length === 1 ? "it" : `all ${chosen.length}`}`}
