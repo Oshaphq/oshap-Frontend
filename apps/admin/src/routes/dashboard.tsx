@@ -164,60 +164,30 @@ export default function DashboardPage() {
         </SecondaryButton>
       </header>
 
+      {/* Stat cards, per the Figma extract of this screen.
+          Three things it specifies that the code did not do:
+          the label carries a **designed** line break rather than wrapping
+          wherever it lands, it is centred, and it takes the card's own
+          foreground colour instead of a flat secondary grey. Together those
+          keep the three cards the same height and stop the ragged wrap that
+          made "PAYMENTS TO VERIFY" look broken on a phone. */}
       <div className="flex gap-s sm:gap-md flex-wrap">
-        <div className="flex-1 min-w-0 sm:min-w-[120px] bg-surface-container-low rounded-md p-s sm:p-md flex flex-col items-center gap-xs">
-          <span className="font-display text-display-h2 font-semibold text-primary block">
-            {activeTablesCount}
-          </span>
-          <span className="text-caption-sm font-medium text-secondary-text uppercase tracking-wider">
-            Active Tables
-          </span>
-        </div>
-        <div
-          className={`flex-1 min-w-0 sm:min-w-[120px] rounded-md p-s sm:p-md flex flex-col items-center gap-xs border ${
-            hasPending
-              ? "bg-warning-container border-warning"
-              : "bg-surface-container-low border-transparent"
-          }`}
-        >
-          <span
-            className={`font-display text-display-h2 font-semibold block ${
-              hasPending ? "text-on-warning-container" : "text-primary"
-            }`}
-          >
-            {pendingCount}
-          </span>
-          <span
-            className={`text-caption-sm font-medium uppercase tracking-wider ${
-              hasPending ? "text-on-warning-container" : "text-secondary-text"
-            }`}
-          >
-            Payments to Verify
-          </span>
-        </div>
-        <Link
+        <StatCard
+          value={activeTablesCount}
+          label={["ACTIVE", "TABLES"]}
+          tone="plain"
+        />
+        <StatCard
+          value={pendingCount}
+          label={["PAYMENTS TO", "VERIFY"]}
+          tone={hasPending ? "warning" : "plain"}
+        />
+        <StatCard
+          value={lowStockCount}
+          label={["LOW STOCK", "ITEMS"]}
+          tone={hasLowStock ? "error" : "plain"}
           to="/menu"
-          className={`flex-1 min-w-0 sm:min-w-[120px] rounded-md p-s sm:p-md flex flex-col items-center gap-xs border no-underline transition-colors ${
-            hasLowStock
-              ? "bg-error-container border-error hover:opacity-90"
-              : "bg-surface-container-low border-transparent hover:border-outline-variant"
-          }`}
-        >
-          <span
-            className={`font-display text-display-h2 font-semibold block ${
-              hasLowStock ? "text-on-error-container" : "text-primary"
-            }`}
-          >
-            {lowStockCount}
-          </span>
-          <span
-            className={`text-caption-sm font-medium uppercase tracking-wider ${
-              hasLowStock ? "text-on-error-container" : "text-secondary-text"
-            }`}
-          >
-            Low Stock Items
-          </span>
-        </Link>
+        />
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-md">
@@ -427,6 +397,76 @@ export default function DashboardPage() {
       )}
     </main>
   );
+}
+
+/**
+ * One figure on the dashboard, at a glance.
+ *
+ * `label` arrives as one string per line, because the break is a design
+ * decision rather than a consequence of the width — all three cards stay the
+ * same height and the wrap never lands mid-phrase. Passing the lines beats a
+ * `
+` in a string: it survives formatting, and it reads as the intent.
+ *
+ * The label takes the card's foreground rather than a flat grey, so a lit card
+ * reads as one block of colour instead of a bright number over dim text.
+ */
+function StatCard({
+  value,
+  label,
+  tone,
+  to,
+}: {
+  value: number;
+  /** One entry per line. The break is designed, not a consequence of width. */
+  label: readonly string[];
+  tone: "plain" | "warning" | "error";
+  to?: string;
+}) {
+  const surface =
+    tone === "warning"
+      ? "bg-warning-container border-warning"
+      : tone === "error"
+        ? "bg-error-container border-error"
+        : "bg-surface-container-low border-transparent";
+  const ink =
+    tone === "warning"
+      ? "text-on-warning-container"
+      : tone === "error"
+        ? "text-on-error-container"
+        : "text-primary";
+
+  const inner = (
+    <>
+      <span className={`font-display text-display-h1 font-semibold ${ink}`}>
+        {value}
+      </span>
+      <span
+        className={`text-caption-xs font-semibold uppercase tracking-wider text-center ${ink}`}
+      >
+        {label.map((line) => (
+          <span key={line} className="block">
+            {line}
+          </span>
+        ))}
+      </span>
+    </>
+  );
+
+  const shared =
+    "flex-1 min-w-0 sm:min-w-[120px] rounded-md px-s py-md flex flex-col items-center gap-xs border";
+
+  if (to) {
+    return (
+      <Link
+        to={to}
+        className={`${shared} no-underline transition-colors hover:opacity-90 ${surface}`}
+      >
+        {inner}
+      </Link>
+    );
+  }
+  return <div className={`${shared} ${surface}`}>{inner}</div>;
 }
 
 /**
