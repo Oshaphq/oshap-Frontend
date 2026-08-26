@@ -164,8 +164,8 @@ export default function DashboardPage() {
         </SecondaryButton>
       </header>
 
-      <div className="flex gap-md flex-wrap">
-        <div className="flex-1 min-w-[120px] bg-surface-container-low rounded-md p-md flex flex-col items-center gap-xs">
+      <div className="flex gap-s sm:gap-md flex-wrap">
+        <div className="flex-1 min-w-0 sm:min-w-[120px] bg-surface-container-low rounded-md p-s sm:p-md flex flex-col items-center gap-xs">
           <span className="font-display text-display-h2 font-semibold text-primary block">
             {activeTablesCount}
           </span>
@@ -174,7 +174,7 @@ export default function DashboardPage() {
           </span>
         </div>
         <div
-          className={`flex-1 min-w-[120px] rounded-md p-md flex flex-col items-center gap-xs border ${
+          className={`flex-1 min-w-0 sm:min-w-[120px] rounded-md p-s sm:p-md flex flex-col items-center gap-xs border ${
             hasPending
               ? "bg-warning-container border-warning"
               : "bg-surface-container-low border-transparent"
@@ -197,7 +197,7 @@ export default function DashboardPage() {
         </div>
         <Link
           to="/menu"
-          className={`flex-1 min-w-[120px] rounded-md p-md flex flex-col items-center gap-xs border no-underline transition-colors ${
+          className={`flex-1 min-w-0 sm:min-w-[120px] rounded-md p-s sm:p-md flex flex-col items-center gap-xs border no-underline transition-colors ${
             hasLowStock
               ? "bg-error-container border-error hover:opacity-90"
               : "bg-surface-container-low border-transparent hover:border-outline-variant"
