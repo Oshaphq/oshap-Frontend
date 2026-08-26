@@ -2061,9 +2061,14 @@ describe("mock API — notifications", () => {
     expect((second.body as Row).resolved_at).toBe((first.body as Row).resolved_at);
   });
 
-  it("refuses to let a person hand-close a derived notification", async () => {
-    // `new_order` closes itself when the order leaves CREATED. Closing it by
-    // hand would put this list out of step with the kitchen board.
+  it("lets a derived notification be cleared by hand", async () => {
+    /**
+     * This used to answer 409, on the reasoning that a person closing one would
+     * put the list out of step with the board. True for a live order — but rows
+     * created before derived resolution was wired up never close on their own,
+     * because the transition that would have closed them already happened. With
+     * no way to clear them the bell sat at 9+ for good.
+     */
     await mockRequest(
       "/orders",
       "POST",
@@ -2084,8 +2089,8 @@ describe("mock API — notifications", () => {
       q(),
       true,
     );
-    // 409, not 403 — the caller is allowed here, this row is just not that kind.
-    expect(res.status).toBe(409);
+    expect(res.status).toBe(200);
+    expect((res.body as Row).resolved_at).not.toBeNull();
   });
 
   it("marking read is idempotent and does not touch the unresolved count", async () => {
@@ -2544,5 +2549,62 @@ describe("mock API — serving on the card machine", () => {
     expect(body.settled).toBe(true);
     expect(body.balance_due).toBe(0);
     expect(body.status).toBe("CONFIRMED");
+  });
+});
+
+describe("mock API — clearing a stuck backlog", () => {
+  it("lets a derived notification be cleared by hand", async () => {
+    // Derived types close themselves only from the moment that was wired up.
+    // Rows created before it sit unresolved for good, because the order they
+    // describe moved on days ago — which is what left the bell at 9+.
+    await mockRequest(
+      "/orders",
+      "POST",
+      {
+        table: "T9",
+        restaurant_id: HOME_RESTAURANT,
+        device_token: "dev-backlog",
+        items: [{ name: "Jollof Rice", qty: 1, price: 350000 }],
+      },
+      q(),
+      false,
+    );
+    const list = (
+      await mockRequest("/admin/notifications", "GET", null, q("unresolved_only=true"), true)
+    ).body as { notifications: Array<{ id: string; type: string }> };
+    const stuck = list.notifications.find((n) => n.type === "new_order")!;
+
+    const res = await mockRequest(
+      `/admin/notifications/${stuck.id}/resolve`,
+      "POST",
+      null,
+      q(),
+      true,
+    );
+    expect(res.status).toBe(200);
+    expect((res.body as { resolved_at: string | null }).resolved_at).not.toBeNull();
+  });
+
+  it("brings the outstanding count down", async () => {
+    const count = async () =>
+      (
+        (
+          await mockRequest("/admin/notifications", "GET", null, q("per_page=1&unresolved_only=true"), true)
+        ).body as { total: number }
+      ).total;
+
+    const before = await count();
+    expect(before).toBeGreaterThan(0);
+
+    const rows = (
+      await mockRequest("/admin/notifications", "GET", null, q("per_page=50&unresolved_only=true"), true)
+    ).body as { notifications: Array<{ id: string }> };
+    for (const n of rows.notifications) {
+      await mockRequest(`/admin/notifications/${n.id}/resolve`, "POST", null, q(), true);
+    }
+
+    // Falls by what was cleared. Not asserted as zero: one page may not hold
+    // every row, and the badge only needs to move for the fix to be real.
+    expect(await count()).toBe(before - rows.notifications.length);
   });
 });

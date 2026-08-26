@@ -3,9 +3,11 @@ import {
   useAdminNotifications,
   useMarkNotificationsRead,
   useNotificationCount,
+  useResolveAllNotifications,
 } from "@oshap/shared";
 import type { NotificationType } from "@oshap/shared";
-import { SecondaryButton, Select } from "@oshap/shared/ui";
+import { errorMessage } from "@oshap/shared";
+import { PrimaryButton, SecondaryButton, Select, toast } from "@oshap/shared/ui";
 import QueryError from "../components/QueryError";
 import { NotificationRow, groupByTime } from "../components/NotificationBell";
 import { NOTIFICATION_META } from "../notificationCopy";
@@ -47,6 +49,41 @@ export default function Notifications() {
   // button whenever page 1 happened to be read, while page 3 was not.
   const unread = useNotificationCount("unread");
 
+  /**
+   * The rows still outstanding, so they can be cleared in one go.
+   *
+   * Derived notifications close themselves only from the moment that was wired
+   * up on the backend. Anything created before it stays open for good — the
+   * order it describes moved on days ago — which left the bell reading 9+ with
+   * no way for anyone to bring it down.
+   */
+  const outstanding = useAdminNotifications({ per_page: 100, unresolved_only: true });
+  const outstandingIds = useMemo(
+    () => (outstanding.data?.notifications ?? []).map((n) => n.id),
+    [outstanding.data?.notifications],
+  );
+  const resolveAll = useResolveAllNotifications();
+  const [confirmClear, setConfirmClear] = useState(false);
+
+  const clearAll = () => {
+    resolveAll.mutate(outstandingIds, {
+      onSuccess: ({ cleared, failed }) => {
+        setConfirmClear(false);
+        if (failed.length === 0) {
+          toast.success(cleared === 1 ? "Cleared" : `Cleared ${cleared}`);
+          return;
+        }
+        toast.error(
+          `Cleared ${cleared}. ${failed.length} would not clear — they may need someone to act on them.`,
+        );
+      },
+      onError: (err) => {
+        setConfirmClear(false);
+        toast.error(errorMessage(err, "clear the notifications"));
+      },
+    });
+  };
+
   const rows = useMemo(
     () => query.data?.notifications ?? [],
     [query.data?.notifications],
@@ -86,6 +123,28 @@ export default function Notifications() {
           {markRead.isPending ? "Marking…" : "Mark all read"}
         </SecondaryButton>
       </div>
+
+      {confirmClear && (
+        <div className="flex flex-col gap-s p-md rounded-lg bg-surface-container-high border border-outline-variant">
+          <p className="text-caption-md text-secondary-text">
+            Clear{" "}
+            <span className="font-semibold text-primary-text">
+              {outstandingIds.length}
+            </span>{" "}
+            still needing attention? This marks the work done and empties the
+            bell. Anything genuinely waiting on someone — a waiter call nobody
+            has answered — goes with it.
+          </p>
+          <div className="flex gap-s justify-end">
+            <SecondaryButton size="md" onClick={() => setConfirmClear(false)}>
+              Cancel
+            </SecondaryButton>
+            <PrimaryButton size="md" disabled={resolveAll.isPending} onClick={clearAll}>
+              {resolveAll.isPending ? "Clearing…" : "Yes, clear them"}
+            </PrimaryButton>
+          </div>
+        </div>
+      )}
 
       <div className="flex items-end gap-md flex-wrap">
         <Select
