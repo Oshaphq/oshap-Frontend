@@ -14,10 +14,7 @@ import type { Bill, BillState } from "@oshap/shared";
  * would be a guess where "2 bills" is a fact.
  */
 
-const STATE_META: Record<
-  BillState,
-  { label: string; cls: string }
-> = {
+const STATE_META: Record<BillState, { label: string; cls: string }> = {
   claimed: {
     label: "Says paid",
     cls: "bg-warning text-on-warning",
@@ -46,11 +43,15 @@ const STATE_META: Record<
  * A card request means carry the machine over; a transfer means check the
  * account and verify. Cash needs no label — it is the default and saying so
  * adds noise to every row.
+ *
+ * It gets its own line rather than trailing the order count. Appended, it read
+ * as one long grey string that a waiter had to parse to the end; on its own it
+ * is the instruction, and it is what they are looking for.
  */
-function methodLabel(method: string | null): string {
-  if (method === "POS") return " · card machine";
-  if (method === "MANUAL_TRANSFER") return " · transfer";
-  return "";
+function methodLabel(method: string | null): string | null {
+  if (method === "POS") return "Card machine";
+  if (method === "MANUAL_TRANSFER") return "Transfer";
+  return null;
 }
 
 interface Props {
@@ -71,6 +72,13 @@ export default function TableBills({ bills, renderActions }: Props) {
       )}
       {bills.map((bill) => {
         const meta = STATE_META[bill.state];
+        const detail =
+          bill.state === "part"
+            ? `${formatCurrency(bill.amountPaid)} of ${formatCurrency(bill.total)} paid`
+            : bill.orders.length > 1
+              ? `${bill.orders.length} orders`
+              : null;
+        const method = methodLabel(bill.paymentMethod);
         return (
           <div
             key={bill.key}
@@ -81,14 +89,16 @@ export default function TableBills({ bills, renderActions }: Props) {
                 <span className="text-label-l5 font-semibold text-primary-text truncate">
                   {bill.guestName ?? "Guest"}
                 </span>
-                <span className="text-caption-xs text-secondary-text">
-                  {bill.state === "part" &&
-                    `${formatCurrency(bill.amountPaid)} of ${formatCurrency(bill.total)} paid`}
-                  {bill.state !== "part" && bill.orders.length > 1
-                    ? `${bill.orders.length} orders`
-                    : ""}
-                  {methodLabel(bill.paymentMethod)}
-                </span>
+                {detail && (
+                  <span className="text-caption-xs text-secondary-text">
+                    {detail}
+                  </span>
+                )}
+                {method && (
+                  <span className="text-caption-xs text-secondary-text">
+                    {method}
+                  </span>
+                )}
               </div>
               <div className="flex items-center gap-s shrink-0">
                 <span className="text-label-l5 font-semibold tabular-nums text-primary-text">

@@ -51,9 +51,11 @@ export default function DashboardPage() {
    */
   const [rejectingBill, setRejectingBill] = useState<string | null>(null);
   const [verifyingBill, setVerifyingBill] = useState<string | null>(null);
-  const [cashTarget, setCashTarget] = useState<
-    { tableName: string; orderIds: string[]; total: number } | null
-  >(null);
+  const [cashTarget, setCashTarget] = useState<{
+    tableName: string;
+    orderIds: string[];
+    total: number;
+  } | null>(null);
 
   if (tablesQuery.isLoading) {
     return (
@@ -65,7 +67,13 @@ export default function DashboardPage() {
   }
 
   if (tablesQuery.isError) {
-    return <QueryError error={tablesQuery.error} action="load the tables" onRetry={() => tablesQuery.refetch()} />;
+    return (
+      <QueryError
+        error={tablesQuery.error}
+        action="load the tables"
+        onRetry={() => tablesQuery.refetch()}
+      />
+    );
   }
 
   const tables = tablesQuery.data?.tables ?? [];
@@ -89,7 +97,11 @@ export default function DashboardPage() {
       toast.success("Payment rejected — the bill is unpaid again");
     } catch (err) {
       setRejectingBill(null);
-      toast.error(settledElsewhere(err) ? ALREADY_SETTLED : errorMessage(err, "reject the payment"));
+      toast.error(
+        settledElsewhere(err)
+          ? ALREADY_SETTLED
+          : errorMessage(err, "reject the payment"),
+      );
     }
   };
 
@@ -115,14 +127,20 @@ export default function DashboardPage() {
       // Without this the row just leaves the pending list, which is
       // indistinguishable from the click never registering.
       toast.success(
-        bill.guestName ? `${bill.guestName}'s payment verified` : "Payment verified",
+        bill.guestName
+          ? `${bill.guestName}'s payment verified`
+          : "Payment verified",
       );
     } catch (err) {
       // Close the prompt either way. Leaving it open under a failure toast
       // invites a second confirm, which is how one refusal becomes two
       // attempts at the same bill.
       setVerifyingBill(null);
-      toast.error(settledElsewhere(err) ? ALREADY_SETTLED : errorMessage(err, "verify the payment"));
+      toast.error(
+        settledElsewhere(err)
+          ? ALREADY_SETTLED
+          : errorMessage(err, "verify the payment"),
+      );
     }
   };
 
@@ -130,7 +148,10 @@ export default function DashboardPage() {
     setClearPromptTable(null);
     try {
       // The name again, for the same reason as verify above.
-      await closeTable.mutateAsync({ table_id: table.table_id, reason: "abandoned" });
+      await closeTable.mutateAsync({
+        table_id: table.table_id,
+        reason: "abandoned",
+      });
       toast.success("Table cleared — recorded as unpaid");
     } catch (err) {
       toast.error(errorMessage(err, "clear the table"));
@@ -164,60 +185,30 @@ export default function DashboardPage() {
         </SecondaryButton>
       </header>
 
+      {/* Stat cards, per the Figma extract of this screen.
+          Three things it specifies that the code did not do:
+          the label carries a **designed** line break rather than wrapping
+          wherever it lands, it is centred, and it takes the card's own
+          foreground colour instead of a flat secondary grey. Together those
+          keep the three cards the same height and stop the ragged wrap that
+          made "PAYMENTS TO VERIFY" look broken on a phone. */}
       <div className="flex gap-s sm:gap-md flex-wrap">
-        <div className="flex-1 min-w-0 sm:min-w-[120px] bg-surface-container-low rounded-md p-s sm:p-md flex flex-col items-center gap-xs">
-          <span className="font-display text-display-h2 font-semibold text-primary block">
-            {activeTablesCount}
-          </span>
-          <span className="text-caption-sm font-medium text-secondary-text uppercase tracking-wider">
-            Active Tables
-          </span>
-        </div>
-        <div
-          className={`flex-1 min-w-0 sm:min-w-[120px] rounded-md p-s sm:p-md flex flex-col items-center gap-xs border ${
-            hasPending
-              ? "bg-warning-container border-warning"
-              : "bg-surface-container-low border-transparent"
-          }`}
-        >
-          <span
-            className={`font-display text-display-h2 font-semibold block ${
-              hasPending ? "text-on-warning-container" : "text-primary"
-            }`}
-          >
-            {pendingCount}
-          </span>
-          <span
-            className={`text-caption-sm font-medium uppercase tracking-wider ${
-              hasPending ? "text-on-warning-container" : "text-secondary-text"
-            }`}
-          >
-            Payments to Verify
-          </span>
-        </div>
-        <Link
+        <StatCard
+          value={activeTablesCount}
+          label={["ACTIVE", "TABLES"]}
+          tone="plain"
+        />
+        <StatCard
+          value={pendingCount}
+          label={["PAYMENTS TO", "VERIFY"]}
+          tone={hasPending ? "warning" : "plain"}
+        />
+        <StatCard
+          value={lowStockCount}
+          label={["LOW STOCK", "ITEMS"]}
+          tone={hasLowStock ? "error" : "plain"}
           to="/menu"
-          className={`flex-1 min-w-0 sm:min-w-[120px] rounded-md p-s sm:p-md flex flex-col items-center gap-xs border no-underline transition-colors ${
-            hasLowStock
-              ? "bg-error-container border-error hover:opacity-90"
-              : "bg-surface-container-low border-transparent hover:border-outline-variant"
-          }`}
-        >
-          <span
-            className={`font-display text-display-h2 font-semibold block ${
-              hasLowStock ? "text-on-error-container" : "text-primary"
-            }`}
-          >
-            {lowStockCount}
-          </span>
-          <span
-            className={`text-caption-sm font-medium uppercase tracking-wider ${
-              hasLowStock ? "text-on-error-container" : "text-secondary-text"
-            }`}
-          >
-            Low Stock Items
-          </span>
-        </Link>
+        />
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-md">
@@ -233,7 +224,11 @@ export default function DashboardPage() {
             ? "bg-warning-container border-warning"
             : !isEmpty
               ? "bg-surface-container-low border-outline-variant"
-              : "bg-surface-container-low border-transparent";
+              : /* A faint border rather than none. A transparent one made an
+                   empty table a floating block with no edge, so a row of them
+                   ran together — the extract draws the outline either way and
+                   only changes its weight. */
+                "bg-surface-container-low border-surface-container";
 
           return (
             <div
@@ -261,7 +256,9 @@ export default function DashboardPage() {
 
               <div className="flex flex-col gap-xs flex-1">
                 {isEmpty ? (
-                  <p className="text-caption-md text-secondary-text">No active orders</p>
+                  <p className="text-caption-md text-secondary-text">
+                    No active orders
+                  </p>
                 ) : bills.length > 0 ? (
                   <TableBills
                     bills={bills}
@@ -352,7 +349,10 @@ export default function DashboardPage() {
                         setClearPromptTable(null);
                         setCashTarget({
                           tableName: table.table_id,
-                          orderIds: bills[0]?.unpaidOrderIds ?? table.unpaid_order_ids ?? [],
+                          orderIds:
+                            bills[0]?.unpaidOrderIds ??
+                            table.unpaid_order_ids ??
+                            [],
                           total: bills[0]?.total ?? table.unpaidTotal,
                         });
                       }}
@@ -386,7 +386,7 @@ export default function DashboardPage() {
                       {formatCurrency(
                         bills.length > 0
                           ? bills.reduce((sum, b) => sum + b.balanceDue, 0)
-                          : table.outstanding_total ?? table.unpaidTotal,
+                          : (table.outstanding_total ?? table.unpaidTotal),
                       )}
                       .
                     </p>
@@ -430,6 +430,76 @@ export default function DashboardPage() {
 }
 
 /**
+ * One figure on the dashboard, at a glance.
+ *
+ * `label` arrives as one string per line, because the break is a design
+ * decision rather than a consequence of the width — all three cards stay the
+ * same height and the wrap never lands mid-phrase. Passing the lines beats a
+ * `
+` in a string: it survives formatting, and it reads as the intent.
+ *
+ * The label takes the card's foreground rather than a flat grey, so a lit card
+ * reads as one block of colour instead of a bright number over dim text.
+ */
+function StatCard({
+  value,
+  label,
+  tone,
+  to,
+}: {
+  value: number;
+  /** One entry per line. The break is designed, not a consequence of width. */
+  label: readonly string[];
+  tone: "plain" | "warning" | "error";
+  to?: string;
+}) {
+  const surface =
+    tone === "warning"
+      ? "bg-warning-container border-warning"
+      : tone === "error"
+        ? "bg-error-container border-error"
+        : "bg-surface-container-low border-transparent";
+  const ink =
+    tone === "warning"
+      ? "text-on-warning-container"
+      : tone === "error"
+        ? "text-on-error-container"
+        : "text-primary";
+
+  const inner = (
+    <>
+      <span className={`font-display text-display-h1 font-semibold ${ink}`}>
+        {value}
+      </span>
+      <span
+        className={`text-caption-xs font-semibold uppercase tracking-wider text-center ${ink}`}
+      >
+        {label.map((line) => (
+          <span key={line} className="block">
+            {line}
+          </span>
+        ))}
+      </span>
+    </>
+  );
+
+  const shared =
+    "flex-1 min-w-0 sm:min-w-[120px] rounded-md px-s py-md flex flex-col items-center gap-xs border";
+
+  if (to) {
+    return (
+      <Link
+        to={to}
+        className={`${shared} no-underline transition-colors hover:opacity-90 ${surface}`}
+      >
+        {inner}
+      </Link>
+    );
+  }
+  return <div className={`${shared} ${surface}`}>{inner}</div>;
+}
+
+/**
  * Whether a table still needs somebody, and whether anyone has claimed to pay.
  *
  * **The bills decide this, not `hasUnpaid`.** That flag goes false the moment
@@ -448,10 +518,16 @@ export default function DashboardPage() {
  * Falls back to the flags only where `live_orders` is absent, which means a
  * deployment that predates it.
  */
-function tableState(table: AdminTableStatus): { busy: boolean; claimed: boolean } {
+function tableState(table: AdminTableStatus): {
+  busy: boolean;
+  claimed: boolean;
+} {
   const bills = groupBills(table.live_orders);
   if (bills.length === 0) {
-    return { busy: table.hasUnpaid || table.hasPending, claimed: table.hasPending };
+    return {
+      busy: table.hasUnpaid || table.hasPending,
+      claimed: table.hasPending,
+    };
   }
   return {
     busy: bills.some((b) => b.state !== "settled"),
@@ -519,10 +595,17 @@ function BillActions({
           bill goes back to unpaid and this account is marked down.
         </p>
         <div className="flex gap-s">
-          <SecondaryButton className="flex-1" onClick={() => setRejectingBill(null)}>
+          <SecondaryButton
+            className="flex-1"
+            onClick={() => setRejectingBill(null)}
+          >
             Cancel
           </SecondaryButton>
-          <PrimaryButton className="flex-1" onClick={onReject} disabled={rejectPending}>
+          <PrimaryButton
+            className="flex-1"
+            onClick={onReject}
+            disabled={rejectPending}
+          >
             {rejectPending ? "Rejecting…" : "Confirm Reject"}
           </PrimaryButton>
         </div>
@@ -540,8 +623,7 @@ function BillActions({
               <span className="font-bold text-primary-text">
                 {formatCurrency(bill.balanceDue)}
               </span>{" "}
-              went through on the machine for{" "}
-              {bill.guestName ?? "this guest"}.
+              went through on the machine for {bill.guestName ?? "this guest"}.
             </>
           ) : (
             <>
@@ -555,10 +637,17 @@ function BillActions({
           This settles their bill and cannot be undone from here.
         </p>
         <div className="flex gap-s">
-          <SecondaryButton className="flex-1" onClick={() => setVerifyingBill(null)}>
+          <SecondaryButton
+            className="flex-1"
+            onClick={() => setVerifyingBill(null)}
+          >
             Cancel
           </SecondaryButton>
-          <PrimaryButton className="flex-1" onClick={onVerify} disabled={verifyPending}>
+          <PrimaryButton
+            className="flex-1"
+            onClick={onVerify}
+            disabled={verifyPending}
+          >
             {verifyPending ? "Verifying…" : "Yes, it's in"}
           </PrimaryButton>
         </div>
