@@ -111,6 +111,41 @@ export function useMarkNotificationsRead() {
   });
 }
 
+/**
+ * Clears every notification that is still outstanding.
+ *
+ * Derived notifications close themselves when the order or payment moves — but
+ * only from the moment that was wired up. Rows created before it sit at
+ * `resolved_at: null` for good, because the transitions that would have closed
+ * them are long past. At Jobiz that left the bell reading `9+` with nothing a
+ * person could do about it.
+ *
+ * Resolving one at a time rather than in a batch, because the API has no bulk
+ * route. Failures are counted rather than thrown: one row that refuses must not
+ * strand the other twenty, and the caller reports what actually happened.
+ */
+export function useResolveAllNotifications() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (ids: string[]) => {
+      let cleared = 0;
+      const failed: string[] = [];
+      for (const id of ids) {
+        try {
+          await adminResolveNotification(id);
+          cleared++;
+        } catch {
+          failed.push(id);
+        }
+      }
+      return { cleared, failed };
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["admin", "notifications"] });
+    },
+  });
+}
+
 export function useResolveNotification() {
   const queryClient = useQueryClient();
   return useMutation({

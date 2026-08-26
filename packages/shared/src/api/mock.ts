@@ -2506,13 +2506,15 @@ route("POST", /^\/admin\/notifications\/[^/]+\/resolve$/, ({ path }) => {
   const row = _notifications.find((n) => n.id === id);
   if (!row) return json(404, { error: "Notification not found" });
 
-  if (!CLAIMABLE.includes(row.type as NotificationType)) {
-    // 409, not 403 — the caller is allowed here, this row just is not the kind
-    // a person closes.
-    return json(409, {
-      error: "This notification resolves itself when the order or payment moves",
-    });
-  }
+  /**
+   * Any type can be cleared by hand now, derived ones included.
+   *
+   * They used to answer 409, on the reasoning that a person closing one would
+   * put the list out of step with the board. True for a live order — but rows
+   * created before derived resolution was wired up never close on their own,
+   * because the transition that would have closed them already happened. With
+   * no way to clear them the bell sat at 9+ for good.
+   */
 
   // Already claimed answers 200 with who got there first. Two waiters tapping
   // at once is the normal case, not an error.
