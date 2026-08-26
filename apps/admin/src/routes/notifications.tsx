@@ -112,16 +112,30 @@ export default function Notifications() {
               : "Calls, orders and payments as they happen"}
           </p>
         </div>
-        <SecondaryButton
-          size="md"
-          // `unread_total` was on the agreed contract and never shipped, so
-          // this read `undefined`, fell back to 0, and disabled the button
-          // permanently — a dead control that looked deliberate.
-          disabled={markRead.isPending || (unread.data ?? 0) === 0}
-          onClick={() => markRead.mutate({ all: true })}
-        >
-          {markRead.isPending ? "Marking…" : "Mark all read"}
-        </SecondaryButton>
+        <div className="flex items-center gap-s">
+          <SecondaryButton
+            size="md"
+            // `unread_total` was on the agreed contract and never shipped, so
+            // this read `undefined`, fell back to 0, and disabled the button
+            // permanently — a dead control that looked deliberate.
+            disabled={markRead.isPending || (unread.data ?? 0) === 0}
+            onClick={() => markRead.mutate({ all: true })}
+          >
+            {markRead.isPending ? "Marking…" : "Mark all read"}
+          </SecondaryButton>
+          {/* Separate from Mark all read on purpose. Reading is about one
+              person's attention; clearing says the work is done, and the bell
+              counts the second. */}
+          <PrimaryButton
+            size="md"
+            disabled={resolveAll.isPending || outstandingIds.length === 0}
+            onClick={() => setConfirmClear(true)}
+          >
+            {resolveAll.isPending
+              ? "Clearing…"
+              : `Clear ${outstandingIds.length || ""}`.trim()}
+          </PrimaryButton>
+        </div>
       </div>
 
       {confirmClear && (
