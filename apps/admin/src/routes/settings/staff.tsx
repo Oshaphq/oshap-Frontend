@@ -137,7 +137,11 @@ export default function StaffSettings() {
       </div>
 
       <div className="bg-surface-container-low rounded-md border border-transparent hover:border-outline-variant transition-colors overflow-hidden">
-        <table className="w-full text-left border-collapse">
+        {/* Scrolls inside its own box. Four or five columns of names and
+                    money cannot usefully collapse, and without this the whole
+                    page slides sideways on a phone. */}
+<div className="overflow-x-auto -mx-md px-md">
+<table className="w-full min-w-[32rem] text-left border-collapse">
           <thead>
             <tr className="bg-surface-container-high border-b border-surface-container-highest">
               <th className="py-s px-md text-label-l4 font-semibold text-secondary-text">Name</th>
@@ -193,6 +197,7 @@ export default function StaffSettings() {
             )}
           </tbody>
         </table>
+</div>
       </div>
 
       {isModalOpen && (
