@@ -273,7 +273,11 @@ export default function Analytics() {
                 Table Performance
               </h3>
               <div className="h-[300px] w-full overflow-y-auto">
-                <table className="w-full text-left border-collapse">
+                {/* Scrolls inside its own box. Four or five columns of names and
+                    money cannot usefully collapse, and without this the whole
+                    page slides sideways on a phone. */}
+<div className="overflow-x-auto -mx-md px-md">
+<table className="w-full min-w-[32rem] text-left border-collapse">
                   <thead>
                     <tr className="bg-surface-container-high border-b border-surface-container-highest">
                       <th className="py-s px-md text-label-l4 font-semibold text-secondary-text">Table</th>
@@ -291,6 +295,7 @@ export default function Analytics() {
                     ))}
                   </tbody>
                 </table>
+</div>
               </div>
             </div>
           </div>
