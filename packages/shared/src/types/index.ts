@@ -45,7 +45,8 @@ export type CloseReason = "paid" | "abandoned";
 /** How the money actually arrived. Stored server-side, not inferred. */
 export type PaymentMethod = "CASH" | "MANUAL_TRANSFER" | "POS";
 
-export type Role = "OWNER" | "MANAGER" | "CASHIER" | "WAITER" | "KITCHEN" | "BARTENDER";
+export type Role =
+  "OWNER" | "MANAGER" | "CASHIER" | "WAITER" | "KITCHEN" | "BARTENDER";
 
 // ---------------------------------------------------------------------------
 // Entities
@@ -851,8 +852,7 @@ export interface AdminHistoryQuery {
   date?: string;
 }
 
-export interface AdminHistoryOrder
-  extends Omit<Order, "order_items"> {
+export interface AdminHistoryOrder extends Omit<Order, "order_items"> {
   customer_name?: string | null;
   order_items: OrderItem[];
   payments: Payment[];
@@ -1023,7 +1023,11 @@ export interface ReceiptItem {
   quantity: number;
   price: number;
   notes?: string | null;
-  modifiers?: Array<{ name: string; option: string; price_delta: number }> | null;
+  modifiers?: Array<{
+    name: string;
+    option: string;
+    price_delta: number;
+  }> | null;
 }
 
 /**
@@ -1092,6 +1096,11 @@ export const AUDIT_ACTIONS = {
   tip: "order.tip",
   refund: "order.refund",
   cashPaid: "order.cash_paid",
+  /** Money in, balance still owing. Observed in production before it was ever
+   *  written down, which is how it reached a screen as a raw identifier. */
+  partialPayment: "order.partial_payment",
+  paymentVerify: "payment.verify",
+  paymentReject: "payment.reject",
   itemUpdate: "item.update",
   itemVoid: "item.void",
   itemComp: "item.comp",
