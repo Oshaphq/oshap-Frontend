@@ -1,62 +1,217 @@
-import { NavLink, Routes, Route, Navigate } from "react-router";
+import { Link, Routes, Route, Navigate, useLocation } from "react-router";
+import {
+  useAdminBankAccounts,
+  useAdminBranches,
+  useAdminSettings,
+  useAdminStaff,
+  useAdminTables,
+} from "@oshap/shared";
 import GeneralSettings from "./settings/general";
 import StaffSettings from "./settings/staff";
 import TablesSettings from "./settings/tables";
 import BranchesSettings from "./settings/branches";
+import BrandingSettings from "./settings/branding";
+import BankSettings from "./settings/bank";
+import NotificationSettings from "./settings/notifications";
 import { useAuth } from "../context/AuthContext";
 
-const tabCls = ({ isActive }: { isActive: boolean }) =>
-  `px-md py-s rounded-lg font-semibold text-caption-md transition-all border ${
-    isActive
-      ? "bg-surface-container-high text-primary border-outline-variant"
-      : "text-secondary-text hover:bg-surface-container-high border-transparent"
-  }`;
+/**
+ * Settings as a list of places, not a row of tabs.
+ *
+ * Seven sections do not fit across a phone, so the tab bar wrapped to three
+ * lines and the current one was wherever it landed. A list has room for what
+ * each section actually holds — and the counts underneath answer the question
+ * people open settings to ask ("how many tables have I got?") without anyone
+ * having to go in and look.
+ */
+
+/** One row of the list. The chevron is the only affordance it needs. */
+function Row({
+  to,
+  icon,
+  title,
+  subtitle,
+}: {
+  to: string;
+  icon: string;
+  title: string;
+  subtitle: string;
+}) {
+  return (
+    <Link
+      to={to}
+      className="flex items-center gap-md px-md py-md border-b border-outline-variant last:border-none no-underline hover:bg-surface-container transition-colors group"
+    >
+      <i className={`${icon} text-xl shrink-0 text-primary`} aria-hidden />
+      <span className="flex flex-col gap-0.5 min-w-0 flex-1">
+        <span className="text-p2 font-semibold text-primary-text">{title}</span>
+        <span className="text-caption-md text-secondary-text">{subtitle}</span>
+      </span>
+      <i
+        className="mgc_right_line text-lg shrink-0 text-outline group-hover:text-primary transition-colors"
+        aria-hidden
+      />
+    </Link>
+  );
+}
+
+/**
+ * Counts live in their own components so each hook runs only for a role that
+ * may call it. `useAdminStaff` 403s for anyone but an owner, and a hook cannot
+ * be skipped with a condition — but a component that is never rendered never
+ * calls one.
+ */
+function BankRow() {
+  const { data } = useAdminBankAccounts();
+  const n = data?.length ?? 0;
+  return (
+    <Row
+      to="/settings/bank"
+      icon="mgc_bank_line"
+      title="Bank accounts"
+      subtitle={
+        n === 0
+          ? "Where transfers go — none set up yet"
+          : `${n} account${n === 1 ? "" : "s"} — guests see the top one`
+      }
+    />
+  );
+}
+
+function StaffRow() {
+  const { data } = useAdminStaff();
+  const staff = data ?? [];
+  const roles = new Set(staff.map((s) => s.role)).size;
+  return (
+    <Row
+      to="/settings/staff"
+      icon="mgc_group_2_line"
+      title="Staff"
+      subtitle={
+        staff.length === 0
+          ? "Who can sign in, and what they can do"
+          : `${staff.length} account${staff.length === 1 ? "" : "s"} across ${roles} role${roles === 1 ? "" : "s"}`
+      }
+    />
+  );
+}
+
+function TablesRow() {
+  const { data } = useAdminTables();
+  const n = data?.tables.length ?? 0;
+  return (
+    <Row
+      to="/settings/tables"
+      icon="mgc_qrcode_line"
+      title="Tables"
+      subtitle={n === 0 ? "QR codes for each table" : `${n} table${n === 1 ? "" : "s"} · QR codes`}
+    />
+  );
+}
+
+function BranchesRow() {
+  const { data } = useAdminBranches();
+  const n = data?.length ?? 0;
+  return (
+    <Row
+      to="/settings/branches"
+      icon="mgc_building_2_line"
+      title="Branches"
+      subtitle={n <= 1 ? "One location" : `${n} locations`}
+    />
+  );
+}
 
 export default function SettingsLayout() {
   const { user } = useAuth();
   const isOwner = user?.role === "OWNER";
+  const { pathname } = useLocation();
+  const { data: settings } = useAdminSettings();
+
+  const atIndex = pathname === "/settings" || pathname === "/settings/";
 
   return (
-    <main className="p-md flex flex-col gap-l">
-      <header>
-        <h1 className="font-display text-display-h2 font-semibold text-primary-text">
-          Settings
-        </h1>
-        <p className="text-p2 text-secondary-text mt-xs">
-          Manage your restaurant details, tables, and staff access.
-        </p>
-      </header>
+    <main className="p-md flex flex-col gap-md max-w-[52rem]">
+      {atIndex ? (
+        <>
+          <header className="flex flex-col gap-0.5">
+            <h1 className="font-display text-display-h2 font-semibold text-primary-text">
+              Settings
+            </h1>
+            {/* The restaurant's own name, so an owner with two venues open in
+                two tabs can tell which one they are about to change. */}
+            <p className="text-caption-md text-secondary-text">
+              {settings?.name ?? "Your restaurant"}
+            </p>
+          </header>
 
-      <div className="flex items-center gap-s border-b border-surface-container-high pb-s flex-wrap">
-        <NavLink to="/settings/general" className={tabCls}>
-          General
-        </NavLink>
-        <NavLink to="/settings/tables" className={tabCls}>
-          Tables
-        </NavLink>
-        {isOwner && (
-          <NavLink to="/settings/staff" className={tabCls}>
-            Staff
-          </NavLink>
-        )}
-        {/* Owner-only: branches are a group-level concern, and a manager
-            running one venue has no business closing another. */}
-        {isOwner && (
-          <NavLink to="/settings/branches" className={tabCls}>
-            Branches
-          </NavLink>
-        )}
-      </div>
-
-      <div className="flex-1">
+          <nav className="bg-surface-container-low rounded-md overflow-hidden">
+            <Row
+              to="/settings/general"
+              icon="mgc_store_2_line"
+              title="General"
+              subtitle="Name, hours, service charge and VAT"
+            />
+            <BankRow />
+            {/* Owner-only, as the routes below are. A manager running one venue
+                has no business adding accounts or closing another branch. */}
+            {isOwner && <StaffRow />}
+            <TablesRow />
+            <Row
+              to="/settings/branding"
+              icon="mgc_palette_line"
+              title="Branding"
+              subtitle="Logo, cover image, brand colour"
+            />
+            <Row
+              to="/settings/notifications"
+              icon="mgc_notification_line"
+              title="Notifications"
+              subtitle="Which alerts reach which roles"
+            />
+            {isOwner && <BranchesRow />}
+          </nav>
+        </>
+      ) : (
         <Routes>
-          <Route path="general" element={<GeneralSettings />} />
-          <Route path="tables" element={<TablesSettings />} />
-          {isOwner && <Route path="staff" element={<StaffSettings />} />}
-          {isOwner && <Route path="branches" element={<BranchesSettings />} />}
-          <Route path="*" element={<Navigate to="general" replace />} />
+          <Route path="general" element={<Section title="General"><GeneralSettings /></Section>} />
+          <Route path="bank" element={<Section title="Bank accounts"><BankSettings /></Section>} />
+          <Route path="tables" element={<Section title="Tables"><TablesSettings /></Section>} />
+          <Route path="branding" element={<Section title="Branding"><BrandingSettings /></Section>} />
+          <Route
+            path="notifications"
+            element={<Section title="Notifications"><NotificationSettings /></Section>}
+          />
+          {isOwner && <Route path="staff" element={<Section title="Staff"><StaffSettings /></Section>} />}
+          {isOwner && (
+            <Route path="branches" element={<Section title="Branches"><BranchesSettings /></Section>} />
+          )}
+          {/* Anything else lands on the list rather than on General. A wrong
+              URL should show you where you can go, not pick for you. */}
+          <Route path="*" element={<Navigate to="/settings" replace />} />
         </Routes>
-      </div>
+      )}
     </main>
+  );
+}
+
+/** A section's own screen: a way back, its name, then the section. */
+function Section({ title, children }: { title: string; children: React.ReactNode }) {
+  return (
+    <div className="flex flex-col gap-md">
+      <header className="flex flex-col gap-xs">
+        <Link
+          to="/settings"
+          className="flex items-center gap-xs w-fit text-caption-md font-semibold text-secondary-text hover:text-primary no-underline transition-colors"
+        >
+          <i className="mgc_left_line text-base" aria-hidden />
+          Settings
+        </Link>
+        <h1 className="font-display text-display-h2 font-semibold text-primary-text">
+          {title}
+        </h1>
+      </header>
+      {children}
+    </div>
   );
 }

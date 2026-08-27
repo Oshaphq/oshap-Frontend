@@ -32,7 +32,11 @@ interface Step {
  * A merchant landing on an empty dashboard has no idea what to do next, which
  * is where onboarding actually fails — account creation is the easy part.
  */
-export default function SetupChecklist({ restaurantId }: { restaurantId: string }) {
+export default function SetupChecklist({
+  restaurantId,
+}: {
+  restaurantId: string;
+}) {
   const settings = useAdminSettings();
   const banks = useAdminBankAccounts();
   const menu = useAdminMenu();
@@ -62,17 +66,26 @@ export default function SetupChecklist({ restaurantId }: { restaurantId: string 
   })();
 
   const steps: Step[] = [
+    // Two errands on two screens, so two steps. Together they sent people to
+    // General and left them looking for a logo uploader that lives in
+    // Branding.
     {
-      label: "Add your logo and address",
-      detail: "Guests see the address as “You’re sitting at …”.",
-      done: Boolean(settings.data?.logo_url && settings.data?.address),
+      label: "Add your address",
+      detail: "Guests see it as “You’re sitting at …”.",
+      done: Boolean(settings.data?.address),
       to: "/settings/general",
+    },
+    {
+      label: "Add your logo",
+      detail: "It goes on receipts and the top of the guest’s menu.",
+      done: Boolean(settings.data?.logo_url),
+      to: "/settings/branding",
     },
     {
       label: "Add a bank account",
       detail: "Where transfers land when a guest pays.",
       done: (banks.data?.length ?? 0) > 0,
-      to: "/settings/general",
+      to: "/settings/bank",
     },
     {
       label: "Build your menu",
@@ -167,7 +180,9 @@ export default function SetupChecklist({ restaurantId }: { restaurantId: string 
                     : "border-outline"
                 }`}
               >
-                {step.done && <i className="mgc_check_line text-xs font-bold" />}
+                {step.done && (
+                  <i className="mgc_check_line text-xs font-bold" />
+                )}
               </span>
               <span className="flex flex-col gap-0.5 min-w-0">
                 <span

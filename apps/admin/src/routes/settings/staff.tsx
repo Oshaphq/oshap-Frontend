@@ -1,13 +1,18 @@
 import { useState } from "react";
-import { 
-  useAdminStaff, 
-  useAdminCreateStaff, 
-  useAdminUpdateStaff, 
-  useAdminDeleteStaff 
+import {
+  useAdminStaff,
+  useAdminCreateStaff,
+  useAdminUpdateStaff,
+  useAdminDeleteStaff,
 } from "@oshap/shared/hooks";
 import { Role, StaffMember } from "@oshap/shared/types";
 import { errorMessage, formatPhone, tryNormalizePhone } from "@oshap/shared";
-import { PrimaryButton, SecondaryButton, Select, toast } from "@oshap/shared/ui";
+import {
+  PrimaryButton,
+  SecondaryButton,
+  Select,
+  toast,
+} from "@oshap/shared/ui";
 import { useAuth } from "../../context/AuthContext";
 
 export default function StaffSettings() {
@@ -61,27 +66,28 @@ export default function StaffSettings() {
 
     if (editingId) {
       updateStaff.mutate(
-        { 
-          id: editingId, 
-          payload: { 
+        {
+          id: editingId,
+          payload: {
             name: form.name,
             phone,
             email: form.email || undefined,
             role: form.role,
-            ...(form.password ? { password: form.password } : {})
-          } 
+            ...(form.password ? { password: form.password } : {}),
+          },
         },
         {
           onSuccess: () => {
             toast.success("Staff updated successfully");
             setIsModalOpen(false);
           },
-          onError: (err: unknown) => toast.error(errorMessage(err, "update the staff member")),
-        }
+          onError: (err: unknown) =>
+            toast.error(errorMessage(err, "update the staff member")),
+        },
       );
     } else {
       createStaff.mutate(
-        { 
+        {
           name: form.name,
           phone,
           email: form.email || undefined,
@@ -96,8 +102,9 @@ export default function StaffSettings() {
             toast.success("Staff created successfully");
             setIsModalOpen(false);
           },
-          onError: (err: unknown) => toast.error(errorMessage(err, "add the staff member")),
-        }
+          onError: (err: unknown) =>
+            toast.error(errorMessage(err, "add the staff member")),
+        },
       );
     }
   };
@@ -106,7 +113,8 @@ export default function StaffSettings() {
     if (window.confirm("Are you sure you want to remove this staff member?")) {
       deleteStaff.mutate(id, {
         onSuccess: () => toast.success("Staff removed"),
-        onError: (err: unknown) => toast.error(errorMessage(err, "remove the staff member")),
+        onError: (err: unknown) =>
+          toast.error(errorMessage(err, "remove the staff member")),
       });
     }
   };
@@ -119,15 +127,16 @@ export default function StaffSettings() {
     );
   }
 
-  const inputClass = "w-full px-md py-s rounded-lg bg-surface-container-low border border-outline-variant text-p2 text-primary-text placeholder:text-outline outline-none focus:border-primary transition-colors";
-  const labelClass = "block text-caption-md font-semibold text-primary-text mb-xs";
+  const inputClass =
+    "w-full px-md py-s rounded-lg bg-surface-container-low border border-outline-variant text-p2 text-primary-text placeholder:text-outline outline-none focus:border-primary transition-colors";
+  const labelClass =
+    "block text-caption-md font-semibold text-primary-text mb-xs";
 
   return (
     <div className="flex flex-col gap-md pb-10">
-      <div className="flex items-center justify-between">
-        <h2 className="text-display-h3 font-display font-semibold text-primary-text">
-          Team Members
-        </h2>
+      {/* No heading of its own: the section wrapper names the screen, and two
+          titles in a row read as two screens. */}
+      <div className="flex items-center justify-end">
         {user?.role === "OWNER" && (
           <PrimaryButton size="md" onClick={handleOpenNew} className="gap-s">
             <i className="mgc_add_line" />
@@ -140,64 +149,88 @@ export default function StaffSettings() {
         {/* Scrolls inside its own box. Four or five columns of names and
                     money cannot usefully collapse, and without this the whole
                     page slides sideways on a phone. */}
-<div className="overflow-x-auto -mx-md px-md">
-<table className="w-full min-w-[32rem] text-left border-collapse">
-          <thead>
-            <tr className="bg-surface-container-high border-b border-surface-container-highest">
-              <th className="py-s px-md text-label-l4 font-semibold text-secondary-text">Name</th>
-              <th className="py-s px-md text-label-l4 font-semibold text-secondary-text">Email</th>
-              <th className="py-s px-md text-label-l4 font-semibold text-secondary-text">Role</th>
-              {user?.role === "OWNER" && (
-                <th className="py-s px-md text-label-l4 font-semibold text-secondary-text text-right">Actions</th>
-              )}
-            </tr>
-          </thead>
-          <tbody>
-            {staffList.map((staff) => (
-              <tr key={staff.id} className="border-b border-surface-container-highest last:border-none hover:bg-surface-container-low transition-colors">
-                <td className="py-s px-md text-p2 text-primary-text font-medium">{staff.name}</td>
-                <td className="py-s px-md text-p2 text-secondary-text">
-                  <span className="tabular-nums">{formatPhone(staff.phone)}</span>
-                  {staff.email && (
-                    <span className="block text-caption-sm text-outline">{staff.email}</span>
-                  )}
-                </td>
-                <td className="py-s px-md">
-                  <span className="px-xs py-xs bg-surface-container-highest text-primary-text text-label-l4 rounded-md font-mono">
-                    {staff.role}
-                  </span>
-                </td>
+        <div className="overflow-x-auto -mx-md px-md">
+          <table className="w-full min-w-[32rem] text-left border-collapse">
+            <thead>
+              <tr className="bg-surface-container-high border-b border-surface-container-highest">
+                <th className="py-s px-md text-label-l4 font-semibold text-secondary-text">
+                  Name
+                </th>
+                <th className="py-s px-md text-label-l4 font-semibold text-secondary-text">
+                  Email
+                </th>
+                <th className="py-s px-md text-label-l4 font-semibold text-secondary-text">
+                  Role
+                </th>
                 {user?.role === "OWNER" && (
-                  <td className="py-s px-md text-right">
-                    <button 
-                      onClick={() => handleOpenEdit(staff)}
-                      className="p-xs text-secondary-text hover:text-primary transition-colors"
-                      title="Edit"
-                    >
-                      <i className="mgc_edit_line text-lg" />
-                    </button>
-                    <button 
-                      onClick={() => handleDelete(staff.id)}
-                      className="p-xs text-secondary-text hover:text-error transition-colors"
-                      title="Remove"
-                      disabled={staff.role === "OWNER" && staffList.filter(s => s.role === "OWNER").length === 1}
-                    >
-                      <i className="mgc_delete_line text-lg" />
-                    </button>
-                  </td>
+                  <th className="py-s px-md text-label-l4 font-semibold text-secondary-text text-right">
+                    Actions
+                  </th>
                 )}
               </tr>
-            ))}
-            {staffList.length === 0 && (
-              <tr>
-                <td colSpan={4} className="p-xl text-center text-secondary-text">
-                  No staff members found.
-                </td>
-              </tr>
-            )}
-          </tbody>
-        </table>
-</div>
+            </thead>
+            <tbody>
+              {staffList.map((staff) => (
+                <tr
+                  key={staff.id}
+                  className="border-b border-surface-container-highest last:border-none hover:bg-surface-container-low transition-colors"
+                >
+                  <td className="py-s px-md text-p2 text-primary-text font-medium">
+                    {staff.name}
+                  </td>
+                  <td className="py-s px-md text-p2 text-secondary-text">
+                    <span className="tabular-nums">
+                      {formatPhone(staff.phone)}
+                    </span>
+                    {staff.email && (
+                      <span className="block text-caption-sm text-outline">
+                        {staff.email}
+                      </span>
+                    )}
+                  </td>
+                  <td className="py-s px-md">
+                    <span className="px-xs py-xs bg-surface-container-highest text-primary-text text-label-l4 rounded-md font-mono">
+                      {staff.role}
+                    </span>
+                  </td>
+                  {user?.role === "OWNER" && (
+                    <td className="py-s px-md text-right">
+                      <button
+                        onClick={() => handleOpenEdit(staff)}
+                        className="p-xs text-secondary-text hover:text-primary transition-colors"
+                        title="Edit"
+                      >
+                        <i className="mgc_edit_line text-lg" />
+                      </button>
+                      <button
+                        onClick={() => handleDelete(staff.id)}
+                        className="p-xs text-secondary-text hover:text-error transition-colors"
+                        title="Remove"
+                        disabled={
+                          staff.role === "OWNER" &&
+                          staffList.filter((s) => s.role === "OWNER").length ===
+                            1
+                        }
+                      >
+                        <i className="mgc_delete_line text-lg" />
+                      </button>
+                    </td>
+                  )}
+                </tr>
+              ))}
+              {staffList.length === 0 && (
+                <tr>
+                  <td
+                    colSpan={4}
+                    className="p-xl text-center text-secondary-text"
+                  >
+                    No staff members found.
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </div>
       </div>
 
       {isModalOpen && (
@@ -233,7 +266,9 @@ export default function StaffSettings() {
                 />
                 <p className="text-caption-xs text-secondary-text mt-xs">
                   {phoneError ? (
-                    <span className="text-error font-semibold">{phoneError}</span>
+                    <span className="text-error font-semibold">
+                      {phoneError}
+                    </span>
                   ) : (
                     "How they sign in. Every member of staff needs one."
                   )}
@@ -241,7 +276,10 @@ export default function StaffSettings() {
               </div>
               <div>
                 <label className={labelClass}>
-                  Email <span className="font-normal text-secondary-text">(optional)</span>
+                  Email{" "}
+                  <span className="font-normal text-secondary-text">
+                    (optional)
+                  </span>
                 </label>
                 <input
                   type="email"
@@ -254,7 +292,9 @@ export default function StaffSettings() {
                 <label className={labelClass}>Role</label>
                 <Select
                   value={form.role}
-                  onChange={(e) => setForm({ ...form, role: e.target.value as Role })}
+                  onChange={(e) =>
+                    setForm({ ...form, role: e.target.value as Role })
+                  }
                   wrapperClassName="block w-full"
                 >
                   <option value="OWNER">Owner</option>
@@ -273,8 +313,14 @@ export default function StaffSettings() {
                   <input
                     type={showPassword ? "text" : "password"}
                     value={form.password}
-                    onChange={(e) => setForm({ ...form, password: e.target.value })}
-                    placeholder={editingId ? "Leave blank to keep current" : "Choose a password"}
+                    onChange={(e) =>
+                      setForm({ ...form, password: e.target.value })
+                    }
+                    placeholder={
+                      editingId
+                        ? "Leave blank to keep current"
+                        : "Choose a password"
+                    }
                     className={`${inputClass} pr-12`}
                   />
                   <button
@@ -282,9 +328,17 @@ export default function StaffSettings() {
                     onClick={() => setShowPassword(!showPassword)}
                     className="absolute right-xs top-1/2 -translate-y-1/2 w-10 h-10 flex items-center justify-center text-outline hover:text-primary-text transition-colors rounded-full"
                     tabIndex={-1}
-                    aria-label={showPassword ? "Hide password" : "Show password"}
+                    aria-label={
+                      showPassword ? "Hide password" : "Show password"
+                    }
                   >
-                    <i className={showPassword ? "mgc_eye_close_line text-xl" : "mgc_eye_line text-xl"} />
+                    <i
+                      className={
+                        showPassword
+                          ? "mgc_eye_close_line text-xl"
+                          : "mgc_eye_line text-xl"
+                      }
+                    />
                   </button>
                 </div>
               </div>
@@ -297,9 +351,17 @@ export default function StaffSettings() {
               <PrimaryButton
                 size="md"
                 onClick={handleSave}
-                disabled={!form.name || !form.phone || (!editingId && !form.password) || createStaff.isPending || updateStaff.isPending}
+                disabled={
+                  !form.name ||
+                  !form.phone ||
+                  (!editingId && !form.password) ||
+                  createStaff.isPending ||
+                  updateStaff.isPending
+                }
               >
-                {createStaff.isPending || updateStaff.isPending ? "Saving..." : "Save"}
+                {createStaff.isPending || updateStaff.isPending
+                  ? "Saving..."
+                  : "Save"}
               </PrimaryButton>
             </div>
           </div>
