@@ -52,7 +52,12 @@ describe("an audit entry is a card on a phone", () => {
   });
 
   it("names the known action rather than printing its identifier", () => {
-    expect(src).toContain('"order.partial_payment": "Part payment taken"');
+    expect(src).toContain('[AUDIT_ACTIONS.partialPayment]: "Part payment taken"');
+  });
+
+  it("every action it filters by is a named constant", () => {
+    // A literal here and a literal in the spec is two places to get it wrong.
+    expect(src).not.toMatch(/value: "(order|item|payment)\./);
   });
 
   it("falls back to humanise, never to the raw action", () => {

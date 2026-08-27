@@ -18,8 +18,8 @@ import QueryError from "../components/QueryError";
 const ACTIONS = [
   { value: "", label: "Everything" },
   { value: AUDIT_ACTIONS.cashPaid, label: "Cash taken" },
-  { value: "payment.verify", label: "Payments verified" },
-  { value: "payment.reject", label: "Payments rejected" },
+  { value: AUDIT_ACTIONS.paymentVerify, label: "Payments verified" },
+  { value: AUDIT_ACTIONS.paymentReject, label: "Payments rejected" },
   { value: AUDIT_ACTIONS.discount, label: "Discounts" },
   { value: AUDIT_ACTIONS.refund, label: "Refunds" },
   { value: AUDIT_ACTIONS.tip, label: "Tips" },
@@ -34,7 +34,7 @@ const REDUCING_ACTIONS = new Set<string>([
   AUDIT_ACTIONS.refund,
   AUDIT_ACTIONS.itemVoid,
   AUDIT_ACTIONS.itemComp,
-  "payment.reject",
+  AUDIT_ACTIONS.paymentReject,
 ]);
 
 /** Fallback wording, used when `details` carries nothing readable. */
@@ -46,11 +46,11 @@ const ACTION_LABELS: Record<string, string> = {
   [AUDIT_ACTIONS.itemUpdate]: "Item edited",
   [AUDIT_ACTIONS.itemVoid]: "Item voided",
   [AUDIT_ACTIONS.itemComp]: "Item comped",
-  "payment.verify": "Payment verified",
-  "payment.reject": "Payment rejected",
-  // The server emits this and the contract does not list it, so it reached the
-  // screen raw as `order.partial_payment`.
-  "order.partial_payment": "Part payment taken",
+  [AUDIT_ACTIONS.paymentVerify]: "Payment verified",
+  [AUDIT_ACTIONS.paymentReject]: "Payment rejected",
+  // Reached a manager's screen as the raw identifier before the spec listed
+  // it. Both are fixed; the fallback below is what stops the next one.
+  [AUDIT_ACTIONS.partialPayment]: "Part payment taken",
 };
 
 /**

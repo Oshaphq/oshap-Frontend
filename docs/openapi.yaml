@@ -2298,9 +2298,19 @@ paths:
           in: query
           schema: { type: string }
           description: >
-            Exact match. Known values: `order.discount`, `order.tip`,
-            `order.refund`, `order.cash_paid`, `item.update`, `item.void`,
-            `item.comp`. A wrong value returns nothing rather than erroring.
+            Exact match. A wrong value returns nothing rather than erroring.
+
+
+            Known values: `order.discount`, `order.tip`, `order.refund`,
+            `order.cash_paid`, `order.partial_payment`, `payment.verify`,
+            `payment.reject`, `item.update`, `item.void`, `item.comp`.
+
+
+            **The list is open.** The server writes these entries itself, so it
+            can add an action without the client knowing. `order.partial_payment`
+            was observed in production while this list still omitted it, and it
+            reached a manager's screen as the raw identifier. Clients must
+            render an unknown action readably rather than printing it.
       responses:
         "200":
           description: Audit entries
