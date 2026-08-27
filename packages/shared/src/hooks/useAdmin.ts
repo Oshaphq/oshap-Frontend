@@ -176,10 +176,17 @@ export function useAdminDeleteStaff() {
 
 // ---------- Menu management ----------
 
-export function useAdminMenu() {
+/**
+ * `GET /admin/menu` is owner and manager only, so a caller who cannot read it
+ * must be able to say so rather than fire a request that comes back 403. The
+ * kitchen board needs the menu for one job — splitting drinks tickets from
+ * food — and only two roles do that job.
+ */
+export function useAdminMenu(options: { enabled?: boolean } = {}) {
   return useQuery({
     queryKey: queryKeys.admin.menu(),
     queryFn: adminListMenu,
+    enabled: options.enabled ?? true,
   });
 }
 

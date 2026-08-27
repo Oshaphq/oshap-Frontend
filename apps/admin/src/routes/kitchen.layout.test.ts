@@ -49,3 +49,41 @@ describe("kitchen tickets have no accent bar", () => {
     expect(src).toContain("text-primary");
   });
 });
+
+/**
+ * A waiter opening the board and being told they can't.
+ *
+ * `GET /admin/menu` is owner and manager only. The board asked for it on every
+ * role and blanked itself on any error, so a waiter got "You can't open this"
+ * on the one screen they need most — Served is tapped from it. Nothing in the
+ * API testing caught it, because the API was right; the screen was wrong.
+ */
+describe("the kitchen board and the menu it does not always need", () => {
+  it("only fetches the menu for the roles that split by it", () => {
+    expect(src).toContain("useAdminMenu({ enabled: isStationRole })");
+  });
+
+  it("only the tickets can empty the screen", () => {
+    // A menu failure costs the drinks/food split, which is recoverable. A
+    // blank board during service is not.
+    expect(src).not.toContain("kitchenQuery.isError || menuQuery.isError");
+    expect(src).toContain("if (kitchenQuery.isError) {");
+  });
+
+  it("does not wait on a menu it never asked for", () => {
+    expect(src).toContain("(isStationRole && menuQuery.isLoading)");
+  });
+
+  it("shows every ticket when it cannot split, rather than none", () => {
+    // With an empty lookup every `.some()` is false, so a bartender whose menu
+    // failed saw an empty board and no error — which looks like a quiet night.
+    expect(src).toContain("const canSplit = !isStationRole || menuLookup.size > 0");
+    expect(src).toContain("if (!user || !canSplit) return true;");
+    expect(src).toContain("if (!user || !canSplit) return o;");
+  });
+
+  it("and says so instead of quietly mixing the two", () => {
+    expect(src).toContain("isStationRole && !canSplit");
+    expect(src).toContain("Showing every ticket");
+  });
+});
