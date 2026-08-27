@@ -1,34 +1,30 @@
-import { useEffect, useState, useRef } from "react";
-import { 
-  useAdminSettings, 
-  useAdminUpdateSettings, 
-  useAdminUploadSettingsImage 
-} from "@oshap/shared/hooks";
+import { useEffect, useState } from "react";
+import { useAdminSettings, useAdminUpdateSettings } from "@oshap/shared/hooks";
 import {
   basisPointsToPercent,
   percentToBasisPoints,
   errorMessage,
-  validateImageFile,
-  IMAGE_ACCEPT_ATTR,
 } from "@oshap/shared";
 import { PrimaryButton, toast } from "@oshap/shared/ui";
-import BrandColourField from "../../components/BrandColourField";
-import { useAuth } from "../../context/AuthContext";
-import BankAccountsSection from "../../components/BankAccountsSection";
 
+/**
+ * What the restaurant is and what it charges.
+ *
+ * The logo, cover photo and brand colour moved to Branding, and the bank
+ * accounts to their own screen. This page was 400 lines holding six unrelated
+ * errands behind one Save button, so changing a VAT rate meant scrolling past
+ * a photo uploader — and the button at the bottom re-sent every field, which
+ * is how a half-finished image edit could ride along with a tax change.
+ *
+ * Every key on the settings PATCH is optional, so this sends only its own.
+ */
 export default function GeneralSettings() {
-  const { user } = useAuth();
-  const isOwner = user?.role === "OWNER";
   const { data: settings, isLoading } = useAdminSettings();
   const updateSettings = useAdminUpdateSettings();
-  const uploadImage = useAdminUploadSettingsImage();
 
   const [form, setForm] = useState({
     name: "",
     description: "",
-    logo_url: "",
-    cover_image_url: "",
-    primary_color: "",
     address: "",
     operating_hours: "",
     whatsapp_number: "",
@@ -38,33 +34,28 @@ export default function GeneralSettings() {
     service_charge_rate: "",
   });
 
-  const fileInputRef = useRef<HTMLInputElement>(null);
-  const coverInputRef = useRef<HTMLInputElement>(null);
-
   useEffect(() => {
-    if (settings) {
-      setForm({
-        name: settings.name || "",
-        description: settings.description || "",
-        logo_url: settings.logo_url || "",
-        cover_image_url: settings.cover_image_url || "",
-        primary_color: settings.primary_color || "",
-        address: settings.address || "",
-        operating_hours: settings.operating_hours || "",
-        whatsapp_number: settings.whatsapp_number || "",
-        vat_rate:
-          settings.vat_rate == null
-            ? ""
-            : String(basisPointsToPercent(settings.vat_rate)),
-        service_charge_rate:
-          settings.service_charge_rate == null
-            ? ""
-            : String(basisPointsToPercent(settings.service_charge_rate)),
-      });
-    }
+    if (!settings) return;
+    setForm({
+      name: settings.name || "",
+      description: settings.description || "",
+      address: settings.address || "",
+      operating_hours: settings.operating_hours || "",
+      whatsapp_number: settings.whatsapp_number || "",
+      vat_rate:
+        settings.vat_rate == null
+          ? ""
+          : String(basisPointsToPercent(settings.vat_rate)),
+      service_charge_rate:
+        settings.service_charge_rate == null
+          ? ""
+          : String(basisPointsToPercent(settings.service_charge_rate)),
+    });
   }, [settings]);
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
+  ) => {
     const { name, value } = e.target;
     setForm((prev) => ({ ...prev, [name]: value }));
   };
@@ -94,9 +85,6 @@ export default function GeneralSettings() {
       {
         name: form.name,
         description: form.description || null,
-        logo_url: form.logo_url || null,
-        cover_image_url: form.cover_image_url || null,
-        primary_color: form.primary_color || null,
         address: form.address || null,
         operating_hours: form.operating_hours || null,
         whatsapp_number: form.whatsapp_number || null,
@@ -104,61 +92,10 @@ export default function GeneralSettings() {
         service_charge_rate: rateToBps(form.service_charge_rate),
       },
       {
-        onSuccess: () => {
-          toast.success("Settings updated successfully");
-        },
-        onError: (err) => {
-          toast.error(errorMessage(err, "save the settings"));
-        },
-      }
+        onSuccess: () => toast.success("Settings updated"),
+        onError: (err) => toast.error(errorMessage(err, "save the settings")),
+      },
     );
-  };
-
-  const handleCoverUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-
-    const problem = validateImageFile(file);
-    if (problem) {
-      toast.error(problem);
-      e.target.value = "";
-      return;
-    }
-
-    uploadImage.mutate(file, {
-      onSuccess: (res) => {
-        setForm((prev) => ({ ...prev, cover_image_url: res.url }));
-        toast.success("Cover photo uploaded — remember to save");
-      },
-      onError: (err) => {
-        toast.error(errorMessage(err, "upload the cover photo"));
-      },
-    });
-    e.target.value = "";
-  };
-
-  const handleLogoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-
-    const problem = validateImageFile(file);
-    if (problem) {
-      toast.error(problem);
-      e.target.value = "";
-      return;
-    }
-
-    uploadImage.mutate(file, {
-      onSuccess: (res) => {
-        setForm((prev) => ({ ...prev, logo_url: res.url }));
-        toast.success("Logo uploaded — remember to save");
-      },
-      onError: (err) => {
-        toast.error(errorMessage(err, "upload the logo"));
-      },
-    });
-    // Let the same file be re-picked after a failure.
-    e.target.value = "";
   };
 
   if (isLoading) {
@@ -169,233 +106,151 @@ export default function GeneralSettings() {
     );
   }
 
-  const inputClass = "w-full px-md py-s rounded-lg bg-surface-container-low border border-outline-variant text-p2 text-primary-text placeholder:text-outline outline-none focus:border-primary transition-colors disabled:opacity-50 disabled:cursor-not-allowed";
-  const labelClass = "block text-caption-md font-semibold text-primary-text mb-xs";
+  const inputClass =
+    "w-full px-md py-s rounded-s bg-surface-container border border-outline-variant text-p2 text-primary-text placeholder:text-outline outline-none focus:border-primary transition-colors disabled:opacity-50 disabled:cursor-not-allowed";
+  const labelClass =
+    "block text-caption-md font-semibold text-primary-text mb-xs";
 
   return (
-    <div className="flex flex-col gap-l pb-10">
-      <div className="bg-surface-container-low rounded-md p-l flex flex-col gap-md border border-transparent hover:border-outline-variant transition-colors">
-        <h3 className="font-bold text-primary-text">
-          General Info
-        </h3>
-        
-        <div className="flex flex-col sm:flex-row gap-l items-start">
-          <div className="flex-1 flex flex-col gap-md w-full">
-            <div>
-              <label className={labelClass}>
-                Restaurant Name
-              </label>
-              <input
-                type="text"
-                name="name"
-                value={form.name}
-                onChange={handleChange}
-                className={inputClass}
-              />
-            </div>
-            
-            <div>
-              <label className={labelClass}>
-                Description
-              </label>
-              <textarea
-                name="description"
-                value={form.description}
-                onChange={handleChange}
-                rows={3}
-                className={`${inputClass} resize-none`}
-              />
-            </div>
-            
-            <div>
-              <label className={labelClass}>
-                Address
-              </label>
-              <input
-                type="text"
-                name="address"
-                value={form.address}
-                onChange={handleChange}
-                placeholder="12 Adeola Odeku Street, Victoria Island, Lagos"
-                className={inputClass}
-              />
-              <p className="text-caption-xs text-secondary-text mt-xs">
-                Shown to guests as &ldquo;You&rsquo;re sitting at&hellip;&rdquo;. Write it the
-                way a person would say it, not the way a courier would.
-              </p>
-            </div>
-
-            <div>
-              <label className={labelClass}>
-                WhatsApp Number
-              </label>
-              <input
-                type="text"
-                name="whatsapp_number"
-                value={form.whatsapp_number}
-                onChange={handleChange}
-                placeholder="+234..."
-                className={inputClass}
-              />
-            </div>
-
-            {/* Until these are set a restaurant charges neither, silently —
-                the totals simply come out lower than they should and nothing
-                anywhere reports a problem. */}
-            <div className="grid grid-cols-2 gap-md">
-              <div>
-                <label className={labelClass}>VAT (%)</label>
-                <input
-                  type="text"
-                  inputMode="decimal"
-                  name="vat_rate"
-                  value={form.vat_rate}
-                  onChange={handleChange}
-                  placeholder="7.5"
-                  className={inputClass}
-                />
-              </div>
-              <div>
-                <label className={labelClass}>Service charge (%)</label>
-                <input
-                  type="text"
-                  inputMode="decimal"
-                  name="service_charge_rate"
-                  value={form.service_charge_rate}
-                  onChange={handleChange}
-                  placeholder="5"
-                  className={inputClass}
-                />
-              </div>
-            </div>
-            <p className="text-caption-xs text-secondary-text -mt-s">
-              Added to every bill and shown to guests as separate lines. Leave
-              blank to charge neither. VAT applies after any discount and
-              includes the service charge in its base.
-            </p>
-          </div>
-          
-          <div className="w-full sm:w-40 flex flex-col items-start gap-s">
-            <label className={labelClass}>
-              Logo
-            </label>
-            <div 
-              className="w-32 h-32 rounded-xl bg-surface-container-low border border-dashed border-outline-variant flex items-center justify-center overflow-hidden cursor-pointer hover:border-primary transition-colors"
-              onClick={() => fileInputRef.current?.click()}
-            >
-              {form.logo_url ? (
-                <img src={form.logo_url} alt="Logo" className="w-full h-full object-cover" />
-              ) : uploadImage.isPending ? (
-                <div className="oshap-spinner" />
-              ) : (
-                <div className="text-center text-secondary-text">
-                  <i className="mgc_upload_line text-2xl" />
-                  <div className="text-caption-md mt-xs">Upload</div>
-                </div>
-              )}
-            </div>
-            <input 
-              type="file" 
-              ref={fileInputRef} 
-              className="hidden" 
-              accept={IMAGE_ACCEPT_ATTR}
-              onChange={handleLogoUpload}
-            />
-          </div>
-        </div>
-      </div>
-
-      {/* Sits with the logo and the brand colour: the three things that make
-          the guest's menu look like this restaurant rather than like ours. */}
+    <div className="flex flex-col gap-md pb-10">
       <div className="bg-surface-container-low rounded-md p-l flex flex-col gap-md">
-        <div className="flex flex-col gap-0.5">
-          <h3 className="font-bold text-primary-text">Cover photo</h3>
-          <p className="text-caption-xs text-secondary-text">
-            Shown across the top of your guests&rsquo; menu, with your name over
-            it. Landscape works best. Leave it empty and the menu simply starts
-            at the food.
+        <h3 className="font-bold text-primary-text">The restaurant</h3>
+
+        <div>
+          <label className={labelClass} htmlFor="name">
+            Restaurant name
+          </label>
+          <input
+            id="name"
+            type="text"
+            name="name"
+            value={form.name}
+            onChange={handleChange}
+            className={inputClass}
+          />
+        </div>
+
+        <div>
+          <label className={labelClass} htmlFor="description">
+            Description
+          </label>
+          <textarea
+            id="description"
+            name="description"
+            value={form.description}
+            onChange={handleChange}
+            rows={3}
+            className={`${inputClass} resize-none`}
+          />
+        </div>
+
+        <div>
+          <label className={labelClass} htmlFor="address">
+            Address
+          </label>
+          <input
+            id="address"
+            type="text"
+            name="address"
+            value={form.address}
+            onChange={handleChange}
+            placeholder="12 Adeola Odeku Street, Victoria Island, Lagos"
+            className={inputClass}
+          />
+          <p className="text-caption-xs text-secondary-text mt-xs">
+            Shown to guests as &ldquo;You&rsquo;re sitting at&hellip;&rdquo;.
+            Write it the way a person would say it, not the way a courier would.
           </p>
         </div>
 
-        <div
-          className="relative w-full h-36 rounded-xl bg-surface-container border border-dashed border-outline-variant flex items-center justify-center overflow-hidden cursor-pointer hover:border-primary transition-colors"
-          onClick={() => coverInputRef.current?.click()}
-        >
-          {form.cover_image_url ? (
-            <>
-              <img
-                src={form.cover_image_url}
-                alt="Cover"
-                className="w-full h-full object-cover"
-              />
-              {/* The same scrim the guest sees, so what is previewed here is
-                  what lands on their phone rather than a cleaner version. */}
-              <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
-              <p className="absolute bottom-md left-md font-display text-display-h4 font-semibold text-white drop-shadow">
-                {form.name || "Your restaurant"}
-              </p>
-            </>
-          ) : (
-            <span className="text-caption-md text-secondary-text">
-              {uploadImage.isPending ? "Uploading…" : "Tap to add a cover photo"}
-            </span>
-          )}
-        </div>
-
-        {form.cover_image_url && (
-          <button
-            type="button"
-            onClick={() => setForm((prev) => ({ ...prev, cover_image_url: "" }))}
-            className="self-start text-caption-sm font-semibold text-error hover:underline"
-          >
-            Remove cover photo
-          </button>
-        )}
-
-        <input
-          type="file"
-          ref={coverInputRef}
-          className="hidden"
-          accept={IMAGE_ACCEPT_ATTR}
-          onChange={handleCoverUpload}
-        />
-      </div>
-
-      <div className="bg-surface-container-low rounded-md p-l flex flex-col gap-md border border-transparent hover:border-outline-variant transition-colors">
-        <h3 className="font-bold text-primary-text">
-          Operating Hours
-        </h3>
         <div>
-          <label className={labelClass}>
-            Hours of Operation (e.g., 09:00 - 22:00)
+          <label className={labelClass} htmlFor="whatsapp_number">
+            WhatsApp number
           </label>
           <input
+            id="whatsapp_number"
             type="text"
-            name="operating_hours"
-            value={form.operating_hours}
+            name="whatsapp_number"
+            value={form.whatsapp_number}
             onChange={handleChange}
+            placeholder="+234..."
             className={inputClass}
           />
         </div>
       </div>
 
-      <BankAccountsSection canEdit={isOwner} />
+      <div className="bg-surface-container-low rounded-md p-l flex flex-col gap-md">
+        <h3 className="font-bold text-primary-text">Opening hours</h3>
+        <div>
+          <label className={labelClass} htmlFor="operating_hours">
+            Hours of operation
+          </label>
+          <input
+            id="operating_hours"
+            type="text"
+            name="operating_hours"
+            value={form.operating_hours}
+            onChange={handleChange}
+            placeholder="09:00 - 22:00"
+            className={inputClass}
+          />
+        </div>
+      </div>
 
-      <div className="bg-surface-container-low rounded-md p-md">
-        <BrandColourField
-          value={form.primary_color}
-          onChange={(hex) => setForm((prev) => ({ ...prev, primary_color: hex }))}
-        />
+      <div className="bg-surface-container-low rounded-md p-l flex flex-col gap-md">
+        <div className="flex flex-col gap-0.5">
+          <h3 className="font-bold text-primary-text">Charges</h3>
+          {/* Until these are set a restaurant charges neither, silently — the
+              totals simply come out lower than they should and nothing
+              anywhere reports a problem. */}
+          <p className="text-caption-xs text-secondary-text">
+            Added to every bill and shown to guests as separate lines. Leave
+            blank to charge neither. VAT applies after any discount and includes
+            the service charge in its base.
+          </p>
+        </div>
+        <div className="grid grid-cols-2 gap-md">
+          <div>
+            <label className={labelClass} htmlFor="vat_rate">
+              VAT (%)
+            </label>
+            <input
+              id="vat_rate"
+              type="text"
+              inputMode="decimal"
+              name="vat_rate"
+              value={form.vat_rate}
+              onChange={handleChange}
+              placeholder="7.5"
+              className={inputClass}
+            />
+          </div>
+          <div>
+            <label className={labelClass} htmlFor="service_charge_rate">
+              Service charge (%)
+            </label>
+            <input
+              id="service_charge_rate"
+              type="text"
+              inputMode="decimal"
+              name="service_charge_rate"
+              value={form.service_charge_rate}
+              onChange={handleChange}
+              placeholder="5"
+              className={inputClass}
+            />
+          </div>
+        </div>
       </div>
 
       <div className="flex justify-end pt-s">
-        <PrimaryButton 
+        <PrimaryButton
           size="md"
-          onClick={handleSave} 
+          onClick={handleSave}
           disabled={updateSettings.isPending || !form.name}
           className="min-w-32"
         >
-          {updateSettings.isPending ? "Saving..." : "Save Changes"}
+          {updateSettings.isPending ? "Saving…" : "Save Changes"}
         </PrimaryButton>
       </div>
     </div>

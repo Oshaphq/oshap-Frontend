@@ -60,9 +60,7 @@ export default function TablesSettings() {
           setIsModalOpen(false);
         },
         onError: (err: unknown) =>
-          toast.error(
-            errorMessage(err, "add the table"),
-          ),
+          toast.error(errorMessage(err, "add the table")),
       },
     );
   };
@@ -71,9 +69,7 @@ export default function TablesSettings() {
     deleteTable.mutate(id, {
       onSuccess: () => toast.success(`Table "${id}" removed`),
       onError: (err: unknown) =>
-        toast.error(
-          errorMessage(err, "remove the table"),
-        ),
+        toast.error(errorMessage(err, "remove the table")),
     });
   };
 
@@ -90,15 +86,12 @@ export default function TablesSettings() {
 
   return (
     <div className="flex flex-col gap-md pb-10">
-      <div className="flex items-center justify-between">
-        <div>
-          <h2 className="text-display-h3 font-display font-semibold text-primary-text">
-            Tables
-          </h2>
-          <p className="text-caption-md text-secondary-text mt-xs">
-            {tables.length} table{tables.length !== 1 ? "s" : ""} configured
-          </p>
-        </div>
+      <div className="flex items-center justify-between gap-md flex-wrap">
+        {/* The count stays; the title does not. The section wrapper names the
+            screen already. */}
+        <p className="text-caption-md text-secondary-text">
+          {tables.length} table{tables.length !== 1 ? "s" : ""} configured
+        </p>
         <div className="flex items-center gap-s">
           <SecondaryButton
             size="md"
@@ -124,18 +117,21 @@ export default function TablesSettings() {
             {isLocalOrigin() ? (
               <>
                 QR codes currently point at{" "}
-                <span className="font-semibold">localhost</span>, which guests&apos;
-                phones can&apos;t reach. Set{" "}
-                <span className="font-semibold">VITE_CUSTOMER_APP_URL</span> to your
-                public customer URL before printing.
+                <span className="font-semibold">localhost</span>, which
+                guests&apos; phones can&apos;t reach. Set{" "}
+                <span className="font-semibold">VITE_CUSTOMER_APP_URL</span> to
+                your public customer URL before printing.
               </>
             ) : (
               <>
-                <span className="font-semibold">VITE_CUSTOMER_APP_URL</span> is missing{" "}
-                <span className="font-semibold">https://</span>. Codes generated here
-                now add it, but any already printed encode a bare domain, which is text
-                rather than a link — some phones will open it, some will not.{" "}
-                <span className="font-semibold">Reprint anything already on a table.</span>
+                <span className="font-semibold">VITE_CUSTOMER_APP_URL</span> is
+                missing <span className="font-semibold">https://</span>. Codes
+                generated here now add it, but any already printed encode a bare
+                domain, which is text rather than a link — some phones will open
+                it, some will not.{" "}
+                <span className="font-semibold">
+                  Reprint anything already on a table.
+                </span>
               </>
             )}
           </p>
@@ -146,91 +142,96 @@ export default function TablesSettings() {
         {/* Scrolls inside its own box. Four or five columns of names and
                     money cannot usefully collapse, and without this the whole
                     page slides sideways on a phone. */}
-<div className="overflow-x-auto -mx-md px-md">
-<table className="w-full min-w-[32rem] text-left border-collapse">
-          <thead>
-            <tr className="bg-surface-container-high border-b border-surface-container-highest">
-              <th className="py-s px-md text-label-l4 font-semibold text-secondary-text">
-                Table ID
-              </th>
-              <th className="py-s px-md text-label-l4 font-semibold text-secondary-text">
-                Status
-              </th>
-              <th className="py-s px-md text-label-l4 font-semibold text-secondary-text text-right">
-                Actions
-              </th>
-            </tr>
-          </thead>
-          <tbody>
-            {tables.map((table) => {
-              const isPending = table.hasPending;
-              const isUnpaid = table.hasUnpaid;
-              const isEmpty = !isPending && !isUnpaid;
-              const isDeleting =
-                deleteTable.isPending &&
-                deleteTable.variables === table.id;
+        <div className="overflow-x-auto -mx-md px-md">
+          <table className="w-full min-w-[32rem] text-left border-collapse">
+            <thead>
+              <tr className="bg-surface-container-high border-b border-surface-container-highest">
+                <th className="py-s px-md text-label-l4 font-semibold text-secondary-text">
+                  Table ID
+                </th>
+                <th className="py-s px-md text-label-l4 font-semibold text-secondary-text">
+                  Status
+                </th>
+                <th className="py-s px-md text-label-l4 font-semibold text-secondary-text text-right">
+                  Actions
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              {tables.map((table) => {
+                const isPending = table.hasPending;
+                const isUnpaid = table.hasUnpaid;
+                const isEmpty = !isPending && !isUnpaid;
+                const isDeleting =
+                  deleteTable.isPending && deleteTable.variables === table.id;
 
-              return (
-                <tr
-                  key={table.table_id}
-                  className="border-b border-surface-container-highest last:border-none hover:bg-surface-container-low transition-colors"
-                >
-                  <td className="py-s px-md text-p2 text-primary-text font-semibold font-display">
-                    {table.table_id}
-                  </td>
-                  <td className="py-s px-md">
-                    {isPending ? (
-                      <span className="px-s py-xs rounded-4xl text-caption-xs font-bold uppercase tracking-wider bg-warning text-on-warning">
-                        Verification Req.
-                      </span>
-                    ) : isUnpaid ? (
-                      <span className="px-s py-xs rounded-4xl text-caption-xs font-bold uppercase tracking-wider bg-error-container text-on-error-container">
-                        Dining
-                      </span>
-                    ) : (
-                      <span className="px-s py-xs rounded-4xl text-caption-xs font-bold uppercase tracking-wider bg-surface-container-high text-outline">
-                        Empty
-                      </span>
-                    )}
-                  </td>
-                  <td className="py-s px-md text-right">
-                    <button
-                      onClick={() => setQrTable({ uuid: table.id, name: table.table_id })}
-                      title={`Show QR code for ${table.table_id}`}
-                      aria-label={`Show QR code for ${table.table_id}`}
-                      className="p-xs text-secondary-text hover:text-primary transition-colors"
-                    >
-                      <i className="mgc_qrcode_line text-lg" />
-                    </button>
-                    <button
-                      onClick={() => handleDelete(table.id)}
-                      disabled={!isEmpty || isDeleting}
-                      title={isEmpty ? "Remove table" : "Cannot remove table with active orders"}
-                      className="p-xs text-secondary-text hover:text-error transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
-                    >
-                      {isDeleting ? (
-                        <i className="mgc_loading_line animate-spin text-lg" />
+                return (
+                  <tr
+                    key={table.table_id}
+                    className="border-b border-surface-container-highest last:border-none hover:bg-surface-container-low transition-colors"
+                  >
+                    <td className="py-s px-md text-p2 text-primary-text font-semibold font-display">
+                      {table.table_id}
+                    </td>
+                    <td className="py-s px-md">
+                      {isPending ? (
+                        <span className="px-s py-xs rounded-4xl text-caption-xs font-bold uppercase tracking-wider bg-warning text-on-warning">
+                          Verification Req.
+                        </span>
+                      ) : isUnpaid ? (
+                        <span className="px-s py-xs rounded-4xl text-caption-xs font-bold uppercase tracking-wider bg-error-container text-on-error-container">
+                          Dining
+                        </span>
                       ) : (
-                        <i className="mgc_delete_line text-lg" />
+                        <span className="px-s py-xs rounded-4xl text-caption-xs font-bold uppercase tracking-wider bg-surface-container-high text-outline">
+                          Empty
+                        </span>
                       )}
-                    </button>
+                    </td>
+                    <td className="py-s px-md text-right">
+                      <button
+                        onClick={() =>
+                          setQrTable({ uuid: table.id, name: table.table_id })
+                        }
+                        title={`Show QR code for ${table.table_id}`}
+                        aria-label={`Show QR code for ${table.table_id}`}
+                        className="p-xs text-secondary-text hover:text-primary transition-colors"
+                      >
+                        <i className="mgc_qrcode_line text-lg" />
+                      </button>
+                      <button
+                        onClick={() => handleDelete(table.id)}
+                        disabled={!isEmpty || isDeleting}
+                        title={
+                          isEmpty
+                            ? "Remove table"
+                            : "Cannot remove table with active orders"
+                        }
+                        className="p-xs text-secondary-text hover:text-error transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+                      >
+                        {isDeleting ? (
+                          <i className="mgc_loading_line animate-spin text-lg" />
+                        ) : (
+                          <i className="mgc_delete_line text-lg" />
+                        )}
+                      </button>
+                    </td>
+                  </tr>
+                );
+              })}
+              {tables.length === 0 && (
+                <tr>
+                  <td
+                    colSpan={3}
+                    className="p-xl text-center text-secondary-text"
+                  >
+                    No tables configured yet.
                   </td>
                 </tr>
-              );
-            })}
-            {tables.length === 0 && (
-              <tr>
-                <td
-                  colSpan={3}
-                  className="p-xl text-center text-secondary-text"
-                >
-                  No tables configured yet.
-                </td>
-              </tr>
-            )}
-          </tbody>
-        </table>
-</div>
+              )}
+            </tbody>
+          </table>
+        </div>
       </div>
 
       {isModalOpen && (
@@ -288,7 +289,10 @@ export default function TablesSettings() {
         />
       )}
 
-      <QrPrintSheet request={printRequest} onDone={() => setPrintRequest(null)} />
+      <QrPrintSheet
+        request={printRequest}
+        onDone={() => setPrintRequest(null)}
+      />
     </div>
   );
 }
