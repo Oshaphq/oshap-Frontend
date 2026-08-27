@@ -48,7 +48,23 @@ const ACTION_LABELS: Record<string, string> = {
   [AUDIT_ACTIONS.itemComp]: "Item comped",
   "payment.verify": "Payment verified",
   "payment.reject": "Payment rejected",
+  // The server emits this and the contract does not list it, so it reached the
+  // screen raw as `order.partial_payment`.
+  "order.partial_payment": "Part payment taken",
 };
+
+/**
+ * Readable wording for an action we have no label for.
+ *
+ * `order.partial_payment` reached a manager as exactly that · a dotted
+ * identifier, mid-table, next to real money. The server can add an action any
+ * time, so the fallback has to be something a person can read rather than a
+ * gap we patch each time somebody notices one.
+ */
+export function humanise(action: string): string {
+  const tail = action.slice(action.lastIndexOf(".") + 1).replace(/_/g, " ");
+  return tail ? tail.charAt(0).toUpperCase() + tail.slice(1) : action;
+}
 
 /**
  * The server records what changed as structured data rather than a sentence,
@@ -57,13 +73,14 @@ const ACTION_LABELS: Record<string, string> = {
  * action name.
  */
 function describe(entry: AuditLogEntry): string {
-  const base = ACTION_LABELS[entry.action] ?? entry.action;
+  const base = ACTION_LABELS[entry.action] ?? humanise(entry.action);
   const details = entry.details ?? {};
   const parts: string[] = [];
 
   if (typeof details.item === "string") parts.push(details.item);
   if (typeof details.reference === "string") parts.push(details.reference);
-  if (typeof details.reason === "string" && details.reason) parts.push(`“${details.reason}”`);
+  if (typeof details.reason === "string" && details.reason)
+    parts.push(`“${details.reason}”`);
 
   return parts.length > 0 ? `${base} · ${parts.join(" · ")}` : base;
 }
@@ -93,16 +110,25 @@ export default function AuditPage() {
     setPage(1);
   };
 
-  if (logs.isError) return <QueryError error={logs.error} action="load the audit log" onRetry={() => logs.refetch()} />;
+  if (logs.isError)
+    return (
+      <QueryError
+        error={logs.error}
+        action="load the audit log"
+        onRetry={() => logs.refetch()}
+      />
+    );
 
   const entries = logs.data?.logs ?? [];
   // No page count is returned, so derive it.
   const perPage = logs.data?.per_page ?? 25;
-  const totalPages = logs.data ? Math.max(1, Math.ceil(logs.data.total / perPage)) : 1;
+  const totalPages = logs.data
+    ? Math.max(1, Math.ceil(logs.data.total / perPage))
+    : 1;
 
   return (
-    <main className="p-md flex flex-col gap-l max-w-[52rem]">
-      <header className="flex flex-wrap items-center justify-between gap-md">
+    <main className="p-md flex flex-col gap-md max-w-[52rem]">
+      <header className="flex flex-col gap-s sm:flex-row sm:flex-wrap sm:items-center sm:justify-between">
         <div className="flex flex-col gap-0.5">
           <h1 className="font-display text-display-h2 font-semibold text-primary-text">
             Audit trail
@@ -145,43 +171,83 @@ export default function AuditPage() {
           {entries.map((entry) => {
             const reduces = REDUCING_ACTIONS.has(entry.action);
             const amount = amountOf(entry);
-            const orderId = entry.target_type === "order" ? entry.target_id : null;
+            const orderId =
+              entry.target_type === "order" ? entry.target_id : null;
             const reference =
-              typeof entry.details?.reference === "string" ? entry.details.reference : null;
+              typeof entry.details?.reference === "string"
+                ? entry.details.reference
+                : null;
+            const amountCls = reduces ? "text-error" : "text-primary-text";
             return (
               <div
                 key={entry.id}
-                className="flex flex-wrap items-baseline gap-x-md gap-y-xs px-md py-s border-b border-outline-variant last:border-none"
+                className="px-md py-s border-b border-outline-variant last:border-none"
               >
-                <span className="text-caption-md text-secondary-text tabular-nums shrink-0">
-                  {formatApiDateTime(entry.created_at)}
-                </span>
-                <span className="text-p2 text-primary-text min-w-0 flex-1">
-                  {describe(entry)}
-                </span>
-                {orderId && (
-                  <Link
-                    to={`/orders/${orderId}`}
-                    className="text-caption-md font-mono text-secondary-text hover:text-primary transition-colors no-underline shrink-0"
-                  >
-                    {reference ?? "Open bill"}
-                  </Link>
-                )}
-                {entry.actor_name && (
-                  <span className="text-caption-md text-secondary-text shrink-0">
-                    {entry.actor_name}
+                {/* Five things on one wrapping row is fine at width and chaos
+                    on a phone: the description was squeezed to two lines, the
+                    bill link and the name landed on top of each other, and the
+                    amount fell to a line of its own. Two deliberate lines
+                    instead · what happened and how much, then when, who and
+                    which bill. */}
+                <div className="flex flex-col gap-0.5 sm:hidden">
+                  <div className="flex items-baseline justify-between gap-s">
+                    <span className="text-p2 text-primary-text min-w-0">
+                      {describe(entry)}
+                    </span>
+                    {amount != null && (
+                      <span
+                        className={`text-label-l4 font-semibold tabular-nums shrink-0 ${amountCls}`}
+                      >
+                        {reduces ? "− " : ""}
+                        {formatCurrency(amount)}
+                      </span>
+                    )}
+                  </div>
+                  <div className="flex items-baseline justify-between gap-s">
+                    <span className="text-caption-xs text-secondary-text tabular-nums min-w-0 truncate">
+                      {formatApiDateTime(entry.created_at)}
+                      {entry.actor_name ? ` · ${entry.actor_name}` : ""}
+                    </span>
+                    {orderId && (
+                      <Link
+                        to={`/orders/${orderId}`}
+                        className="text-caption-xs font-mono text-secondary-text hover:text-primary transition-colors no-underline shrink-0"
+                      >
+                        {reference ?? "Open bill"}
+                      </Link>
+                    )}
+                  </div>
+                </div>
+
+                <div className="hidden sm:flex flex-wrap items-baseline gap-x-md gap-y-xs">
+                  <span className="text-caption-md text-secondary-text tabular-nums shrink-0">
+                    {formatApiDateTime(entry.created_at)}
                   </span>
-                )}
-                {amount != null && (
-                  <span
-                    className={`text-label-l4 font-semibold tabular-nums shrink-0 ${
-                      reduces ? "text-error" : "text-primary-text"
-                    }`}
-                  >
-                    {reduces ? "− " : ""}
-                    {formatCurrency(amount)}
+                  <span className="text-p2 text-primary-text min-w-0 flex-1">
+                    {describe(entry)}
                   </span>
-                )}
+                  {orderId && (
+                    <Link
+                      to={`/orders/${orderId}`}
+                      className="text-caption-md font-mono text-secondary-text hover:text-primary transition-colors no-underline shrink-0"
+                    >
+                      {reference ?? "Open bill"}
+                    </Link>
+                  )}
+                  {entry.actor_name && (
+                    <span className="text-caption-md text-secondary-text shrink-0">
+                      {entry.actor_name}
+                    </span>
+                  )}
+                  {amount != null && (
+                    <span
+                      className={`text-label-l4 font-semibold tabular-nums shrink-0 ${amountCls}`}
+                    >
+                      {reduces ? "− " : ""}
+                      {formatCurrency(amount)}
+                    </span>
+                  )}
+                </div>
               </div>
             );
           })}

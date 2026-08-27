@@ -7,7 +7,12 @@ import {
 } from "@oshap/shared";
 import type { NotificationType } from "@oshap/shared";
 import { errorMessage } from "@oshap/shared";
-import { PrimaryButton, SecondaryButton, Select, toast } from "@oshap/shared/ui";
+import {
+  PrimaryButton,
+  SecondaryButton,
+  Select,
+  toast,
+} from "@oshap/shared/ui";
 import QueryError from "../components/QueryError";
 import { NotificationRow, groupByTime } from "../components/NotificationBell";
 import { NOTIFICATION_META } from "../notificationCopy";
@@ -57,7 +62,10 @@ export default function Notifications() {
    * order it describes moved on days ago — which left the bell reading 9+ with
    * no way for anyone to bring it down.
    */
-  const outstanding = useAdminNotifications({ per_page: 100, unresolved_only: true });
+  const outstanding = useAdminNotifications({
+    per_page: 100,
+    unresolved_only: true,
+  });
   const outstandingIds = useMemo(
     () => (outstanding.data?.notifications ?? []).map((n) => n.id),
     [outstanding.data?.notifications],
@@ -92,15 +100,17 @@ export default function Notifications() {
   const lastPage = Math.max(1, Math.ceil(total / PER_PAGE));
   const grouped = useMemo(() => groupByTime(rows), [rows]);
 
-  const change = <T,>(set: (v: T) => void) => (value: T) => {
-    set(value);
-    // Any filter change invalidates the page number — page 4 of "everything"
-    // is not page 4 of "waiter requested".
-    setPage(1);
-  };
+  const change =
+    <T,>(set: (v: T) => void) =>
+    (value: T) => {
+      set(value);
+      // Any filter change invalidates the page number — page 4 of "everything"
+      // is not page 4 of "waiter requested".
+      setPage(1);
+    };
 
   return (
-    <div className="p-md sm:p-l flex flex-col gap-l max-w-[52rem] mx-auto w-full">
+    <div className="p-md sm:p-l flex flex-col gap-md max-w-[52rem] mx-auto w-full">
       <div className="flex items-start justify-between gap-md flex-wrap">
         <div className="flex flex-col gap-0.5">
           <h1 className="text-h4 font-semibold font-display text-primary-text">
@@ -153,19 +163,25 @@ export default function Notifications() {
             <SecondaryButton size="md" onClick={() => setConfirmClear(false)}>
               Cancel
             </SecondaryButton>
-            <PrimaryButton size="md" disabled={resolveAll.isPending} onClick={clearAll}>
+            <PrimaryButton
+              size="md"
+              disabled={resolveAll.isPending}
+              onClick={clearAll}
+            >
               {resolveAll.isPending ? "Clearing…" : "Yes, clear them"}
             </PrimaryButton>
           </div>
         </div>
       )}
 
-      <div className="flex items-end gap-md flex-wrap">
+      <div className="flex items-center gap-s flex-wrap">
         <Select
           aria-label="Filter by type"
           density="sm"
           value={type}
-          onChange={(e) => change(setType)(e.target.value as NotificationType | "")}
+          onChange={(e) =>
+            change(setType)(e.target.value as NotificationType | "")
+          }
           wrapperClassName="max-w-[220px]"
         >
           {TYPE_OPTIONS.map((o) => (
@@ -174,7 +190,7 @@ export default function Notifications() {
             </option>
           ))}
         </Select>
-        <label className="flex items-center gap-xs text-caption-md text-secondary-text cursor-pointer select-none py-s">
+        <label className="flex items-center gap-xs text-caption-md text-secondary-text cursor-pointer select-none">
           <input
             type="checkbox"
             checked={unresolvedOnly}
@@ -188,7 +204,9 @@ export default function Notifications() {
       {query.isError ? (
         <QueryError error={query.error} onRetry={() => query.refetch()} />
       ) : query.isLoading ? (
-        <p className="text-p2 text-secondary-text py-2xl text-center">Loading…</p>
+        <p className="text-p2 text-secondary-text py-2xl text-center">
+          Loading…
+        </p>
       ) : rows.length === 0 ? (
         <p className="text-p2 text-secondary-text py-2xl text-center">
           {type || unresolvedOnly
@@ -199,10 +217,10 @@ export default function Notifications() {
         <div className="flex flex-col gap-l">
           {grouped.map(([bucket, items]) => (
             <section key={bucket} className="flex flex-col gap-xs">
-              <h2 className="text-caption-xs font-semibold uppercase tracking-wider text-secondary-text px-s">
+              <h2 className="text-caption-xs font-semibold uppercase tracking-widest text-secondary-text">
                 {bucket}
               </h2>
-              <div className="rounded-lg bg-surface-container-low p-s flex flex-col gap-xs">
+              <div className="rounded-md bg-surface-container-low p-s flex flex-col gap-s">
                 {items.map((n) => (
                   <NotificationRow key={n.id} notification={n} />
                 ))}
