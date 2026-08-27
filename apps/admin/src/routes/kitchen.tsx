@@ -45,7 +45,14 @@ export default function KitchenPage() {
   const [serving, setServing] = useState<OrderWithItems | null>(null);
   const { user } = useAuth();
   const kitchenQuery = useAdminKitchen();
-  const menuQuery = useAdminMenu();
+  /**
+   * Only a station role needs the menu, and only to tell a drink from a plate.
+   * `GET /admin/menu` is owner and manager only, so asking for it on every
+   * role meant a waiter opening this board got a 403 — and the board is the
+   * screen a waiter needs most, because Served is tapped from it.
+   */
+  const isStationRole = user?.role === "BARTENDER" || user?.role === "KITCHEN";
+  const menuQuery = useAdminMenu({ enabled: isStationRole });
   const updateStatus = useAdminUpdateKitchenStatus();
 
   const handleUpdateStatus = async (
@@ -64,7 +71,7 @@ export default function KitchenPage() {
     }
   };
 
-  if (kitchenQuery.isLoading || menuQuery.isLoading) {
+  if (kitchenQuery.isLoading || (isStationRole && menuQuery.isLoading)) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[60vh] gap-md text-secondary-text">
         <div className="oshap-spinner" />
@@ -73,40 +80,62 @@ export default function KitchenPage() {
     );
   }
 
-  if (kitchenQuery.isError || menuQuery.isError) {
-    return <QueryError
-        error={kitchenQuery.error ?? menuQuery.error}
+  // Only the tickets can empty this screen. A menu that fails costs the
+  // drinks/food split, which is recoverable by showing everything; a blank
+  // board during service is not.
+  if (kitchenQuery.isError) {
+    return (
+      <QueryError
+        error={kitchenQuery.error}
         action="load the orders"
-        onRetry={() => { kitchenQuery.refetch(); menuQuery.refetch(); }}
-      />;
+        onRetry={() => kitchenQuery.refetch()}
+      />
+    );
   }
 
   const menuItems = menuQuery.data ?? [];
   const menuLookup = new Map(menuItems.map((m) => [m.name, m.category]));
+  /**
+   * Whether the split can be trusted.
+   *
+   * With an empty lookup every `.some()` below is false, so a bartender whose
+   * menu request failed saw an empty board and no error at all — the worst
+   * of the three outcomes, because it looks like a quiet night. Fall back to
+   * showing every ticket and say why.
+   */
+  const canSplit = !isStationRole || menuLookup.size > 0;
 
   const filterOrder = (o: OrderWithItems): boolean => {
-    if (!user) return true;
+    if (!user || !canSplit) return true;
     if (user.role === "BARTENDER") {
-      return o.order_items.some((i) => menuLookup.get(i.name) === DRINKS_CATEGORY);
+      return o.order_items.some(
+        (i) => menuLookup.get(i.name) === DRINKS_CATEGORY,
+      );
     }
     if (user.role === "KITCHEN") {
-      return o.order_items.some((i) => menuLookup.get(i.name) !== DRINKS_CATEGORY);
+      return o.order_items.some(
+        (i) => menuLookup.get(i.name) !== DRINKS_CATEGORY,
+      );
     }
     return true;
   };
 
   const mapOrderItems = (o: OrderWithItems): OrderWithItems => {
-    if (!user) return o;
+    if (!user || !canSplit) return o;
     if (user.role === "BARTENDER") {
       return {
         ...o,
-        order_items: o.order_items.filter((i) => menuLookup.get(i.name) === DRINKS_CATEGORY),
+        order_items: o.order_items.filter(
+          (i) => menuLookup.get(i.name) === DRINKS_CATEGORY,
+        ),
       };
     }
     if (user.role === "KITCHEN") {
       return {
         ...o,
-        order_items: o.order_items.filter((i) => menuLookup.get(i.name) !== DRINKS_CATEGORY),
+        order_items: o.order_items.filter(
+          (i) => menuLookup.get(i.name) !== DRINKS_CATEGORY,
+        ),
       };
     }
     return o;
@@ -115,16 +144,15 @@ export default function KitchenPage() {
   const rawOrders = kitchenQuery.data ?? [];
   const orders = rawOrders.filter(filterOrder).map(mapOrderItems);
 
-
-  const isStationRole = user?.role === "BARTENDER" || user?.role === "KITCHEN";
-
   const canAdvanceTickets = user ? canAdvanceKitchenTickets(user.role) : false;
   // Orders exist but this station sees none of them — usually a category-name
   // mismatch rather than a quiet service.
   const hiddenByStationFilter =
     isStationRole && orders.length === 0 && rawOrders.length > 0;
-  const hasDrinksCategory = menuItems.some((m) => m.category === DRINKS_CATEGORY);
-  
+  const hasDrinksCategory = menuItems.some(
+    (m) => m.category === DRINKS_CATEGORY,
+  );
+
   const newOrders = orders.filter((o) => o.status === "CREATED");
   const inProgress = orders.filter((o) => o.status === "PREPARING");
   const ready = orders.filter((o) => o.status === "READY");
@@ -154,7 +182,22 @@ export default function KitchenPage() {
         </div>
       </header>
 
-      <div className="flex-1 overflow-auto p-md">
+      <div className="flex-1 overflow-auto p-md flex flex-col gap-md">
+        {/* Said out loud, because the alternative is a bartender reading a
+            board that quietly includes the kitchen's tickets and wondering
+            why there is suddenly rice on it. */}
+        {isStationRole && !canSplit && (
+          <div
+            role="alert"
+            className="flex items-start gap-s p-md rounded-md bg-warning-container text-on-warning-container"
+          >
+            <i className="mgc_alert_line text-lg shrink-0" aria-hidden />
+            <p className="text-caption-sm font-semibold">
+              Showing every ticket — we couldn’t load the menu, so drinks and
+              food can’t be told apart right now.
+            </p>
+          </div>
+        )}
         {orders.length === 0 ? (
           <div className="flex flex-col items-center justify-center h-full gap-s text-center py-20">
             <i className="mgc_knife_line text-5xl text-outline-variant opacity-40" />
@@ -238,8 +281,8 @@ function StationRoutingHint() {
       <i className="mgc_alert_line text-xl shrink-0 mt-0.5" />
       <p className="text-label-l5">
         Kitchen and bar orders are split by a menu category named{" "}
-        <span className="font-semibold">&ldquo;{DRINKS_CATEGORY}&rdquo;</span>, and
-        your menu has no such category. Rename your drinks category in{" "}
+        <span className="font-semibold">&ldquo;{DRINKS_CATEGORY}&rdquo;</span>,
+        and your menu has no such category. Rename your drinks category in{" "}
         <span className="font-semibold">Menu</span> so tickets reach the right
         station.
       </p>
