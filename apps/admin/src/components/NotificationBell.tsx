@@ -146,11 +146,15 @@ function NotificationPanel({ onClose }: { onClose: () => void }) {
 
           {grouped.map(([bucket, items]) => (
             <section key={bucket} className="flex flex-col gap-xs">
-              <h3 className="px-s text-caption-xs font-semibold uppercase tracking-wider text-secondary-text">
+              <h3 className="text-caption-xs font-semibold uppercase tracking-widest text-secondary-text">
                 {bucket}
               </h3>
               {items.map((n) => (
-                <NotificationRow key={n.id} notification={n} onNavigate={onClose} />
+                <NotificationRow
+                  key={n.id}
+                  notification={n}
+                  onNavigate={onClose}
+                />
               ))}
             </section>
           ))}
@@ -168,8 +172,7 @@ export function NotificationRow({
   onNavigate?: () => void;
 }) {
   const meta = NOTIFICATION_META[n.type as NotificationType] as
-    | NotificationMeta
-    | undefined;
+    NotificationMeta | undefined;
   const resolve = useResolveNotification();
   const ref = useMarkReadWhenSeen(n);
   const tableName = useResolvedTableName(n);
@@ -178,14 +181,17 @@ export function NotificationRow({
   const canClaim = Boolean(meta?.claimable) && !claimed;
 
   return (
+    /* A claimed row keeps its surface and its icon. It used to fade to 60%
+       and swap to a generic tick, which turned a Saturday's history into a
+       column of ghosts and threw away the one thing that makes it scannable:
+       the icon says what kind of thing happened, not whether it is finished.
+       Whether it is finished is what the line underneath is for. */
     <div
       ref={ref}
-      className={`flex items-start gap-s p-s rounded-lg transition-colors ${
-        claimed ? "opacity-60" : "bg-surface-container"
-      }`}
+      className="flex items-center gap-s p-s rounded-s bg-surface-container transition-colors"
     >
       <i
-        className={`${claimed ? "mgc_check_circle_line text-on-surface-variant" : `${meta?.iconClass ?? "mgc_notification_line"} ${meta?.iconColorClass ?? "text-on-surface-variant"}`} text-xl shrink-0 mt-0.5`}
+        className={`${meta?.iconClass ?? "mgc_notification_line"} ${meta?.iconColorClass ?? "text-on-surface-variant"} text-lg shrink-0`}
         aria-hidden
       />
       <div className="flex flex-col gap-0.5 min-w-0 flex-1">
@@ -226,7 +232,7 @@ export function NotificationRow({
                 ),
             })
           }
-          className="shrink-0 px-s py-0.5 rounded-4xl bg-primary text-on-primary text-caption-xs font-semibold hover:opacity-90 active:scale-[0.97] disabled:opacity-50 focus-visible:outline-2 focus-visible:outline-primary focus-visible:outline-offset-2 transition"
+          className="shrink-0 px-s py-1 rounded-4xl bg-primary text-on-primary text-caption-xs font-semibold hover:opacity-90 active:scale-[0.97] disabled:opacity-50 focus-visible:outline-2 focus-visible:outline-primary focus-visible:outline-offset-2 transition"
         >
           {resolve.isPending ? "…" : "I'll go"}
         </button>
@@ -325,5 +331,8 @@ export function groupByTime(
     else buckets.set(key, [n]);
   }
   // Fixed order, so a bucket never jumps position as rows arrive.
-  return TIME_BUCKETS.filter((b) => buckets.has(b)).map((b) => [b, buckets.get(b)!]);
+  return TIME_BUCKETS.filter((b) => buckets.has(b)).map((b) => [
+    b,
+    buckets.get(b)!,
+  ]);
 }
