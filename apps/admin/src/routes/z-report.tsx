@@ -30,7 +30,13 @@ export default function ZReportPage() {
   const handlePrint = () => window.print();
 
   if (report.isError) {
-    return <QueryError error={report.error} action="load the report" onRetry={() => report.refetch()} />;
+    return (
+      <QueryError
+        error={report.error}
+        action="load the report"
+        onRetry={() => report.refetch()}
+      />
+    );
   }
 
   const data = report.data;
@@ -56,7 +62,11 @@ export default function ZReportPage() {
             aria-label="Report date"
             className="px-md py-s rounded-lg bg-surface-container-low border border-outline-variant text-p2 text-primary-text outline-none focus:border-primary transition-colors"
           />
-          <SecondaryButton size="md" onClick={handlePrint} disabled={!hasTakings}>
+          <SecondaryButton
+            size="md"
+            onClick={handlePrint}
+            disabled={!hasTakings}
+          >
             <i className="mgc_print_line" /> Print
           </SecondaryButton>
         </div>
@@ -87,10 +97,19 @@ export default function ZReportPage() {
                   sit closest to the total and always show — a method with no
                   takings is itself worth seeing. */}
               <div className="flex flex-col">
-                <Line label={METHOD_LABELS.CASH} value={data.cash_total} />
-                <Line label={METHOD_LABELS.MANUAL_TRANSFER} value={data.transfer_total} />
-                <Line label={METHOD_LABELS.POS} value={data.pos_total} />
-                <div className="flex items-center justify-between gap-md pt-md mt-s border-t-2 border-ink">
+                {/* The methods are their own group so that `last:border-none`
+                    lands on the last of them. It was reaching for the total
+                    row instead, which draws its own rule — so Card / POS kept
+                    a border and the two sat 8px apart as a double line. */}
+                <div className="flex flex-col">
+                  <Line label={METHOD_LABELS.CASH} value={data.cash_total} />
+                  <Line
+                    label={METHOD_LABELS.MANUAL_TRANSFER}
+                    value={data.transfer_total}
+                  />
+                  <Line label={METHOD_LABELS.POS} value={data.pos_total} />
+                </div>
+                <div className="flex items-center justify-between gap-md pt-md border-t-2 border-ink">
                   <span className="text-label-l2 font-semibold text-primary-text">
                     Total takings
                   </span>
@@ -110,7 +129,10 @@ export default function ZReportPage() {
                   that resolves to the total would be inventing a sum. */}
               <div className="flex flex-col">
                 <Line label="VAT collected" value={data.vat_collected} />
-                <Line label="Service charge collected" value={data.service_charge_collected} />
+                <Line
+                  label="Service charge collected"
+                  value={data.service_charge_collected}
+                />
                 <Line label="Discounts given" value={data.discount_total} />
                 <Line label="Tips" value={data.tip_total} />
                 <Line label="Refunded" value={data.refund_total} isDeduction />
@@ -152,7 +174,9 @@ function Line({
           isDeduction ? "text-error" : "text-primary-text"
         }`}
       >
-        {isDeduction ? `− ${formatCurrency(Math.abs(value))}` : formatCurrency(value)}
+        {isDeduction
+          ? `− ${formatCurrency(Math.abs(value))}`
+          : formatCurrency(value)}
       </span>
     </div>
   );
