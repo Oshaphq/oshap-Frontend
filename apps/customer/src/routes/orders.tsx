@@ -180,7 +180,7 @@ function OrdersView({ tableId }: { tableId: string }) {
             type="button"
             onClick={() => navigate(`/menu?table=${tableId}`)}
             aria-label="Back"
-            className="w-9 h-9 flex items-center justify-center rounded-4xl bg-surface-container hover:bg-surface-container-high transition-colors"
+            className="w-9 h-9 flex items-center justify-center rounded-full bg-surface-container hover:bg-surface-container-high transition-colors"
           >
             <i className="mgc_left_line text-xl" />
           </button>
@@ -189,29 +189,29 @@ function OrdersView({ tableId }: { tableId: string }) {
 
       {!isHydrated ? (
         <section className="py-l px-md">
-          <p className="text-p2 text-secondary-text">Loading session...</p>
+          <p className="text-body-medium text-on-surface-variant">Loading session...</p>
         </section>
       ) : session ? (
         <section className="py-l px-md bg-surface-container-low border-b-[6px] border-surface-container flex flex-col gap-s">
-          <h2 className="font-display text-display-h3 font-semibold text-primary-text">
+          <h2 className="font-display text-title-medium font-semibold text-on-surface">
             Order together
           </h2>
-          <p className="text-p2 text-secondary-text">
+          <p className="text-body-medium text-on-surface-variant">
             Share PIN with your companions at table & order<br />together.
           </p>
           <PinChip pin={session.pin} />
         </section>
       ) : (
         <section className="py-l px-md bg-surface-container-low border-b-[6px] border-surface-container flex flex-col gap-md">
-          <h2 className="font-display text-display-h3 font-semibold text-primary-text">
+          <h2 className="font-display text-title-medium font-semibold text-on-surface">
             Order together
           </h2>
-          <p className="text-p2 text-secondary-text">
+          <p className="text-body-medium text-on-surface-variant">
             Share PIN with your companions at table & order<br />together.
           </p>
 
           <div className="flex flex-col gap-s">
-            <span className="text-label-l5 font-semibold text-secondary-text">
+            <span className="text-label-medium font-semibold text-on-surface-variant">
               YOUR NAME
             </span>
             <input
@@ -219,13 +219,13 @@ function OrdersView({ tableId }: { tableId: string }) {
               placeholder="Enter your name"
               value={customerName}
               onChange={(e) => setCustomerName(e.target.value)}
-              className="px-md py-md bg-surface-container-low border border-outline-variant rounded-lg text-label-l3 text-primary-text placeholder:text-secondary-text outline-none focus:border-primary transition-colors"
+              className="px-md py-md bg-surface-container-low border border-outline-variant rounded-sm text-title-medium text-on-surface placeholder:text-on-surface-variant outline-none focus:border-primary transition-colors"
             />
           </div>
 
           {showPinInput && (
             <div className="flex flex-col gap-s">
-              <span className="text-label-l5 font-semibold text-secondary-text">
+              <span className="text-label-medium font-semibold text-on-surface-variant">
                 TABLE PIN
               </span>
               <input
@@ -238,10 +238,10 @@ function OrdersView({ tableId }: { tableId: string }) {
                   setPinInput(e.target.value);
                   setPinError("");
                 }}
-                className="px-md py-md bg-surface-container-low border border-outline-variant rounded-lg text-label-l3 text-primary-text placeholder:text-secondary-text outline-none focus:border-primary transition-colors"
+                className="px-md py-md bg-surface-container-low border border-outline-variant rounded-sm text-title-medium text-on-surface placeholder:text-on-surface-variant outline-none focus:border-primary transition-colors"
               />
               {pinError && (
-                <span className="text-caption-sm text-error">{pinError}</span>
+                <span className="text-body-small text-error">{pinError}</span>
               )}
             </div>
           )}
@@ -267,7 +267,7 @@ function OrdersView({ tableId }: { tableId: string }) {
       )}
 
       <section className="pt-l pb-md px-md bg-surface-container-low flex flex-col gap-s">
-        <h2 className="font-display text-display-h3 font-semibold text-primary-text">
+        <h2 className="font-display text-title-medium font-semibold text-on-surface">
           {customerName ? `${customerName}'s Order` : "Your Order"}
         </h2>
         <div className="h-px bg-outline-variant" />
@@ -275,10 +275,10 @@ function OrdersView({ tableId }: { tableId: string }) {
         {myOrders.length === 0 ? (
           <div className="flex flex-col items-center gap-s py-10 px-md">
             <i className="mgc_shopping_bag_2_line text-5xl text-outline-variant" />
-            <span className="font-display text-display-h4 font-semibold text-primary-text">
+            <span className="font-display text-title-medium font-semibold text-on-surface">
               No orders yet
             </span>
-            <p className="text-p2 text-secondary-text text-center">
+            <p className="text-body-medium text-on-surface-variant text-center">
               Add items from the menu to place your order.
             </p>
             <PrimaryButton
@@ -293,7 +293,7 @@ function OrdersView({ tableId }: { tableId: string }) {
             {myOrders.map((order, i) => (
               <div key={order.id} className="flex flex-col gap-md">
                 <div className="flex items-center justify-between gap-s">
-                  <span className="text-label-l4 text-secondary-text">
+                  <span className="text-label-large text-on-surface-variant">
                     Order {i + 1}
                   </span>
                   <OrderStatusBadge status={order.status} />
@@ -305,12 +305,12 @@ function OrdersView({ tableId }: { tableId: string }) {
                       className="flex items-center justify-between"
                     >
                       <div className="flex items-center gap-s">
-                        <i className="mgc_fork_spoon_line text-xl text-primary" />
+                        <i className="mgc_fork_spoon_line text-xl text-primary-label" />
                         <div className="flex flex-col gap-0.5">
-                          <span className="text-label-l3 font-semibold text-primary-text">
+                          <span className="text-title-medium font-semibold text-on-surface">
                             {item.name}
                           </span>
-                          <span className="text-label-l5 text-secondary-text">
+                          <span className="text-label-medium text-on-surface-variant">
                             Qty {item.quantity}
                           </span>
                         </div>
@@ -328,20 +328,20 @@ function OrdersView({ tableId }: { tableId: string }) {
             <div className="h-px bg-outline-variant" />
 
             <div className="flex items-center justify-between">
-              <span className="text-label-l4 text-secondary-text">
+              <span className="text-label-large text-on-surface-variant">
                 {othersOrders.length > 0 ? "Your Total" : "Total"}
               </span>
-              <span className="text-label-l4 font-semibold text-primary-text">
+              <span className="text-label-large font-semibold text-on-surface">
                 {formatCurrency(yourTotal)}
               </span>
             </div>
 
             {othersOrders.length > 0 && (
               <div className="flex items-center justify-between">
-                <span className="text-label-l4 text-secondary-text">
+                <span className="text-label-large text-on-surface-variant">
                   Group Total
                 </span>
-                <span className="text-label-l4 text-secondary-text">
+                <span className="text-label-large text-on-surface-variant">
                   {formatCurrency(groupTotal)}
                 </span>
               </div>
@@ -357,10 +357,10 @@ function OrdersView({ tableId }: { tableId: string }) {
             className="fixed left-0 right-0 bottom-16 bg-inverse-surface px-md py-md flex items-center justify-between gap-md z-[44] hover:opacity-95 active:opacity-90 transition-opacity"
           >
             <div className="flex flex-col gap-xs min-w-0 text-left">
-              <span className="text-label-l4 font-semibold font-display text-inverse-on-surface">
+              <span className="text-label-large font-semibold font-display text-inverse-on-surface">
                 See what others are ordering
               </span>
-              <span className="text-label-l5 text-outline-variant truncate">
+              <span className="text-label-medium text-outline-variant truncate">
                 {otherItemNames.join(", ")}
               </span>
             </div>
@@ -369,13 +369,13 @@ function OrdersView({ tableId }: { tableId: string }) {
                 <div
                   key={name}
                   title={name}
-                  className="w-10 h-10 rounded-full bg-primary-container border-2 border-inverse-surface flex items-center justify-center text-label-l5 font-semibold text-on-primary-container"
+                  className="w-10 h-10 rounded-full bg-primary-container border-2 border-inverse-surface flex items-center justify-center text-label-medium font-semibold text-on-primary-container"
                 >
                   {name.slice(0, 2).toUpperCase()}
                 </div>
               ))}
               {otherCustomers.length > 3 && (
-                <div className="w-10 h-10 rounded-full bg-surface-container-high border-2 border-inverse-surface flex items-center justify-center text-label-l5 font-semibold text-on-surface">
+                <div className="w-10 h-10 rounded-full bg-surface-container-high border-2 border-inverse-surface flex items-center justify-center text-label-medium font-semibold text-on-surface">
                   +{otherCustomers.length - 3}
                 </div>
               )}
@@ -394,21 +394,21 @@ function OrdersView({ tableId }: { tableId: string }) {
             ref={othersSheetRef}
             role="dialog"
             aria-label="Others' orders"
-            className="fixed left-0 right-0 bottom-0 max-h-[80vh] bg-surface-container-low rounded-t-l z-[100] flex flex-col shadow-[0_-4px_24px_var(--ds-shadow)] animate-[slide-up-drawer_0.3s_ease] will-change-transform"
+            className="fixed left-0 right-0 bottom-0 max-h-[80vh] bg-surface-container-low rounded-t-xl z-[100] flex flex-col shadow-[0_-4px_24px_var(--ds-shadow)] animate-[slide-up-drawer_0.3s_ease] will-change-transform"
           >
             <div {...othersHandleProps} className="flex justify-center py-s cursor-grab active:cursor-grabbing">
-              <div className="w-10 h-1 rounded-4xl bg-outline-variant" />
+              <div className="w-10 h-1 rounded-full bg-outline-variant" />
             </div>
 
             <div className="flex items-center justify-between px-md pb-md border-b border-outline-variant">
-              <h2 className="font-display text-display-h2 font-semibold text-primary-text">
+              <h2 className="font-display text-title-large font-semibold text-on-surface">
                 Others' Orders
               </h2>
               <button
                 type="button"
                 onClick={() => setShowOthersDetail(false)}
                 aria-label="Close"
-                className="w-9 h-9 flex items-center justify-center rounded-4xl bg-surface-container text-on-surface-variant hover:bg-surface-container-high transition-colors"
+                className="w-9 h-9 flex items-center justify-center rounded-full bg-surface-container text-on-surface-variant hover:bg-surface-container-high transition-colors"
               >
                 <i className="mgc_close_line text-xl" />
               </button>
@@ -425,14 +425,14 @@ function OrdersView({ tableId }: { tableId: string }) {
                   <div key={name} className="flex flex-col gap-s">
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-s">
-                        <div className="w-9 h-9 rounded-full bg-primary-container flex items-center justify-center text-label-l5 font-semibold text-on-primary-container">
+                        <div className="w-9 h-9 rounded-full bg-primary-container flex items-center justify-center text-label-medium font-semibold text-on-primary-container">
                           {name.slice(0, 2).toUpperCase()}
                         </div>
-                        <span className="text-label-l3 font-semibold text-primary-text">
+                        <span className="text-title-medium font-semibold text-on-surface">
                           {name}
                         </span>
                       </div>
-                      <span className="text-label-l4 font-semibold text-primary-text">
+                      <span className="text-label-large font-semibold text-on-surface">
                         {formatCurrency(customerTotal)}
                       </span>
                     </div>
@@ -443,17 +443,17 @@ function OrdersView({ tableId }: { tableId: string }) {
                           className="flex items-center justify-between"
                         >
                           <div className="flex items-center gap-s">
-                            <i className="mgc_fork_spoon_line text-xl text-primary" />
+                            <i className="mgc_fork_spoon_line text-xl text-primary-label" />
                             <div className="flex flex-col gap-0.5">
-                              <span className="text-label-l3 font-semibold text-primary-text">
+                              <span className="text-title-medium font-semibold text-on-surface">
                                 {item.name}
                               </span>
-                              <span className="text-label-l5 text-secondary-text">
+                              <span className="text-label-medium text-on-surface-variant">
                                 Qty {item.quantity}
                               </span>
                             </div>
                           </div>
-                          <span className="text-label-l4 text-primary-text">
+                          <span className="text-label-large text-on-surface">
                             {formatCurrency(item.price * item.quantity)}
                           </span>
                         </div>
@@ -465,10 +465,10 @@ function OrdersView({ tableId }: { tableId: string }) {
             </div>
 
             <div className="px-md py-md border-t border-outline-variant flex items-center justify-between">
-              <span className="text-label-l4 text-secondary-text">
+              <span className="text-label-large text-on-surface-variant">
                 Others' Total
               </span>
-              <span className="font-display text-display-h2 font-semibold text-primary-text">
+              <span className="font-display text-title-large font-semibold text-on-surface">
                 {formatCurrency(othersTotal)}
               </span>
             </div>
@@ -520,7 +520,7 @@ function OrderStatusBadge({ status }: { status: OrderStatus }) {
   const { label, cls } = ORDER_STATUS_META[status];
   return (
     <span
-      className={`text-caption-xs font-bold uppercase tracking-wider px-s py-xs rounded-4xl whitespace-nowrap ${cls}`}
+      className={`text-label-small font-bold uppercase tracking-wider px-s py-xs rounded-full whitespace-nowrap ${cls}`}
     >
       {label}
     </span>
@@ -550,7 +550,7 @@ function ReorderButton({ item }: { item: OrderItem }) {
   if (!reconstructable) {
     return (
       <span
-        className="text-caption-xs text-secondary-text"
+        className="text-label-small text-on-surface-variant"
         title="This item had choices we can no longer identify — add it from the menu to pick them again."
       >
         Reorder from menu

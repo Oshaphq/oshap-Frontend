@@ -48,14 +48,14 @@ export default function NotificationBell() {
             : "Notifications"
         }
         aria-expanded={open}
-        className="relative w-9 h-9 flex items-center justify-center rounded-4xl bg-surface-container-high text-on-surface-variant hover:bg-surface-container-highest active:scale-[0.97] focus-visible:outline-2 focus-visible:outline-primary focus-visible:outline-offset-2 transition-colors"
+        className="relative w-9 h-9 flex items-center justify-center rounded-full bg-surface-container-high text-on-surface-variant hover:bg-surface-container-highest active:scale-[0.97] focus-visible:outline-2 focus-visible:outline-primary focus-visible:outline-offset-2 transition-colors"
       >
         <i className="mgc_notification_line text-lg" aria-hidden />
         {unresolved > 0 && (
           <span
             // Sits on the icon rather than beside it: staff read this at a
             // glance across a room, not by scanning the nav bar.
-            className="absolute -top-0.5 -right-0.5 min-w-[18px] h-[18px] px-1 flex items-center justify-center rounded-4xl bg-error text-on-error text-caption-xs font-bold tabular-nums"
+            className="absolute -top-0.5 -right-0.5 min-w-[18px] h-[18px] px-1 flex items-center justify-center rounded-full bg-error text-on-error text-label-small font-bold tabular-nums"
             aria-hidden
           >
             {unresolved > 9 ? "9+" : unresolved}
@@ -100,10 +100,10 @@ function NotificationPanel({ onClose }: { onClose: () => void }) {
            heading in half. Pinned to both edges instead, so its width is
            whatever the screen allows rather than a number that happens to
            fit some phones. */
-        className="fixed left-md right-md top-[3.75rem] z-[71] sm:absolute sm:left-auto sm:right-0 sm:top-[calc(100%+0.5rem)] sm:w-[23rem] max-h-[min(30rem,70vh)] flex flex-col rounded-lg bg-surface-container-low border border-outline-variant shadow-xl overflow-hidden"
+        className="fixed left-md right-md top-[3.75rem] z-[71] sm:absolute sm:left-auto sm:right-0 sm:top-[calc(100%+0.5rem)] sm:w-[23rem] max-h-[min(30rem,70vh)] flex flex-col rounded-sm bg-surface-container-low border border-outline-variant shadow-xl overflow-hidden"
       >
         <div className="flex items-center justify-between gap-s px-md py-s border-b border-outline-variant shrink-0">
-          <span className="text-label-l4 font-semibold font-display text-primary-text">
+          <span className="text-label-large font-semibold font-display text-on-surface">
             Notifications
           </span>
           <div className="flex items-center gap-md">
@@ -113,14 +113,14 @@ function NotificationPanel({ onClose }: { onClose: () => void }) {
               type="button"
               disabled={markRead.isPending || unreadCount === 0}
               onClick={() => markRead.mutate({ all: true })}
-              className="text-caption-md font-semibold text-primary bg-transparent border-none cursor-pointer p-0 hover:underline disabled:text-outline disabled:cursor-default disabled:no-underline"
+              className="text-body-medium font-semibold text-primary-label bg-transparent border-none cursor-pointer p-0 hover:underline disabled:text-outline disabled:cursor-default disabled:no-underline"
             >
               {markRead.isPending ? "Marking…" : "Mark all read"}
             </button>
             <Link
               to="/notifications"
               onClick={onClose}
-              className="text-caption-md font-semibold text-primary no-underline hover:underline"
+              className="text-body-medium font-semibold text-primary-label no-underline hover:underline"
             >
               See all
             </Link>
@@ -129,24 +129,24 @@ function NotificationPanel({ onClose }: { onClose: () => void }) {
 
         <div className="flex-1 overflow-y-auto p-s flex flex-col gap-s">
           {isLoading && (
-            <p className="text-caption-md text-secondary-text px-s py-l text-center">
+            <p className="text-body-medium text-on-surface-variant px-s py-l text-center">
               Loading…
             </p>
           )}
           {isError && (
-            <p className="text-caption-md text-secondary-text px-s py-l text-center">
+            <p className="text-body-medium text-on-surface-variant px-s py-l text-center">
               Couldn't load notifications.
             </p>
           )}
           {!isLoading && !isError && rows.length === 0 && (
-            <p className="text-caption-md text-secondary-text px-s py-l text-center">
+            <p className="text-body-medium text-on-surface-variant px-s py-l text-center">
               Nothing yet. Calls and orders will show up here.
             </p>
           )}
 
           {grouped.map(([bucket, items]) => (
             <section key={bucket} className="flex flex-col gap-xs">
-              <h3 className="text-caption-xs font-semibold uppercase tracking-widest text-secondary-text">
+              <h3 className="text-label-small font-semibold uppercase tracking-widest text-on-surface-variant">
                 {bucket}
               </h3>
               {items.map((n) => (
@@ -188,21 +188,21 @@ export function NotificationRow({
        Whether it is finished is what the line underneath is for. */
     <div
       ref={ref}
-      className="flex items-center gap-s p-s rounded-s bg-surface-container transition-colors"
+      className="flex items-center gap-s p-s rounded-sm bg-surface-container transition-colors"
     >
       <i
         className={`${meta?.iconClass ?? "mgc_notification_line"} ${meta?.iconColorClass ?? "text-on-surface-variant"} text-lg shrink-0`}
         aria-hidden
       />
       <div className="flex flex-col gap-0.5 min-w-0 flex-1">
-        <span className="text-label-l5 font-semibold text-primary-text">
+        <span className="text-label-medium font-semibold text-on-surface">
           {/* Our own wording for a type we know; the server's for one we do
               not, so a newly added event still says something. */}
           {meta
             ? meta.body({ ...notificationFacts(n), table_name: tableName })
             : n.message || n.title || "Something needs attention"}
         </span>
-        <span className="text-caption-xs text-secondary-text">
+        <span className="text-label-small text-on-surface-variant">
           {n.created_at ? timeAgo(n.created_at) : ""}
           {/* Naming who went is the point: it is what stops a second waiter
               walking over to a table somebody is already at. */}
@@ -232,7 +232,7 @@ export function NotificationRow({
                 ),
             })
           }
-          className="shrink-0 px-s py-1 rounded-4xl bg-primary text-on-primary text-caption-xs font-semibold hover:opacity-90 active:scale-[0.97] disabled:opacity-50 focus-visible:outline-2 focus-visible:outline-primary focus-visible:outline-offset-2 transition"
+          className="shrink-0 px-s py-1 rounded-full bg-primary-action text-on-primary text-label-small font-semibold hover:opacity-90 active:scale-[0.97] disabled:opacity-50 focus-visible:outline-2 focus-visible:outline-primary focus-visible:outline-offset-2 transition"
         >
           {resolve.isPending ? "…" : "I'll go"}
         </button>
@@ -243,7 +243,7 @@ export function NotificationRow({
           to="/"
           onClick={onNavigate}
           aria-label="Open the dashboard"
-          className="shrink-0 text-on-surface-variant no-underline hover:text-primary"
+          className="shrink-0 text-on-surface-variant no-underline hover:text-primary-label"
         >
           <i className="mgc_right_line text-lg" aria-hidden />
         </Link>

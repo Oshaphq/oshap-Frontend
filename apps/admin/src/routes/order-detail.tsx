@@ -107,15 +107,15 @@ export default function OrderDetailPage() {
         <Link
           to="/"
           aria-label="Back to tables"
-          className="w-9 h-9 shrink-0 flex items-center justify-center rounded-lg border border-outline-variant text-secondary-text hover:bg-surface-container-high transition-colors no-underline"
+          className="w-9 h-9 shrink-0 flex items-center justify-center rounded-sm border border-outline-variant text-on-surface-variant hover:bg-surface-container-high transition-colors no-underline"
         >
           <i className="mgc_left_line" />
         </Link>
         <div className="flex-1 min-w-0">
-          <h1 className="font-display text-display-h2 font-semibold text-primary-text truncate">
+          <h1 className="font-display text-title-large font-semibold text-on-surface truncate">
             {data.reference}
           </h1>
-          <p className="text-caption-md text-secondary-text">
+          <p className="text-body-medium text-on-surface-variant">
             Table {data.table} · {data.status}
           </p>
         </div>
@@ -129,9 +129,9 @@ export default function OrderDetailPage() {
       )}
 
       {isClosed && (
-        <div className="flex items-start gap-s p-md rounded-lg bg-error-container text-on-error-container">
+        <div className="flex items-start gap-s p-md rounded-sm bg-error-container text-on-error-container">
           <i className="mgc_alert_line text-xl shrink-0 mt-0.5" />
-          <p className="text-label-l5">
+          <p className="text-label-medium">
             {isRefunded
               ? "This bill was refunded. It no longer counts towards the day's takings."
               : "This order was cancelled. It was never paid for."}
@@ -139,8 +139,8 @@ export default function OrderDetailPage() {
         </div>
       )}
 
-      <section className="bg-surface-container-low rounded-md p-l flex flex-col gap-md">
-        <h2 className="text-label-l2 font-semibold text-primary-text">Items</h2>
+      <section className="bg-surface-container-low rounded-lg p-l flex flex-col gap-md">
+        <h2 className="text-title-large font-semibold text-on-surface">Items</h2>
         <div className="flex flex-col">
           {data.items.map((item) => {
             const isComped = item.price === 0;
@@ -151,18 +151,18 @@ export default function OrderDetailPage() {
                 className="flex flex-col gap-s py-s border-b border-outline-variant last:border-none"
               >
                 <div className="flex items-center justify-between gap-md">
-                  <span className="text-p2 text-primary-text min-w-0">
-                    <span className="tabular-nums text-secondary-text">
+                  <span className="text-body-medium text-on-surface min-w-0">
+                    <span className="tabular-nums text-on-surface-variant">
                       {item.quantity}×{" "}
                     </span>
                     {item.name}
                     {isComped && (
-                      <span className="ml-s px-s py-0.5 rounded-4xl bg-success-container text-on-success-container text-caption-xs font-semibold uppercase tracking-wider">
+                      <span className="ml-s px-s py-0.5 rounded-full bg-success-container text-on-success-container text-label-small font-semibold uppercase tracking-wider">
                         Comped
                       </span>
                     )}
                   </span>
-                  <span className="text-label-l3 font-semibold text-primary-text tabular-nums shrink-0">
+                  <span className="text-title-medium font-semibold text-on-surface tabular-nums shrink-0">
                     {formatCurrency(item.price * item.quantity)}
                   </span>
                 </div>
@@ -171,7 +171,7 @@ export default function OrderDetailPage() {
                   <div className="flex items-center gap-md">
                     {confirming ? (
                       <>
-                        <span className="text-caption-md text-secondary-text">
+                        <span className="text-body-medium text-on-surface-variant">
                           Remove or comp this line?
                         </span>
                         <button
@@ -189,7 +189,7 @@ export default function OrderDetailPage() {
                               },
                             )
                           }
-                          className="text-caption-md font-semibold text-primary hover:underline disabled:opacity-50"
+                          className="text-body-medium font-semibold text-primary-label hover:underline disabled:opacity-50"
                         >
                           Comp
                         </button>
@@ -208,14 +208,14 @@ export default function OrderDetailPage() {
                               },
                             )
                           }
-                          className="text-caption-md font-semibold text-error hover:underline disabled:opacity-50"
+                          className="text-body-medium font-semibold text-error hover:underline disabled:opacity-50"
                         >
                           Void
                         </button>
                         <button
                           type="button"
                           onClick={() => setPendingItemAction(null)}
-                          className="text-caption-md text-secondary-text hover:underline"
+                          className="text-body-medium text-on-surface-variant hover:underline"
                         >
                           Cancel
                         </button>
@@ -232,7 +232,7 @@ export default function OrderDetailPage() {
                               payload: { quantity: item.quantity - 1 },
                             })
                           }
-                          className="text-caption-md text-secondary-text hover:underline disabled:opacity-30"
+                          className="text-body-medium text-on-surface-variant hover:underline disabled:opacity-30"
                         >
                           −1
                         </button>
@@ -246,14 +246,14 @@ export default function OrderDetailPage() {
                               payload: { quantity: item.quantity + 1 },
                             })
                           }
-                          className="text-caption-md text-secondary-text hover:underline disabled:opacity-30"
+                          className="text-body-medium text-on-surface-variant hover:underline disabled:opacity-30"
                         >
                           +1
                         </button>
                         <button
                           type="button"
                           onClick={() => setPendingItemAction(item.id)}
-                          className="text-caption-md text-secondary-text hover:underline ml-auto"
+                          className="text-body-medium text-on-surface-variant hover:underline ml-auto"
                         >
                           Remove…
                         </button>
@@ -267,8 +267,8 @@ export default function OrderDetailPage() {
         </div>
       </section>
 
-      <section className="bg-surface-container-low rounded-md p-l flex flex-col gap-md">
-        <h2 className="text-label-l2 font-semibold text-primary-text">Bill</h2>
+      <section className="bg-surface-container-low rounded-lg p-l flex flex-col gap-md">
+        <h2 className="text-title-large font-semibold text-on-surface">Bill</h2>
         <div className="flex flex-col">
           <Line label="Subtotal" value={data.subtotal ?? data.total} />
           {(data.discount ?? 0) > 0 && <Line label="Discount" value={-(data.discount ?? 0)} />}
@@ -278,8 +278,8 @@ export default function OrderDetailPage() {
           {(data.vat ?? 0) > 0 && <Line label="VAT" value={data.vat ?? 0} />}
           {(data.tip ?? 0) > 0 && <Line label="Tip" value={data.tip ?? 0} />}
           <div className="flex items-center justify-between gap-md pt-md mt-s border-t-2 border-ink">
-            <span className="text-label-l2 font-semibold text-primary-text">Total</span>
-            <span className="font-display text-display-h2 font-semibold text-primary tabular-nums">
+            <span className="text-title-large font-semibold text-on-surface">Total</span>
+            <span className="font-display text-title-large font-semibold text-primary-label tabular-nums">
               {formatCurrency(data.total)}
             </span>
           </div>
@@ -287,12 +287,12 @@ export default function OrderDetailPage() {
       </section>
 
       {!isClosed && (
-        <section className="bg-surface-container-low rounded-md p-l flex flex-col gap-md">
-          <h2 className="text-label-l2 font-semibold text-primary-text">Adjust</h2>
+        <section className="bg-surface-container-low rounded-lg p-l flex flex-col gap-md">
+          <h2 className="text-title-large font-semibold text-on-surface">Adjust</h2>
 
           {openAdjustment ? (
             <div className="flex flex-col gap-s">
-              <label className="text-caption-md font-semibold text-primary-text" htmlFor="adjust-amount">
+              <label className="text-body-medium font-semibold text-on-surface" htmlFor="adjust-amount">
                 {openAdjustment === "discount"
                   ? "Discount amount"
                   : openAdjustment === "tip"
@@ -307,10 +307,10 @@ export default function OrderDetailPage() {
                 value={amount}
                 onChange={(e) => setAmount(e.target.value)}
                 placeholder="Amount in ₦"
-                className="w-full px-md py-s rounded-lg bg-surface-container border border-outline-variant text-p2 text-primary-text placeholder:text-outline outline-none focus:border-primary transition-colors"
+                className="w-full px-md py-s rounded-sm bg-surface-container border border-outline-variant text-body-medium text-on-surface placeholder:text-outline outline-none focus:border-primary transition-colors"
               />
               {openAdjustment === "refund" && (
-                <p className="text-caption-md text-secondary-text">
+                <p className="text-body-medium text-on-surface-variant">
                   Refunding removes this order from the day&rsquo;s takings.
                 </p>
               )}
@@ -342,7 +342,7 @@ export default function OrderDetailPage() {
           )}
 
           {isSettled && (
-            <p className="text-caption-md text-secondary-text">
+            <p className="text-body-medium text-on-surface-variant">
               This bill is settled — items can no longer be changed, only refunded.
             </p>
           )}
@@ -356,10 +356,10 @@ function Line({ label, value }: { label: string; value: number }) {
   const isDeduction = value < 0;
   return (
     <div className="flex items-center justify-between gap-md py-s border-b border-outline-variant last:border-none">
-      <span className="text-p2 text-secondary-text">{label}</span>
+      <span className="text-body-medium text-on-surface-variant">{label}</span>
       <span
-        className={`text-label-l3 font-semibold tabular-nums ${
-          isDeduction ? "text-error" : "text-primary-text"
+        className={`text-title-medium font-semibold tabular-nums ${
+          isDeduction ? "text-error" : "text-on-surface"
         }`}
       >
         {isDeduction ? `− ${formatCurrency(-value)}` : formatCurrency(value)}

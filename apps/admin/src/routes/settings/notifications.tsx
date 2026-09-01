@@ -60,18 +60,18 @@ const TYPE_LABELS: Record<string, string> = {
 export default function NotificationSettings() {
   return (
     <div className="flex flex-col gap-md">
-      <p className="text-caption-md text-secondary-text">
+      <p className="text-body-medium text-on-surface-variant">
         Alerts are routed by role, and the routing is fixed. A kitchen account
         never receives payment alerts — hiding them in the app would still have
         sent the day&rsquo;s takings to whoever is on the pass, so the server
         simply doesn&rsquo;t send them.
       </p>
 
-      <div className="bg-surface-container-low rounded-md overflow-x-auto">
+      <div className="bg-surface-container-low rounded-lg overflow-x-auto">
         <table className="w-full border-collapse text-left">
           <thead>
             <tr className="border-b border-outline-variant">
-              <th className="px-md py-s text-caption-md font-semibold text-secondary-text">
+              <th className="px-md py-s text-body-medium font-semibold text-on-surface-variant">
                 Alert
               </th>
               {ROLES.map((role) => (
@@ -79,7 +79,7 @@ export default function NotificationSettings() {
                   key={role}
                   scope="col"
                   title={role}
-                  className="px-s py-s text-caption-xs font-semibold text-secondary-text text-center whitespace-nowrap"
+                  className="px-s py-s text-label-small font-semibold text-on-surface-variant text-center whitespace-nowrap"
                 >
                   {ROLE_SHORT[role]}
                 </th>
@@ -97,7 +97,7 @@ export default function NotificationSettings() {
                 >
                   <th
                     scope="row"
-                    className="px-md py-s font-normal text-caption-md text-primary-text whitespace-nowrap"
+                    className="px-md py-s font-normal text-body-medium text-on-surface whitespace-nowrap"
                   >
                     <span className="flex items-center gap-s">
                       <i
@@ -135,7 +135,7 @@ export default function NotificationSettings() {
         </table>
       </div>
 
-      <p className="text-caption-xs text-secondary-text">
+      <p className="text-label-small text-on-surface-variant">
         New orders reach the kitchen or the bar by the same category split the
         kitchen board uses, so a bartender isn&rsquo;t woken for a plate of rice.
       </p>

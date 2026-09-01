@@ -75,15 +75,15 @@ function PlatformLogin({ onLogin }: { onLogin: () => void }) {
     <div className="min-h-screen bg-surface flex items-center justify-center p-md">
       <form
         onSubmit={handleSubmit}
-        className="w-full max-w-[360px] bg-surface-container-low rounded-xl p-xl flex flex-col items-center gap-md"
+        className="w-full max-w-[360px] bg-surface-container-low rounded-2xl p-xl flex flex-col items-center gap-md"
       >
         <div className="w-14 h-14 rounded-full bg-primary-container flex items-center justify-center text-2xl text-on-primary-container">
           <i className="mgc_shield_keyhole_line" />
         </div>
-        <h1 className="font-display text-display-h3 font-semibold text-primary-text">
+        <h1 className="font-display text-title-medium font-semibold text-on-surface">
           Oshap Platform
         </h1>
-        <p className="text-p2 text-secondary-text text-center">
+        <p className="text-body-medium text-on-surface-variant text-center">
           Internal operator portal. Enter your platform access code to continue.
         </p>
         <input
@@ -96,11 +96,11 @@ function PlatformLogin({ onLogin }: { onLogin: () => void }) {
             setToken(e.target.value);
             setError("");
           }}
-          className={`w-full px-md py-md rounded-lg bg-surface-container-low border-2 text-p text-primary-text placeholder:text-outline outline-none transition-colors ${
+          className={`w-full px-md py-md rounded-sm bg-surface-container-low border-2 text-body-large text-on-surface placeholder:text-outline outline-none transition-colors ${
             error ? "border-error" : "border-outline-variant focus:border-primary"
           }`}
         />
-        {error && <p className="text-caption-md text-error self-start">{error}</p>}
+        {error && <p className="text-body-medium text-error self-start">{error}</p>}
         <PrimaryButton
           type="submit"
           disabled={!token || checking}
@@ -139,7 +139,7 @@ function PlatformLayout() {
         <nav className="flex items-center justify-between gap-s px-s sm:px-md py-s">
           {/* Hamburger — mobile & tablet only */}
           <button
-            className="md:hidden w-9 h-9 flex items-center justify-center rounded-lg text-secondary-text hover:bg-surface-container-high transition-colors shrink-0"
+            className="md:hidden w-9 h-9 flex items-center justify-center rounded-sm text-on-surface-variant hover:bg-surface-container-high transition-colors shrink-0"
             onClick={() => setMenuOpen((o) => !o)}
             aria-label={menuOpen ? "Close menu" : "Open menu"}
           >
@@ -147,7 +147,7 @@ function PlatformLayout() {
           </button>
 
           {/* Logo */}
-          <span className="font-display font-bold text-primary mr-s shrink-0">
+          <span className="font-display font-bold text-primary-label mr-s shrink-0">
             Oshap Platform
           </span>
 
@@ -159,10 +159,10 @@ function PlatformLayout() {
                 to={link.to}
                 end={link.end}
                 className={({ isActive }) =>
-                  `px-md py-s rounded-lg text-label-l4 font-semibold font-display whitespace-nowrap transition-colors no-underline shrink-0 ${
+                  `px-md py-s rounded-sm text-label-large font-semibold font-display whitespace-nowrap transition-colors no-underline shrink-0 ${
                     isActive
-                      ? "bg-primary text-on-primary"
-                      : "text-secondary-text hover:bg-surface-container-high"
+                      ? "bg-primary-action text-on-primary"
+                      : "text-on-surface-variant hover:bg-surface-container-high"
                   }`
                 }
               >
@@ -176,7 +176,7 @@ function PlatformLayout() {
             <ThemeToggle />
             <button
               onClick={handleLogout}
-              className="w-9 h-9 flex items-center justify-center rounded-4xl bg-surface-container-high text-on-surface-variant border border-transparent hover:bg-error-container hover:text-on-error-container transition-colors"
+              className="w-9 h-9 flex items-center justify-center rounded-full bg-surface-container-high text-on-surface-variant border border-transparent hover:bg-error-container hover:text-on-error-container transition-colors"
               title="Logout"
             >
               <i className="mgc_exit_line text-lg" />
@@ -194,10 +194,10 @@ function PlatformLayout() {
                 end={link.end}
                 onClick={() => setMenuOpen(false)}
                 className={({ isActive }) =>
-                  `px-md py-s rounded-lg text-label-l4 font-semibold font-display transition-colors no-underline ${
+                  `px-md py-s rounded-sm text-label-large font-semibold font-display transition-colors no-underline ${
                     isActive
-                      ? "bg-primary text-on-primary"
-                      : "text-secondary-text hover:bg-surface-container-high"
+                      ? "bg-primary-action text-on-primary"
+                      : "text-on-surface-variant hover:bg-surface-container-high"
                   }`
                 }
               >

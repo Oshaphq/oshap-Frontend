@@ -114,19 +114,19 @@ export default function CashPaymentDialog({
         role="dialog"
         aria-modal="true"
         aria-label={`Record cash payment for table ${tableName}`}
-        className="w-full max-w-[420px] rounded-md bg-surface-container-high p-l flex flex-col gap-md shadow-xl"
+        className="w-full max-w-[420px] rounded-lg bg-surface-container-high p-l flex flex-col gap-md shadow-xl"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex items-start justify-between gap-md">
           <div className="flex flex-col gap-0.5">
-            <h3 className="font-bold text-primary-text">Take cash</h3>
-            <p className="text-caption-md text-secondary-text">Table {tableName}</p>
+            <h3 className="font-bold text-on-surface">Take cash</h3>
+            <p className="text-body-medium text-on-surface-variant">Table {tableName}</p>
           </div>
           <button
             type="button"
             onClick={onClose}
             aria-label="Close"
-            className="w-9 h-9 shrink-0 flex items-center justify-center rounded-4xl bg-surface-container text-on-surface-variant hover:bg-surface-container-highest transition-colors"
+            className="w-9 h-9 shrink-0 flex items-center justify-center rounded-full bg-surface-container text-on-surface-variant hover:bg-surface-container-highest transition-colors"
           >
             <i className="mgc_close_line" />
           </button>
@@ -134,22 +134,22 @@ export default function CashPaymentDialog({
 
         {/* No spinner: the table is passed in, so there is nothing to wait for. */}
         {orderIds.length === 0 ? (
-          <p className="text-p2 text-secondary-text py-l text-center">
+          <p className="text-body-medium text-on-surface-variant py-l text-center">
             This table has no unpaid bill.
           </p>
         ) : (
           <>
-            <div className="flex flex-col items-center gap-xs py-l rounded-lg bg-surface-container">
-              <span className="text-caption-xs font-semibold uppercase tracking-wider text-secondary-text">
+            <div className="flex flex-col items-center gap-xs py-l rounded-sm bg-surface-container">
+              <span className="text-label-small font-semibold uppercase tracking-wider text-on-surface-variant">
                 Amount due
               </span>
-              <span className="font-emphasized text-emphasized-md font-medium text-primary">
+              <span className="font-display text-display-medium font-medium text-primary-label">
                 {formatCurrency(total)}
               </span>
             </div>
 
             <div className="flex flex-col gap-xs">
-              <span className="text-caption-md font-semibold text-primary-text">
+              <span className="text-body-medium font-semibold text-on-surface">
                 How did they pay?
               </span>
               <div className="flex gap-xs">
@@ -159,9 +159,9 @@ export default function CashPaymentDialog({
                     type="button"
                     onClick={() => setMethod(m.value)}
                     aria-pressed={method === m.value}
-                    className={`flex-1 flex items-center justify-center gap-xs px-s py-s rounded-lg text-caption-md font-semibold transition-colors ${
+                    className={`flex-1 flex items-center justify-center gap-xs px-s py-s rounded-sm text-body-medium font-semibold transition-colors ${
                       method === m.value
-                        ? "bg-primary text-on-primary"
+                        ? "bg-primary-action text-on-primary"
                         : "bg-surface-container text-on-surface-variant hover:bg-surface-container-highest"
                     }`}
                   >
@@ -173,7 +173,7 @@ export default function CashPaymentDialog({
 
             <div className="flex flex-col gap-s">
               <label
-                className="text-caption-md font-semibold text-primary-text"
+                className="text-body-medium font-semibold text-on-surface"
                 htmlFor="tendered"
               >
                 Amount received (optional)
@@ -185,7 +185,7 @@ export default function CashPaymentDialog({
                 value={tendered}
                 onChange={(e) => setTendered(e.target.value)}
                 placeholder="Amount in ₦"
-                className="w-full px-md py-s rounded-lg bg-surface-container-low border border-outline-variant text-p2 text-primary-text placeholder:text-outline outline-none focus:border-primary transition-colors"
+                className="w-full px-md py-s rounded-sm bg-surface-container-low border border-outline-variant text-body-medium text-on-surface placeholder:text-outline outline-none focus:border-primary transition-colors"
               />
               <div className="flex flex-wrap gap-xs">
                 {QUICK_NOTES.map((note) => (
@@ -193,7 +193,7 @@ export default function CashPaymentDialog({
                     key={note}
                     type="button"
                     onClick={() => setTendered(String(note))}
-                    className="px-md py-xs rounded-4xl bg-surface-container text-on-surface-variant text-caption-md font-semibold hover:bg-surface-container-highest transition-colors"
+                    className="px-md py-xs rounded-full bg-surface-container text-on-surface-variant text-body-medium font-semibold hover:bg-surface-container-highest transition-colors"
                   >
                     ₦{note.toLocaleString()}
                   </button>
@@ -204,9 +204,9 @@ export default function CashPaymentDialog({
             {/* Saves the cashier doing subtraction at a busy till, which is
                 where change mistakes come from. */}
             {tender.kind === "change" && (
-              <div className="flex items-center justify-between p-md rounded-lg bg-success-container text-on-success-container">
-                <span className="text-label-l4 font-semibold">Change due</span>
-                <span className="font-display text-display-h3 font-semibold tabular-nums">
+              <div className="flex items-center justify-between p-md rounded-sm bg-success-container text-on-success-container">
+                <span className="text-label-large font-semibold">Change due</span>
+                <span className="font-display text-title-medium font-semibold tabular-nums">
                   {formatCurrency(tender.change)}
                 </span>
               </div>
@@ -215,14 +215,14 @@ export default function CashPaymentDialog({
                 refuse it, because the endpoint booked the full amount either
                 way and the shortfall vanished. */}
             {tender.kind === "short" && (
-              <div className="flex flex-col gap-xs p-md rounded-lg bg-warning-container text-on-warning-container">
+              <div className="flex flex-col gap-xs p-md rounded-sm bg-warning-container text-on-warning-container">
                 <div className="flex items-center justify-between">
-                  <span className="text-label-l4 font-semibold">Still owing</span>
-                  <span className="font-display text-display-h3 font-semibold tabular-nums">
+                  <span className="text-label-large font-semibold">Still owing</span>
+                  <span className="font-display text-title-medium font-semibold tabular-nums">
                     {formatCurrency(tender.shortfall)}
                   </span>
                 </div>
-                <p className="text-caption-md">
+                <p className="text-body-medium">
                   Recorded as a part payment. The bill stays open for the rest,
                   and the table stays lit.
                 </p>

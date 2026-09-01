@@ -1,12 +1,19 @@
 import type { ReactNode } from "react";
+import Button from "./Button";
 
+/**
+ * An alternative to the filled action, at lower emphasis.
+ *
+ * Kept as a named wrapper over {@link Button} so the ~100 existing call sites
+ * do not all move in the DS v2 migration. New code should reach for `Button`
+ * with an explicit `variant`, which also opens the elevated, text and
+ * destructive rungs of the ladder.
+ */
 interface TertiaryButtonProps {
   children: ReactNode;
   /**
-   * `lg` — full-width outlined CTA: 16/16 padding, fixed 52px height, fills
-   *        its container width. Pair with PrimaryButton-lg.
-   * `md` — compact outlined CTA: 12/24 padding, hugs content. Pass
-   *        `className="w-full"` for fill where needed.
+   * `lg` — full-width CTA, 48px. The mobile primary action.
+   * `md` — hugs its label, 40px. The default everywhere else.
    *
    * @default "lg"
    */
@@ -27,18 +34,18 @@ export default function TertiaryButton({
   className = "",
   "aria-label": ariaLabel,
 }: TertiaryButtonProps) {
-  const sizeClass =
-    size === "lg" ? "w-full h-[52px] p-md" : "py-3 px-l";
-
   return (
-    <button
-      type={type}
+    <Button
+      variant="outlined"
+      size={size}
+      fullWidth={size === "lg"}
       onClick={onClick}
       disabled={disabled}
+      type={type}
       aria-label={ariaLabel}
-      className={`inline-flex items-center justify-center gap-xs ${sizeClass} rounded-lg bg-transparent text-primary border-2 border-primary text-label-l4 leading-4 tracking-normal font-semibold font-display transition duration-100 ease-out hover:opacity-90 active:bg-primary-10a active:scale-[0.97] disabled:opacity-50 disabled:cursor-not-allowed disabled:active:scale-100 ${className}`}
+      className={className}
     >
       {children}
-    </button>
+    </Button>
   );
 }

@@ -60,14 +60,14 @@ export default function CallWaiterFab({ tableId }: { tableId: string }) {
         onClick={handleClick}
         disabled={callWaiter.isPending}
         title="Call a waiter"
-        className="fixed right-4 bottom-[calc(4rem+1rem+env(safe-area-inset-bottom,0px))] z-40 flex items-center gap-xs h-12 px-md rounded-4xl text-xl shadow-lg bg-primary text-on-primary font-display transition duration-100 ease-out hover:opacity-90 active:scale-[0.97] active:brightness-95 disabled:opacity-50 disabled:cursor-wait"
+        className="fixed right-4 bottom-[calc(4rem+1rem+env(safe-area-inset-bottom,0px))] z-40 flex items-center gap-xs h-12 px-md rounded-full text-xl shadow-lg bg-primary-action text-on-primary font-display transition duration-100 ease-out hover:opacity-90 active:scale-[0.97] active:brightness-95 disabled:opacity-50 disabled:cursor-wait"
       >
         {callWaiter.isPending ? (
           <i className="mgc_loading_line animate-spin" />
         ) : (
           <ServiceBellIcon />
         )}
-        <span className="text-label-l4 font-semibold whitespace-nowrap">
+        <span className="text-label-large font-semibold whitespace-nowrap">
           {callWaiter.isPending ? "Calling…" : "Call a waiter"}
         </span>
       </button>
@@ -101,13 +101,13 @@ function WaiterToast() {
     <div
       role="status"
       aria-live="polite"
-      className="fixed top-[calc(env(safe-area-inset-top,0px)+1rem)] left-1/2 -translate-x-1/2 z-[60] flex items-center gap-s px-md py-s rounded-4xl bg-inverse-surface text-inverse-on-surface shadow-lg max-w-[calc(100vw-2rem)]"
+      className="fixed top-[calc(env(safe-area-inset-top,0px)+1rem)] left-1/2 -translate-x-1/2 z-[60] flex items-center gap-s px-md py-s rounded-full bg-inverse-surface text-inverse-on-surface shadow-lg max-w-[calc(100vw-2rem)]"
       style={{ animation: "slide-down 220ms ease-out" }}
     >
-      <span className="text-xl text-primary">
+      <span className="text-xl text-primary-label">
         <ServiceBellIcon />
       </span>
-      <span className="text-label-l4 font-medium">
+      <span className="text-label-large font-medium">
         A waiter is on the way
       </span>
     </div>

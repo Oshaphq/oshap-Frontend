@@ -86,7 +86,7 @@ export default function HistoryPage() {
   return (
     <main className="p-md flex flex-col gap-l">
       <header className="flex items-center justify-between">
-        <h1 className="font-display text-display-h2 font-semibold text-primary-text">
+        <h1 className="font-display text-title-large font-semibold text-on-surface">
           Transaction History
         </h1>
         <SecondaryButton
@@ -114,7 +114,7 @@ export default function HistoryPage() {
             setTableFilter(e.target.value.toUpperCase());
             setPage(1);
           }}
-          className="flex-1 px-md py-md rounded-lg bg-surface-container-low border border-outline-variant text-caption-md text-primary-text placeholder:text-outline outline-none focus:border-primary transition-colors"
+          className="flex-1 px-md py-md rounded-sm bg-surface-container-low border border-outline-variant text-body-medium text-on-surface placeholder:text-outline outline-none focus:border-primary transition-colors"
         />
         <input
           type="date"
@@ -123,7 +123,7 @@ export default function HistoryPage() {
             setDateFilter(e.target.value);
             setPage(1);
           }}
-          className="flex-1 px-md py-md rounded-lg bg-surface-container-low border border-outline-variant text-caption-md text-primary-text outline-none focus:border-primary transition-colors"
+          className="flex-1 px-md py-md rounded-sm bg-surface-container-low border border-outline-variant text-body-medium text-on-surface outline-none focus:border-primary transition-colors"
         />
       </div>
 
@@ -142,7 +142,7 @@ export default function HistoryPage() {
       </div>
 
       {historyQuery.isLoading ? (
-        <div className="flex flex-col items-center justify-center min-h-[40vh] gap-md text-secondary-text">
+        <div className="flex flex-col items-center justify-center min-h-[40vh] gap-md text-on-surface-variant">
           <div className="oshap-spinner" />
           <p>Loading history...</p>
         </div>
@@ -151,10 +151,10 @@ export default function HistoryPage() {
       ) : orders.length === 0 ? (
         <div className="flex flex-col items-center justify-center gap-s py-10 px-md text-center">
           <i className="mgc_history_line text-5xl text-outline-variant opacity-40" />
-          <span className="font-display text-display-h4 font-semibold text-primary-text">
+          <span className="font-display text-title-medium font-semibold text-on-surface">
             No transactions found
           </span>
-          <p className="text-p2 text-secondary-text">
+          <p className="text-body-medium text-on-surface-variant">
             Try a different filter or date range.
           </p>
         </div>
@@ -171,7 +171,7 @@ export default function HistoryPage() {
                 onClick={() =>
                   setExpandedOrder(isExpanded ? null : order.id)
                 }
-                className={`text-left rounded-md p-md flex flex-col gap-md bg-surface-container-low border border-transparent transition-colors hover:border-outline-variant cursor-pointer ${
+                className={`text-left rounded-lg p-md flex flex-col gap-md bg-surface-container-low border border-transparent transition-colors hover:border-outline-variant cursor-pointer ${
                   order.status === "CANCELLED" || order.status === "REFUNDED"
                     ? "opacity-55"
                     : ""
@@ -182,23 +182,23 @@ export default function HistoryPage() {
                     <Link
                       to={`/orders/${order.id}`}
                       title="Open the bill"
-                      className="text-caption-md font-bold text-primary-text font-mono hover:text-primary transition-colors no-underline"
+                      className="text-body-medium font-bold text-on-surface font-mono hover:text-primary-label transition-colors no-underline"
                     >
                       {order.reference}
                     </Link>
-                    <span className="text-caption-sm text-secondary-text">
+                    <span className="text-body-small text-on-surface-variant">
                       {order.table_id}
                       {order.customer_name && (
-                        <span className="text-primary font-medium"> · {order.customer_name}</span>
+                        <span className="text-primary-label font-medium"> · {order.customer_name}</span>
                       )}
                     </span>
                   </div>
                   <div className="flex flex-col items-end gap-xs shrink-0">
-                    <span className="text-p font-semibold text-primary-text">
+                    <span className="text-body-large font-semibold text-on-surface">
                       {formatCurrency(order.total)}
                     </span>
                     <span
-                      className={`text-caption-xs font-bold uppercase tracking-wider px-s py-xs rounded-4xl whitespace-nowrap ${statusChip(order.status).cls}`}
+                      className={`text-label-small font-bold uppercase tracking-wider px-s py-xs rounded-full whitespace-nowrap ${statusChip(order.status).cls}`}
                     >
                       {statusChip(order.status).label}
                     </span>
@@ -210,15 +210,15 @@ export default function HistoryPage() {
                     {order.order_items.map((item) => (
                       <div
                         key={item.id}
-                        className="flex items-center justify-between text-caption-md"
+                        className="flex items-center justify-between text-body-medium"
                       >
-                        <span className="text-secondary-text flex gap-s">
-                          <span className="text-primary font-bold min-w-6 shrink-0">
+                        <span className="text-on-surface-variant flex gap-s">
+                          <span className="text-primary-label font-bold min-w-6 shrink-0">
                             {item.quantity}×
                           </span>
                           <span className="min-w-0">{item.name}</span>
                         </span>
-                        <span className="text-primary-text font-semibold shrink-0">
+                        <span className="text-on-surface font-semibold shrink-0">
                           {formatCurrency(item.price * item.quantity)}
                         </span>
                       </div>
@@ -227,12 +227,12 @@ export default function HistoryPage() {
                 )}
 
                 <div className="flex items-center justify-between pt-s border-t border-surface-container-high">
-                  <span className="text-caption-sm text-outline">
+                  <span className="text-body-small text-outline">
                     {formatDate(order.created_at)} · {formatTime(order.created_at)}
                   </span>
                   {payment && (
                     <span
-                      className={`text-caption-xs font-bold uppercase tracking-wider px-s py-xs rounded-4xl whitespace-nowrap ${
+                      className={`text-label-small font-bold uppercase tracking-wider px-s py-xs rounded-full whitespace-nowrap ${
                         payment.status === "VERIFIED"
                           ? "bg-success-container text-on-success-container"
                           : "bg-surface-container-high text-outline"
@@ -261,7 +261,7 @@ export default function HistoryPage() {
           >
             Prev
           </SecondaryButton>
-          <span className="text-caption-md font-medium text-secondary-text">
+          <span className="text-body-medium font-medium text-on-surface-variant">
             Page {pagination.page} of {pagination.total_pages}
           </span>
           <SecondaryButton
@@ -278,7 +278,7 @@ export default function HistoryPage() {
 }
 
 const SUMMARY_TONE_CLS = {
-  neutral: "text-primary",
+  neutral: "text-primary-label",
   success: "text-success",
   error: "text-error",
 } as const;
@@ -293,13 +293,13 @@ function SummaryCard({
   tone?: keyof typeof SUMMARY_TONE_CLS;
 }) {
   return (
-    <div className="flex-1 bg-surface-container-low rounded-md px-s py-md flex flex-col items-center gap-xs">
+    <div className="flex-1 bg-surface-container-low rounded-lg px-s py-md flex flex-col items-center gap-xs">
       <span
-        className={`font-display text-display-h2 font-semibold block ${SUMMARY_TONE_CLS[tone]}`}
+        className={`font-display text-title-large font-semibold block ${SUMMARY_TONE_CLS[tone]}`}
       >
         {value}
       </span>
-      <span className="text-caption-sm font-medium text-secondary-text uppercase tracking-wider">
+      <span className="text-body-small font-medium text-on-surface-variant uppercase tracking-wider">
         {label}
       </span>
     </div>

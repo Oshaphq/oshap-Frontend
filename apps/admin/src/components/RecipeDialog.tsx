@@ -9,7 +9,7 @@ import type { MenuItem } from "@oshap/shared";
 import { PrimaryButton, SecondaryButton, Select, toast } from "@oshap/shared/ui";
 
 const inputClass =
-  "px-md py-s rounded-lg bg-surface-container border border-outline-variant text-p2 text-primary-text placeholder:text-outline outline-none focus:border-primary transition-colors";
+  "px-md py-s rounded-sm bg-surface-container border border-outline-variant text-body-medium text-on-surface placeholder:text-outline outline-none focus:border-primary transition-colors";
 
 interface Props {
   item: MenuItem;
@@ -86,13 +86,13 @@ export default function RecipeDialog({ item, onClose }: Props) {
 
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center bg-scrim backdrop-blur-sm p-md">
-      <div className="w-full max-w-[520px] max-h-[85vh] rounded-md bg-surface-container-high flex flex-col border border-outline-variant shadow-xl">
+      <div className="w-full max-w-[520px] max-h-[85vh] rounded-lg bg-surface-container-high flex flex-col border border-outline-variant shadow-xl">
         <header className="flex items-start justify-between gap-md p-l border-b border-outline-variant">
           <div className="flex flex-col gap-0.5 min-w-0">
-            <h2 className="font-display text-display-h3 font-semibold text-primary-text truncate">
+            <h2 className="font-display text-title-medium font-semibold text-on-surface truncate">
               Recipe · {item.name}
             </h2>
-            <p className="text-caption-md text-secondary-text">
+            <p className="text-body-medium text-on-surface-variant">
               What one serving uses. Orders draw these down automatically.
             </p>
           </div>
@@ -100,7 +100,7 @@ export default function RecipeDialog({ item, onClose }: Props) {
             type="button"
             onClick={onClose}
             aria-label="Close"
-            className="w-9 h-9 shrink-0 flex items-center justify-center rounded-4xl bg-surface-container text-on-surface-variant hover:bg-surface-container-highest transition-colors"
+            className="w-9 h-9 shrink-0 flex items-center justify-center rounded-full bg-surface-container text-on-surface-variant hover:bg-surface-container-highest transition-colors"
           >
             <i className="mgc_close_line text-xl" />
           </button>
@@ -112,11 +112,11 @@ export default function RecipeDialog({ item, onClose }: Props) {
               <div className="oshap-spinner" />
             </div>
           ) : ingredients.length === 0 ? (
-            <p className="text-p2 text-secondary-text text-center py-l">
+            <p className="text-body-medium text-on-surface-variant text-center py-l">
               No ingredients exist yet. Add some on the Inventory screen first.
             </p>
           ) : lines.length === 0 ? (
-            <p className="text-p2 text-secondary-text text-center py-l">
+            <p className="text-body-medium text-on-surface-variant text-center py-l">
               No recipe yet — this dish won&rsquo;t affect ingredient stock.
             </p>
           ) : (
@@ -165,7 +165,7 @@ export default function RecipeDialog({ item, onClose }: Props) {
                     aria-label={`Quantity of ${ingredient?.name ?? "ingredient"} per serving`}
                     className={`${inputClass} w-24`}
                   />
-                  <span className="text-caption-md text-secondary-text w-12 shrink-0">
+                  <span className="text-body-medium text-on-surface-variant w-12 shrink-0">
                     {ingredient?.unit ?? ""}
                   </span>
                   <button
@@ -174,7 +174,7 @@ export default function RecipeDialog({ item, onClose }: Props) {
                       setLines((prev) => prev.filter((_, i) => i !== index))
                     }
                     aria-label={`Remove ${ingredient?.name ?? "line"}`}
-                    className="p-xs text-secondary-text hover:text-error transition-colors"
+                    className="p-xs text-on-surface-variant hover:text-error transition-colors"
                   >
                     <i className="mgc_delete_line text-lg" />
                   </button>

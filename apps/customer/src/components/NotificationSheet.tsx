@@ -24,21 +24,21 @@ export default function NotificationSheet({
         ref={sheetRef}
         role="dialog"
         aria-label="Notifications"
-        className="fixed left-0 right-0 bottom-0 max-h-[80vh] bg-surface-container-low rounded-t-l z-[100] flex flex-col shadow-[0_-4px_24px_var(--ds-shadow)] animate-[slide-up-drawer_0.3s_ease] will-change-transform"
+        className="fixed left-0 right-0 bottom-0 max-h-[80vh] bg-surface-container-low rounded-t-xl z-[100] flex flex-col shadow-[0_-4px_24px_var(--ds-shadow)] animate-[slide-up-drawer_0.3s_ease] will-change-transform"
       >
         <div {...handleProps} className="flex justify-center py-s cursor-grab active:cursor-grabbing">
-          <div className="w-10 h-1 rounded-4xl bg-outline-variant" />
+          <div className="w-10 h-1 rounded-full bg-outline-variant" />
         </div>
 
         <div className="flex items-center justify-between px-md pb-md border-b border-outline-variant">
-          <h2 className="text-display-h2 font-display font-semibold text-primary-text">
+          <h2 className="text-title-large font-display font-semibold text-on-surface">
             Notifications
           </h2>
           <button
             type="button"
             onClick={onClose}
             aria-label="Close notifications"
-            className="w-9 h-9 flex items-center justify-center rounded-4xl bg-surface-container text-on-surface-variant hover:bg-surface-container-high transition-colors"
+            className="w-9 h-9 flex items-center justify-center rounded-full bg-surface-container text-on-surface-variant hover:bg-surface-container-high transition-colors"
           >
             <i className="mgc_close_line text-xl" />
           </button>
@@ -46,7 +46,7 @@ export default function NotificationSheet({
 
         <div className="flex-1 overflow-y-auto p-md space-y-s">
           {notifications.length === 0 ? (
-            <div className="py-xl text-center text-secondary-text">
+            <div className="py-xl text-center text-on-surface-variant">
               <i className="mgc_notification_off_line text-4xl mb-s opacity-50" />
               <p>No notifications yet</p>
             </div>
@@ -57,7 +57,7 @@ export default function NotificationSheet({
                 onClick={() => {
                   if (!n.read) markAsRead(n.id);
                 }}
-                className={`p-s rounded-xl border transition-colors cursor-pointer ${
+                className={`p-s rounded-2xl border transition-colors cursor-pointer ${
                   n.read
                     ? "bg-surface border-transparent opacity-75"
                     : "bg-surface border-primary"
@@ -70,10 +70,10 @@ export default function NotificationSheet({
                     }`}
                   />
                   <div>
-                    <p className={`text-p2 ${n.read ? "text-secondary-text" : "text-primary-text font-medium"}`}>
+                    <p className={`text-body-medium ${n.read ? "text-on-surface-variant" : "text-on-surface font-medium"}`}>
                       {n.message}
                     </p>
-                    <p className="text-caption-md text-secondary-text mt-xs">
+                    <p className="text-body-medium text-on-surface-variant mt-xs">
                       {new Date(n.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                     </p>
                   </div>
@@ -87,13 +87,13 @@ export default function NotificationSheet({
           <div className="p-md border-t border-outline-variant flex justify-between gap-s">
             <button
               onClick={clearAll}
-              className="px-md py-s rounded-full font-semibold text-label-l2 text-error hover:bg-error/10 transition-colors"
+              className="px-md py-s rounded-full font-semibold text-title-large text-error hover:bg-error/10 transition-colors"
             >
               Clear All
             </button>
             <button
               onClick={markAllAsRead}
-              className="px-md py-s rounded-full font-semibold text-label-l2 text-primary hover:bg-primary/10 transition-colors"
+              className="px-md py-s rounded-full font-semibold text-title-large text-primary-label hover:bg-primary/8 transition-colors"
             >
               Mark all as read
             </button>

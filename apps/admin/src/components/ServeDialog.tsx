@@ -70,34 +70,34 @@ export default function ServeDialog({ orderId, tableName, total, onClose }: Prop
         role="dialog"
         aria-modal="true"
         aria-label={`Mark table ${tableName} served`}
-        className="w-full max-w-[420px] rounded-md bg-surface-container-high p-l flex flex-col gap-md shadow-xl"
+        className="w-full max-w-[420px] rounded-lg bg-surface-container-high p-l flex flex-col gap-md shadow-xl"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex items-start justify-between gap-md">
           <div className="flex flex-col gap-0.5">
-            <h3 className="font-bold text-primary-text">Food delivered</h3>
-            <p className="text-caption-md text-secondary-text">Table {tableName}</p>
+            <h3 className="font-bold text-on-surface">Food delivered</h3>
+            <p className="text-body-medium text-on-surface-variant">Table {tableName}</p>
           </div>
           <button
             type="button"
             onClick={onClose}
             aria-label="Close"
-            className="w-9 h-9 shrink-0 flex items-center justify-center rounded-4xl bg-surface-container text-on-surface-variant hover:bg-surface-container-highest transition-colors"
+            className="w-9 h-9 shrink-0 flex items-center justify-center rounded-full bg-surface-container text-on-surface-variant hover:bg-surface-container-highest transition-colors"
           >
             <i className="mgc_close_line" />
           </button>
         </div>
 
-        <div className="flex flex-col items-center gap-xs py-l rounded-lg bg-surface-container">
-          <span className="text-caption-xs font-semibold uppercase tracking-wider text-secondary-text">
+        <div className="flex flex-col items-center gap-xs py-l rounded-sm bg-surface-container">
+          <span className="text-label-small font-semibold uppercase tracking-wider text-on-surface-variant">
             Bill
           </span>
-          <span className="font-emphasized text-emphasized-md font-medium text-primary">
+          <span className="font-display text-display-medium font-medium text-primary-label">
             {formatCurrency(total)}
           </span>
         </div>
 
-        <span className="text-caption-md font-semibold text-primary-text">
+        <span className="text-body-medium font-semibold text-on-surface">
           How did they pay?
         </span>
 
@@ -111,13 +111,13 @@ export default function ServeDialog({ orderId, tableName, total, onClose }: Prop
                 setChoice(m.value);
                 confirm(m.value);
               }}
-              className="flex items-center justify-between gap-s px-md py-s rounded-lg bg-surface-container text-primary-text text-label-l5 font-semibold hover:bg-surface-container-highest active:scale-[0.99] disabled:opacity-50 focus-visible:outline-2 focus-visible:outline-primary focus-visible:outline-offset-2 transition"
+              className="flex items-center justify-between gap-s px-md py-s rounded-sm bg-surface-container text-on-surface text-label-medium font-semibold hover:bg-surface-container-highest active:scale-[0.99] disabled:opacity-50 focus-visible:outline-2 focus-visible:outline-primary focus-visible:outline-offset-2 transition"
             >
               <span className="flex items-center gap-s">
-                <i className={`${m.icon} text-xl text-primary`} aria-hidden />
+                <i className={`${m.icon} text-xl text-primary-label`} aria-hidden />
                 {m.label}
               </span>
-              <span className="text-caption-md text-secondary-text">
+              <span className="text-body-medium text-on-surface-variant">
                 {serve.isPending && choice === m.value
                   ? "Recording…"
                   : `Settles ${formatCurrency(total)}`}
@@ -134,13 +134,13 @@ export default function ServeDialog({ orderId, tableName, total, onClose }: Prop
               setChoice("later");
               confirm();
             }}
-            className="flex items-center justify-between gap-s px-md py-s rounded-lg border border-outline-variant text-primary-text text-label-l5 font-semibold hover:bg-surface-container active:scale-[0.99] disabled:opacity-50 focus-visible:outline-2 focus-visible:outline-primary focus-visible:outline-offset-2 transition"
+            className="flex items-center justify-between gap-s px-md py-s rounded-sm border border-outline-variant text-on-surface text-label-medium font-semibold hover:bg-surface-container active:scale-[0.99] disabled:opacity-50 focus-visible:outline-2 focus-visible:outline-primary focus-visible:outline-offset-2 transition"
           >
             <span className="flex items-center gap-s">
               <i className="mgc_time_line text-xl text-on-surface-variant" aria-hidden />
               Not yet
             </span>
-            <span className="text-caption-md text-secondary-text">
+            <span className="text-body-medium text-on-surface-variant">
               {serve.isPending && choice === "later"
                 ? "Recording…"
                 : "Bill stays open"}

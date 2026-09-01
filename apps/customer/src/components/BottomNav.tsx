@@ -24,18 +24,18 @@ export default function BottomNav({ tableId }: BottomNavProps) {
           <Link
             key={path}
             to={`${path}?table=${tableId}`}
-            className={`relative flex flex-col items-center gap-0.5 py-xs px-md rounded-lg transition-colors ${
+            className={`relative flex flex-col items-center gap-0.5 py-xs px-md rounded-sm transition-colors ${
               active
-                ? "text-primary after:content-[''] after:absolute after:-bottom-0.5 after:left-1/2 after:-translate-x-1/2 after:w-6 after:h-[3px] after:rounded-4xl after:bg-primary"
-                : "text-on-surface-variant hover:text-primary"
+                ? "text-primary-label after:content-[''] after:absolute after:-bottom-0.5 after:left-1/2 after:-translate-x-1/2 after:w-6 after:h-[3px] after:rounded-full after:bg-primary"
+                : "text-on-surface-variant hover:text-primary-label"
             }`}
           >
             <i
               className={`${icon} text-[22px] leading-none ${
-                active ? "text-primary" : ""
+                active ? "text-primary-label" : ""
               }`}
             />
-            <span className="text-caption-c1-medium">{label}</span>
+            <span className="text-label-medium">{label}</span>
           </Link>
         );
       })}

@@ -59,7 +59,7 @@ export default function DashboardPage() {
 
   if (tablesQuery.isLoading) {
     return (
-      <div className="flex flex-col items-center justify-center min-h-[60vh] gap-md text-secondary-text">
+      <div className="flex flex-col items-center justify-center min-h-[60vh] gap-md text-on-surface-variant">
         <div className="oshap-spinner" />
         <p>Loading tables...</p>
       </div>
@@ -166,7 +166,7 @@ export default function DashboardPage() {
     <main className="p-md flex flex-col gap-l">
       {restaurantId && <SetupChecklist restaurantId={restaurantId} />}
       <header className="flex items-center justify-between">
-        <h1 className="font-display text-display-h2 font-semibold text-primary-text">
+        <h1 className="font-display text-title-large font-semibold text-on-surface">
           Waiter Dashboard
         </h1>
         <SecondaryButton
@@ -233,22 +233,22 @@ export default function DashboardPage() {
           return (
             <div
               key={table.id}
-              className={`rounded-md p-md flex flex-col gap-s border transition-colors min-h-[120px] ${cardCls}`}
+              className={`rounded-lg p-md flex flex-col gap-s border transition-colors min-h-[120px] ${cardCls}`}
             >
               <div className="flex items-center justify-between">
-                <span className="font-display text-display-h3 font-semibold text-primary-text">
+                <span className="font-display text-title-medium font-semibold text-on-surface">
                   {table.table_id}
                 </span>
                 {isPending ? (
-                  <span className="px-s py-xs rounded-4xl font-bold text-caption-xs uppercase tracking-wider whitespace-nowrap bg-warning text-on-warning">
+                  <span className="px-s py-xs rounded-full font-bold text-label-small uppercase tracking-wider whitespace-nowrap bg-warning text-on-warning">
                     Verification Req.
                   </span>
                 ) : isUnpaid ? (
-                  <span className="px-s py-xs rounded-4xl font-bold text-caption-xs uppercase tracking-wider whitespace-nowrap bg-error-container text-on-error-container">
+                  <span className="px-s py-xs rounded-full font-bold text-label-small uppercase tracking-wider whitespace-nowrap bg-error-container text-on-error-container">
                     Dining
                   </span>
                 ) : (
-                  <span className="px-s py-xs rounded-4xl font-bold text-caption-xs uppercase tracking-wider whitespace-nowrap bg-surface-container-high text-outline">
+                  <span className="px-s py-xs rounded-full font-bold text-label-small uppercase tracking-wider whitespace-nowrap bg-surface-container-high text-outline">
                     Empty
                   </span>
                 )}
@@ -256,7 +256,7 @@ export default function DashboardPage() {
 
               <div className="flex flex-col gap-xs flex-1">
                 {isEmpty ? (
-                  <p className="text-caption-md text-secondary-text">
+                  <p className="text-body-medium text-on-surface-variant">
                     No active orders
                   </p>
                 ) : bills.length > 0 ? (
@@ -292,15 +292,15 @@ export default function DashboardPage() {
                      better than an empty card. */
                   <>
                     {isUnpaid && (
-                      <p className="text-caption-md text-secondary-text">
+                      <p className="text-body-medium text-on-surface-variant">
                         Current Bill:{" "}
-                        <span className="font-bold text-primary-text">
+                        <span className="font-bold text-on-surface">
                           {formatCurrency(table.unpaidTotal)}
                         </span>
                       </p>
                     )}
                     {isPending && (
-                      <p className="text-caption-md text-on-warning-container">
+                      <p className="text-body-medium text-on-warning-container">
                         Claimed:{" "}
                         <span className="font-bold">
                           {formatCurrency(table.pendingTotal)}
@@ -312,7 +312,7 @@ export default function DashboardPage() {
               </div>
 
               {!isEmpty && isClosing && (
-                <div className="py-s text-center text-caption-md font-semibold text-secondary-text">
+                <div className="py-s text-center text-body-medium font-semibold text-on-surface-variant">
                   Clearing...
                 </div>
               )}
@@ -329,7 +329,7 @@ export default function DashboardPage() {
 
               {clearPromptTable === table.id && (
                 <div className="flex flex-col gap-s pt-s border-t border-surface-container-high">
-                  <span className="text-caption-sm font-semibold text-secondary-text text-center uppercase tracking-wider">
+                  <span className="text-body-small font-semibold text-on-surface-variant text-center uppercase tracking-wider">
                     Why are you clearing?
                   </span>
                   {/* "Paid" settled the bill but recorded no method and no
@@ -338,7 +338,7 @@ export default function DashboardPage() {
                   {bills.length > 1 ? (
                     /* Two bills open, so "they paid" names nothing. Sending the
                        waiter back to the row is the point of this screen. */
-                    <p className="text-caption-xs text-secondary-text text-center">
+                    <p className="text-label-small text-on-surface-variant text-center">
                       Taking money? Use the bill above — this table has{" "}
                       {bills.length} open.
                     </p>
@@ -356,7 +356,7 @@ export default function DashboardPage() {
                           total: bills[0]?.total ?? table.unpaidTotal,
                         });
                       }}
-                      className="flex items-center justify-center gap-s py-s rounded-lg font-bold text-caption-md bg-success text-on-success transition-all hover:opacity-90 active:scale-[0.98]"
+                      className="flex items-center justify-center gap-s py-s rounded-sm font-bold text-body-medium bg-success text-on-success transition-all hover:opacity-90 active:scale-[0.98]"
                     >
                       <i className="mgc_wallet_4_line" />
                       They paid — record it
@@ -365,7 +365,7 @@ export default function DashboardPage() {
                   <button
                     type="button"
                     onClick={() => handleAbandon(table)}
-                    className="flex items-center justify-center gap-s py-s rounded-lg font-bold text-caption-md border border-error text-error bg-transparent transition-all hover:bg-error/10 active:scale-[0.98]"
+                    className="flex items-center justify-center gap-s py-s rounded-sm font-bold text-body-medium border border-error text-error bg-transparent transition-all hover:bg-error/10 active:scale-[0.98]"
                   >
                     <i className="mgc_exit_line" />
                     Left without paying
@@ -375,13 +375,13 @@ export default function DashboardPage() {
                       and the payment stays on the books with nothing to match
                       it. Two orders at Jobiz went this way. */}
                   {bills.some((b) => b.amountPaid > 0 && b.balanceDue > 0) ? (
-                    <p className="text-caption-xs text-on-warning-container bg-warning-container rounded-lg p-s text-center">
+                    <p className="text-label-small text-on-warning-container bg-warning-container rounded-sm p-s text-center">
                       Careful — money has already been taken on this table.
                       Clearing as unpaid cancels the order and leaves that
                       payment with nothing to match it. Take the rest instead.
                     </p>
                   ) : (
-                    <p className="text-caption-xs text-outline text-center">
+                    <p className="text-label-small text-outline text-center">
                       Clearing as unpaid writes off{" "}
                       {formatCurrency(
                         bills.length > 0
@@ -394,7 +394,7 @@ export default function DashboardPage() {
                   <button
                     type="button"
                     onClick={() => setClearPromptTable(null)}
-                    className="py-s text-center text-caption-sm font-medium text-outline bg-transparent border-none cursor-pointer hover:text-primary-text transition-colors"
+                    className="py-s text-center text-body-small font-medium text-outline bg-transparent border-none cursor-pointer hover:text-on-surface transition-colors"
                   >
                     Cancel
                   </button>
@@ -408,10 +408,10 @@ export default function DashboardPage() {
       {tables.length === 0 && (
         <div className="flex flex-col items-center justify-center gap-s py-10 px-md text-center">
           <i className="mgc_table_line text-5xl text-outline-variant opacity-40" />
-          <span className="font-display text-display-h4 font-semibold text-primary-text">
+          <span className="font-display text-title-medium font-semibold text-on-surface">
             No tables configured
           </span>
-          <p className="text-p2 text-secondary-text">
+          <p className="text-body-medium text-on-surface-variant">
             Add tables in your restaurant settings to get started.
           </p>
         </div>
@@ -464,15 +464,15 @@ function StatCard({
       ? "text-on-warning-container"
       : tone === "error"
         ? "text-on-error-container"
-        : "text-primary";
+        : "text-primary-label";
 
   const inner = (
     <>
-      <span className={`font-display text-display-h1 font-semibold ${ink}`}>
+      <span className={`font-display text-headline-small font-semibold ${ink}`}>
         {value}
       </span>
       <span
-        className={`text-caption-xs font-semibold uppercase tracking-wider text-center ${ink}`}
+        className={`text-label-small font-semibold uppercase tracking-wider text-center ${ink}`}
       >
         {label.map((line) => (
           <span key={line} className="block">
@@ -484,7 +484,7 @@ function StatCard({
   );
 
   const shared =
-    "flex-1 min-w-0 sm:min-w-[120px] rounded-md px-s py-md flex flex-col items-center gap-xs border";
+    "flex-1 min-w-0 sm:min-w-[120px] rounded-lg px-s py-md flex flex-col items-center gap-xs border";
 
   if (to) {
     return (
@@ -590,7 +590,7 @@ function BillActions({
   if (rejectingBill === bill.key) {
     return (
       <div className="flex flex-col gap-s">
-        <p className="text-caption-xs text-secondary-text">
+        <p className="text-label-small text-on-surface-variant">
           Reject {bill.guestName ? `${bill.guestName}'s` : "this"} payment? The
           bill goes back to unpaid and this account is marked down.
         </p>
@@ -616,11 +616,11 @@ function BillActions({
   if (verifyingBill === bill.key) {
     return (
       <div className="flex flex-col gap-s">
-        <p className="text-caption-xs text-secondary-text">
+        <p className="text-label-small text-on-surface-variant">
           {isCard ? (
             <>
               Confirm{" "}
-              <span className="font-bold text-primary-text">
+              <span className="font-bold text-on-surface">
                 {formatCurrency(bill.balanceDue)}
               </span>{" "}
               went through on the machine for {bill.guestName ?? "this guest"}.
@@ -628,7 +628,7 @@ function BillActions({
           ) : (
             <>
               Confirm{" "}
-              <span className="font-bold text-primary-text">
+              <span className="font-bold text-on-surface">
                 {formatCurrency(bill.balanceDue)}
               </span>{" "}
               from {bill.guestName ?? "this guest"} has landed in the account.

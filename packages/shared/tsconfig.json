@@ -16,5 +16,9 @@
     "allowImportingTsExtensions": false,
     "types": ["vite/client"]
   },
-  "include": ["src/**/*.ts", "src/**/*.tsx"]
+  "include": ["src/**/*.ts", "src/**/*.tsx"],
+  // Tests are typechecked by tsconfig.test.json instead. They need node types
+  // for the token-file guard, and this package ships to the browser — widening
+  // the library's global types to get one test to compile is the wrong trade.
+  "exclude": ["src/**/*.test.ts", "src/**/*.test.tsx"]
 }

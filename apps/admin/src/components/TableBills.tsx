@@ -66,7 +66,7 @@ export default function TableBills({ bills, renderActions }: Props) {
   return (
     <div className="flex flex-col gap-xs">
       {bills.length > 1 && (
-        <span className="text-caption-xs font-semibold uppercase tracking-wider text-secondary-text">
+        <span className="text-label-small font-semibold uppercase tracking-wider text-on-surface-variant">
           {bills.length} bills open
         </span>
       )}
@@ -82,26 +82,26 @@ export default function TableBills({ bills, renderActions }: Props) {
         return (
           <div
             key={bill.key}
-            className="flex flex-col gap-xs p-s rounded-lg bg-surface-container"
+            className="flex flex-col gap-xs p-s rounded-sm bg-surface-container"
           >
             <div className="flex items-center justify-between gap-s">
               <div className="flex flex-col min-w-0">
-                <span className="text-label-l5 font-semibold text-primary-text truncate">
+                <span className="text-label-medium font-semibold text-on-surface truncate">
                   {bill.guestName ?? "Guest"}
                 </span>
                 {detail && (
-                  <span className="text-caption-xs text-secondary-text">
+                  <span className="text-label-small text-on-surface-variant">
                     {detail}
                   </span>
                 )}
                 {method && (
-                  <span className="text-caption-xs text-secondary-text">
+                  <span className="text-label-small text-on-surface-variant">
                     {method}
                   </span>
                 )}
               </div>
               <div className="flex items-center gap-s shrink-0">
-                <span className="text-label-l5 font-semibold tabular-nums text-primary-text">
+                <span className="text-label-medium font-semibold tabular-nums text-on-surface">
                   {/* The balance, not the total. A waiter collecting on a part
                       paid bill needs the number they are about to ask for. */}
                   {formatCurrency(
@@ -109,7 +109,7 @@ export default function TableBills({ bills, renderActions }: Props) {
                   )}
                 </span>
                 <span
-                  className={`px-s py-0.5 rounded-4xl font-bold text-caption-xs uppercase tracking-wider whitespace-nowrap ${meta.cls}`}
+                  className={`px-s py-0.5 rounded-full font-bold text-label-small uppercase tracking-wider whitespace-nowrap ${meta.cls}`}
                 >
                   {meta.label}
                 </span>
@@ -120,7 +120,7 @@ export default function TableBills({ bills, renderActions }: Props) {
               /* Deliberately no money button. `payment_state` is an untyped
                  string, so a value we cannot read might mean already paid —
                  and offering Take Cash there charges a guest twice. */
-              <p className="text-caption-xs text-on-surface-variant">
+              <p className="text-label-small text-on-surface-variant">
                 We can't tell whether this is paid. Check the order before
                 taking money.
               </p>

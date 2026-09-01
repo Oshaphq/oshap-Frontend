@@ -42,13 +42,13 @@ function Row({
       to={to}
       className="flex items-center gap-md px-md py-md border-b border-outline-variant last:border-none no-underline hover:bg-surface-container transition-colors group"
     >
-      <i className={`${icon} text-xl shrink-0 text-primary`} aria-hidden />
+      <i className={`${icon} text-xl shrink-0 text-primary-label`} aria-hidden />
       <span className="flex flex-col gap-0.5 min-w-0 flex-1">
-        <span className="text-p2 font-semibold text-primary-text">{title}</span>
-        <span className="text-caption-md text-secondary-text">{subtitle}</span>
+        <span className="text-body-medium font-semibold text-on-surface">{title}</span>
+        <span className="text-body-medium text-on-surface-variant">{subtitle}</span>
       </span>
       <i
-        className="mgc_right_line text-lg shrink-0 text-outline group-hover:text-primary transition-colors"
+        className="mgc_right_line text-lg shrink-0 text-outline group-hover:text-primary-label transition-colors"
         aria-hidden
       />
     </Link>
@@ -135,17 +135,17 @@ export default function SettingsLayout() {
       {atIndex ? (
         <>
           <header className="flex flex-col gap-0.5">
-            <h1 className="font-display text-display-h2 font-semibold text-primary-text">
+            <h1 className="font-display text-title-large font-semibold text-on-surface">
               Settings
             </h1>
             {/* The restaurant's own name, so an owner with two venues open in
                 two tabs can tell which one they are about to change. */}
-            <p className="text-caption-md text-secondary-text">
+            <p className="text-body-medium text-on-surface-variant">
               {settings?.name ?? "Your restaurant"}
             </p>
           </header>
 
-          <nav className="bg-surface-container-low rounded-md overflow-hidden">
+          <nav className="bg-surface-container-low rounded-lg overflow-hidden">
             <Row
               to="/settings/general"
               icon="mgc_store_2_line"
@@ -202,12 +202,12 @@ function Section({ title, children }: { title: string; children: React.ReactNode
       <header className="flex flex-col gap-xs">
         <Link
           to="/settings"
-          className="flex items-center gap-xs w-fit text-caption-md font-semibold text-secondary-text hover:text-primary no-underline transition-colors"
+          className="flex items-center gap-xs w-fit text-body-medium font-semibold text-on-surface-variant hover:text-primary-label no-underline transition-colors"
         >
           <i className="mgc_left_line text-base" aria-hidden />
           Settings
         </Link>
-        <h1 className="font-display text-display-h2 font-semibold text-primary-text">
+        <h1 className="font-display text-title-large font-semibold text-on-surface">
           {title}
         </h1>
       </header>

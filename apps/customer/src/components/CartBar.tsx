@@ -11,15 +11,15 @@ export default function CartBar() {
       <button
         type="button"
         onClick={() => setIsCartOpen(true)}
-        className="w-full flex items-center justify-between p-md bg-primary text-on-primary rounded-md shadow-lg transition-opacity hover:opacity-95 active:scale-[0.98]"
+        className="w-full flex items-center justify-between p-md bg-primary-action text-on-primary rounded-lg shadow-lg transition-opacity hover:opacity-95 active:scale-[0.98]"
       >
         <div className="flex items-center gap-s">
-          <span className="bg-on-primary text-primary w-7 h-7 flex items-center justify-center rounded-4xl text-caption-md font-bold">
+          <span className="bg-on-primary text-primary-label w-7 h-7 flex items-center justify-center rounded-full text-body-medium font-bold">
             {totalItems}
           </span>
-          <span className="font-semibold text-p">View Cart</span>
+          <span className="font-semibold text-body-large">View Cart</span>
         </div>
-        <span className="text-label-l3 font-semibold">
+        <span className="text-title-medium font-semibold">
           {formatCurrency(totalPrice)}
         </span>
       </button>

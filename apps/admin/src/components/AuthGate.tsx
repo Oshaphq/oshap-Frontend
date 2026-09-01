@@ -101,19 +101,19 @@ export default function AuthGate() {
   if (!isAuthenticated || !user) {
     return (
       <div className="flex items-center justify-center min-h-screen bg-surface p-md">
-        <form onSubmit={handleLogin} className="w-full max-w-[384px] bg-surface-container-low rounded-xl p-xl flex flex-col items-center gap-md">
+        <form onSubmit={handleLogin} className="w-full max-w-[384px] bg-surface-container-low rounded-2xl p-xl flex flex-col items-center gap-md">
           <div className="w-16 h-16 rounded-full bg-primary-container flex items-center justify-center text-2xl text-on-primary-container">
             <i className="mgc_lock_fill" />
           </div>
-          <h1 className="font-display text-display-h2 font-semibold text-primary-text">
+          <h1 className="font-display text-title-large font-semibold text-on-surface">
             Staff Login
           </h1>
-          <p className="text-p2 text-secondary-text text-center mb-s">
+          <p className="text-body-medium text-on-surface-variant text-center mb-s">
             Enter your phone number or email and password to continue.
           </p>
 
           <input
-            className={`w-full px-md py-md rounded-lg bg-surface-container-low border-2 text-p text-primary-text placeholder:text-outline outline-none transition-colors ${error ? "border-error" : "border-outline-variant focus:border-primary"}`}
+            className={`w-full px-md py-md rounded-sm bg-surface-container-low border-2 text-body-large text-on-surface placeholder:text-outline outline-none transition-colors ${error ? "border-error" : "border-outline-variant focus:border-primary"}`}
             // Not type="email": most staff sign in with a phone number, and
             // the browser would reject one as malformed before we ever ask.
             type="text"
@@ -139,20 +139,20 @@ export default function AuthGate() {
                 setPassword(e.target.value);
                 setError("");
               }}
-              className={`w-full px-md py-md rounded-lg bg-surface-container-low border-2 text-p text-primary-text placeholder:text-outline outline-none transition-colors pr-12 ${error ? "border-error" : "border-outline-variant focus:border-primary"}`}
+              className={`w-full px-md py-md rounded-sm bg-surface-container-low border-2 text-body-large text-on-surface placeholder:text-outline outline-none transition-colors pr-12 ${error ? "border-error" : "border-outline-variant focus:border-primary"}`}
               required
             />
             <button
               type="button"
               onClick={() => setShowPassword(!showPassword)}
-              className="absolute right-s top-1/2 -translate-y-1/2 w-10 h-10 flex items-center justify-center text-outline hover:text-primary-text transition-colors rounded-full"
+              className="absolute right-s top-1/2 -translate-y-1/2 w-10 h-10 flex items-center justify-center text-outline hover:text-on-surface transition-colors rounded-full"
               tabIndex={-1}
               aria-label={showPassword ? "Hide password" : "Show password"}
             >
               <i className={showPassword ? "mgc_eye_close_line text-xl" : "mgc_eye_line text-xl"} />
             </button>
           </div>
-          {error && <p className="text-caption-md text-error">{error}</p>}
+          {error && <p className="text-body-medium text-error">{error}</p>}
 
           <PrimaryButton
             type="submit"
@@ -166,7 +166,7 @@ export default function AuthGate() {
               only remaining route into the account is someone editing the
               database. The setup screen already tells people to come here. */}
           {resetSent ? (
-            <p className="text-caption-md text-secondary-text text-center">
+            <p className="text-body-medium text-on-surface-variant text-center">
               If that account exists, a reset link is on its way.
             </p>
           ) : (
@@ -174,7 +174,7 @@ export default function AuthGate() {
               type="button"
               onClick={handleForgot}
               disabled={isResetting}
-              className="text-caption-md font-semibold text-primary hover:underline disabled:opacity-50 bg-transparent border-0 cursor-pointer"
+              className="text-body-medium font-semibold text-primary-label hover:underline disabled:opacity-50 bg-transparent border-0 cursor-pointer"
             >
               {isResetting ? "Sending…" : "Forgot password?"}
             </button>
@@ -209,7 +209,7 @@ export default function AuthGate() {
         <nav className="flex items-center justify-between gap-s px-s sm:px-md py-s">
           {/* Hamburger — mobile & tablet only */}
           <button
-            className="lg:hidden w-9 h-9 flex items-center justify-center rounded-lg text-secondary-text hover:bg-surface-container-high transition-colors shrink-0"
+            className="lg:hidden w-9 h-9 flex items-center justify-center rounded-sm text-on-surface-variant hover:bg-surface-container-high transition-colors shrink-0"
             onClick={() => setMenuOpen((o) => !o)}
             aria-label={menuOpen ? "Close menu" : "Open menu"}
           >
@@ -224,9 +224,9 @@ export default function AuthGate() {
                 to={tab.to}
                 end={tab.end}
                 className={({ isActive }) =>
-                  `px-md py-s rounded-lg text-label-l4 font-semibold font-display whitespace-nowrap transition-colors no-underline shrink-0 ${isActive
-                    ? "bg-primary text-on-primary"
-                    : "text-secondary-text hover:bg-surface-container-high"
+                  `px-md py-s rounded-sm text-label-large font-semibold font-display whitespace-nowrap transition-colors no-underline shrink-0 ${isActive
+                    ? "bg-primary-action text-on-primary"
+                    : "text-on-surface-variant hover:bg-surface-container-high"
                   }`
                 }
               >
@@ -236,7 +236,7 @@ export default function AuthGate() {
                     // Inherits the tab's own colours so it reads as part of the
                     // label rather than an alert pinned to it — this counts
                     // work in hand, it is not a warning.
-                    className="ml-xs inline-flex items-center justify-center min-w-5 h-5 px-1 rounded-4xl bg-current/15 text-caption-xs font-bold tabular-nums"
+                    className="ml-xs inline-flex items-center justify-center min-w-5 h-5 px-1 rounded-full bg-current/15 text-label-small font-bold tabular-nums"
                   >
                     {tab.count}
                   </span>
@@ -267,12 +267,12 @@ export default function AuthGate() {
             <NotificationBell />
             <ThemeToggle />
             <div className="hidden md:flex flex-col items-end mr-s">
-              <span className="text-label-l4 font-semibold text-primary-text">{user.name}</span>
-              <span className="text-caption-md text-secondary-text">{user.role}</span>
+              <span className="text-label-large font-semibold text-on-surface">{user.name}</span>
+              <span className="text-body-medium text-on-surface-variant">{user.role}</span>
             </div>
             {restaurantName && (
               <span
-                className="hidden lg:inline text-caption-md font-semibold text-secondary-text truncate max-w-[200px]"
+                className="hidden lg:inline text-body-medium font-semibold text-on-surface-variant truncate max-w-[200px]"
                 title={restaurantName}
               >
                 {restaurantName}
@@ -280,7 +280,7 @@ export default function AuthGate() {
             )}
             <button
               onClick={handleLogout}
-              className="w-9 h-9 flex items-center justify-center rounded-4xl bg-surface-container-high text-on-surface-variant border border-transparent hover:bg-error-container hover:text-on-error-container transition-colors"
+              className="w-9 h-9 flex items-center justify-center rounded-full bg-surface-container-high text-on-surface-variant border border-transparent hover:bg-error-container hover:text-on-error-container transition-colors"
               title="Logout"
             >
               <i className="mgc_exit_line text-lg" />
@@ -298,9 +298,9 @@ export default function AuthGate() {
                 end={tab.end}
                 onClick={() => setMenuOpen(false)}
                 className={({ isActive }) =>
-                  `px-md py-s rounded-lg text-label-l4 font-semibold font-display transition-colors no-underline ${isActive
-                    ? "bg-primary text-on-primary"
-                    : "text-secondary-text hover:bg-surface-container-high"
+                  `px-md py-s rounded-sm text-label-large font-semibold font-display transition-colors no-underline ${isActive
+                    ? "bg-primary-action text-on-primary"
+                    : "text-on-surface-variant hover:bg-surface-container-high"
                   }`
                 }
               >

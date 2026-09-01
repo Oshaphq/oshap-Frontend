@@ -66,31 +66,31 @@ export default function SubscriptionsPage() {
   return (
     <main className="p-md flex flex-col gap-l">
       <header>
-        <h1 className="font-display text-display-h2 font-semibold text-primary-text">
+        <h1 className="font-display text-title-large font-semibold text-on-surface">
           Subscriptions
         </h1>
-        <p className="text-p2 text-secondary-text mt-xs">Mock billing overview — no real payments processed.</p>
+        <p className="text-body-medium text-on-surface-variant mt-xs">Mock billing overview — no real payments processed.</p>
       </header>
 
       {/* Revenue summary */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-md">
-        <div className="bg-surface-container-low rounded-md p-md flex flex-col gap-xs">
-          <span className="text-label-l4 font-semibold text-secondary-text uppercase tracking-wider">MRR (est.)</span>
-          <span className="font-display text-display-h3 font-semibold text-primary-text">{formatCurrency(mrr)}</span>
+        <div className="bg-surface-container-low rounded-lg p-md flex flex-col gap-xs">
+          <span className="text-label-large font-semibold text-on-surface-variant uppercase tracking-wider">MRR (est.)</span>
+          <span className="font-display text-title-medium font-semibold text-on-surface">{formatCurrency(mrr)}</span>
         </div>
-        <div className="bg-surface-container-low rounded-md p-md flex flex-col gap-xs">
-          <span className="text-label-l4 font-semibold text-secondary-text uppercase tracking-wider">ARR (est.)</span>
-          <span className="font-display text-display-h3 font-semibold text-primary-text">{formatCurrency(arr)}</span>
+        <div className="bg-surface-container-low rounded-lg p-md flex flex-col gap-xs">
+          <span className="text-label-large font-semibold text-on-surface-variant uppercase tracking-wider">ARR (est.)</span>
+          <span className="font-display text-title-medium font-semibold text-on-surface">{formatCurrency(arr)}</span>
         </div>
-        <div className="bg-surface-container-low rounded-md p-md flex flex-col gap-xs">
-          <span className="text-label-l4 font-semibold text-secondary-text uppercase tracking-wider">Active</span>
-          <span className="font-display text-display-h3 font-semibold text-primary-text">
+        <div className="bg-surface-container-low rounded-lg p-md flex flex-col gap-xs">
+          <span className="text-label-large font-semibold text-on-surface-variant uppercase tracking-wider">Active</span>
+          <span className="font-display text-title-medium font-semibold text-on-surface">
             {restaurants.filter((r) => r.is_active).length}
           </span>
         </div>
-        <div className="bg-surface-container-low rounded-md p-md flex flex-col gap-xs">
-          <span className="text-label-l4 font-semibold text-secondary-text uppercase tracking-wider">Lite Tier</span>
-          <span className="font-display text-display-h3 font-semibold text-secondary-text">
+        <div className="bg-surface-container-low rounded-lg p-md flex flex-col gap-xs">
+          <span className="text-label-large font-semibold text-on-surface-variant uppercase tracking-wider">Lite Tier</span>
+          <span className="font-display text-title-medium font-semibold text-on-surface-variant">
             {byTier.LITE.length}
           </span>
         </div>
@@ -105,26 +105,26 @@ export default function SubscriptionsPage() {
           return (
             <div
               key={tier}
-              className={`rounded-md p-md flex flex-col gap-s border-2 ${TIER_COLORS[tier]}`}
+              className={`rounded-lg p-md flex flex-col gap-s border-2 ${TIER_COLORS[tier]}`}
             >
               <div className="flex items-center justify-between">
-                <span className="font-display font-bold text-p">{tier}</span>
-                <span className="text-caption-sm font-semibold opacity-80">
+                <span className="font-display font-bold text-body-large">{tier}</span>
+                <span className="text-body-small font-semibold opacity-80">
                   {tierPriceLabel(tier)}
                 </span>
               </div>
               <div className="flex flex-col gap-xs">
-                <span className="text-display-h3 font-display font-semibold">{count}</span>
-                <span className="text-caption-xs opacity-70">{active} active · {count - active} inactive</span>
+                <span className="text-title-medium font-display font-semibold">{count}</span>
+                <span className="text-label-small opacity-70">{active} active · {count - active} inactive</span>
               </div>
               {TIER_MONTHLY_KOBO[tier] > 0 && (
-                <span className="text-caption-sm font-semibold opacity-80">
+                <span className="text-body-small font-semibold opacity-80">
                   {formatCurrency(revenue)}/mo revenue
                 </span>
               )}
               <ul className="flex flex-col gap-s">
                 {tierCapacityLines(tier).map((f) => (
-                  <li key={f} className="text-caption-xs opacity-75 flex items-start gap-s">
+                  <li key={f} className="text-label-small opacity-75 flex items-start gap-s">
                     <i className="mgc_check_line text-sm shrink-0" />
                     {f}
                   </li>
@@ -137,14 +137,14 @@ export default function SubscriptionsPage() {
 
       {/* All restaurants in a table */}
       {restaurants.length > 0 && (
-        <div className="bg-surface-container-low rounded-md overflow-hidden">
+        <div className="bg-surface-container-low rounded-lg overflow-hidden">
           <table className="w-full text-left border-collapse">
             <thead>
               <tr className="bg-surface-container-high border-b border-surface-container-highest">
-                <th className="py-s px-md text-label-l4 font-semibold text-secondary-text">Restaurant</th>
-                <th className="py-s px-md text-label-l4 font-semibold text-secondary-text hidden sm:table-cell">Owner</th>
-                <th className="py-s px-md text-label-l4 font-semibold text-secondary-text">Tier</th>
-                <th className="py-s px-md text-label-l4 font-semibold text-secondary-text text-right">MRR</th>
+                <th className="py-s px-md text-label-large font-semibold text-on-surface-variant">Restaurant</th>
+                <th className="py-s px-md text-label-large font-semibold text-on-surface-variant hidden sm:table-cell">Owner</th>
+                <th className="py-s px-md text-label-large font-semibold text-on-surface-variant">Tier</th>
+                <th className="py-s px-md text-label-large font-semibold text-on-surface-variant text-right">MRR</th>
               </tr>
             </thead>
             <tbody>
@@ -152,18 +152,18 @@ export default function SubscriptionsPage() {
                 .sort((a, b) => TIER_MONTHLY_KOBO[b.subscription_tier] - TIER_MONTHLY_KOBO[a.subscription_tier])
                 .map((r) => (
                   <tr key={r.id} className="border-b border-surface-container-highest last:border-none hover:bg-surface-container-low transition-colors">
-                    <td className="py-s px-md text-p2 font-medium">
-                      <Link to={`/restaurants/${r.id}`} className="text-primary hover:underline">
+                    <td className="py-s px-md text-body-medium font-medium">
+                      <Link to={`/restaurants/${r.id}`} className="text-primary-label hover:underline">
                         {r.name}
                       </Link>
                     </td>
-                    <td className="py-s px-md text-caption-sm text-secondary-text hidden sm:table-cell">{r.owner_email}</td>
+                    <td className="py-s px-md text-body-small text-on-surface-variant hidden sm:table-cell">{r.owner_email}</td>
                     <td className="py-s px-md">
-                      <span className="text-caption-xs font-bold uppercase tracking-wider">
+                      <span className="text-label-small font-bold uppercase tracking-wider">
                         {r.subscription_tier}
                       </span>
                     </td>
-                    <td className="py-s px-md text-p2 text-right font-semibold text-primary-text">
+                    <td className="py-s px-md text-body-medium text-right font-semibold text-on-surface">
                       {r.is_active ? formatCurrency(TIER_MONTHLY_KOBO[r.subscription_tier]) : "—"}
                     </td>
                   </tr>

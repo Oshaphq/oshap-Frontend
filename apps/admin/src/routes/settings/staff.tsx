@@ -128,9 +128,9 @@ export default function StaffSettings() {
   }
 
   const inputClass =
-    "w-full px-md py-s rounded-lg bg-surface-container-low border border-outline-variant text-p2 text-primary-text placeholder:text-outline outline-none focus:border-primary transition-colors";
+    "w-full px-md py-s rounded-sm bg-surface-container-low border border-outline-variant text-body-medium text-on-surface placeholder:text-outline outline-none focus:border-primary transition-colors";
   const labelClass =
-    "block text-caption-md font-semibold text-primary-text mb-xs";
+    "block text-body-medium font-semibold text-on-surface mb-xs";
 
   return (
     <div className="flex flex-col gap-md pb-10">
@@ -145,7 +145,7 @@ export default function StaffSettings() {
         )}
       </div>
 
-      <div className="bg-surface-container-low rounded-md border border-transparent hover:border-outline-variant transition-colors overflow-hidden">
+      <div className="bg-surface-container-low rounded-lg border border-transparent hover:border-outline-variant transition-colors overflow-hidden">
         {/* Scrolls inside its own box. Four or five columns of names and
                     money cannot usefully collapse, and without this the whole
                     page slides sideways on a phone. */}
@@ -153,17 +153,17 @@ export default function StaffSettings() {
           <table className="w-full min-w-[32rem] text-left border-collapse">
             <thead>
               <tr className="bg-surface-container-high border-b border-surface-container-highest">
-                <th className="py-s px-md text-label-l4 font-semibold text-secondary-text">
+                <th className="py-s px-md text-label-large font-semibold text-on-surface-variant">
                   Name
                 </th>
-                <th className="py-s px-md text-label-l4 font-semibold text-secondary-text">
+                <th className="py-s px-md text-label-large font-semibold text-on-surface-variant">
                   Email
                 </th>
-                <th className="py-s px-md text-label-l4 font-semibold text-secondary-text">
+                <th className="py-s px-md text-label-large font-semibold text-on-surface-variant">
                   Role
                 </th>
                 {user?.role === "OWNER" && (
-                  <th className="py-s px-md text-label-l4 font-semibold text-secondary-text text-right">
+                  <th className="py-s px-md text-label-large font-semibold text-on-surface-variant text-right">
                     Actions
                   </th>
                 )}
@@ -175,21 +175,21 @@ export default function StaffSettings() {
                   key={staff.id}
                   className="border-b border-surface-container-highest last:border-none hover:bg-surface-container-low transition-colors"
                 >
-                  <td className="py-s px-md text-p2 text-primary-text font-medium">
+                  <td className="py-s px-md text-body-medium text-on-surface font-medium">
                     {staff.name}
                   </td>
-                  <td className="py-s px-md text-p2 text-secondary-text">
+                  <td className="py-s px-md text-body-medium text-on-surface-variant">
                     <span className="tabular-nums">
                       {formatPhone(staff.phone)}
                     </span>
                     {staff.email && (
-                      <span className="block text-caption-sm text-outline">
+                      <span className="block text-body-small text-outline">
                         {staff.email}
                       </span>
                     )}
                   </td>
                   <td className="py-s px-md">
-                    <span className="px-xs py-xs bg-surface-container-highest text-primary-text text-label-l4 rounded-md font-mono">
+                    <span className="px-xs py-xs bg-surface-container-highest text-on-surface text-label-large rounded-lg font-mono">
                       {staff.role}
                     </span>
                   </td>
@@ -197,14 +197,14 @@ export default function StaffSettings() {
                     <td className="py-s px-md text-right">
                       <button
                         onClick={() => handleOpenEdit(staff)}
-                        className="p-xs text-secondary-text hover:text-primary transition-colors"
+                        className="p-xs text-on-surface-variant hover:text-primary-label transition-colors"
                         title="Edit"
                       >
                         <i className="mgc_edit_line text-lg" />
                       </button>
                       <button
                         onClick={() => handleDelete(staff.id)}
-                        className="p-xs text-secondary-text hover:text-error transition-colors"
+                        className="p-xs text-on-surface-variant hover:text-error transition-colors"
                         title="Remove"
                         disabled={
                           staff.role === "OWNER" &&
@@ -222,7 +222,7 @@ export default function StaffSettings() {
                 <tr>
                   <td
                     colSpan={4}
-                    className="p-xl text-center text-secondary-text"
+                    className="p-xl text-center text-on-surface-variant"
                   >
                     No staff members found.
                   </td>
@@ -235,8 +235,8 @@ export default function StaffSettings() {
 
       {isModalOpen && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center bg-scrim backdrop-blur-sm p-md">
-          <div className="w-full max-w-[448px] rounded-md bg-surface-container-high p-l flex flex-col gap-md border border-primary shadow-xl">
-            <h3 className="font-bold text-primary-text">
+          <div className="w-full max-w-[448px] rounded-lg bg-surface-container-high p-l flex flex-col gap-md border border-primary shadow-xl">
+            <h3 className="font-bold text-on-surface">
               {editingId ? "Edit Staff" : "Add Staff"}
             </h3>
 
@@ -264,7 +264,7 @@ export default function StaffSettings() {
                   aria-invalid={Boolean(phoneError)}
                   className={inputClass}
                 />
-                <p className="text-caption-xs text-secondary-text mt-xs">
+                <p className="text-label-small text-on-surface-variant mt-xs">
                   {phoneError ? (
                     <span className="text-error font-semibold">
                       {phoneError}
@@ -277,7 +277,7 @@ export default function StaffSettings() {
               <div>
                 <label className={labelClass}>
                   Email{" "}
-                  <span className="font-normal text-secondary-text">
+                  <span className="font-normal text-on-surface-variant">
                     (optional)
                   </span>
                 </label>
@@ -326,7 +326,7 @@ export default function StaffSettings() {
                   <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-xs top-1/2 -translate-y-1/2 w-10 h-10 flex items-center justify-center text-outline hover:text-primary-text transition-colors rounded-full"
+                    className="absolute right-xs top-1/2 -translate-y-1/2 w-10 h-10 flex items-center justify-center text-outline hover:text-on-surface transition-colors rounded-full"
                     tabIndex={-1}
                     aria-label={
                       showPassword ? "Hide password" : "Show password"

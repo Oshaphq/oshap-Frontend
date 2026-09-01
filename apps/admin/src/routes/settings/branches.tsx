@@ -10,8 +10,8 @@ import { PrimaryButton, SecondaryButton, QueryError, toast } from "@oshap/shared
 import { useAuth } from "../../context/AuthContext";
 
 const inputClass =
-  "w-full px-md py-s rounded-lg bg-surface-container-low border border-outline-variant text-p2 text-primary-text placeholder:text-outline outline-none focus:border-primary transition-colors";
-const labelClass = "block text-caption-md font-semibold text-primary-text mb-xs";
+  "w-full px-md py-s rounded-sm bg-surface-container-low border border-outline-variant text-body-medium text-on-surface placeholder:text-outline outline-none focus:border-primary transition-colors";
+const labelClass = "block text-body-medium font-semibold text-on-surface mb-xs";
 
 const EMPTY = { name: "", address: "", operating_hours: "", table_count: "" };
 
@@ -141,8 +141,8 @@ export default function BranchesSettings() {
     <div className="flex flex-col gap-l pb-10">
       <div className="flex items-start justify-between gap-md flex-wrap">
         <div className="flex flex-col gap-xs">
-          <h3 className="font-bold text-primary-text">Branches</h3>
-          <p className="text-caption-md text-secondary-text max-w-[52ch]">
+          <h3 className="font-bold text-on-surface">Branches</h3>
+          <p className="text-body-medium text-on-surface-variant max-w-[52ch]">
             Each branch has its own tables, menu and staff. Switch between them
             from the top bar; figures across all of them live under Analytics.
           </p>
@@ -155,8 +155,8 @@ export default function BranchesSettings() {
       </div>
 
       {showForm && (
-        <div className="bg-surface-container-low rounded-md p-l flex flex-col gap-md border border-primary">
-          <h4 className="font-bold text-primary-text">
+        <div className="bg-surface-container-low rounded-lg p-l flex flex-col gap-md border border-primary">
+          <h4 className="font-bold text-on-surface">
             {editing ? `Edit ${editing.name}` : "New branch"}
           </h4>
 
@@ -168,7 +168,7 @@ export default function BranchesSettings() {
               onChange={(e) => setForm({ ...form, name: e.target.value })}
               placeholder="Ikeja"
             />
-            <p className="text-caption-xs text-secondary-text mt-xs">
+            <p className="text-label-small text-on-surface-variant mt-xs">
               What staff will see in the switcher. Somewhere recognisable beats
               something formal — &ldquo;Ikeja&rdquo;, not &ldquo;Branch 2&rdquo;.
             </p>
@@ -204,7 +204,7 @@ export default function BranchesSettings() {
                 placeholder="12"
                 inputMode="numeric"
               />
-              <p className="text-caption-xs text-secondary-text mt-xs">
+              <p className="text-label-small text-on-surface-variant mt-xs">
                 Creates them ready to print QR codes for. You can add or remove
                 tables afterwards.
               </p>
@@ -229,7 +229,7 @@ export default function BranchesSettings() {
       )}
 
       {branches.length === 0 ? (
-        <p className="text-p2 text-secondary-text text-center py-xl">
+        <p className="text-body-medium text-on-surface-variant text-center py-xl">
           No branches yet.
         </p>
       ) : (
@@ -239,7 +239,7 @@ export default function BranchesSettings() {
             return (
               <div
                 key={branch.id}
-                className={`rounded-md p-l flex flex-wrap items-start justify-between gap-md border transition-colors ${
+                className={`rounded-lg p-l flex flex-wrap items-start justify-between gap-md border transition-colors ${
                   branch.is_active
                     ? "bg-surface-container-low border-outline-variant"
                     : "bg-surface-container-low border-transparent opacity-60"
@@ -247,26 +247,26 @@ export default function BranchesSettings() {
               >
                 <div className="flex flex-col gap-xs min-w-0">
                   <div className="flex items-center gap-s flex-wrap">
-                    <span className="font-display text-display-h4 font-semibold text-primary-text">
+                    <span className="font-display text-title-medium font-semibold text-on-surface">
                       {branch.name}
                     </span>
                     {isCurrent && (
-                      <span className="px-s py-xs rounded-4xl text-caption-xs font-bold uppercase tracking-wider bg-primary-container text-on-primary-container">
+                      <span className="px-s py-xs rounded-full text-label-small font-bold uppercase tracking-wider bg-primary-container text-on-primary-container">
                         Viewing
                       </span>
                     )}
                     {!branch.is_active && (
-                      <span className="px-s py-xs rounded-4xl text-caption-xs font-bold uppercase tracking-wider bg-surface-container-high text-outline">
+                      <span className="px-s py-xs rounded-full text-label-small font-bold uppercase tracking-wider bg-surface-container-high text-outline">
                         Closed
                       </span>
                     )}
                   </div>
                   {branch.address && (
-                    <span className="text-caption-md text-secondary-text">
+                    <span className="text-body-medium text-on-surface-variant">
                       {branch.address}
                     </span>
                   )}
-                  <span className="text-caption-sm text-outline">
+                  <span className="text-body-small text-outline">
                     {branch.table_count} table{branch.table_count === 1 ? "" : "s"}
                     {" · "}
                     {branch.staff_count} staff
@@ -285,7 +285,7 @@ export default function BranchesSettings() {
                   <button
                     type="button"
                     onClick={() => toggleActive(branch)}
-                    className="px-md py-s rounded-lg text-caption-md font-semibold text-secondary-text bg-transparent border border-outline-variant hover:bg-surface-container-high transition-colors"
+                    className="px-md py-s rounded-sm text-body-medium font-semibold text-on-surface-variant bg-transparent border border-outline-variant hover:bg-surface-container-high transition-colors"
                   >
                     {branch.is_active ? "Close" : "Reopen"}
                   </button>

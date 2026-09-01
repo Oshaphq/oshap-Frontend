@@ -21,7 +21,7 @@ import {
 import QueryError from "../components/QueryError";
 
 const inputClass =
-  "px-md py-s rounded-lg bg-surface-container-low border border-outline-variant text-p2 text-primary-text placeholder:text-outline outline-none focus:border-primary transition-colors";
+  "px-md py-s rounded-sm bg-surface-container-low border border-outline-variant text-body-medium text-on-surface placeholder:text-outline outline-none focus:border-primary transition-colors";
 
 /**
  * Staff-facing wording for the reasons stock moves. The `value` is the
@@ -85,13 +85,13 @@ export default function InventoryPage() {
       {/* Title block above the actions, not beside them. */}
       <header className="flex flex-col gap-s">
         <div className="flex flex-col gap-0.5">
-          <h1 className="font-display text-display-h2 font-semibold text-primary-text">
+          <h1 className="font-display text-title-large font-semibold text-on-surface">
             Inventory
           </h1>
           {/* Two lines by design, not by wrapping. They are two separate
               things to know, and running them together as one sentence made
               the second half read as a qualification of the first. */}
-          <p className="text-caption-md text-secondary-text">
+          <p className="text-body-medium text-on-surface-variant">
             <span className="block">What your dishes are made of.</span>
             <span className="block">Plate counts live on the menu screen.</span>
           </p>
@@ -110,13 +110,13 @@ export default function InventoryPage() {
       {low.length > 0 && (
         <div
           role="alert"
-          className="flex items-start gap-s p-md rounded-md bg-warning-container text-on-warning-container"
+          className="flex items-start gap-s p-md rounded-lg bg-warning-container text-on-warning-container"
         >
           <i className="mgc_alert_line text-lg shrink-0" />
           {/* One sentence naming them, rather than a heading with a list under
               it. At one or two ingredients the list was a paragraph break for
               five words. */}
-          <p className="text-caption-sm font-semibold">
+          <p className="text-body-small font-semibold">
             {low.length} ingredient{low.length === 1 ? "" : "s"} at or below
             threshold: {low.map((i) => i.name).join(", ")}
           </p>
@@ -128,12 +128,12 @@ export default function InventoryPage() {
           <div className="oshap-spinner" />
         </div>
       ) : ingredients.length === 0 ? (
-        <div className="flex flex-col items-center gap-xs py-10 px-md text-center rounded-md bg-surface-container-low">
+        <div className="flex flex-col items-center gap-xs py-10 px-md text-center rounded-lg bg-surface-container-low">
           <i className="mgc_box_2_line text-5xl text-outline-variant opacity-40" />
-          <span className="font-display text-display-h4 font-semibold text-primary-text">
+          <span className="font-display text-title-medium font-semibold text-on-surface">
             No ingredients yet
           </span>
-          <p className="text-p2 text-secondary-text max-w-[36rem]">
+          <p className="text-body-medium text-on-surface-variant max-w-[36rem]">
             Add what you buy — rice, chicken, oil — then attach them to dishes
             as recipes. Orders will draw stock down automatically.
           </p>
@@ -146,8 +146,8 @@ export default function InventoryPage() {
            and every `1fr` column drifted out of step with its own heading.
            Sharing the tracks makes the alignment structural rather than a
            coincidence that has to be maintained. */
-        <div className="bg-surface-container-low rounded-md overflow-hidden sm:grid sm:grid-cols-[2fr_1fr_1fr_1fr_auto] sm:gap-x-md">
-          <div className="hidden sm:grid sm:grid-cols-subgrid sm:col-span-5 gap-md px-md py-s bg-surface-container-high text-label-l4 font-semibold text-secondary-text">
+        <div className="bg-surface-container-low rounded-lg overflow-hidden sm:grid sm:grid-cols-[2fr_1fr_1fr_1fr_auto] sm:gap-x-md">
+          <div className="hidden sm:grid sm:grid-cols-subgrid sm:col-span-5 gap-md px-md py-s bg-surface-container-high text-label-large font-semibold text-on-surface-variant">
             <span>Ingredient</span>
             <span className="text-right">In stock</span>
             <span className="text-right">Alert at</span>
@@ -163,7 +163,7 @@ export default function InventoryPage() {
               ? "text-error"
               : isLow
                 ? "text-warning"
-                : "text-primary-text";
+                : "text-on-surface";
             return (
               <div
                 key={ingredient.id}
@@ -178,14 +178,14 @@ export default function InventoryPage() {
                 <div className="flex flex-col gap-s sm:hidden">
                   <div className="flex items-start justify-between gap-s">
                     <div className="flex flex-col gap-0.5 min-w-0">
-                      <span className="text-p2 font-semibold text-primary-text truncate">
+                      <span className="text-body-medium font-semibold text-on-surface truncate">
                         {ingredient.name}
                       </span>
                       {/* Named, not bare. The extract leaves this number on its
                           own; four extra characters are worth more than the
                           symmetry. */}
                       {ingredient.low_stock_threshold != null && (
-                        <span className="text-caption-xs text-secondary-text tabular-nums">
+                        <span className="text-label-small text-on-surface-variant tabular-nums">
                           Alert at {qty(ingredient.low_stock_threshold)}{" "}
                           {ingredient.unit}
                         </span>
@@ -193,12 +193,12 @@ export default function InventoryPage() {
                     </div>
                     <div className="flex flex-col gap-0.5 items-end shrink-0">
                       <span
-                        className={`text-p2 font-semibold tabular-nums ${stockCls}`}
+                        className={`text-body-medium font-semibold tabular-nums ${stockCls}`}
                       >
                         {qty(ingredient.stock_qty)} {ingredient.unit}
                       </span>
                       {ingredient.cost_per_unit != null && (
-                        <span className="text-caption-xs text-secondary-text tabular-nums">
+                        <span className="text-label-small text-on-surface-variant tabular-nums">
                           {formatCurrency(ingredient.cost_per_unit)} /{" "}
                           {ingredient.unit}
                         </span>
@@ -212,11 +212,11 @@ export default function InventoryPage() {
                   />
                 </div>
 
-                <span className="hidden sm:block text-p2 font-semibold text-primary-text">
+                <span className="hidden sm:block text-body-medium font-semibold text-on-surface">
                   {ingredient.name}
                 </span>
                 <span
-                  className={`hidden sm:block text-label-l3 font-semibold tabular-nums text-right ${stockCls}`}
+                  className={`hidden sm:block text-title-medium font-semibold tabular-nums text-right ${stockCls}`}
                   title={
                     isNegative
                       ? "Negative means more was sold than the count allowed — the recipe or the count is wrong."
@@ -225,12 +225,12 @@ export default function InventoryPage() {
                 >
                   {qty(ingredient.stock_qty)} {ingredient.unit}
                 </span>
-                <span className="hidden sm:block text-caption-md text-secondary-text tabular-nums text-right">
+                <span className="hidden sm:block text-body-medium text-on-surface-variant tabular-nums text-right">
                   {ingredient.low_stock_threshold == null
                     ? "—"
                     : `${qty(ingredient.low_stock_threshold)} ${ingredient.unit}`}
                 </span>
-                <span className="hidden sm:block text-caption-md text-secondary-text tabular-nums text-right">
+                <span className="hidden sm:block text-body-medium text-on-surface-variant tabular-nums text-right">
                   {ingredient.cost_per_unit == null
                     ? "—"
                     : formatCurrency(ingredient.cost_per_unit)}
@@ -288,7 +288,7 @@ function RowActions({
       <button
         type="button"
         onClick={onAdjust}
-        className="px-md py-s rounded-s bg-surface-container text-secondary-text text-caption-sm font-semibold hover:bg-surface-container-high hover:text-primary-text transition-colors"
+        className="px-md py-s rounded-sm bg-surface-container text-on-surface-variant text-body-small font-semibold hover:bg-surface-container-high hover:text-on-surface transition-colors"
       >
         Adjust
       </button>
@@ -297,7 +297,7 @@ function RowActions({
         onClick={onEdit}
         title="Edit name, unit, threshold or cost"
         aria-label={`Edit ${ingredient.name}`}
-        className="px-md py-s rounded-s border border-outline-variant bg-transparent text-secondary-text text-caption-sm font-semibold hover:border-primary-text hover:text-primary-text transition-colors"
+        className="px-md py-s rounded-sm border border-outline-variant bg-transparent text-on-surface-variant text-body-small font-semibold hover:border-on-surface hover:text-on-surface transition-colors"
       >
         Edit
       </button>
@@ -322,7 +322,7 @@ function MovementsLedger() {
   return (
     <section className="flex flex-col gap-md">
       <div className="flex flex-wrap items-center justify-between gap-md">
-        <h2 className="text-label-l2 font-semibold text-primary-text">
+        <h2 className="text-title-large font-semibold text-on-surface">
           Stock movements
         </h2>
         <Select
@@ -347,36 +347,36 @@ function MovementsLedger() {
           <div className="oshap-spinner" />
         </div>
       ) : rows.length === 0 ? (
-        <p className="text-p2 text-secondary-text py-l text-center rounded-md bg-surface-container-low">
+        <p className="text-body-medium text-on-surface-variant py-l text-center rounded-lg bg-surface-container-low">
           Nothing recorded yet.
         </p>
       ) : (
-        <div className="bg-surface-container-low rounded-md overflow-hidden">
+        <div className="bg-surface-container-low rounded-lg overflow-hidden">
           {rows.map((movement) => (
             <div
               key={movement.id}
               className="flex flex-wrap items-baseline gap-x-md gap-y-xs px-md py-s border-b border-outline-variant last:border-none"
             >
-              <span className="text-caption-md text-secondary-text tabular-nums shrink-0">
+              <span className="text-body-medium text-on-surface-variant tabular-nums shrink-0">
                 {formatApiDateTime(movement.created_at)}
               </span>
-              <span className="text-p2 text-primary-text flex-1 min-w-0">
+              <span className="text-body-medium text-on-surface flex-1 min-w-0">
                 {REASON_LABELS[movement.reason] ?? movement.reason}
                 {movement.note && (
-                  <span className="text-secondary-text">
+                  <span className="text-on-surface-variant">
                     {" "}
                     · {movement.note}
                   </span>
                 )}
               </span>
               {movement.order_id && (
-                <span className="text-caption-md font-mono text-secondary-text shrink-0">
+                <span className="text-body-medium font-mono text-on-surface-variant shrink-0">
                   order
                 </span>
               )}
               <span
-                className={`text-label-l4 font-semibold tabular-nums shrink-0 ${
-                  movement.delta < 0 ? "text-error" : "text-primary-text"
+                className={`text-label-large font-semibold tabular-nums shrink-0 ${
+                  movement.delta < 0 ? "text-error" : "text-on-surface"
                 }`}
               >
                 {movement.delta > 0 ? "+" : "−"}
@@ -396,7 +396,7 @@ function MovementsLedger() {
           >
             Previous
           </SecondaryButton>
-          <span className="text-caption-md text-secondary-text tabular-nums">
+          <span className="text-body-medium text-on-surface-variant tabular-nums">
             Page {page} of {totalPages}
           </span>
           <SecondaryButton
@@ -462,18 +462,18 @@ function AdjustDialog({
 
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center bg-scrim backdrop-blur-sm p-md">
-      <div className="w-full max-w-[440px] rounded-md bg-surface-container-high p-l flex flex-col gap-md border border-outline-variant shadow-xl">
+      <div className="w-full max-w-[440px] rounded-lg bg-surface-container-high p-l flex flex-col gap-md border border-outline-variant shadow-xl">
         <div className="flex flex-col gap-0.5">
-          <h3 className="font-display text-display-h3 font-semibold text-primary-text">
+          <h3 className="font-display text-title-medium font-semibold text-on-surface">
             {ingredient.name}
           </h3>
-          <p className="text-caption-md text-secondary-text">
+          <p className="text-body-medium text-on-surface-variant">
             Currently {qty(ingredient.stock_qty)} {ingredient.unit}
           </p>
         </div>
 
         <label className="flex flex-col gap-xs">
-          <span className="text-caption-md font-semibold text-primary-text">
+          <span className="text-body-medium font-semibold text-on-surface">
             What happened?
           </span>
           <Select
@@ -490,7 +490,7 @@ function AdjustDialog({
         </label>
 
         <label className="flex flex-col gap-xs">
-          <span className="text-caption-md font-semibold text-primary-text">
+          <span className="text-body-medium font-semibold text-on-surface">
             {isCount
               ? `Counted total (${ingredient.unit})`
               : `Amount (${ingredient.unit})`}
@@ -504,7 +504,7 @@ function AdjustDialog({
             className={inputClass}
           />
           {valid && (
-            <span className="text-caption-sm text-secondary-text tabular-nums">
+            <span className="text-body-small text-on-surface-variant tabular-nums">
               {delta >= 0 ? "+" : "−"}
               {qty(Math.abs(delta))} {ingredient.unit} → new level{" "}
               {qty(ingredient.stock_qty + delta)} {ingredient.unit}
@@ -513,9 +513,9 @@ function AdjustDialog({
         </label>
 
         <label className="flex flex-col gap-xs">
-          <span className="text-caption-md font-semibold text-primary-text">
+          <span className="text-body-medium font-semibold text-on-surface">
             Note{" "}
-            <span className="font-normal text-secondary-text">(optional)</span>
+            <span className="font-normal text-on-surface-variant">(optional)</span>
           </span>
           <input
             value={note}
@@ -574,8 +574,8 @@ function NewIngredientDialog({ onClose }: { onClose: () => void }) {
 
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center bg-scrim backdrop-blur-sm p-md">
-      <div className="w-full max-w-[440px] rounded-md bg-surface-container-high p-l flex flex-col gap-md border border-outline-variant shadow-xl">
-        <h3 className="font-display text-display-h3 font-semibold text-primary-text">
+      <div className="w-full max-w-[440px] rounded-lg bg-surface-container-high p-l flex flex-col gap-md border border-outline-variant shadow-xl">
+        <h3 className="font-display text-title-medium font-semibold text-on-surface">
           Add ingredient
         </h3>
 
@@ -698,12 +698,12 @@ function EditIngredientDialog({
 
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center bg-scrim backdrop-blur-sm p-md">
-      <div className="w-full max-w-[440px] rounded-md bg-surface-container-high p-l flex flex-col gap-md border border-outline-variant shadow-xl">
+      <div className="w-full max-w-[440px] rounded-lg bg-surface-container-high p-l flex flex-col gap-md border border-outline-variant shadow-xl">
         <div className="flex flex-col gap-0.5">
-          <h3 className="font-display text-display-h3 font-semibold text-primary-text">
+          <h3 className="font-display text-title-medium font-semibold text-on-surface">
             Edit {ingredient.name}
           </h3>
-          <p className="text-caption-md text-secondary-text">
+          <p className="text-body-medium text-on-surface-variant">
             Changing the level is a separate action — use Adjust, so it lands in
             the ledger.
           </p>
@@ -719,7 +719,7 @@ function EditIngredientDialog({
         />
 
         <div className="grid grid-cols-2 gap-s">
-          <label className="flex flex-col gap-xs text-caption-md text-secondary-text">
+          <label className="flex flex-col gap-xs text-body-medium text-on-surface-variant">
             Unit
             <input
               value={unit}
@@ -729,7 +729,7 @@ function EditIngredientDialog({
               className={inputClass}
             />
           </label>
-          <label className="flex flex-col gap-xs text-caption-md text-secondary-text">
+          <label className="flex flex-col gap-xs text-body-medium text-on-surface-variant">
             Low at
             <input
               value={threshold}
@@ -742,7 +742,7 @@ function EditIngredientDialog({
           </label>
         </div>
 
-        <label className="flex flex-col gap-xs text-caption-md text-secondary-text">
+        <label className="flex flex-col gap-xs text-body-medium text-on-surface-variant">
           Cost per {unit.trim() || "unit"} (₦)
           <input
             value={cost}
@@ -758,7 +758,7 @@ function EditIngredientDialog({
             would otherwise multiply their own stock by a thousand without
             noticing. */}
         {unit.trim() !== ingredient.unit && (
-          <p className="text-caption-xs text-warning">
+          <p className="text-label-small text-warning">
             Changing the unit relabels {qty(ingredient.stock_qty)} — it
             doesn&rsquo;t convert it. {qty(ingredient.stock_qty)}{" "}
             {ingredient.unit} becomes {qty(ingredient.stock_qty)}{" "}

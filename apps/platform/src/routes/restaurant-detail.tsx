@@ -28,7 +28,7 @@ export default function RestaurantDetailPage() {
 
   if (query.isLoading) {
     return (
-      <div className="flex flex-col items-center justify-center min-h-[60vh] gap-md text-secondary-text">
+      <div className="flex flex-col items-center justify-center min-h-[60vh] gap-md text-on-surface-variant">
         <div className="oshap-spinner" />
         <p>Loading restaurant...</p>
       </div>
@@ -39,7 +39,7 @@ export default function RestaurantDetailPage() {
     return (
       <main className="p-md">
         <p className="text-error">Restaurant not found.</p>
-        <Link to="/restaurants" className="text-primary">← Back</Link>
+        <Link to="/restaurants" className="text-primary-label">← Back</Link>
       </main>
     );
   }
@@ -76,21 +76,21 @@ export default function RestaurantDetailPage() {
       <header className="flex items-center gap-md">
         <Link
           to="/restaurants"
-          className="w-9 h-9 flex items-center justify-center rounded-lg border border-outline-variant text-secondary-text hover:bg-surface-container-high transition-colors no-underline"
+          className="w-9 h-9 flex items-center justify-center rounded-sm border border-outline-variant text-on-surface-variant hover:bg-surface-container-high transition-colors no-underline"
         >
           <i className="mgc_left_line" />
         </Link>
         <div className="flex-1 min-w-0">
-          <h1 className="font-display text-display-h2 font-semibold text-primary-text truncate">
+          <h1 className="font-display text-title-large font-semibold text-on-surface truncate">
             {r.name}
           </h1>
-          <p className="text-caption-md text-secondary-text">{r.owner_email}</p>
+          <p className="text-body-medium text-on-surface-variant">{r.owner_email}</p>
         </div>
         <button
           type="button"
           onClick={handleToggleActive}
           disabled={update.isPending}
-          className={`px-md py-s rounded-lg font-bold text-caption-md transition-all hover:opacity-90 active:scale-[0.98] disabled:opacity-50 ${
+          className={`px-md py-s rounded-sm font-bold text-body-medium transition-all hover:opacity-90 active:scale-[0.98] disabled:opacity-50 ${
             r.is_active
               ? "bg-error-container text-on-error-container"
               : "bg-success-container text-on-success-container"
@@ -102,22 +102,22 @@ export default function RestaurantDetailPage() {
 
       {/* Info cards */}
       <div className="grid grid-cols-2 gap-md">
-        <div className="bg-surface-container-low rounded-md p-md flex flex-col gap-xs">
-          <span className="text-label-l4 font-semibold text-secondary-text uppercase tracking-wider">
+        <div className="bg-surface-container-low rounded-lg p-md flex flex-col gap-xs">
+          <span className="text-label-large font-semibold text-on-surface-variant uppercase tracking-wider">
             Status
           </span>
-          <span className={`font-bold text-p ${r.is_active ? "text-success" : "text-error"}`}>
+          <span className={`font-bold text-body-large ${r.is_active ? "text-success" : "text-error"}`}>
             {r.is_active ? "Active" : "Inactive"}
           </span>
         </div>
-        <div className="bg-surface-container-low rounded-md p-md flex flex-col gap-xs">
-          <span className="text-label-l4 font-semibold text-secondary-text uppercase tracking-wider">
+        <div className="bg-surface-container-low rounded-lg p-md flex flex-col gap-xs">
+          <span className="text-label-large font-semibold text-on-surface-variant uppercase tracking-wider">
             Tables
           </span>
-          <span className="font-bold text-p text-primary-text">{r.table_count}</span>
+          <span className="font-bold text-body-large text-on-surface">{r.table_count}</span>
         </div>
-        <div className="bg-surface-container-low rounded-md p-md flex flex-col gap-xs">
-          <span className="text-label-l4 font-semibold text-secondary-text uppercase tracking-wider">
+        <div className="bg-surface-container-low rounded-lg p-md flex flex-col gap-xs">
+          <span className="text-label-large font-semibold text-on-surface-variant uppercase tracking-wider">
             Monthly Orders
           </span>
           {(() => {
@@ -127,31 +127,31 @@ export default function RestaurantDetailPage() {
             const usage = orderUsage(r.subscription_tier, r.monthly_orders);
             if (!usage) {
               return (
-                <span className="font-bold text-p text-primary-text">
+                <span className="font-bold text-body-large text-on-surface">
                   {r.monthly_orders.toLocaleString()}
                 </span>
               );
             }
             return (
               <>
-                <span className="font-bold text-p text-primary-text tabular-nums">
+                <span className="font-bold text-body-large text-on-surface tabular-nums">
                   {usage.used.toLocaleString()}
-                  <span className="text-caption-md font-normal text-secondary-text">
+                  <span className="text-body-medium font-normal text-on-surface-variant">
                     {" "}of {usage.cap.toLocaleString()}
                   </span>
                 </span>
                 <div
-                  className="h-1.5 w-full rounded-4xl bg-surface-container-high overflow-hidden"
+                  className="h-1.5 w-full rounded-full bg-surface-container-high overflow-hidden"
                   role="img"
                   aria-label={`${usage.used} of ${usage.cap} orders used this month`}
                 >
                   <div
-                    className={`h-full rounded-4xl ${usage.nearLimit ? "bg-warning" : "bg-primary"}`}
+                    className={`h-full rounded-full ${usage.nearLimit ? "bg-warning" : "bg-primary"}`}
                     style={{ width: `${Math.max(usage.fraction * 100, 2)}%` }}
                   />
                 </div>
                 {usage.nearLimit && (
-                  <span className="text-caption-xs text-warning font-semibold">
+                  <span className="text-label-small text-warning font-semibold">
                     Close to the {r.subscription_tier} limit — worth a conversation
                     before it bites.
                   </span>
@@ -160,20 +160,20 @@ export default function RestaurantDetailPage() {
             );
           })()}
         </div>
-        <div className="bg-surface-container-low rounded-md p-md flex flex-col gap-xs">
-          <span className="text-label-l4 font-semibold text-secondary-text uppercase tracking-wider">
+        <div className="bg-surface-container-low rounded-lg p-md flex flex-col gap-xs">
+          <span className="text-label-large font-semibold text-on-surface-variant uppercase tracking-wider">
             Onboarded
           </span>
-          <span className="font-bold text-p text-primary-text">
+          <span className="font-bold text-body-large text-on-surface">
             {parseApiDate(r.created_at).toLocaleDateString()}
           </span>
         </div>
       </div>
 
       {/* Subscription tier */}
-      <div className="bg-surface-container-low rounded-md p-md flex flex-col gap-md">
+      <div className="bg-surface-container-low rounded-lg p-md flex flex-col gap-md">
         <div className="flex items-center justify-between">
-          <h2 className="text-label-l2 font-semibold text-primary-text">Subscription</h2>
+          <h2 className="text-title-large font-semibold text-on-surface">Subscription</h2>
           {!editTier && (
             <button
               type="button"
@@ -182,7 +182,7 @@ export default function RestaurantDetailPage() {
                 setPendingTier(r.subscription_tier);
                 setPendingPeriod(r.billing_period);
               }}
-              className="text-caption-sm font-semibold text-primary hover:underline"
+              className="text-body-small font-semibold text-primary-label hover:underline"
             >
               Change plan
             </button>
@@ -197,15 +197,15 @@ export default function RestaurantDetailPage() {
                   key={tier}
                   type="button"
                   onClick={() => setPendingTier(tier)}
-                  className={`py-s px-md rounded-lg border-2 text-left transition-all ${
+                  className={`py-s px-md rounded-sm border-2 text-left transition-all ${
                     pendingTier === tier
                       ? "border-primary bg-primary-container text-on-primary-container"
-                      : "border-outline-variant bg-surface-container-low text-primary-text hover:border-outline"
+                      : "border-outline-variant bg-surface-container-low text-on-surface hover:border-outline"
                   }`}
                 >
-                  <p className="font-bold text-caption-md">{tier}</p>
-                  <p className="text-caption-xs opacity-70">{tierPriceLabel(tier)}</p>
-                  <p className="text-caption-xs opacity-50">{tierAnnualLabel(tier)}</p>
+                  <p className="font-bold text-body-medium">{tier}</p>
+                  <p className="text-label-small opacity-70">{tierPriceLabel(tier)}</p>
+                  <p className="text-label-small opacity-50">{tierAnnualLabel(tier)}</p>
                 </button>
               ))}
             </div>
@@ -219,16 +219,16 @@ export default function RestaurantDetailPage() {
                   key={period}
                   type="button"
                   onClick={() => setPendingPeriod(period)}
-                  className={`py-s px-md rounded-lg border-2 text-left transition-all ${
+                  className={`py-s px-md rounded-sm border-2 text-left transition-all ${
                     pendingPeriod === period
                       ? "border-primary bg-primary-container text-on-primary-container"
-                      : "border-outline-variant bg-surface-container-low text-primary-text hover:border-outline"
+                      : "border-outline-variant bg-surface-container-low text-on-surface hover:border-outline"
                   }`}
                 >
-                  <p className="font-bold text-caption-md">
+                  <p className="font-bold text-body-medium">
                     {period === "MONTHLY" ? "Monthly" : "Annual"}
                   </p>
-                  <p className="text-caption-xs opacity-70">
+                  <p className="text-label-small opacity-70">
                     {period === "MONTHLY"
                       ? tierPriceLabel(pendingTier ?? r.subscription_tier)
                       : tierAnnualLabel(pendingTier ?? r.subscription_tier)}
@@ -242,7 +242,7 @@ export default function RestaurantDetailPage() {
                 type="button"
                 onClick={handleSaveTier}
                 disabled={update.isPending || !pendingTier || !pendingPeriod}
-                className="px-md py-s rounded-lg font-bold text-caption-md bg-primary text-on-primary hover:opacity-90 disabled:opacity-50 transition-all"
+                className="px-md py-s rounded-sm font-bold text-body-medium bg-primary-action text-on-primary hover:opacity-90 disabled:opacity-50 transition-all"
               >
                 {update.isPending ? "Saving..." : "Save"}
               </button>
@@ -253,7 +253,7 @@ export default function RestaurantDetailPage() {
                   setPendingTier(null);
                   setPendingPeriod(null);
                 }}
-                className="px-md py-s rounded-lg font-bold text-caption-md border border-outline-variant text-secondary-text hover:bg-surface-container-high transition-all"
+                className="px-md py-s rounded-sm font-bold text-body-medium border border-outline-variant text-on-surface-variant hover:bg-surface-container-high transition-all"
               >
                 Cancel
               </button>
@@ -262,19 +262,19 @@ export default function RestaurantDetailPage() {
         ) : (
           <div className="flex flex-col gap-xs">
             <div className="flex items-center gap-md flex-wrap">
-              <span className="font-display text-display-h3 font-semibold text-primary-text">
+              <span className="font-display text-title-medium font-semibold text-on-surface">
                 {r.subscription_tier}
               </span>
-              <span className="text-p2 text-secondary-text">
+              <span className="text-body-medium text-on-surface-variant">
                 {r.billing_period === "ANNUAL"
                   ? tierAnnualLabel(r.subscription_tier)
                   : tierPriceLabel(r.subscription_tier)}
               </span>
-              <span className="px-s py-xs rounded-4xl text-caption-xs font-bold uppercase tracking-wider bg-surface-container-high text-secondary-text">
+              <span className="px-s py-xs rounded-full text-label-small font-bold uppercase tracking-wider bg-surface-container-high text-on-surface-variant">
                 {r.billing_period === "ANNUAL" ? "Annual" : "Monthly"}
               </span>
             </div>
-            <span className="text-caption-md text-secondary-text">
+            <span className="text-body-medium text-on-surface-variant">
               {locationAllowanceLabel(r.subscription_tier)}
             </span>
           </div>

@@ -89,13 +89,13 @@ export default function Analytics() {
       <header className="flex flex-col gap-md sm:flex-row sm:items-start sm:justify-between">
         {/* Title + secondary link stacked */}
         <div className="flex flex-col gap-0.5">
-          <h1 className="font-display text-display-h2 font-semibold text-primary-text">
+          <h1 className="font-display text-title-large font-semibold text-on-surface">
             Analytics Dashboard
           </h1>
           {showGroupLink && (
             <Link
               to="/analytics/group"
-              className="text-caption-md font-semibold text-primary hover:underline no-underline self-start"
+              className="text-body-medium font-semibold text-primary-label hover:underline no-underline self-start"
             >
               Group View →
             </Link>
@@ -110,15 +110,15 @@ export default function Analytics() {
               aria-label="Start date"
               value={startDate}
               onChange={(e) => setStartDate(e.target.value)}
-              className="px-s py-s rounded-md bg-surface-container-low border border-outline-variant text-p2 text-primary-text outline-none focus:border-primary"
+              className="px-s py-s rounded-lg bg-surface-container-low border border-outline-variant text-body-medium text-on-surface outline-none focus:border-primary"
             />
-            <span className="text-secondary-text shrink-0">to</span>
+            <span className="text-on-surface-variant shrink-0">to</span>
             <input
               type="date"
               aria-label="End date"
               value={endDate}
               onChange={(e) => setEndDate(e.target.value)}
-              className="px-s py-s rounded-md bg-surface-container-low border border-outline-variant text-p2 text-primary-text outline-none focus:border-primary"
+              className="px-s py-s rounded-lg bg-surface-container-low border border-outline-variant text-body-medium text-on-surface outline-none focus:border-primary"
             />
           </div>
 
@@ -162,7 +162,7 @@ export default function Analytics() {
       )}
 
       {error && (
-        <div className="bg-error-container text-on-error-container p-md rounded-md">
+        <div className="bg-error-container text-on-error-container p-md rounded-lg">
           Failed to load analytics data.
         </div>
       )}
@@ -171,27 +171,27 @@ export default function Analytics() {
         <div className="flex flex-col gap-l">
           {/* Summary Cards */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-md">
-            <div className="bg-surface-container-low rounded-md p-md border border-transparent">
-              <h3 className="text-label-l4 font-semibold text-secondary-text mb-xs">
+            <div className="bg-surface-container-low rounded-lg p-md border border-transparent">
+              <h3 className="text-label-large font-semibold text-on-surface-variant mb-xs">
                 Total Revenue
               </h3>
-              <p className="text-display-h2 font-display font-semibold text-primary-text">
+              <p className="text-title-large font-display font-semibold text-on-surface">
                 {formatCurrency(data.summary.total_revenue)}
               </p>
             </div>
-            <div className="bg-surface-container-low rounded-md p-md border border-transparent">
-              <h3 className="text-label-l4 font-semibold text-secondary-text mb-xs">
+            <div className="bg-surface-container-low rounded-lg p-md border border-transparent">
+              <h3 className="text-label-large font-semibold text-on-surface-variant mb-xs">
                 Total Orders
               </h3>
-              <p className="text-display-h2 font-display font-semibold text-primary-text">
+              <p className="text-title-large font-display font-semibold text-on-surface">
                 {data.summary.total_orders.toLocaleString()}
               </p>
             </div>
-            <div className="bg-surface-container-low rounded-md p-md border border-transparent">
-              <h3 className="text-label-l4 font-semibold text-secondary-text mb-xs">
+            <div className="bg-surface-container-low rounded-lg p-md border border-transparent">
+              <h3 className="text-label-large font-semibold text-on-surface-variant mb-xs">
                 Avg Order Value
               </h3>
-              <p className="text-display-h2 font-display font-semibold text-primary-text">
+              <p className="text-title-large font-display font-semibold text-on-surface">
                 {formatCurrency(data.summary.avg_order_value)}
               </p>
             </div>
@@ -199,8 +199,8 @@ export default function Analytics() {
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-md">
             {/* Revenue Over Time Chart */}
-            <div className="bg-surface-container-low rounded-md p-md border border-transparent flex flex-col">
-              <h3 className="text-label-l2 font-semibold text-primary-text mb-md">
+            <div className="bg-surface-container-low rounded-lg p-md border border-transparent flex flex-col">
+              <h3 className="text-title-large font-semibold text-on-surface mb-md">
                 Revenue Over Time
               </h3>
               <div className="h-[300px] w-full">
@@ -223,8 +223,8 @@ export default function Analytics() {
             </div>
 
             {/* Popular Items Chart */}
-            <div className="bg-surface-container-low rounded-md p-md border border-transparent flex flex-col">
-              <h3 className="text-label-l2 font-semibold text-primary-text mb-md">
+            <div className="bg-surface-container-low rounded-lg p-md border border-transparent flex flex-col">
+              <h3 className="text-title-large font-semibold text-on-surface mb-md">
                 Popular Items
               </h3>
               <div className="h-[300px] w-full">
@@ -250,8 +250,8 @@ export default function Analytics() {
             </div>
 
             {/* Peak Hours Chart */}
-            <div className="bg-surface-container-low rounded-md p-md border border-transparent flex flex-col">
-              <h3 className="text-label-l2 font-semibold text-primary-text mb-md">
+            <div className="bg-surface-container-low rounded-lg p-md border border-transparent flex flex-col">
+              <h3 className="text-title-large font-semibold text-on-surface mb-md">
                 Peak Hours (Orders)
               </h3>
               <div className="h-[300px] w-full">
@@ -268,8 +268,8 @@ export default function Analytics() {
             </div>
 
             {/* Table Performance */}
-            <div className="bg-surface-container-low rounded-md p-md border border-transparent flex flex-col">
-              <h3 className="text-label-l2 font-semibold text-primary-text mb-md">
+            <div className="bg-surface-container-low rounded-lg p-md border border-transparent flex flex-col">
+              <h3 className="text-title-large font-semibold text-on-surface mb-md">
                 Table Performance
               </h3>
               <div className="h-[300px] w-full overflow-y-auto">
@@ -280,17 +280,17 @@ export default function Analytics() {
 <table className="w-full min-w-[32rem] text-left border-collapse">
                   <thead>
                     <tr className="bg-surface-container-high border-b border-surface-container-highest">
-                      <th className="py-s px-md text-label-l4 font-semibold text-secondary-text">Table</th>
-                      <th className="py-s px-md text-label-l4 font-semibold text-secondary-text text-right">Orders</th>
-                      <th className="py-s px-md text-label-l4 font-semibold text-secondary-text text-right">Revenue</th>
+                      <th className="py-s px-md text-label-large font-semibold text-on-surface-variant">Table</th>
+                      <th className="py-s px-md text-label-large font-semibold text-on-surface-variant text-right">Orders</th>
+                      <th className="py-s px-md text-label-large font-semibold text-on-surface-variant text-right">Revenue</th>
                     </tr>
                   </thead>
                   <tbody>
                     {data.table_performance.map((row, idx) => (
                       <tr key={idx} className="border-b border-surface-container-highest last:border-none hover:bg-surface-container-low transition-colors">
-                        <td className="py-s px-md text-p2 text-primary-text font-medium">{row.table_id}</td>
-                        <td className="py-s px-md text-p2 text-primary-text text-right">{row.order_count}</td>
-                        <td className="py-s px-md text-p2 text-primary-text text-right">{formatCurrency(row.revenue)}</td>
+                        <td className="py-s px-md text-body-medium text-on-surface font-medium">{row.table_id}</td>
+                        <td className="py-s px-md text-body-medium text-on-surface text-right">{row.order_count}</td>
+                        <td className="py-s px-md text-body-medium text-on-surface text-right">{formatCurrency(row.revenue)}</td>
                       </tr>
                     ))}
                   </tbody>

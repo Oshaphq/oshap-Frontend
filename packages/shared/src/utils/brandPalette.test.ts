@@ -1,4 +1,27 @@
+import { readFileSync } from "node:fs";
+import { join } from "node:path";
 import { describe, it, expect } from "vitest";
+
+/**
+ * Read rather than import: vitest stubs CSS imports to an empty module, `?raw`
+ * included, so importing the token file would silently assert against "".
+ * Both candidate paths are tried so the guard holds whether vitest starts at
+ * the repo root or inside the workspace.
+ */
+function readTokensCss(): string {
+  const candidates = [
+    "packages/shared/src/tokens/tokens.css",
+    "src/tokens/tokens.css",
+  ];
+  for (const rel of candidates) {
+    try {
+      return readFileSync(join(process.cwd(), rel), "utf8");
+    } catch {
+      // try the next root
+    }
+  }
+  throw new Error(`tokens.css not found from ${process.cwd()}`);
+}
 import {
   brandCssVars,
   contrastRatio,
@@ -175,20 +198,65 @@ describe("the brand stays recognisable", () => {
 
 describe("brandCssVars", () => {
   it("names the variables the token file actually reads", () => {
-    // bg-primary resolves through --color-primary to --ds-primary, so these
-    // names are the whole mechanism — a typo silently does nothing.
+    // bg-primary resolves through --color-primary to --ds-brand-primary, so
+    // these names are the whole mechanism — a typo silently does nothing.
     const vars = brandCssVars(deriveBrandPalette("#d32f2f")!.light);
     expect(Object.keys(vars).sort()).toEqual([
+      "--ds-brand-primary",
       "--ds-on-primary",
       "--ds-on-primary-container",
-      "--ds-primary",
-      "--ds-primary-10a",
+      "--ds-primary-action",
+      "--ds-primary-action-hover",
+      "--ds-primary-action-pressed",
       "--ds-primary-container",
+      "--ds-primary-label",
     ]);
   });
 
-  it("carries the alpha wash as an 8-digit hex", () => {
-    const vars = brandCssVars(deriveBrandPalette("#d32f2f")!.light);
-    expect(vars["--ds-primary-10a"]).toMatch(/^#[0-9a-f]{6}1a$/);
+  /**
+   * The v1 -> v2 rename broke exactly this and nothing caught it: the generator
+   * kept writing `--ds-primary`, the token file had moved to
+   * `--ds-brand-primary`, and every tenant would have silently kept Oshap
+   * orange. A dangling custom property is valid CSS, so only reading the token
+   * file can tell.
+   */
+  it("writes only variables that tokens.css declares", () => {
+    const declared = new Set(
+      [...readTokensCss().matchAll(/^\s*(--ds-[a-z0-9-]+)\s*:/gm)].map((m) => m[1]),
+    );
+    const written = Object.keys(brandCssVars(deriveBrandPalette("#d32f2f")!.light));
+
+    expect(written.filter((name) => !declared.has(name))).toEqual([]);
   });
+
+  /**
+   * A tenant whose action fill cannot carry a white label is the failure this
+   * whole role exists to prevent, so it is asserted across the seed range
+   * rather than on one convenient hex.
+   */
+  it.each(["#d32f2f", "#1a237e", "#ffd700", "#00897b", "#f56500"])(
+    "derives an action fill that clears 4.5:1 under white for %s",
+    (seed) => {
+      const { light, dark } = deriveBrandPalette(seed)!;
+      for (const roles of [light, dark]) {
+        expect(contrastRatio(roles.primaryAction, "#ffffff")).toBeGreaterThanOrEqual(4.5);
+        // States walk DOWN the ramp, so contrast only improves under the label.
+        expect(contrastRatio(roles.primaryActionHover, "#ffffff")).toBeGreaterThanOrEqual(
+          contrastRatio(roles.primaryAction, "#ffffff"),
+        );
+        expect(contrastRatio(roles.primaryActionPressed, "#ffffff")).toBeGreaterThanOrEqual(
+          contrastRatio(roles.primaryActionHover, "#ffffff"),
+        );
+      }
+    },
+  );
+
+  it.each(["#d32f2f", "#1a237e", "#ffd700", "#00897b", "#f56500"])(
+    "derives a label that clears 4.5:1 on the surface it sits on for %s",
+    (seed) => {
+      const { light, dark } = deriveBrandPalette(seed)!;
+      expect(contrastRatio("#fafafa", light.primaryLabel)).toBeGreaterThanOrEqual(4.5);
+      expect(contrastRatio("#100f10", dark.primaryLabel)).toBeGreaterThanOrEqual(4.5);
+    },
+  );
 });

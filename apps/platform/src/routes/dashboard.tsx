@@ -20,10 +20,10 @@ export default function DashboardPage() {
   return (
     <main className="p-md flex flex-col gap-l">
       <header>
-        <h1 className="font-display text-display-h2 font-semibold text-primary-text">
+        <h1 className="font-display text-title-large font-semibold text-on-surface">
           Platform Overview
         </h1>
-        <p className="text-p2 text-secondary-text">Internal Oshap operator dashboard</p>
+        <p className="text-body-medium text-on-surface-variant">Internal Oshap operator dashboard</p>
       </header>
 
       {/* A failed query must never render as a real figure. Zero restaurants
@@ -39,41 +39,41 @@ export default function DashboardPage() {
 
       {/* KPI row */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-md">
-        <div className="bg-surface-container-low rounded-md p-md flex flex-col gap-xs">
-          <span className="text-label-l4 font-semibold text-secondary-text uppercase tracking-wider">
+        <div className="bg-surface-container-low rounded-lg p-md flex flex-col gap-xs">
+          <span className="text-label-large font-semibold text-on-surface-variant uppercase tracking-wider">
             Total Restaurants
           </span>
-          <span className="font-display text-display-h2 font-semibold text-primary-text">
+          <span className="font-display text-title-large font-semibold text-on-surface">
             {restaurantsQuery.isLoading || restaurantsQuery.isError ? "—" : restaurants.length}
           </span>
         </div>
-        <div className="bg-surface-container-low rounded-md p-md flex flex-col gap-xs">
-          <span className="text-label-l4 font-semibold text-secondary-text uppercase tracking-wider">
+        <div className="bg-surface-container-low rounded-lg p-md flex flex-col gap-xs">
+          <span className="text-label-large font-semibold text-on-surface-variant uppercase tracking-wider">
             Active
           </span>
-          <span className="font-display text-display-h2 font-semibold text-success">
+          <span className="font-display text-title-large font-semibold text-success">
             {restaurantsQuery.isLoading || restaurantsQuery.isError ? "—" : active}
           </span>
         </div>
-        <div className="bg-surface-container-low rounded-md p-md flex flex-col gap-xs">
-          <span className="text-label-l4 font-semibold text-secondary-text uppercase tracking-wider">
+        <div className="bg-surface-container-low rounded-lg p-md flex flex-col gap-xs">
+          <span className="text-label-large font-semibold text-on-surface-variant uppercase tracking-wider">
             Est. MRR
           </span>
-          <span className="font-display text-display-h2 font-semibold text-primary-text">
+          <span className="font-display text-title-large font-semibold text-on-surface">
             {restaurantsQuery.isLoading || restaurantsQuery.isError ? "—" : formatCurrency(mrr)}
           </span>
         </div>
         <div
-          className={`rounded-md p-md flex flex-col gap-xs border ${
+          className={`rounded-lg p-md flex flex-col gap-xs border ${
             health && health.error_rate_pct < 1
               ? "bg-success-container border-success"
               : "bg-error-container border-error"
           }`}
         >
-          <span className="text-label-l4 font-semibold text-secondary-text uppercase tracking-wider">
+          <span className="text-label-large font-semibold text-on-surface-variant uppercase tracking-wider">
             API Health
           </span>
-          <span className="font-display text-display-h2 font-semibold text-primary-text">
+          <span className="font-display text-title-large font-semibold text-on-surface">
             {healthQuery.isLoading
               ? "—"
               : health
@@ -87,32 +87,32 @@ export default function DashboardPage() {
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-md">
         <Link
           to="/restaurants/new"
-          className="bg-primary text-on-primary rounded-md p-md flex items-center gap-md no-underline hover:opacity-90 transition-opacity"
+          className="bg-primary-action text-on-primary rounded-lg p-md flex items-center gap-md no-underline hover:opacity-90 transition-opacity"
         >
           <i className="mgc_add_circle_line text-2xl" />
           <div>
-            <p className="font-bold font-display text-p">Onboard Restaurant</p>
-            <p className="text-caption-sm opacity-80">Create new account</p>
+            <p className="font-bold font-display text-body-large">Onboard Restaurant</p>
+            <p className="text-body-small opacity-80">Create new account</p>
           </div>
         </Link>
         <Link
           to="/restaurants"
-          className="bg-surface-container-low text-primary-text rounded-md p-md flex items-center gap-md no-underline hover:bg-surface-container-high transition-colors border border-transparent hover:border-outline-variant"
+          className="bg-surface-container-low text-on-surface rounded-lg p-md flex items-center gap-md no-underline hover:bg-surface-container-high transition-colors border border-transparent hover:border-outline-variant"
         >
-          <i className="mgc_fork_spoon_line text-2xl text-primary" />
+          <i className="mgc_fork_spoon_line text-2xl text-primary-label" />
           <div>
-            <p className="font-bold font-display text-p">Manage Restaurants</p>
-            <p className="text-caption-sm text-secondary-text">View & edit all accounts</p>
+            <p className="font-bold font-display text-body-large">Manage Restaurants</p>
+            <p className="text-body-small text-on-surface-variant">View & edit all accounts</p>
           </div>
         </Link>
         <Link
           to="/health"
-          className="bg-surface-container-low text-primary-text rounded-md p-md flex items-center gap-md no-underline hover:bg-surface-container-high transition-colors border border-transparent hover:border-outline-variant"
+          className="bg-surface-container-low text-on-surface rounded-lg p-md flex items-center gap-md no-underline hover:bg-surface-container-high transition-colors border border-transparent hover:border-outline-variant"
         >
-          <i className="mgc_heartbeat_line text-2xl text-primary" />
+          <i className="mgc_heartbeat_line text-2xl text-primary-label" />
           <div>
-            <p className="font-bold font-display text-p">System Health</p>
-            <p className="text-caption-sm text-secondary-text">Uptime &amp; error rates</p>
+            <p className="font-bold font-display text-body-large">System Health</p>
+            <p className="text-body-small text-on-surface-variant">Uptime &amp; error rates</p>
           </div>
         </Link>
       </div>
@@ -120,7 +120,7 @@ export default function DashboardPage() {
       {/* Recent restaurants */}
       {restaurants.length > 0 && (
         <div className="flex flex-col gap-md">
-          <h2 className="text-label-l2 font-semibold text-primary-text">
+          <h2 className="text-title-large font-semibold text-on-surface">
             Recently Onboarded
           </h2>
           <div className="flex flex-col gap-s">
@@ -131,24 +131,24 @@ export default function DashboardPage() {
                 <Link
                   key={r.id}
                   to={`/restaurants/${r.id}`}
-                  className="bg-surface-container-low rounded-md p-md flex items-center justify-between gap-md no-underline hover:bg-surface-container-high transition-colors"
+                  className="bg-surface-container-low rounded-lg p-md flex items-center justify-between gap-md no-underline hover:bg-surface-container-high transition-colors"
                 >
                   <div className="flex items-center gap-md min-w-0">
-                    <div className="w-9 h-9 rounded-lg bg-primary-container flex items-center justify-center shrink-0">
+                    <div className="w-9 h-9 rounded-sm bg-primary-container flex items-center justify-center shrink-0">
                       <i className="mgc_fork_spoon_line text-on-primary-container" />
                     </div>
                     <div className="min-w-0">
-                      <p className="font-semibold text-primary-text truncate">
+                      <p className="font-semibold text-on-surface truncate">
                         {r.name}
                       </p>
-                      <p className="text-caption-sm text-secondary-text">
+                      <p className="text-body-small text-on-surface-variant">
                         {r.owner_email}
                       </p>
                     </div>
                   </div>
                   <div className="flex items-center gap-s shrink-0">
                     <span
-                      className={`px-s py-xs rounded-4xl text-caption-xs font-bold uppercase tracking-wider ${
+                      className={`px-s py-xs rounded-full text-label-small font-bold uppercase tracking-wider ${
                         r.subscription_tier === "PRO" || r.subscription_tier === "ENTERPRISE"
                           ? "bg-primary-container text-on-primary-container"
                           : "bg-surface-container-high text-outline"

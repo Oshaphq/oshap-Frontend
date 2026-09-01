@@ -43,10 +43,10 @@ export default function QueryError({
   return (
     <div className="flex flex-col items-center justify-center gap-s py-10 px-md text-center">
       <i className="mgc_warning_line text-5xl text-error opacity-60" />
-      <span className="font-display text-display-h4 font-semibold text-primary-text">
+      <span className="font-display text-title-medium font-semibold text-on-surface">
         {described.title}
       </span>
-      <p className="text-p2 text-secondary-text max-w-[46ch]">
+      <p className="text-body-medium text-on-surface-variant max-w-[46ch]">
         {message ?? described.message}
       </p>
       {described.canRetry && (

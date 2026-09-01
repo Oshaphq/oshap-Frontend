@@ -39,11 +39,11 @@ export default function Toaster() {
             key={t.id}
             type="button"
             onClick={() => dismiss(t.id)}
-            className={`pointer-events-auto flex items-start gap-s p-md rounded-lg shadow-lg text-left ${meta.wrapperClass}`}
+            className={`pointer-events-auto flex items-start gap-s p-md rounded-sm shadow-lg text-left ${meta.wrapperClass}`}
             style={{ animation: "slide-down 220ms ease-out" }}
           >
             <i className={`${meta.icon} text-xl shrink-0`} />
-            <span className="text-label-l4 font-medium flex-1">{t.message}</span>
+            <span className="text-label-large font-medium flex-1">{t.message}</span>
           </button>
         );
       })}

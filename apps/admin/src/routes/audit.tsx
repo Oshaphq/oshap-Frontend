@@ -130,10 +130,10 @@ export default function AuditPage() {
     <main className="p-md flex flex-col gap-md max-w-[52rem]">
       <header className="flex flex-col gap-s sm:flex-row sm:flex-wrap sm:items-center sm:justify-between">
         <div className="flex flex-col gap-0.5">
-          <h1 className="font-display text-display-h2 font-semibold text-primary-text">
+          <h1 className="font-display text-title-large font-semibold text-on-surface">
             Audit trail
           </h1>
-          <p className="text-caption-md text-secondary-text">
+          <p className="text-body-medium text-on-surface-variant">
             Every change to a bill, newest first.
           </p>
         </div>
@@ -155,19 +155,19 @@ export default function AuditPage() {
           <div className="oshap-spinner" />
         </div>
       ) : entries.length === 0 ? (
-        <div className="flex flex-col items-center gap-xs py-10 px-md text-center rounded-md bg-surface-container-low">
+        <div className="flex flex-col items-center gap-xs py-10 px-md text-center rounded-lg bg-surface-container-low">
           <i className="mgc_history_line text-5xl text-outline-variant opacity-40" />
-          <span className="font-display text-display-h4 font-semibold text-primary-text">
+          <span className="font-display text-title-medium font-semibold text-on-surface">
             Nothing recorded
           </span>
-          <p className="text-p2 text-secondary-text">
+          <p className="text-body-medium text-on-surface-variant">
             {action
               ? "No entries of this kind yet."
               : "Adjustments and payments will appear here as they happen."}
           </p>
         </div>
       ) : (
-        <div className="bg-surface-container-low rounded-md overflow-hidden">
+        <div className="bg-surface-container-low rounded-lg overflow-hidden">
           {entries.map((entry) => {
             const reduces = REDUCING_ACTIONS.has(entry.action);
             const amount = amountOf(entry);
@@ -177,7 +177,7 @@ export default function AuditPage() {
               typeof entry.details?.reference === "string"
                 ? entry.details.reference
                 : null;
-            const amountCls = reduces ? "text-error" : "text-primary-text";
+            const amountCls = reduces ? "text-error" : "text-on-surface";
             return (
               <div
                 key={entry.id}
@@ -191,12 +191,12 @@ export default function AuditPage() {
                     which bill. */}
                 <div className="flex flex-col gap-0.5 sm:hidden">
                   <div className="flex items-baseline justify-between gap-s">
-                    <span className="text-p2 text-primary-text min-w-0">
+                    <span className="text-body-medium text-on-surface min-w-0">
                       {describe(entry)}
                     </span>
                     {amount != null && (
                       <span
-                        className={`text-label-l4 font-semibold tabular-nums shrink-0 ${amountCls}`}
+                        className={`text-label-large font-semibold tabular-nums shrink-0 ${amountCls}`}
                       >
                         {reduces ? "− " : ""}
                         {formatCurrency(amount)}
@@ -204,14 +204,14 @@ export default function AuditPage() {
                     )}
                   </div>
                   <div className="flex items-baseline justify-between gap-s">
-                    <span className="text-caption-xs text-secondary-text tabular-nums min-w-0 truncate">
+                    <span className="text-label-small text-on-surface-variant tabular-nums min-w-0 truncate">
                       {formatApiDateTime(entry.created_at)}
                       {entry.actor_name ? ` · ${entry.actor_name}` : ""}
                     </span>
                     {orderId && (
                       <Link
                         to={`/orders/${orderId}`}
-                        className="text-caption-xs font-mono text-secondary-text hover:text-primary transition-colors no-underline shrink-0"
+                        className="text-label-small font-mono text-on-surface-variant hover:text-primary-label transition-colors no-underline shrink-0"
                       >
                         {reference ?? "Open bill"}
                       </Link>
@@ -220,28 +220,28 @@ export default function AuditPage() {
                 </div>
 
                 <div className="hidden sm:flex flex-wrap items-baseline gap-x-md gap-y-xs">
-                  <span className="text-caption-md text-secondary-text tabular-nums shrink-0">
+                  <span className="text-body-medium text-on-surface-variant tabular-nums shrink-0">
                     {formatApiDateTime(entry.created_at)}
                   </span>
-                  <span className="text-p2 text-primary-text min-w-0 flex-1">
+                  <span className="text-body-medium text-on-surface min-w-0 flex-1">
                     {describe(entry)}
                   </span>
                   {orderId && (
                     <Link
                       to={`/orders/${orderId}`}
-                      className="text-caption-md font-mono text-secondary-text hover:text-primary transition-colors no-underline shrink-0"
+                      className="text-body-medium font-mono text-on-surface-variant hover:text-primary-label transition-colors no-underline shrink-0"
                     >
                       {reference ?? "Open bill"}
                     </Link>
                   )}
                   {entry.actor_name && (
-                    <span className="text-caption-md text-secondary-text shrink-0">
+                    <span className="text-body-medium text-on-surface-variant shrink-0">
                       {entry.actor_name}
                     </span>
                   )}
                   {amount != null && (
                     <span
-                      className={`text-label-l4 font-semibold tabular-nums shrink-0 ${amountCls}`}
+                      className={`text-label-large font-semibold tabular-nums shrink-0 ${amountCls}`}
                     >
                       {reduces ? "− " : ""}
                       {formatCurrency(amount)}
@@ -263,7 +263,7 @@ export default function AuditPage() {
           >
             Previous
           </SecondaryButton>
-          <span className="text-caption-md text-secondary-text tabular-nums">
+          <span className="text-body-medium text-on-surface-variant tabular-nums">
             Page {page} of {totalPages}
           </span>
           <SecondaryButton

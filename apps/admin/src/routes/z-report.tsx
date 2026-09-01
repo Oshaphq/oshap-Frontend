@@ -46,10 +46,10 @@ export default function ZReportPage() {
     <main className="p-md flex flex-col gap-l max-w-[42rem]">
       <header className="flex flex-wrap items-center justify-between gap-md">
         <div className="flex flex-col gap-0.5">
-          <h1 className="font-display text-display-h2 font-semibold text-primary-text">
+          <h1 className="font-display text-title-large font-semibold text-on-surface">
             Daily close
           </h1>
-          <p className="text-caption-md text-secondary-text">
+          <p className="text-body-medium text-on-surface-variant">
             Settled orders only — an unpaid bill isn&rsquo;t takings.
           </p>
         </div>
@@ -60,7 +60,7 @@ export default function ZReportPage() {
             max={today()}
             onChange={(e) => setDate(e.target.value)}
             aria-label="Report date"
-            className="px-md py-s rounded-lg bg-surface-container-low border border-outline-variant text-p2 text-primary-text outline-none focus:border-primary transition-colors"
+            className="px-md py-s rounded-sm bg-surface-container-low border border-outline-variant text-body-medium text-on-surface outline-none focus:border-primary transition-colors"
           />
           <SecondaryButton
             size="md"
@@ -77,20 +77,20 @@ export default function ZReportPage() {
           <div className="oshap-spinner" />
         </div>
       ) : !hasTakings ? (
-        <div className="flex flex-col items-center gap-xs py-10 px-md text-center rounded-md bg-surface-container-low">
+        <div className="flex flex-col items-center gap-xs py-10 px-md text-center rounded-lg bg-surface-container-low">
           <i className="mgc_receipt_line text-5xl text-outline-variant opacity-40" />
-          <span className="font-display text-display-h4 font-semibold text-primary-text">
+          <span className="font-display text-title-medium font-semibold text-on-surface">
             Nothing settled on this date
           </span>
-          <p className="text-p2 text-secondary-text">
+          <p className="text-body-medium text-on-surface-variant">
             Orders appear here once they&rsquo;re paid for.
           </p>
         </div>
       ) : (
         data && (
           <>
-            <section className="bg-surface-container-low rounded-md p-l flex flex-col gap-md">
-              <h2 className="text-label-l2 font-semibold text-primary-text">
+            <section className="bg-surface-container-low rounded-lg p-l flex flex-col gap-md">
+              <h2 className="text-title-large font-semibold text-on-surface">
                 Takings by method
               </h2>
               {/* The three lines that get checked against the drawer, so they
@@ -110,18 +110,18 @@ export default function ZReportPage() {
                   <Line label={METHOD_LABELS.POS} value={data.pos_total} />
                 </div>
                 <div className="flex items-center justify-between gap-md pt-md border-t-2 border-ink">
-                  <span className="text-label-l2 font-semibold text-primary-text">
+                  <span className="text-title-large font-semibold text-on-surface">
                     Total takings
                   </span>
-                  <span className="font-display text-display-h2 font-semibold text-primary tabular-nums">
+                  <span className="font-display text-title-large font-semibold text-primary-label tabular-nums">
                     {formatCurrency(data.total_sales)}
                   </span>
                 </div>
               </div>
             </section>
 
-            <section className="bg-surface-container-low rounded-md p-l flex flex-col gap-md">
-              <h2 className="text-label-l2 font-semibold text-primary-text">
+            <section className="bg-surface-container-low rounded-lg p-l flex flex-col gap-md">
+              <h2 className="text-title-large font-semibold text-on-surface">
                 Included in the day
               </h2>
               {/* Reported figures, not an equation. The server sends no
@@ -137,13 +137,13 @@ export default function ZReportPage() {
                 <Line label="Tips" value={data.tip_total} />
                 <Line label="Refunded" value={data.refund_total} isDeduction />
               </div>
-              <p className="text-caption-md text-secondary-text">
+              <p className="text-body-medium text-on-surface-variant">
                 {data.order_count} settled order
                 {data.order_count === 1 ? "" : "s"} on {data.date}
               </p>
               <Link
                 to="/audit"
-                className="text-caption-md font-semibold text-primary hover:underline no-underline oshap-print-hide"
+                className="text-body-medium font-semibold text-primary-label hover:underline no-underline oshap-print-hide"
               >
                 Not adding up? See what changed →
               </Link>
@@ -168,10 +168,10 @@ function Line({
   const isDeduction = forceDeduction ? value > 0 : value < 0;
   return (
     <div className="flex items-center justify-between gap-md py-s border-b border-outline-variant last:border-none">
-      <span className="text-p2 text-secondary-text">{label}</span>
+      <span className="text-body-medium text-on-surface-variant">{label}</span>
       <span
-        className={`text-label-l3 font-semibold tabular-nums ${
-          isDeduction ? "text-error" : "text-primary-text"
+        className={`text-title-medium font-semibold tabular-nums ${
+          isDeduction ? "text-error" : "text-on-surface"
         }`}
       >
         {isDeduction

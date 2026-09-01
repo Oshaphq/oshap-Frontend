@@ -61,30 +61,30 @@ export default function CustomerHeader({
           <BrandMark
             logoUrl={tableQuery.data?.restaurant?.logo_url}
             fallbackSrc="/oshap.png"
-            className="w-8 h-8 shrink-0 rounded-lg object-contain"
+            className="w-8 h-8 shrink-0 rounded-sm object-contain"
           />
         )}
 
         <div className="flex flex-col min-w-0">
           {title ? (
             <>
-              <h1 className="font-display text-display-h1 font-bold text-primary-text truncate">
+              <h1 className="font-display text-headline-small font-bold text-on-surface truncate">
                 {title}
               </h1>
               {subtitle && (
-                <span className="text-label-l5 text-secondary-text truncate">
+                <span className="text-label-medium text-on-surface-variant truncate">
                   {subtitle}
                 </span>
               )}
             </>
           ) : (
             <>
-              <span className="text-caption-xs text-secondary-text leading-tight">
+              <span className="text-label-small text-on-surface-variant leading-tight">
                 You&rsquo;re sitting at
               </span>
               {/* Falls back to the app name rather than an empty bar while the
                   table request is in flight, or if no address is configured. */}
-              <h1 className="text-label-l3 font-semibold text-primary-text truncate leading-tight">
+              <h1 className="text-title-medium font-semibold text-on-surface truncate leading-tight">
                 {address || "Oshap"}
               </h1>
             </>
@@ -93,7 +93,7 @@ export default function CustomerHeader({
       </div>
 
       <div className="flex items-center gap-s shrink-0">
-        <span className="px-s py-xs rounded-4xl border border-primary text-primary text-caption-md font-semibold whitespace-nowrap">
+        <span className="px-s py-xs rounded-full border border-primary text-primary-label text-body-medium font-semibold whitespace-nowrap">
           Table {tableName ?? "…"}
         </span>
         <NotificationBell />

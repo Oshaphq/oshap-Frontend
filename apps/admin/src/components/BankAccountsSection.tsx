@@ -11,8 +11,8 @@ import { PrimaryButton, SecondaryButton, toast } from "@oshap/shared/ui";
 const EMPTY_DRAFT = { bank_name: "", account_number: "", account_name: "" };
 
 const inputClass =
-  "w-full px-md py-s rounded-lg bg-surface-container-low border border-outline-variant text-p2 text-primary-text placeholder:text-outline outline-none focus:border-primary transition-colors disabled:opacity-50 disabled:cursor-not-allowed";
-const labelClass = "block text-caption-md font-semibold text-primary-text mb-xs";
+  "w-full px-md py-s rounded-sm bg-surface-container-low border border-outline-variant text-body-medium text-on-surface placeholder:text-outline outline-none focus:border-primary transition-colors disabled:opacity-50 disabled:cursor-not-allowed";
+const labelClass = "block text-body-medium font-semibold text-on-surface mb-xs";
 
 /**
  * Manages payout accounts.
@@ -97,11 +97,11 @@ export default function BankAccountsSection({ canEdit }: { canEdit: boolean }) {
   };
 
   return (
-    <div className="bg-surface-container-low rounded-md p-l flex flex-col gap-md border border-transparent hover:border-outline-variant transition-colors">
+    <div className="bg-surface-container-low rounded-lg p-l flex flex-col gap-md border border-transparent hover:border-outline-variant transition-colors">
       <div className="flex items-start justify-between gap-md">
         <div className="flex flex-col gap-0.5">
-          <h3 className="font-bold text-primary-text">Bank Accounts</h3>
-          <p className="text-caption-md text-secondary-text">
+          <h3 className="font-bold text-on-surface">Bank Accounts</h3>
+          <p className="text-body-medium text-on-surface-variant">
             Guests are shown the default first, then the rest as fallbacks.
           </p>
         </div>
@@ -117,9 +117,9 @@ export default function BankAccountsSection({ canEdit }: { canEdit: boolean }) {
           <div className="oshap-spinner" />
         </div>
       ) : list.length === 0 && !isAdding ? (
-        <div className="flex flex-col items-center gap-xs py-l px-md text-center rounded-lg bg-surface-container">
+        <div className="flex flex-col items-center gap-xs py-l px-md text-center rounded-sm bg-surface-container">
           <i className="mgc_bank_card_line text-3xl text-outline-variant" />
-          <p className="text-p2 text-secondary-text">
+          <p className="text-body-medium text-on-surface-variant">
             No bank account yet — guests can only pay by POS.
           </p>
         </div>
@@ -143,7 +143,7 @@ export default function BankAccountsSection({ canEdit }: { canEdit: boolean }) {
       )}
 
       {isAdding && (
-        <div className="flex flex-col gap-md p-md rounded-lg bg-surface-container">
+        <div className="flex flex-col gap-md p-md rounded-sm bg-surface-container">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-md">
             <div>
               <label className={labelClass} htmlFor="bank-name">
@@ -243,30 +243,30 @@ function AccountRow({
 
   return (
     <div
-      className={`flex flex-wrap items-center justify-between gap-s p-md rounded-lg bg-surface-container ${
+      className={`flex flex-wrap items-center justify-between gap-s p-md rounded-sm bg-surface-container ${
         account.is_active ? "" : "opacity-60"
       }`}
     >
       <div className="flex flex-col gap-0.5 min-w-0">
         <div className="flex items-center gap-s flex-wrap">
-          <span className="text-label-l3 font-semibold text-primary-text truncate">
+          <span className="text-title-medium font-semibold text-on-surface truncate">
             {account.bank_name}
           </span>
           {account.is_default && (
-            <span className="shrink-0 px-s py-0.5 rounded-4xl bg-success-container text-on-success-container text-caption-xs font-semibold uppercase tracking-wider">
+            <span className="shrink-0 px-s py-0.5 rounded-full bg-success-container text-on-success-container text-label-small font-semibold uppercase tracking-wider">
               Default
             </span>
           )}
           {!account.is_active && (
-            <span className="shrink-0 px-s py-0.5 rounded-4xl bg-surface-container-high text-outline text-caption-xs font-semibold uppercase tracking-wider">
+            <span className="shrink-0 px-s py-0.5 rounded-full bg-surface-container-high text-outline text-label-small font-semibold uppercase tracking-wider">
               Hidden
             </span>
           )}
         </div>
-        <span className="text-label-l5 text-secondary-text tracking-wider">
+        <span className="text-label-medium text-on-surface-variant tracking-wider">
           {account.account_number}
         </span>
-        <span className="text-caption-md text-secondary-text truncate">
+        <span className="text-body-medium text-on-surface-variant truncate">
           {account.account_name}
           {rate !== null && (
             <>
@@ -286,7 +286,7 @@ function AccountRow({
               <button
                 type="button"
                 onClick={onCancelDelete}
-                className="text-caption-md text-secondary-text hover:underline"
+                className="text-body-medium text-on-surface-variant hover:underline"
               >
                 Cancel
               </button>
@@ -294,7 +294,7 @@ function AccountRow({
                 type="button"
                 onClick={onConfirmDelete}
                 disabled={isBusy}
-                className="text-caption-md font-semibold text-error hover:underline disabled:opacity-50"
+                className="text-body-medium font-semibold text-error hover:underline disabled:opacity-50"
               >
                 Remove
               </button>
@@ -306,7 +306,7 @@ function AccountRow({
                   type="button"
                   onClick={onMakeDefault}
                   disabled={isBusy}
-                  className="text-caption-md font-semibold text-primary hover:underline disabled:opacity-50"
+                  className="text-body-medium font-semibold text-primary-label hover:underline disabled:opacity-50"
                 >
                   Make default
                 </button>
@@ -315,7 +315,7 @@ function AccountRow({
                 type="button"
                 onClick={onToggleActive}
                 disabled={isBusy}
-                className="text-caption-md text-secondary-text hover:underline disabled:opacity-50"
+                className="text-body-medium text-on-surface-variant hover:underline disabled:opacity-50"
               >
                 {account.is_active ? "Hide" : "Show"}
               </button>
@@ -323,7 +323,7 @@ function AccountRow({
                 type="button"
                 onClick={onRequestDelete}
                 aria-label={`Remove ${account.bank_name} account`}
-                className="w-9 h-9 flex items-center justify-center rounded-4xl bg-surface-container-high text-on-surface-variant hover:bg-error-container hover:text-on-error-container transition-colors"
+                className="w-9 h-9 flex items-center justify-center rounded-full bg-surface-container-high text-on-surface-variant hover:bg-error-container hover:text-on-error-container transition-colors"
               >
                 <i className="mgc_delete_2_line" />
               </button>

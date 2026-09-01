@@ -104,7 +104,7 @@ function CheckoutView({ tableId }: { tableId: string }) {
               type="button"
               onClick={() => navigate(`/menu?table=${tableId}`)}
               aria-label="Back to menu"
-              className="w-9 h-9 flex items-center justify-center rounded-4xl bg-surface-container hover:bg-surface-container-high transition-colors"
+              className="w-9 h-9 flex items-center justify-center rounded-full bg-surface-container hover:bg-surface-container-high transition-colors"
             >
               <i className="mgc_left_line text-xl" />
             </button>
@@ -113,10 +113,10 @@ function CheckoutView({ tableId }: { tableId: string }) {
         <div className="flex flex-col items-center gap-l py-10 px-md text-center">
           <div className="flex flex-col items-center gap-s">
             <i className="mgc_clipboard_line text-5xl text-outline-variant" />
-            <span className="font-display text-display-h4 font-semibold text-primary-text">
+            <span className="font-display text-title-medium font-semibold text-on-surface">
               No items yet
             </span>
-            <p className="text-p2 text-secondary-text max-w-[384px]">
+            <p className="text-body-medium text-on-surface-variant max-w-[384px]">
               Add items from the menu to place your order.
             </p>
           </div>
@@ -141,7 +141,7 @@ function CheckoutView({ tableId }: { tableId: string }) {
             type="button"
             onClick={() => navigate(`/menu?table=${tableId}`)}
             aria-label="Back to menu"
-            className="w-9 h-9 flex items-center justify-center rounded-4xl bg-surface-container hover:bg-surface-container-high transition-colors"
+            className="w-9 h-9 flex items-center justify-center rounded-full bg-surface-container hover:bg-surface-container-high transition-colors"
           >
             <i className="mgc_left_line text-xl" />
           </button>
