@@ -126,7 +126,13 @@ export default function ModifierSheet({ item, onClose, onAdd, remaining = null }
       <div
         ref={sheetRef}
         role="dialog"
-        aria-label={item.name}
+        /* The name follows the job the sheet is doing. It opens two ways: to
+           pick options, and to read a dish in full. Naming it "Choose options"
+           when there is nothing to choose misdescribes it to a screen reader;
+           naming it for the dish alone loses the purpose when there is. */
+        aria-label={
+          groups.length > 0 ? `Choose options for ${item.name}` : item.name
+        }
         className="fixed left-0 right-0 bottom-0 max-h-[88vh] bg-surface-container-low rounded-t-xl z-[100] flex flex-col shadow-[0_-4px_24px_var(--ds-shadow)] animate-[slide-up-drawer_0.3s_ease] will-change-transform"
       >
         <div

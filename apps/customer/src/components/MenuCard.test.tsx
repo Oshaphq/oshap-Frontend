@@ -273,3 +273,47 @@ describe("the notes field in the detail sheet", () => {
     expect(notes.style.height).not.toBe("");
   });
 });
+
+/**
+ * The sheet's accessible name is a contract, not a detail: `order-flow.e2e.ts`
+ * finds it with `getByRole("dialog", { name: /Choose options/i })` in five
+ * tests. Flattening it to the dish name broke all five, and nothing in the unit
+ * suite noticed — so both branches are pinned here.
+ */
+describe("what the detail sheet calls itself", () => {
+  const withChoices = () =>
+    item({
+      modifier_groups: [
+        {
+          id: "g1",
+          name: "Size",
+          required: true,
+          min: 1,
+          max: 1,
+          sort_order: 0,
+          options: [
+            { id: "o1", name: "Large", price_delta: 0, available: true, sort_order: 0 },
+          ],
+        },
+      ],
+    } as Partial<MenuItem>);
+
+  it("names itself for the choosing when there is something to choose", () => {
+    mount(withChoices());
+    click(byLabel("Choose options for Chicken Shawarma"));
+
+    const dialog = host.querySelector('[role="dialog"]')!;
+    expect(dialog.getAttribute("aria-label")).toBe(
+      "Choose options for Chicken Shawarma",
+    );
+  });
+
+  it("names itself for the dish when there is not", () => {
+    mount(item());
+    click(byLabel("View Chicken Shawarma"));
+
+    const dialog = host.querySelector('[role="dialog"]')!;
+    // "Choose options" would misdescribe a sheet with no options in it.
+    expect(dialog.getAttribute("aria-label")).toBe("Chicken Shawarma");
+  });
+});
