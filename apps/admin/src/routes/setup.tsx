@@ -94,7 +94,7 @@ export default function SetupPage() {
   };
 
   const inputClass =
-    "w-full px-md py-s rounded-lg bg-surface-container border border-outline-variant text-p2 text-primary-text placeholder:text-outline outline-none focus:border-primary transition-colors";
+    "w-full px-md py-s rounded-sm bg-surface-container border border-outline-variant text-body-medium text-on-surface placeholder:text-outline outline-none focus:border-primary transition-colors";
 
   if (status === "checking") {
     return (
@@ -107,14 +107,14 @@ export default function SetupPage() {
   if (status === "unreachable") {
     return (
       <div className="flex items-center justify-center min-h-screen bg-surface p-md">
-        <div className="w-full max-w-[400px] bg-surface-container-low rounded-xl p-xl flex flex-col items-center gap-md text-center">
+        <div className="w-full max-w-[400px] bg-surface-container-low rounded-2xl p-xl flex flex-col items-center gap-md text-center">
           <div className="w-16 h-16 rounded-full bg-warning-container flex items-center justify-center text-2xl text-on-warning-container">
             <i className="mgc_wifi_off_line" />
           </div>
-          <h1 className="font-display text-display-h2 font-semibold text-primary-text">
+          <h1 className="font-display text-title-large font-semibold text-on-surface">
             Can&rsquo;t reach Oshap
           </h1>
-          <p className="text-p2 text-secondary-text">
+          <p className="text-body-medium text-on-surface-variant">
             Your link is probably fine — we just couldn&rsquo;t check it. Try
             again in a moment, and tell your Oshap contact if it keeps failing.
           </p>
@@ -134,14 +134,14 @@ export default function SetupPage() {
   if (status === "dead") {
     return (
       <div className="flex items-center justify-center min-h-screen bg-surface p-md">
-        <div className="w-full max-w-[400px] bg-surface-container-low rounded-xl p-xl flex flex-col items-center gap-md text-center">
+        <div className="w-full max-w-[400px] bg-surface-container-low rounded-2xl p-xl flex flex-col items-center gap-md text-center">
           <div className="w-16 h-16 rounded-full bg-error-container flex items-center justify-center text-2xl text-on-error-container">
             <i className="mgc_link_line" />
           </div>
-          <h1 className="font-display text-display-h2 font-semibold text-primary-text">
+          <h1 className="font-display text-title-large font-semibold text-on-surface">
             This link has expired
           </h1>
-          <p className="text-p2 text-secondary-text">
+          <p className="text-body-medium text-on-surface-variant">
             Setup links work once and time out after a week. If you already set
             a password, just sign in. Otherwise use{" "}
             <span className="font-semibold">Forgot password</span> on the
@@ -159,14 +159,14 @@ export default function SetupPage() {
     <div className="flex items-center justify-center min-h-screen bg-surface p-md">
       <form
         onSubmit={handleSubmit}
-        className="w-full max-w-[400px] bg-surface-container-low rounded-xl p-xl flex flex-col gap-md"
+        className="w-full max-w-[400px] bg-surface-container-low rounded-2xl p-xl flex flex-col gap-md"
       >
         <div className="flex items-start justify-between gap-md">
           <div className="flex flex-col gap-0.5 min-w-0">
-            <h1 className="font-display text-display-h2 font-semibold text-primary-text truncate">
+            <h1 className="font-display text-title-large font-semibold text-on-surface truncate">
               {account?.restaurant_name}
             </h1>
-            <p className="text-caption-md text-secondary-text">
+            <p className="text-body-medium text-on-surface-variant">
               Welcome, {account?.owner_name}. Choose a password to finish setting
               up your account.
             </p>
@@ -176,9 +176,9 @@ export default function SetupPage() {
 
         {/* Masked, not full: enough to recognise the account, not enough to
             hand a contact detail to whoever is holding the link. */}
-        <p className="text-caption-sm text-secondary-text bg-surface-container rounded-lg px-md py-s">
+        <p className="text-body-small text-on-surface-variant bg-surface-container rounded-sm px-md py-s">
           Signing in as{" "}
-          <span className="font-semibold text-primary-text">
+          <span className="font-semibold text-on-surface">
             {account?.phone_hint}
           </span>
         </p>
@@ -186,7 +186,7 @@ export default function SetupPage() {
         <div className="flex flex-col gap-xs">
           <label
             htmlFor="setup-password"
-            className="text-caption-md font-semibold text-primary-text"
+            className="text-body-medium font-semibold text-on-surface"
           >
             Password
           </label>
@@ -204,14 +204,14 @@ export default function SetupPage() {
               type="button"
               onClick={() => setShowPassword((v) => !v)}
               aria-label={showPassword ? "Hide password" : "Show password"}
-              className="absolute right-md top-1/2 -translate-y-1/2 text-secondary-text hover:text-primary-text transition-colors"
+              className="absolute right-md top-1/2 -translate-y-1/2 text-on-surface-variant hover:text-on-surface transition-colors"
             >
               <i className={showPassword ? "mgc_eye_close_line" : "mgc_eye_line"} />
             </button>
           </div>
           <p
-            className={`text-caption-xs ${
-              tooShort ? "text-error font-semibold" : "text-secondary-text"
+            className={`text-label-small ${
+              tooShort ? "text-error font-semibold" : "text-on-surface-variant"
             }`}
           >
             At least {MIN_PASSWORD} characters. Length matters more than symbols.
@@ -221,7 +221,7 @@ export default function SetupPage() {
         <div className="flex flex-col gap-xs">
           <label
             htmlFor="setup-confirm"
-            className="text-caption-md font-semibold text-primary-text"
+            className="text-body-medium font-semibold text-on-surface"
           >
             Confirm password
           </label>
@@ -234,7 +234,7 @@ export default function SetupPage() {
             className={inputClass}
           />
           {mismatch && (
-            <p className="text-caption-xs text-error font-semibold">
+            <p className="text-label-small text-error font-semibold">
               These don&rsquo;t match.
             </p>
           )}

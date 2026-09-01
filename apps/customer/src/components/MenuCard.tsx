@@ -39,11 +39,14 @@ export default function MenuCard({ item }: MenuCardProps) {
       modifiers: [],
       image: item.image_url ?? undefined,
     });
+    // The stepper appearing in place of ADD is the durable signal; this is the
+    // one that reaches a guest whose thumb is covering that corner of the card.
+    toast.success(`${item.name} added`, 1800);
   };
 
   return (
-    <article className="flex gap-md p-md bg-surface-container-low rounded-md border-b border-outline-variant/30 transition-shadow">
-      <div className="shrink-0 w-24 h-24 rounded-lg overflow-hidden bg-primary-container">
+    <article className="relative flex items-center gap-md p-md bg-surface-container-low rounded-lg border-b border-outline-variant/30 transition-shadow">
+      <div className="shrink-0 w-24 h-24 rounded-sm overflow-hidden bg-primary-container">
         {item.image_url ? (
           <img
             src={item.image_url}
@@ -58,31 +61,42 @@ export default function MenuCard({ item }: MenuCardProps) {
         )}
       </div>
 
-      <div className="flex-1 flex flex-col justify-between min-w-0">
+      {/* Gap, not `justify-between`. The column hugs its content — 40 + 8 +
+          31.31 = 79.31 against a 96px image — so spreading it to the image
+          height opens a gap that grows with the image rather than a fixed one. */}
+      <div className="flex-1 flex flex-col gap-s min-w-0">
         <div className="flex flex-col gap-xs">
-          <h3 className="text-label-l3 font-semibold text-primary-text">
+          {/* Two lines, then clamp. A dish whose name needs three lines pushes
+              the price and ADD off the card, and the name is the one thing a
+              guest scans by — so it gets the room, and the sheet has the rest. */}
+          <h3 className="text-title-medium font-semibold text-on-surface line-clamp-2">
             {item.name}
           </h3>
           {item.description && (
-            <p className="text-p2 text-secondary-text line-clamp-2">
+            /* One line. The description is what a guest reads *after* deciding
+               the name is interesting, so on the card it only has to hint. */
+            <p className="text-body-medium text-on-surface-variant line-clamp-1">
               {item.description}
             </p>
           )}
         </div>
 
-        <div className="flex items-center justify-between">
+        {/* `items-end`: the price sits on the button's bottom edge. Centring a
+            20px price against a 31px button lifts it two pixels off the line
+            the eye reads along. */}
+        <div className="flex items-end justify-between">
           <div className="flex flex-col">
-            <span className="text-label-l3 font-semibold text-primary-text">
+            <span className="text-title-medium font-semibold text-on-surface">
               {formatCurrency(item.price)}
             </span>
             {configurable && !label && (
-              <span className="text-caption-xs text-secondary-text">
+              <span className="text-label-small text-on-surface-variant">
                 Choices available
               </span>
             )}
             {label && (
               <span
-                className={`text-caption-xs font-semibold ${
+                className={`text-label-small font-semibold ${
                   stock.soldOut ? "text-error" : "text-warning"
                 }`}
               >
@@ -91,73 +105,95 @@ export default function MenuCard({ item }: MenuCardProps) {
             )}
           </div>
 
-          {/* A dish with choices always routes through the sheet: a bare "+1"
-              can't say which variant to add, and silently repeating the last
-              one would put food the guest didn't choose on the bill. */}
-          {configurable ? (
-            <div className="flex items-center gap-s">
-              {quantity > 0 && (
-                <span className="text-label-l5 font-semibold text-primary tabular-nums">
-                  {quantity} in cart
-                </span>
-              )}
-              <AddButton
-                onClick={() => {
-                  if (!stock.canAddMore) {
-                    toast.info(`Only ${item.stock_count} ${item.name} left today.`);
-                    return;
-                  }
-                  setIsChoosing(true);
-                }}
-                aria-label={`Choose options for ${item.name}`}
-              />
-            </div>
-          ) : stock.soldOut ? (
-            /* Nothing to add. The API still lists it, so the guest is told
-               plainly rather than left tapping a button that cannot work. */
-            <span className="text-caption-xs font-semibold text-error">
-              Unavailable
-            </span>
-          ) : quantity === 0 ? (
-            <AddButton
-              onClick={addPlain}
-              aria-label={`Add ${item.name} to cart`}
-            />
-          ) : (
-            <div className="flex items-center gap-s">
-              <button
-                type="button"
-                onClick={() => updateQuantity(plainLine!.lineId, quantity - 1)}
-                aria-label={`Decrease ${item.name} quantity`}
-                className="w-8 h-8 flex items-center justify-center rounded-4xl bg-surface-container-high text-on-surface text-lg font-bold transition-colors hover:bg-primary hover:text-on-primary"
-              >
-                <i className="mgc_minimize_line" />
-              </button>
-              <span className="font-bold text-p min-w-6 text-center text-primary-text">
-                {quantity}
+          {/* Above the body overlay, so these keep their own tap targets. */}
+          <div className="relative z-10 flex items-center gap-s">
+            {/* A dish with choices always routes through the sheet: a bare "+1"
+                can't say which variant to add, and silently repeating the last
+                one would put food the guest didn't choose on the bill. */}
+            {configurable ? (
+              <>
+                {quantity > 0 && (
+                  <span className="text-label-medium font-semibold text-primary-label tabular-nums">
+                    {quantity} in cart
+                  </span>
+                )}
+                <AddButton
+                  onClick={() => {
+                    if (!stock.canAddMore) {
+                      toast.info(`Only ${item.stock_count} ${item.name} left today.`);
+                      return;
+                    }
+                    setIsChoosing(true);
+                  }}
+                  aria-label={`Choose options for ${item.name}`}
+                />
+              </>
+            ) : stock.soldOut ? (
+              /* Nothing to add. The API still lists it, so the guest is told
+                 plainly rather than left tapping a button that cannot work —
+                 but the card body below still opens the dish. */
+              <span className="text-label-small font-semibold text-error">
+                Unavailable
               </span>
-              <button
-                type="button"
-                onClick={() => updateQuantity(plainLine!.lineId, quantity + 1)}
-                disabled={!stock.canAddMore}
-                aria-label={`Increase ${item.name} quantity`}
-                title={
-                  stock.canAddMore
-                    ? undefined
-                    : `Only ${item.stock_count} left today`
-                }
-                className="w-8 h-8 flex items-center justify-center rounded-4xl bg-surface-container-high text-on-surface text-lg font-bold transition-colors hover:bg-primary hover:text-on-primary disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-surface-container-high disabled:hover:text-on-surface"
-              >
-                <i className="mgc_add_line" />
-              </button>
-            </div>
-          )}
+            ) : quantity === 0 ? (
+              <AddButton
+                onClick={addPlain}
+                aria-label={`Add ${item.name} to cart`}
+              />
+            ) : (
+              <>
+                <button
+                  type="button"
+                  onClick={() => updateQuantity(plainLine!.lineId, quantity - 1)}
+                  aria-label={`Decrease ${item.name} quantity`}
+                  className="w-8 h-8 flex items-center justify-center rounded-full bg-surface-container-high text-on-surface text-lg font-bold transition-colors hover:bg-primary-action hover:text-on-primary"
+                >
+                  <i className="mgc_minimize_line" />
+                </button>
+                <span className="font-bold text-body-large min-w-6 text-center text-on-surface tabular-nums">
+                  {quantity}
+                </span>
+                <button
+                  type="button"
+                  onClick={() => updateQuantity(plainLine!.lineId, quantity + 1)}
+                  disabled={!stock.canAddMore}
+                  aria-label={`Increase ${item.name} quantity`}
+                  title={
+                    stock.canAddMore
+                      ? undefined
+                      : `Only ${item.stock_count} left today`
+                  }
+                  className="w-8 h-8 flex items-center justify-center rounded-full bg-surface-container-high text-on-surface text-lg font-bold transition-colors hover:bg-primary-action hover:text-on-primary disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-surface-container-high disabled:hover:text-on-surface"
+                >
+                  <i className="mgc_add_line" />
+                </button>
+              </>
+            )}
+          </div>
         </div>
       </div>
+
+      {/*
+        The card body, as one real button rather than a click handler on the
+        <article>.
+
+        It is a sibling laid over the card instead of a wrapper around it,
+        because a wrapper would nest ADD and the stepper inside a button — which
+        is invalid, and which screen readers and Enter/Space handling both get
+        wrong. The controls above carry `z-10`, so this catches every tap that
+        is not one of them, including on a sold-out dish.
+      */}
+      <button
+        type="button"
+        onClick={() => setIsChoosing(true)}
+        aria-label={`View ${item.name}`}
+        className="absolute inset-0 rounded-lg"
+      />
 
       {isChoosing && (
         <ModifierSheet
           item={item}
+          remaining={stock.remaining}
           onClose={() => setIsChoosing(false)}
           onAdd={(modifiers, notes, qty) => {
             addItem(

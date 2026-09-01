@@ -1,13 +1,20 @@
 import type { ReactNode } from "react";
+import Button from "./Button";
 
+/**
+ * Secondary but still consequential. Tonal rather than outlined: two bordered
+ * buttons side by side read as one control split in half.
+ *
+ * Kept as a named wrapper over {@link Button} so the ~100 existing call sites
+ * do not all move in the DS v2 migration. New code should reach for `Button`
+ * with an explicit `variant`, which also opens the elevated, text and
+ * destructive rungs of the ladder.
+ */
 interface SecondaryButtonProps {
   children: ReactNode;
   /**
-   * `lg` — full-width muted CTA: 16/16 padding, fixed 52px height, fills its
-   *        container width. Use when paired with a PrimaryButton-lg.
-   * `md` — compact muted chip: 12/24 padding, hugs content. Use for quiet
-   *        secondary actions (Refresh, Join with PIN). Pass
-   *        `className="w-full"` for fill where needed.
+   * `lg` — full-width CTA, 48px. The mobile primary action.
+   * `md` — hugs its label, 40px. The default everywhere else.
    *
    * @default "lg"
    */
@@ -28,18 +35,18 @@ export default function SecondaryButton({
   className = "",
   "aria-label": ariaLabel,
 }: SecondaryButtonProps) {
-  const sizeClass =
-    size === "lg" ? "w-full h-[52px] p-md" : "py-3 px-l";
-
   return (
-    <button
-      type={type}
+    <Button
+      variant="tonal"
+      size={size}
+      fullWidth={size === "lg"}
       onClick={onClick}
       disabled={disabled}
+      type={type}
       aria-label={ariaLabel}
-      className={`inline-flex items-center justify-center gap-xs ${sizeClass} rounded-lg bg-surface-container text-on-surface-variant text-label-l4 leading-4 tracking-normal font-semibold font-display transition duration-100 ease-out hover:bg-surface-container-high active:bg-surface-container-highest active:scale-[0.97] disabled:opacity-50 disabled:cursor-not-allowed disabled:active:scale-100 ${className}`}
+      className={className}
     >
       {children}
-    </button>
+    </Button>
   );
 }

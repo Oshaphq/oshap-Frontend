@@ -46,7 +46,7 @@ describe("kitchen tickets have no accent bar", () => {
     expect(src).toContain("border-b-primary");
     expect(src).toContain("border-b-warning");
     expect(src).toContain("border-b-success");
-    expect(src).toContain("text-primary");
+    expect(src).toContain("text-primary-label");
   });
 });
 

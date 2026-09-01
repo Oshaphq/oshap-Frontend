@@ -113,10 +113,10 @@ export default function Notifications() {
     <div className="p-md sm:p-l flex flex-col gap-md max-w-[52rem] mx-auto w-full">
       <div className="flex items-start justify-between gap-md flex-wrap">
         <div className="flex flex-col gap-0.5">
-          <h1 className="text-h4 font-semibold font-display text-primary-text">
+          <h1 className="text-headline-large font-semibold font-display text-on-surface">
             Notifications
           </h1>
-          <p className="text-caption-md text-secondary-text">
+          <p className="text-body-medium text-on-surface-variant">
             {total > 0
               ? `${total} in the last 30 days`
               : "Calls, orders and payments as they happen"}
@@ -149,10 +149,10 @@ export default function Notifications() {
       </div>
 
       {confirmClear && (
-        <div className="flex flex-col gap-s p-md rounded-lg bg-surface-container-high border border-outline-variant">
-          <p className="text-caption-md text-secondary-text">
+        <div className="flex flex-col gap-s p-md rounded-sm bg-surface-container-high border border-outline-variant">
+          <p className="text-body-medium text-on-surface-variant">
             Clear{" "}
-            <span className="font-semibold text-primary-text">
+            <span className="font-semibold text-on-surface">
               {outstandingIds.length}
             </span>{" "}
             still needing attention? This marks the work done and empties the
@@ -190,7 +190,7 @@ export default function Notifications() {
             </option>
           ))}
         </Select>
-        <label className="flex items-center gap-xs text-caption-md text-secondary-text cursor-pointer select-none">
+        <label className="flex items-center gap-xs text-body-medium text-on-surface-variant cursor-pointer select-none">
           <input
             type="checkbox"
             checked={unresolvedOnly}
@@ -204,11 +204,11 @@ export default function Notifications() {
       {query.isError ? (
         <QueryError error={query.error} onRetry={() => query.refetch()} />
       ) : query.isLoading ? (
-        <p className="text-p2 text-secondary-text py-2xl text-center">
+        <p className="text-body-medium text-on-surface-variant py-2xl text-center">
           Loading…
         </p>
       ) : rows.length === 0 ? (
-        <p className="text-p2 text-secondary-text py-2xl text-center">
+        <p className="text-body-medium text-on-surface-variant py-2xl text-center">
           {type || unresolvedOnly
             ? "Nothing matches that filter."
             : "Nothing yet. Calls and orders will show up here."}
@@ -217,10 +217,10 @@ export default function Notifications() {
         <div className="flex flex-col gap-l">
           {grouped.map(([bucket, items]) => (
             <section key={bucket} className="flex flex-col gap-xs">
-              <h2 className="text-caption-xs font-semibold uppercase tracking-widest text-secondary-text">
+              <h2 className="text-label-small font-semibold uppercase tracking-widest text-on-surface-variant">
                 {bucket}
               </h2>
-              <div className="rounded-md bg-surface-container-low p-s flex flex-col gap-s">
+              <div className="rounded-lg bg-surface-container-low p-s flex flex-col gap-s">
                 {items.map((n) => (
                   <NotificationRow key={n.id} notification={n} />
                 ))}
@@ -239,7 +239,7 @@ export default function Notifications() {
           >
             Previous
           </SecondaryButton>
-          <span className="text-caption-md text-secondary-text tabular-nums">
+          <span className="text-body-medium text-on-surface-variant tabular-nums">
             Page {page} of {lastPage}
           </span>
           <SecondaryButton

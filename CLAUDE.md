@@ -33,11 +33,11 @@ Design system:
 - All styling is Tailwind utilities. Do not write CSS Modules or `style={...}` unless there's no utility for it.
 - Semantic color utilities (`bg-primary`, `text-on-surface-variant`, etc.) auto-swap on dark mode via `[data-theme="dark"]`. No `dark:` prefix needed.
 - Color ramp also exposed (`bg-primary-50`, `text-secondary-30`).
-- **Color usage rule (mandatory — every new UI must conform): see [`docs/color-usage.md`](docs/color-usage.md).** In short — page & top nav: `bg-surface`; card/sheet/drawer/input: `bg-surface-container-low`; modal/dialog: `bg-surface-container-high`; nested block inside a card: `bg-surface-container`; icon-bg / inactive pill / chip on a `surface` bg: `bg-surface-container-high`; hover: `bg-surface-container-high` → `-highest`. Never hardcode hex or use a raw ramp step for a surface.
-- Spacing scale: `xs`, `s`, `md`, `l`, `xl`, `2xl`, `3xl`, `4xl`, `5xl`, `7xl`, `8xl`, `9xl`, `10xl`, `11xl`.
-- Radius scale: `xs`, `s`, `md`, `l`, `xl`, `2xl`, `3xl`, `4xl`.
-- Typography: `text-h1` through `text-h6`, `text-p`, `text-caption-md/sm/xs`, plus Figma aliases `text-p1/p2/p3`, `text-label-l1` through `l5`, `text-display-h1` through `h4`, `text-emphasized-lg/md/sm`.
-- Font families: `font-sans` (Inter), `font-display` (Poppins), `font-emphasized` (Space Grotesk).
+- **Color usage rule (mandatory — every new UI must conform): see [`docs/color-usage.md`](docs/color-usage.md).** In short — page & top nav: `bg-surface` (now near-white `#fafafa`, **lighter** than cards); card/sheet/drawer/rail: `bg-surface-container-low`; nested block inside a card: `bg-surface-container`; modal/dialog/menu/tooltip: `bg-surface-container-high`; hover: one step up. Chips are outlined at rest and take `secondary-container` when selected. Filled buttons use `bg-primary-action` #C24E00, never the brand `bg-primary` #F56500 — white is 3.11:1 on the brand. Never hardcode hex or use a raw ramp step for a surface.
+- Spacing scale: `xs` 4, `s` 8, `md` 16, `l` 24, `xl` 32, `2xl` 40, `3xl` 48, `4xl` 56, `5xl` 64, `6xl` 72, `7xl` 80, `8xl` 88, `9xl` 96, `10xl` 112, `11xl` 128.
+- Radius scale (M3): `xs` 4, `sm` 8, `md` 12, `lg` 16, `xl` 28, `2xl` 32, `3xl` 40, `full` 100. Buttons and fields stay `sm`; cards `lg`; dialogs and bottom-sheet tops `xl`; pills, chips and the FAB `full`.
+- Typography — the 15 M3 roles: `text-display-large/medium/small`, `text-headline-large/medium/small`, `text-title-large/medium/small`, `text-body-large/medium/small`, `text-label-large/medium/small`. Display and headline shrink one step ≤768px on their own, so no call site needs a responsive variant. The old `text-h1`–`h6`, `text-p*`, `text-caption-*`, `text-label-l*`, `text-display-h*` and `text-emphasized-*` names are retired.
+- Font families: `font-sans` (Instrument Sans, body), `font-display` (Archivo, display/headline/title/label). Space Grotesk is retired — the emphasized voice is a weight, not a third webfont.
 
 Data layer rules:
 

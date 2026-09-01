@@ -113,7 +113,7 @@ export default function PayPage() {
               type="button"
               onClick={() => navigate(`/menu?table=${tableId}`)}
               aria-label="Back"
-              className="w-9 h-9 flex items-center justify-center rounded-4xl bg-surface-container hover:bg-surface-container-high transition-colors"
+              className="w-9 h-9 flex items-center justify-center rounded-full bg-surface-container hover:bg-surface-container-high transition-colors"
             >
               <i className="mgc_left_line text-xl" />
             </button>
@@ -121,7 +121,7 @@ export default function PayPage() {
         />
         <div className="flex flex-col items-center gap-s py-10 px-md">
           <div className="oshap-spinner" />
-          <p className="text-p2 text-secondary-text">Loading payment details…</p>
+          <p className="text-body-medium text-on-surface-variant">Loading payment details…</p>
         </div>
         <BottomNav tableId={tableId} />
       </div>
@@ -184,7 +184,7 @@ export default function PayPage() {
               type="button"
               onClick={() => navigate(`/menu?table=${tableId}`)}
               aria-label="Back"
-              className="w-9 h-9 flex items-center justify-center rounded-4xl bg-surface-container hover:bg-surface-container-high transition-colors"
+              className="w-9 h-9 flex items-center justify-center rounded-full bg-surface-container hover:bg-surface-container-high transition-colors"
             >
               <i className="mgc_left_line text-xl" />
             </button>
@@ -195,10 +195,10 @@ export default function PayPage() {
           <>
             <section className="py-2xl px-md bg-surface-container-low border-b-[6px] border-surface-container flex flex-col items-center gap-s text-center">
               <i className="mgc_check_circle_fill text-5xl text-success" />
-              <span className="font-display text-display-h2 font-semibold text-primary-text">
+              <span className="font-display text-title-large font-semibold text-on-surface">
                 Payment confirmed
               </span>
-              <span className="text-p2 text-secondary-text">
+              <span className="text-body-medium text-on-surface-variant">
                 {formatCurrency(receipt.total)} received
                 {paymentMethodPhrase(receipt.payment?.method)}
               </span>
@@ -250,7 +250,7 @@ export default function PayPage() {
               type="button"
               onClick={() => navigate(`/menu?table=${tableId}`)}
               aria-label="Back"
-              className="w-9 h-9 flex items-center justify-center rounded-4xl bg-surface-container hover:bg-surface-container-high transition-colors"
+              className="w-9 h-9 flex items-center justify-center rounded-full bg-surface-container hover:bg-surface-container-high transition-colors"
             >
               <i className="mgc_left_line text-xl" />
             </button>
@@ -258,7 +258,7 @@ export default function PayPage() {
         />
         <EmptyState
           icon={isPos ? "mgc_card_pay_line" : "mgc_time_line"}
-          iconClassName={isPos ? "text-primary" : "text-outline-variant"}
+          iconClassName={isPos ? "text-primary-label" : "text-outline-variant"}
           title={isPos ? "POS On The Way" : "Payment Claimed"}
           message={
             isPos
@@ -287,7 +287,7 @@ export default function PayPage() {
             type="button"
             onClick={() => navigate(`/menu?table=${tableId}`)}
             aria-label="Back"
-            className="w-9 h-9 flex items-center justify-center rounded-4xl bg-surface-container hover:bg-surface-container-high transition-colors"
+            className="w-9 h-9 flex items-center justify-center rounded-full bg-surface-container hover:bg-surface-container-high transition-colors"
           >
             <i className="mgc_left_line text-xl" />
           </button>
@@ -296,13 +296,13 @@ export default function PayPage() {
 
       {pendingPayments && (
         <section className="py-l px-md bg-surface-container-low border-b-[6px] border-surface-container">
-          <div className="flex items-start gap-s p-md rounded-lg bg-warning-container text-on-warning-container">
+          <div className="flex items-start gap-s p-md rounded-sm bg-warning-container text-on-warning-container">
             <i className="mgc_information_line text-xl shrink-0 mt-0.5" />
             <div className="flex flex-col gap-0.5">
-              <span className="text-label-l4 font-semibold font-display">
+              <span className="text-label-large font-semibold font-display">
                 Previous payment pending
               </span>
-              <p className="text-label-l5">
+              <p className="text-label-medium">
                 {formatCurrency(pendingPayments.total)} is awaiting
                 verification. The bill below is only for your new items.
               </p>
@@ -312,10 +312,10 @@ export default function PayPage() {
       )}
 
       <section className="py-2xl px-md bg-surface-container-low border-b-[6px] border-surface-container flex flex-col items-center gap-s">
-        <span className="text-label-l5 font-semibold uppercase tracking-wider text-secondary-text">
+        <span className="text-label-medium font-semibold uppercase tracking-wider text-on-surface-variant">
           Amount Due
         </span>
-        <span className="font-emphasized text-emphasized-md font-medium text-primary">
+        <span className="font-display text-display-medium font-medium text-primary-label">
           {formatCurrency(total)}
         </span>
       </section>
@@ -335,10 +335,10 @@ export default function PayPage() {
 
       <section className="py-l px-md bg-surface-container-low border-b-[6px] border-surface-container flex flex-col gap-md">
         <div className="flex flex-col gap-xs">
-          <h2 className="font-display text-display-h3 font-semibold text-primary-text">
+          <h2 className="font-display text-title-medium font-semibold text-on-surface">
             Bank Transfer
           </h2>
-          <p className="text-p2 text-secondary-text">
+          <p className="text-body-medium text-on-surface-variant">
             {selectedAccount
               ? "Transfer the exact amount above using the details below."
               : "This restaurant isn't taking bank transfers right now."}
@@ -365,9 +365,9 @@ export default function PayPage() {
             </>
           ) : (
             <>
-              <div className="flex items-start gap-s p-md rounded-lg bg-surface-container text-on-surface-variant">
+              <div className="flex items-start gap-s p-md rounded-sm bg-surface-container text-on-surface-variant">
                 <i className="mgc_card_pay_line text-xl shrink-0 mt-0.5" />
-                <p className="text-label-l5">
+                <p className="text-label-medium">
                   Tap <span className="font-semibold">Request a POS</span> below and
                   a waiter will bring a card terminal to your table.
                 </p>
@@ -390,7 +390,7 @@ export default function PayPage() {
             somewhere else to go. */}
         {bankAccounts.length > 1 && (
           <div className="flex flex-col gap-s">
-            <span className="text-caption-xs font-semibold uppercase tracking-wider text-secondary-text">
+            <span className="text-label-small font-semibold uppercase tracking-wider text-on-surface-variant">
               Trouble with this bank?
             </span>
             <div className="flex flex-wrap gap-s">
@@ -402,9 +402,9 @@ export default function PayPage() {
                     type="button"
                     onClick={() => setSelectedAccountId(account.id)}
                     aria-pressed={isSelected}
-                    className={`px-md py-s rounded-4xl text-label-l5 font-semibold transition-colors ${
+                    className={`px-md py-s rounded-full text-label-medium font-semibold transition-colors ${
                       isSelected
-                        ? "bg-primary text-on-primary"
+                        ? "bg-primary-action text-on-primary"
                         : "bg-surface-container text-on-surface-variant hover:bg-surface-container-high"
                     }`}
                   >
@@ -458,10 +458,10 @@ function EmptyState({
     <div className="flex flex-col items-center gap-l py-10 px-md text-center">
       <div className="flex flex-col items-center gap-s">
         <i className={`${icon} text-5xl ${iconClassName}`} />
-        <span className="font-display text-display-h4 font-semibold text-primary-text">
+        <span className="font-display text-title-medium font-semibold text-on-surface">
           {title}
         </span>
-        <p className="text-p2 text-secondary-text max-w-[384px]">{message}</p>
+        <p className="text-body-medium text-on-surface-variant max-w-[384px]">{message}</p>
       </div>
       <PrimaryButton size="md" onClick={onCta}>
         {cta}
@@ -492,10 +492,10 @@ function DetailRow({
 }) {
   return (
     <div className="flex items-center justify-between gap-md py-s">
-      <span className="text-label-l5 text-secondary-text">{label}</span>
+      <span className="text-label-medium text-on-surface-variant">{label}</span>
       <div className="flex items-center gap-s min-w-0">
         <span
-          className={`text-label-l3 font-semibold text-primary-text truncate ${
+          className={`text-title-medium font-semibold text-on-surface truncate ${
             mono ? "tracking-wider" : ""
           }`}
         >
@@ -506,7 +506,7 @@ function DetailRow({
             type="button"
             onClick={onCopy}
             aria-label={`Copy ${label}`}
-            className={`shrink-0 w-9 h-9 flex items-center justify-center rounded-4xl transition-colors ${
+            className={`shrink-0 w-9 h-9 flex items-center justify-center rounded-full transition-colors ${
               copied
                 ? "bg-success-container text-on-success-container"
                 : "bg-surface-container hover:bg-surface-container-high text-on-surface-variant"

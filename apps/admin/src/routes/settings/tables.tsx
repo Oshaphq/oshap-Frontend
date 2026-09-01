@@ -74,7 +74,7 @@ export default function TablesSettings() {
   };
 
   const inputClass =
-    "w-full px-md py-s rounded-lg bg-surface-container-low border border-outline-variant text-p2 text-primary-text placeholder:text-outline outline-none focus:border-primary transition-colors";
+    "w-full px-md py-s rounded-sm bg-surface-container-low border border-outline-variant text-body-medium text-on-surface placeholder:text-outline outline-none focus:border-primary transition-colors";
 
   if (tablesQuery.isLoading) {
     return (
@@ -89,7 +89,7 @@ export default function TablesSettings() {
       <div className="flex items-center justify-between gap-md flex-wrap">
         {/* The count stays; the title does not. The section wrapper names the
             screen already. */}
-        <p className="text-caption-md text-secondary-text">
+        <p className="text-body-medium text-on-surface-variant">
           {tables.length} table{tables.length !== 1 ? "s" : ""} configured
         </p>
         <div className="flex items-center gap-s">
@@ -111,9 +111,9 @@ export default function TablesSettings() {
       </div>
 
       {isOriginUnusable() && tables.length > 0 && (
-        <div className="flex items-start gap-s p-md rounded-lg bg-warning-container text-on-warning-container">
+        <div className="flex items-start gap-s p-md rounded-sm bg-warning-container text-on-warning-container">
           <i className="mgc_alert_line text-xl shrink-0 mt-0.5" />
-          <p className="text-p2">
+          <p className="text-body-medium">
             {isLocalOrigin() ? (
               <>
                 QR codes currently point at{" "}
@@ -138,7 +138,7 @@ export default function TablesSettings() {
         </div>
       )}
 
-      <div className="bg-surface-container-low rounded-md border border-transparent hover:border-outline-variant transition-colors overflow-hidden">
+      <div className="bg-surface-container-low rounded-lg border border-transparent hover:border-outline-variant transition-colors overflow-hidden">
         {/* Scrolls inside its own box. Four or five columns of names and
                     money cannot usefully collapse, and without this the whole
                     page slides sideways on a phone. */}
@@ -146,13 +146,13 @@ export default function TablesSettings() {
           <table className="w-full min-w-[32rem] text-left border-collapse">
             <thead>
               <tr className="bg-surface-container-high border-b border-surface-container-highest">
-                <th className="py-s px-md text-label-l4 font-semibold text-secondary-text">
+                <th className="py-s px-md text-label-large font-semibold text-on-surface-variant">
                   Table ID
                 </th>
-                <th className="py-s px-md text-label-l4 font-semibold text-secondary-text">
+                <th className="py-s px-md text-label-large font-semibold text-on-surface-variant">
                   Status
                 </th>
-                <th className="py-s px-md text-label-l4 font-semibold text-secondary-text text-right">
+                <th className="py-s px-md text-label-large font-semibold text-on-surface-variant text-right">
                   Actions
                 </th>
               </tr>
@@ -170,20 +170,20 @@ export default function TablesSettings() {
                     key={table.table_id}
                     className="border-b border-surface-container-highest last:border-none hover:bg-surface-container-low transition-colors"
                   >
-                    <td className="py-s px-md text-p2 text-primary-text font-semibold font-display">
+                    <td className="py-s px-md text-body-medium text-on-surface font-semibold font-display">
                       {table.table_id}
                     </td>
                     <td className="py-s px-md">
                       {isPending ? (
-                        <span className="px-s py-xs rounded-4xl text-caption-xs font-bold uppercase tracking-wider bg-warning text-on-warning">
+                        <span className="px-s py-xs rounded-full text-label-small font-bold uppercase tracking-wider bg-warning text-on-warning">
                           Verification Req.
                         </span>
                       ) : isUnpaid ? (
-                        <span className="px-s py-xs rounded-4xl text-caption-xs font-bold uppercase tracking-wider bg-error-container text-on-error-container">
+                        <span className="px-s py-xs rounded-full text-label-small font-bold uppercase tracking-wider bg-error-container text-on-error-container">
                           Dining
                         </span>
                       ) : (
-                        <span className="px-s py-xs rounded-4xl text-caption-xs font-bold uppercase tracking-wider bg-surface-container-high text-outline">
+                        <span className="px-s py-xs rounded-full text-label-small font-bold uppercase tracking-wider bg-surface-container-high text-outline">
                           Empty
                         </span>
                       )}
@@ -195,7 +195,7 @@ export default function TablesSettings() {
                         }
                         title={`Show QR code for ${table.table_id}`}
                         aria-label={`Show QR code for ${table.table_id}`}
-                        className="p-xs text-secondary-text hover:text-primary transition-colors"
+                        className="p-xs text-on-surface-variant hover:text-primary-label transition-colors"
                       >
                         <i className="mgc_qrcode_line text-lg" />
                       </button>
@@ -207,7 +207,7 @@ export default function TablesSettings() {
                             ? "Remove table"
                             : "Cannot remove table with active orders"
                         }
-                        className="p-xs text-secondary-text hover:text-error transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+                        className="p-xs text-on-surface-variant hover:text-error transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
                       >
                         {isDeleting ? (
                           <i className="mgc_loading_line animate-spin text-lg" />
@@ -223,7 +223,7 @@ export default function TablesSettings() {
                 <tr>
                   <td
                     colSpan={3}
-                    className="p-xl text-center text-secondary-text"
+                    className="p-xl text-center text-on-surface-variant"
                   >
                     No tables configured yet.
                   </td>
@@ -236,10 +236,10 @@ export default function TablesSettings() {
 
       {isModalOpen && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center bg-scrim backdrop-blur-sm p-md">
-          <div className="w-full max-w-[400px] rounded-md bg-surface-container-high p-l flex flex-col gap-md border border-primary shadow-xl">
-            <h3 className="font-bold text-primary-text">Add Table</h3>
+          <div className="w-full max-w-[400px] rounded-lg bg-surface-container-high p-l flex flex-col gap-md border border-primary shadow-xl">
+            <h3 className="font-bold text-on-surface">Add Table</h3>
             <div>
-              <label className="block text-caption-md font-semibold text-primary-text mb-xs">
+              <label className="block text-body-medium font-semibold text-on-surface mb-xs">
                 Table ID / Name
               </label>
               <input
@@ -251,7 +251,7 @@ export default function TablesSettings() {
                 className={inputClass}
                 autoFocus
               />
-              <p className="text-caption-xs text-secondary-text mt-xs">
+              <p className="text-label-small text-on-surface-variant mt-xs">
                 This ID will appear on the QR code for this table.
               </p>
             </div>

@@ -66,13 +66,13 @@ export default function TableQrDialog({
         role="dialog"
         aria-modal="true"
         aria-label={`QR code for table ${tableName}`}
-        className="w-full max-w-[400px] rounded-md bg-surface-container-high p-l flex flex-col gap-md shadow-xl"
+        className="w-full max-w-[400px] rounded-lg bg-surface-container-high p-l flex flex-col gap-md shadow-xl"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex items-start justify-between gap-md">
           <div className="flex flex-col gap-0.5">
-            <h3 className="font-bold text-primary-text">Table {tableName}</h3>
-            <p className="text-caption-md text-secondary-text">
+            <h3 className="font-bold text-on-surface">Table {tableName}</h3>
+            <p className="text-body-medium text-on-surface-variant">
               Guests scan this to open your menu.
             </p>
           </div>
@@ -80,16 +80,16 @@ export default function TableQrDialog({
             type="button"
             onClick={onClose}
             aria-label="Close"
-            className="w-9 h-9 shrink-0 flex items-center justify-center rounded-4xl bg-surface-container text-on-surface-variant hover:bg-surface-container-highest transition-colors"
+            className="w-9 h-9 shrink-0 flex items-center justify-center rounded-full bg-surface-container text-on-surface-variant hover:bg-surface-container-highest transition-colors"
           >
             <i className="mgc_close_line" />
           </button>
         </div>
 
         {/* White plate regardless of theme — a QR code on a dark surface won't scan. */}
-        <div className="flex items-center justify-center p-md rounded-lg bg-white">
+        <div className="flex items-center justify-center p-md rounded-sm bg-white">
           {failed ? (
-            <p className="text-p2 text-error py-xl">Could not generate the QR code.</p>
+            <p className="text-body-medium text-error py-xl">Could not generate the QR code.</p>
           ) : pngDataUrl ? (
             <img
               src={pngDataUrl}
@@ -104,16 +104,16 @@ export default function TableQrDialog({
         </div>
 
         <div className="flex flex-col gap-xs">
-          <span className="text-caption-xs font-semibold uppercase tracking-wider text-secondary-text">
+          <span className="text-label-small font-semibold uppercase tracking-wider text-on-surface-variant">
             Links to
           </span>
-          <code className="text-caption-md text-secondary-text break-all">{url}</code>
+          <code className="text-body-medium text-on-surface-variant break-all">{url}</code>
         </div>
 
         {isOriginUnusable() && (
-          <div className="flex items-start gap-s p-md rounded-lg bg-warning-container text-on-warning-container">
+          <div className="flex items-start gap-s p-md rounded-sm bg-warning-container text-on-warning-container">
             <i className="mgc_alert_line text-lg shrink-0 mt-0.5" />
-            <p className="text-caption-md">
+            <p className="text-body-medium">
               {isLocalOrigin() ? (
                 <>
                   This points at <span className="font-semibold">localhost</span>,

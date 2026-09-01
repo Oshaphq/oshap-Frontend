@@ -49,7 +49,7 @@ const NO_TABLE = "table not recorded";
 export const NOTIFICATION_META: Record<NotificationType, NotificationMeta> = {
   waiter_called: {
     iconClass: "mgc_service_line",
-    iconColorClass: "text-primary",
+    iconColorClass: "text-primary-label",
     chime: true,
     title: "Waiter requested",
     body: (f) =>
@@ -60,7 +60,7 @@ export const NOTIFICATION_META: Record<NotificationType, NotificationMeta> = {
   },
   pos_requested: {
     iconClass: "mgc_card_pay_line",
-    iconColorClass: "text-primary",
+    iconColorClass: "text-primary-label",
     chime: true,
     title: "POS requested",
     body: (f) =>
@@ -71,7 +71,7 @@ export const NOTIFICATION_META: Record<NotificationType, NotificationMeta> = {
   },
   new_order: {
     iconClass: "mgc_shopping_bag_2_line",
-    iconColorClass: "text-primary",
+    iconColorClass: "text-primary-label",
     chime: true,
     title: "New order",
     body: (f) =>

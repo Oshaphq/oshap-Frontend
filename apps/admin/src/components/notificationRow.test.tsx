@@ -68,7 +68,7 @@ describe("NotificationRow", () => {
     // Money is warning, food is success, a call is primary.
     expect(row({ type: "payment_claimed" })).toContain("text-warning");
     expect(row({ type: "order_ready" })).toContain("text-success");
-    expect(row()).toContain("text-primary");
+    expect(row()).toContain("text-primary-label");
   });
 
   it("centres its row rather than hanging the icon off the top", () => {

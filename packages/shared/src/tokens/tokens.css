@@ -1,18 +1,31 @@
 /*
- * Oshap design tokens — ported from /tokens/*.json into Tailwind v4 @theme.
+ * Oshap design tokens — DS v2, a Material 3 system.
+ *
+ * Rendered reference: `Oshap Design System v2.dc.html`.
+ * Derivation notes:   `ds-v2-plan.md`.
+ * Usage rules:        `docs/color-usage.md`.
  *
  * Token tiers:
- *   1. Color roles (raw scales: primary-50, secondary-30, etc.)
- *   2. Semantic colors (primary, on-primary, surface, etc.) — swap on dark mode
- *   3. Spacing, radius, typography (responsive)
+ *   1. Tonal ramps (primary-50, neutral-90, …) — 14 steps, tone = CIE L*.
+ *   2. Semantic roles (primary-action, surface-container-low, …) — swap on dark.
+ *   3. Type, shape, spacing.
  *
- * Dark mode strategy: every semantic color is `@theme inline` referencing a
- * `--ds-*` variable that swaps based on [data-theme="dark"] on <html>. This
- * means `bg-primary`, `text-on-surface`, etc. just work — no `dark:` prefix
- * needed in markup.
+ * The palette is generated from ONE key color, #F56500 (OKLCH L 0.679 · C 0.196
+ * · H 44.6), the same way every tenant palette is. Four ramps rotate hue off it:
+ * secondary H+40, tertiary H+260, accent H+200. Neutrals and the status ramps
+ * (error/success/warning) are fixed — a tenant brand never tints them, because a
+ * restaurant with a red brand must not get a red "paid" chip.
  *
- * Mobile typography: the `--ds-h*` size/line-height vars swap inside a
- * (max-width: 768px) media query so `text-h1` resolves smaller on phones.
+ * The brand hex is pinned at tone 60, the step nearest its own lightness, so it
+ * appears in the ramp exactly rather than as a re-derived approximation.
+ *
+ * Dark mode: every semantic role is `@theme inline` over a `--ds-*` variable
+ * that swaps on [data-theme="dark"]. `bg-surface`, `text-on-surface` etc. just
+ * work — no `dark:` prefix in markup, ever.
+ *
+ * Responsive type: `--ds-*-size` vars swap under (max-width: 768px), so
+ * `text-display-large` resolves smaller on a phone with no variant at the call
+ * site.
  */
 
 @custom-variant dark (&:where([data-theme="dark"], [data-theme="dark"] *));
@@ -21,106 +34,87 @@
  * Tier 1 + 2: Tailwind theme tokens (utility classes)
  * ========================================================================= */
 @theme inline {
-  /* ---------- Font families ---------- */
-  --font-sans: "Inter", system-ui, -apple-system, "Segoe UI", sans-serif;
-  --font-display: "Poppins", system-ui, sans-serif;
-  --font-emphasized: "Space Grotesk", system-ui, sans-serif;
+  /* ---------- Font families ----------
+   * Two, not three. Archivo carries display/headline/title/label; the
+   * "emphasized" voice is a weight (600) rather than a third webfont.
+   * Instrument Sans carries body, on the same metrics envelope as Inter so
+   * nothing reflows, with tabular figures for naira columns. */
+  --font-sans: "Instrument Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-display: "Archivo", system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
 
-  /* ---------- Color roles (raw scales) ---------- */
+  /* ---------- Tonal ramps ----------
+   * Steps are 0 10 20 30 40 50 60 70 80 90 95 98 99 100. Tone is CIE L*, so
+   * tone 40 is the same perceived lightness in every ramp. */
+
+  /* primary — the brand, H 44.6. #f56500 sits at tone 60. */
   --color-primary-0: #000000;
-  --color-primary-1: #050200;
-  --color-primary-10: #331500;
-  --color-primary-20: #662a00;
-  --color-primary-30: #993f00;
-  --color-primary-40: #cc5400;
-  --color-primary-50: #f56500;
-  --color-primary-60: #ff8733;
-  --color-primary-70: #ffa566;
-  --color-primary-80: #ffc399;
-  --color-primary-90: #ffe1cc;
-  --color-primary-95: #fff3eb;
-  --color-primary-98: #fff9f5;
-  --color-primary-99: #fffcfa;
+  --color-primary-10: #330f00;
+  --color-primary-20: #531d00;
+  --color-primary-30: #762d00;
+  --color-primary-40: #9b3d00;
+  --color-primary-50: #c24e00;
+  --color-primary-60: #f56500;
+  --color-primary-70: #fa8751;
+  --color-primary-80: #ffb18f;
+  --color-primary-90: #ffd9c9;
+  --color-primary-95: #ffece4;
+  --color-primary-98: #fff8f4;
+  --color-primary-99: #fffbfa;
   --color-primary-100: #ffffff;
 
+  /* secondary — amber, H +40 · C ×0.90 */
   --color-secondary-0: #000000;
-  --color-secondary-10: #231610;
-  --color-secondary-20: #462c20;
-  --color-secondary-30: #6a422f;
-  --color-secondary-40: #8d583f;
-  --color-secondary-50: #b06e4f;
-  --color-secondary-60: #bc846a;
-  --color-secondary-70: #d0a895;
-  --color-secondary-80: #dfc5b9;
-  --color-secondary-90: #efe2dc;
-  --color-secondary-95: #f7f0ed;
-  --color-secondary-98: #fcf9f8;
-  --color-secondary-99: #fdfcfb;
+  --color-secondary-10: #251900;
+  --color-secondary-20: #3f2d00;
+  --color-secondary-30: #5b4200;
+  --color-secondary-40: #785900;
+  --color-secondary-50: #977000;
+  --color-secondary-60: #b78900;
+  --color-secondary-70: #d4a329;
+  --color-secondary-80: #e7c170;
+  --color-secondary-90: #fadfaa;
+  --color-secondary-95: #ffefcf;
+  --color-secondary-98: #fff9ec;
+  --color-secondary-99: #fffcf5;
   --color-secondary-100: #ffffff;
 
+  /* tertiary — violet, H +260 · C ×0.75.
+   * Rotated off the generator default of H+140, which put its T90 container
+   * 10.8° from success-container: two pale mint chips in the same column of the
+   * payments table, where PAID means settled and SPLIT does not. */
   --color-tertiary-0: #000000;
-  --color-tertiary-10: #25230e;
-  --color-tertiary-15: #383414;
-  --color-tertiary-20: #4b451b;
-  --color-tertiary-30: #706829;
-  --color-tertiary-40: #9e9239;
-  --color-tertiary-50: #bbad44;
-  --color-tertiary-60: #c9be69;
-  --color-tertiary-70: #d6ce8f;
-  --color-tertiary-80: #e4deb4;
-  --color-tertiary-90: #f1efda;
-  --color-tertiary-95: #f8f7ec;
-  --color-tertiary-98: #fcfcf8;
-  --color-tertiary-99: #fefdfb;
+  --color-tertiary-10: #250c3c;
+  --color-tertiary-20: #3e1a5f;
+  --color-tertiary-30: #582c82;
+  --color-tertiary-40: #7243a0;
+  --color-tertiary-50: #8b5dbc;
+  --color-tertiary-60: #a47ad3;
+  --color-tertiary-70: #bc98e7;
+  --color-tertiary-80: #d4b8f7;
+  --color-tertiary-90: #eadbff;
+  --color-tertiary-95: #f4edff;
+  --color-tertiary-98: #fbf8ff;
+  --color-tertiary-99: #fdfbff;
   --color-tertiary-100: #ffffff;
 
-  --color-error-0: #000000;
-  --color-error-10: #2f0407;
-  --color-error-20: #5f070d;
-  --color-error-30: #8e0b14;
-  --color-error-40: #bd0f1b;
-  --color-error-50: #ec1322;
-  --color-error-60: #f0424e;
-  --color-error-70: #f4717a;
-  --color-error-80: #f8a0a6;
-  --color-error-90: #fbd0d3;
-  --color-error-95: #fde7e9;
-  --color-error-98: #fef6f6;
-  --color-error-99: #fffafb;
-  --color-error-100: #ffffff;
+  /* accent — blue, H +200 · C ×0.85. Attention without action. */
+  --color-accent-0: #000000;
+  --color-accent-10: #001d34;
+  --color-accent-20: #003354;
+  --color-accent-30: #004a78;
+  --color-accent-40: #00639d;
+  --color-accent-50: #007dc4;
+  --color-accent-60: #2198e7;
+  --color-accent-70: #5ab3f9;
+  --color-accent-80: #92ceff;
+  --color-accent-90: #cae7ff;
+  --color-accent-95: #e5f3ff;
+  --color-accent-98: #f4faff;
+  --color-accent-99: #fafdff;
+  --color-accent-100: #ffffff;
 
-  --color-success-0: #000000;
-  --color-success-10: #003322;
-  --color-success-20: #006644;
-  --color-success-30: #009966;
-  --color-success-40: #00cc88;
-  --color-success-50: #00ffaa;
-  --color-success-60: #33ffbb;
-  --color-success-70: #66ffcc;
-  --color-success-80: #99ffdd;
-  --color-success-90: #ccffee;
-  --color-success-95: #e5fff6;
-  --color-success-98: #f5fffc;
-  --color-success-99: #fafffd;
-  --color-success-100: #ffffff;
-
-  --color-warning-0: #000000;
-  /* -10 and -20 are both #654301 in the Figma source
-     (tokens/primitive_colors.json) — not a transcription slip. */
-  --color-warning-10: #654301;
-  --color-warning-20: #654301;
-  --color-warning-30: #8e5d01;
-  --color-warning-40: #a36b01;
-  --color-warning-50: #fda602;
-  --color-warning-60: #feb834;
-  --color-warning-70: #feca67;
-  --color-warning-80: #fedc9a;
-  --color-warning-90: #ffedcc;
-  --color-warning-95: #fff6e6;
-  --color-warning-98: #fffbf5;
-  --color-warning-99: #fffdfa;
-  --color-warning-100: #ffffff;
-
+  /* neutral — surfaces, text */
   --color-neutral-0: #000000;
   --color-neutral-10: #1a191a;
   --color-neutral-20: #343234;
@@ -136,6 +130,7 @@
   --color-neutral-99: #fcfcfc;
   --color-neutral-100: #ffffff;
 
+  /* neutral-variant — outlines */
   --color-neutral-variant-0: #000000;
   --color-neutral-variant-10: #1a181b;
   --color-neutral-variant-20: #343036;
@@ -151,72 +146,90 @@
   --color-neutral-variant-99: #fcfcfd;
   --color-neutral-variant-100: #ffffff;
 
-  --color-accent-0: #000000;
-  --color-accent-10: #332900;
-  --color-accent-20: #665200;
-  --color-accent-30: #997b00;
-  --color-accent-40: #cca400;
-  --color-accent-50: #ffcd00;
-  --color-accent-60: #ffd733;
-  --color-accent-70: #ffe166;
-  --color-accent-80: #ffeb99;
-  --color-accent-90: #fff5cc;
-  --color-accent-95: #fffae5;
-  --color-accent-98: #fffdf5;
-  --color-accent-99: #fffefa;
-  --color-accent-100: #ffffff;
+  /* error — owes, rejected */
+  --color-error-0: #000000;
+  --color-error-10: #2f0407;
+  --color-error-20: #5f070d;
+  --color-error-30: #8e0b14;
+  --color-error-40: #bd0f1b;
+  --color-error-50: #ec1322;
+  --color-error-60: #f0424e;
+  --color-error-70: #f4717a;
+  --color-error-80: #f8a0a6;
+  --color-error-90: #fbd0d3;
+  --color-error-95: #fde7e9;
+  --color-error-98: #fef6f6;
+  --color-error-99: #fffafb;
+  --color-error-100: #ffffff;
 
-  --color-accent-2-0: #000000;
-  --color-accent-2-10: #190a29;
-  --color-accent-2-20: #311353;
-  --color-accent-2-30: #4a1d7c;
-  --color-accent-2-40: #5f259f;
-  --color-accent-2-50: #7c30cf;
-  --color-accent-2-60: #965ad8;
-  --color-accent-2-70: #b083e2;
-  --color-accent-2-80: #caacec;
-  --color-accent-2-90: #e5d6f5;
-  --color-accent-2-95: #f2eafa;
-  --color-accent-2-98: #faf7fd;
-  --color-accent-2-99: #fcfbfe;
-  --color-accent-2-100: #ffffff;
+  /* success — paid, verified. Runs bright, so its roles step down. */
+  --color-success-0: #000000;
+  --color-success-10: #003322;
+  --color-success-20: #006644;
+  --color-success-30: #009966;
+  --color-success-40: #00cc88;
+  --color-success-50: #00ffaa;
+  --color-success-60: #33ffbb;
+  --color-success-70: #66ffcc;
+  --color-success-80: #99ffdd;
+  --color-success-90: #ccffee;
+  --color-success-95: #e5fff6;
+  --color-success-98: #f5fffc;
+  --color-success-99: #fafffd;
+  --color-success-100: #ffffff;
 
-  /* ---------- Semantic colors (light/dark via --ds-* indirection) ---------- */
-  --color-primary: var(--ds-primary);
-  --color-primary-10a: var(--ds-primary-10a);
+  /* warning — says paid, low stock.
+   * -10 and -20 are both #654301 in the Figma source; not a transcription slip. */
+  --color-warning-0: #000000;
+  --color-warning-10: #654301;
+  --color-warning-20: #654301;
+  --color-warning-30: #8e5d01;
+  --color-warning-40: #a36b01;
+  --color-warning-50: #fda602;
+  --color-warning-60: #feb834;
+  --color-warning-70: #feca67;
+  --color-warning-80: #fedc9a;
+  --color-warning-90: #ffedcc;
+  --color-warning-95: #fff6e6;
+  --color-warning-98: #fffbf5;
+  --color-warning-99: #fffdfa;
+  --color-warning-100: #ffffff;
+
+  /* ---------- Semantic roles (light/dark via --ds-* indirection) ---------- */
+
+  /* Brand vs interface. `brand-primary` is identity only and is judged against
+   * WCAG's NON-TEXT 3:1 bar (SC 1.4.11) — the mark and other graphical objects,
+   * never a label. `primary-action` is the interface fill, where white clears
+   * 4.5:1 at any label size. White on #f56500 is 3.11:1; on #c24e00, 4.79:1. */
+  --color-brand-primary: var(--ds-brand-primary);
+  --color-primary: var(--ds-brand-primary);
+  --color-primary-action: var(--ds-primary-action);
+  /* The brand as a LABEL on a surface — outlined and text buttons, links.
+   * M3 would call this `primary`, but that name is taken here by the pinned
+   * brand fill, which is unreadable as small text on either theme. Light takes
+   * tone 40 (6.85:1 on `surface`), dark tone 80. */
+  --color-primary-label: var(--ds-primary-label);
+  --color-primary-action-hover: var(--ds-primary-action-hover);
+  --color-primary-action-pressed: var(--ds-primary-action-pressed);
   --color-on-primary: var(--ds-on-primary);
-  --color-on-primary-10a: var(--ds-on-primary-10a);
-  --color-on-primary-20a: var(--ds-on-primary-20a);
   --color-primary-container: var(--ds-primary-container);
   --color-on-primary-container: var(--ds-on-primary-container);
   --color-inverse-primary: var(--ds-inverse-primary);
-  --color-primary-fixed: var(--ds-primary-fixed);
-  --color-on-primary-fixed: var(--ds-on-primary-fixed);
-  --color-primary-fixed-dim: var(--ds-primary-fixed-dim);
-  --color-on-primary-fixed-variant: var(--ds-on-primary-fixed-variant);
 
   --color-secondary: var(--ds-secondary);
   --color-on-secondary: var(--ds-on-secondary);
   --color-secondary-container: var(--ds-secondary-container);
   --color-on-secondary-container: var(--ds-on-secondary-container);
-  --color-on-secondary-container-10a: var(--ds-on-secondary-container-10a);
-  --color-secondary-fixed: var(--ds-secondary-fixed);
-  --color-on-secondary-fixed: var(--ds-on-secondary-fixed);
-  --color-secondary-fixed-dim: var(--ds-secondary-fixed-dim);
-  --color-on-secondary-fixed-variant: var(--ds-on-secondary-fixed-variant);
 
   --color-tertiary: var(--ds-tertiary);
   --color-on-tertiary: var(--ds-on-tertiary);
   --color-tertiary-container: var(--ds-tertiary-container);
   --color-on-tertiary-container: var(--ds-on-tertiary-container);
-  --color-tertiary-fixed: var(--ds-tertiary-fixed);
-  --color-on-tertiary-fixed: var(--ds-on-tertiary-fixed);
-  --color-tertiary-dim-lowest: var(--ds-tertiary-dim-lowest);
-  --color-tertiary-dim-low: var(--ds-tertiary-dim-low);
-  --color-tertiary-fixed-dim: var(--ds-tertiary-fixed-dim);
-  --color-tertiary-fixed-dim-10a: var(--ds-tertiary-fixed-dim-10a);
-  --color-tertiary-fixed-dim-20a: var(--ds-tertiary-fixed-dim-20a);
-  --color-on-tertiary-fixed-variant: var(--ds-on-tertiary-fixed-variant);
+
+  --color-accent: var(--ds-accent);
+  --color-on-accent: var(--ds-on-accent);
+  --color-accent-container: var(--ds-accent-container);
+  --color-on-accent-container: var(--ds-on-accent-container);
 
   --color-error: var(--ds-error);
   --color-on-error: var(--ds-on-error);
@@ -236,13 +249,10 @@
   --color-surface-tint: var(--ds-surface-tint);
   --color-surface: var(--ds-surface);
   --color-on-surface: var(--ds-on-surface);
-  --color-primary-text: var(--ds-primary-text);
-  --color-secondary-text: var(--ds-secondary-text);
   --color-on-surface-disabled: var(--ds-on-surface-disabled);
   --color-on-surface-label-disabled: var(--ds-on-surface-label-disabled);
   --color-surface-variant: var(--ds-surface-variant);
   --color-on-surface-variant: var(--ds-on-surface-variant);
-  --color-on-surface-variant-10a: var(--ds-on-surface-variant-10a);
   --color-inverse-surface: var(--ds-inverse-surface);
   --color-inverse-on-surface: var(--ds-inverse-on-surface);
   --color-surface-dim: var(--ds-surface-dim);
@@ -258,131 +268,115 @@
   --color-shadow: var(--ds-shadow);
   --color-scrim: var(--ds-scrim);
 
-  /* ---------- Spacing (responsive via --ds-spacing-* swap) ---------- */
-  --spacing-xs: var(--ds-spacing-xs);
-  --spacing-s: var(--ds-spacing-s);
-  --spacing-md: var(--ds-spacing-md);
-  --spacing-l: var(--ds-spacing-l);
-  --spacing-xl: var(--ds-spacing-xl);
-  --spacing-2xl: var(--ds-spacing-2xl);
-  --spacing-3xl: var(--ds-spacing-3xl);
-  --spacing-4xl: var(--ds-spacing-4xl);
-  --spacing-5xl: var(--ds-spacing-5xl);
-  --spacing-7xl: var(--ds-spacing-7xl);
-  --spacing-8xl: var(--ds-spacing-8xl);
-  --spacing-9xl: var(--ds-spacing-9xl);
-  --spacing-10xl: var(--ds-spacing-10xl);
-  --spacing-11xl: var(--ds-spacing-11xl);
+  /* ---------- Spacing ----------
+   * 6xl 72px closes the gap where `p-6xl` silently resolved to nothing while
+   * 7xl held 72; everything from 7xl up shifts one step. No call site used the
+   * shifted names, so this renumber is invisible outside this file. */
+  --spacing-xs: 4px;
+  --spacing-s: 8px;
+  --spacing-md: 16px;
+  --spacing-l: 24px;
+  --spacing-xl: 32px;
+  --spacing-2xl: 40px;
+  --spacing-3xl: 48px;
+  --spacing-4xl: 56px;
+  --spacing-5xl: 64px;
+  --spacing-6xl: 72px;
+  --spacing-7xl: 80px;
+  --spacing-8xl: 88px;
+  --spacing-9xl: 96px;
+  --spacing-10xl: 112px;
+  --spacing-11xl: 128px;
   --spacing-button-py: 10px;
   --spacing-button-px: 20px;
 
-  /* ---------- Radius ---------- *
-   * Single-letter tokens (`--radius-s`, `--radius-l`) would normally collide
-   * with Tailwind v4's directional rounded shorthands. The @layer utilities
-   * override at the bottom of this file flips the cascade so `rounded-s` and
-   * `rounded-l` emit the full 4-corner radius from our tokens.
-   * Directional+size forms (`rounded-t-l`, `rounded-bl-s`, etc.) need no
-   * override — they use different class names that Tailwind parses normally.
-   */
+  /* ---------- Shape — the M3 shape scale ----------
+   * Buttons and fields stay at `sm` 8px: M3 draws buttons as pills, Oshap does
+   * not, so no button silhouette moves. `md` compact cards · `lg` cards · `xl`
+   * dialogs and bottom-sheet top corners · `full` pills, chips, FAB, nav.
+   *
+   * The old single-letter tokens (`--radius-s`, `--radius-l`) are gone, and so
+   * is the `@layer utilities` override they needed: they collided with Tailwind
+   * v4 directional shorthands of the same name, and that collision is better
+   * lost than patched. */
+  --radius-none: 0px;
   --radius-xs: 4px;
   --radius-sm: 8px;
-  --radius-s: 8px;
-  --radius-md: 16px;
-  --radius-l: 24px;
-  --radius-xl: 32px;
-  --radius-2xl: 40px;
-  --radius-3xl: 48px;
-  --radius-4xl: 100px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-xl: 28px;
+  --radius-2xl: 32px;
+  --radius-3xl: 40px;
+  --radius-full: 100px;
 
-  /* ---------- Typography (font sizes — responsive via --ds-* swap) ---------- */
-  --text-h1: var(--ds-h1-size);
-  --text-h1--line-height: var(--ds-h1-line-height);
-  --text-h1--letter-spacing: -1.75px;
-  --text-h2: var(--ds-h2-size);
-  --text-h2--line-height: var(--ds-h2-line-height);
-  --text-h2--letter-spacing: -1.75px;
-  --text-h3: var(--ds-h3-size);
-  --text-h3--line-height: var(--ds-h3-line-height);
-  --text-h3--letter-spacing: -1.5px;
-  --text-h4: var(--ds-h4-size);
-  --text-h4--line-height: var(--ds-h4-line-height);
-  --text-h4--letter-spacing: -1px;
-  --text-h5: 24px;
-  --text-h5--line-height: 28px;
-  --text-h5--letter-spacing: -0.75px;
-  --text-h6: 20px;
-  --text-h6--line-height: 24px;
-  --text-h6--letter-spacing: -0.5px;
-  --text-p: 16px;
-  --text-p--line-height: 20px;
-  --text-p--letter-spacing: -0.5px;
-  --text-caption-md: 14px;
-  --text-caption-md--line-height: 16px;
-  --text-caption-md--letter-spacing: -0.5px;
-  --text-caption-sm: 12px;
-  --text-caption-sm--line-height: 14px;
-  --text-caption-sm--letter-spacing: -0.25px;
-  --text-caption-xs: 10px;
-  --text-caption-xs--line-height: 12px;
-  --text-caption-xs--letter-spacing: -0.25px;
+  /* ---------- Typography — the 15 M3 roles ----------
+   * Tracking is ~0 at display sizes and POSITIVE below 16px, replacing the old
+   * blanket −1.75px. Positive tracking is what actually helps at 11–12px on a
+   * phone, which is where most of these labels render. */
+  --text-display-large: var(--ds-display-large-size);
+  --text-display-large--line-height: var(--ds-display-large-line);
+  --text-display-large--letter-spacing: -0.25px;
+  --text-display-large--font-weight: 600;
+  --text-display-medium: var(--ds-display-medium-size);
+  --text-display-medium--line-height: var(--ds-display-medium-line);
+  --text-display-medium--letter-spacing: 0px;
+  --text-display-medium--font-weight: 600;
+  --text-display-small: var(--ds-display-small-size);
+  --text-display-small--line-height: var(--ds-display-small-line);
+  --text-display-small--letter-spacing: 0px;
+  --text-display-small--font-weight: 600;
 
-  /* Text style aliases from textStyles.json (Figma) */
-  --text-p1: 16px;
-  --text-p1--line-height: 20px;
-  --text-p1--letter-spacing: -0.02em;
-  --text-p2: 14px;
-  --text-p2--line-height: 18px;
-  --text-p2--letter-spacing: -0.02em;
-  --text-p3: 12px;
-  --text-p3--line-height: 16px;
-  --text-p3--letter-spacing: -0.02em;
-  --text-label-l1: 24px;
-  --text-label-l1--line-height: 28px;
-  --text-label-l1--letter-spacing: -0.02em;
-  --text-label-l2: 20px;
-  --text-label-l2--line-height: 24px;
-  --text-label-l2--letter-spacing: -0.02em;
-  --text-label-l3: 16px;
-  --text-label-l3--line-height: 20px;
-  --text-label-l3--letter-spacing: -0.02em;
-  --text-label-l4: 14px;
-  --text-label-l4--line-height: 18px;
-  --text-label-l4--letter-spacing: -0.02em;
-  --text-label-l4-medium: 14px;
-  --text-label-l4-medium--line-height: 16px;
-  --text-label-l4-medium--font-weight: 500;
-  --text-label-l4-medium--letter-spacing: 0;
-  --text-label-l5: 12px;
-  --text-label-l5--line-height: 16px;
-  --text-label-l5--letter-spacing: -0.02em;
-  --text-display-h1: 24px;
-  --text-display-h1--line-height: 28px;
-  --text-display-h1--letter-spacing: -0.02em;
-  --text-display-h2: 20px;
-  --text-display-h2--line-height: 24px;
-  --text-display-h2--letter-spacing: -0.02em;
-  --text-display-h3: 18px;
-  --text-display-h3--line-height: 22px;
-  --text-display-h3--letter-spacing: -0.01em;
-  --text-display-h4: 16px;
-  --text-display-h4--line-height: 20px;
-  --text-display-h4--letter-spacing: -0.01em;
-  --text-caption-c1: 12px;
-  --text-caption-c1--line-height: 16px;
-  --text-caption-c1-medium: 12px;
-  --text-caption-c1-medium--line-height: 16px;
-  --text-caption-c1-medium--font-weight: 500;
-  --text-caption-c2: 10px;
-  --text-caption-c2--line-height: 12px;
-  --text-emphasized-lg: 56px;
-  --text-emphasized-lg--line-height: 64px;
-  --text-emphasized-lg--letter-spacing: -1.75px;
-  --text-emphasized-md: 44px;
-  --text-emphasized-md--line-height: 52px;
-  --text-emphasized-md--letter-spacing: -1.5px;
-  --text-emphasized-sm: 36px;
-  --text-emphasized-sm--line-height: 44px;
-  --text-emphasized-sm--letter-spacing: -1.25px;
+  --text-headline-large: var(--ds-headline-large-size);
+  --text-headline-large--line-height: var(--ds-headline-large-line);
+  --text-headline-large--letter-spacing: 0px;
+  --text-headline-large--font-weight: 600;
+  --text-headline-medium: 28px;
+  --text-headline-medium--line-height: 36px;
+  --text-headline-medium--letter-spacing: 0px;
+  --text-headline-medium--font-weight: 600;
+  --text-headline-small: 24px;
+  --text-headline-small--line-height: 32px;
+  --text-headline-small--letter-spacing: 0px;
+  --text-headline-small--font-weight: 600;
+
+  --text-title-large: 22px;
+  --text-title-large--line-height: 28px;
+  --text-title-large--letter-spacing: 0px;
+  --text-title-large--font-weight: 600;
+  --text-title-medium: 16px;
+  --text-title-medium--line-height: 24px;
+  --text-title-medium--letter-spacing: 0.15px;
+  --text-title-medium--font-weight: 600;
+  --text-title-small: 14px;
+  --text-title-small--line-height: 20px;
+  --text-title-small--letter-spacing: 0.1px;
+  --text-title-small--font-weight: 600;
+
+  --text-body-large: 16px;
+  --text-body-large--line-height: 24px;
+  --text-body-large--letter-spacing: 0.5px;
+  --text-body-large--font-weight: 400;
+  --text-body-medium: 14px;
+  --text-body-medium--line-height: 20px;
+  --text-body-medium--letter-spacing: 0.25px;
+  --text-body-medium--font-weight: 400;
+  --text-body-small: 12px;
+  --text-body-small--line-height: 16px;
+  --text-body-small--letter-spacing: 0.4px;
+  --text-body-small--font-weight: 400;
+
+  --text-label-large: 14px;
+  --text-label-large--line-height: 20px;
+  --text-label-large--letter-spacing: 0.1px;
+  --text-label-large--font-weight: 600;
+  --text-label-medium: 12px;
+  --text-label-medium--line-height: 16px;
+  --text-label-medium--letter-spacing: 0.5px;
+  --text-label-medium--font-weight: 500;
+  --text-label-small: 11px;
+  --text-label-small--line-height: 16px;
+  --text-label-small--letter-spacing: 0.5px;
+  --text-label-small--font-weight: 500;
 }
 
 /* ===========================================================================
@@ -404,77 +398,70 @@
    */
   color-scheme: light;
 
-  /* Semantic colors — light mode */
-  --ds-primary: #f56500;
-  --ds-primary-10a: #ff69001a;
+  /* ---- Accent & status roles — light ----
+   * Base roles take tone 40, not 50: white fails on tertiary-50 (4.25:1) and
+   * accent-50 (4.44:1). Containers are tone 90 over a tone 20 on-color, which
+   * gives 10:1 or better across all four families. */
+  --ds-brand-primary: #f56500;
+  --ds-primary-action: #c24e00;
+  --ds-primary-action-hover: #9b3d00;
+  --ds-primary-action-pressed: #762d00;
+  --ds-primary-label: #9b3d00;
   --ds-on-primary: #ffffff;
-  --ds-on-primary-10a: #ffffff1a;
-  --ds-on-primary-20a: #ffffff33;
-  --ds-primary-container: #ffe1cc;
-  --ds-on-primary-container: #993f00;
-  --ds-inverse-primary: #ffc399;
-  --ds-primary-fixed: #ffe1cc;
-  --ds-on-primary-fixed: #331500;
-  --ds-primary-fixed-dim: #ffc399;
-  --ds-on-primary-fixed-variant: #993f00;
+  --ds-primary-container: #ffd9c9;
+  --ds-on-primary-container: #531d00;
+  --ds-inverse-primary: #ffb18f;
 
-  --ds-secondary: #b06e4f;
+  --ds-secondary: #785900;
   --ds-on-secondary: #ffffff;
-  --ds-secondary-container: #efe2dc;
-  --ds-on-secondary-container: #6a422f;
-  --ds-on-secondary-container-10a: #6a422f1a;
-  --ds-secondary-fixed: #efe2dc;
-  --ds-on-secondary-fixed: #231610;
-  --ds-secondary-fixed-dim: #dfc5b9;
-  --ds-on-secondary-fixed-variant: #6a422f;
+  --ds-secondary-container: #fadfaa;
+  --ds-on-secondary-container: #3f2d00;
 
-  --ds-tertiary: #9e9239;
+  --ds-tertiary: #7243a0;
   --ds-on-tertiary: #ffffff;
-  --ds-tertiary-container: #f1efda;
-  --ds-on-tertiary-container: #706829;
-  --ds-tertiary-fixed: #f1efda;
-  --ds-on-tertiary-fixed: #25230e;
-  --ds-tertiary-dim-lowest: #25230e;
-  --ds-tertiary-dim-low: #383414;
-  --ds-tertiary-fixed-dim: #e4deb4;
-  --ds-tertiary-fixed-dim-10a: #e4deb41a;
-  --ds-tertiary-fixed-dim-20a: #e4deb433;
-  --ds-on-tertiary-fixed-variant: #706829;
+  --ds-tertiary-container: #eadbff;
+  --ds-on-tertiary-container: #3e1a5f;
 
-  --ds-error: #ec1322;
+  --ds-accent: #00639d;
+  --ds-on-accent: #ffffff;
+  --ds-accent-container: #cae7ff;
+  --ds-on-accent-container: #003354;
+
+  --ds-error: #bd0f1b;
   --ds-on-error: #ffffff;
   --ds-error-container: #fbd0d3;
-  --ds-on-error-container: #8e0b14;
+  --ds-on-error-container: #5f070d;
 
-  --ds-success: #009966;
+  /* success and warning run bright, so their light roles step down a tone:
+     success takes T20 rather than T30, warning T30 rather than T40. */
+  --ds-success: #006644;
   --ds-on-success: #ffffff;
   --ds-success-container: #ccffee;
-  --ds-on-success-container: #009966;
+  --ds-on-success-container: #006644;
 
-  --ds-warning: #a36b01;
+  --ds-warning: #8e5d01;
   --ds-on-warning: #ffffff;
   --ds-warning-container: #ffedcc;
-  --ds-on-warning-container: #8e5d01;
+  --ds-on-warning-container: #654301;
 
+  /* ---- Surfaces — light ----
+   * The page is LIGHTER than the cards. M3 puts the floor at near-white and
+   * steps down in lightness as elevation rises, which inverts the old
+   * grey-page/white-card look and is the most visible change in the system.
+   * `lowest` #ffffff remains for surfaces that must be pure white. */
   --ds-surface-tint: #f56500;
-  --ds-surface: #f2f2f2;
-  --ds-on-surface: #343234;
-  --ds-primary-text: #343234;
-  --ds-secondary-text: #827d82;
-  --ds-on-surface-disabled: #3432341a;
-  --ds-on-surface-label-disabled: #34323461;
+  --ds-surface: #fafafa;
+  --ds-on-surface: #1a191a;
+  --ds-on-surface-disabled: #1a191a1f;
+  --ds-on-surface-label-disabled: #1a191a61;
   --ds-surface-variant: #e6e4e7;
-  --ds-on-surface-variant: #1a181b;
-  --ds-on-surface-variant-10a: #1a181b1a;
+  --ds-on-surface-variant: #4d4950;
   --ds-inverse-surface: #343234;
   --ds-inverse-on-surface: #f2f2f2;
-  --ds-surface-dim: #e6e5e6;
+  --ds-surface-dim: #dfdddf;
   --ds-surface-bright: #fafafa;
-  /* lowest and low are deliberately both white: the Figma source
-     (tokens/color_roles.json) maps both to {neutral.Neutral100} in light
-     mode. Cards separate from the page via shadow and border, not tone. */
   --ds-surface-container-lowest: #ffffff;
-  --ds-surface-container-low: #ffffff;
+  --ds-surface-container-low: #f5f5f5;
   --ds-surface-container: #f0eff0;
   --ds-surface-container-high: #ebeaeb;
   --ds-surface-container-highest: #e6e5e6;
@@ -484,80 +471,59 @@
   --ds-shadow: #00000052;
   --ds-scrim: #00000052;
 
-  /* Spacing — desktop defaults (also valid on mobile since values match) */
-  --ds-spacing-xs: 4px;
-  --ds-spacing-s: 8px;
-  --ds-spacing-md: 16px;
-  --ds-spacing-l: 24px;
-  --ds-spacing-xl: 32px;
-  --ds-spacing-2xl: 40px;
-  --ds-spacing-3xl: 48px;
-  --ds-spacing-4xl: 56px;
-  --ds-spacing-5xl: 64px;
-  --ds-spacing-7xl: 72px;
-  --ds-spacing-8xl: 80px;
-  --ds-spacing-9xl: 88px;
-  --ds-spacing-10xl: 96px;
-  --ds-spacing-11xl: 128px;
-
-  /* Headings — desktop sizes */
-  --ds-h1-size: 60px;
-  --ds-h1-line-height: 72px;
-  --ds-h2-size: 48px;
-  --ds-h2-line-height: 56px;
-  --ds-h3-size: 40px;
-  --ds-h3-line-height: 48px;
-  --ds-h4-size: 32px;
-  --ds-h4-line-height: 38px;
+  /* Display and headline shrink one step ≤768px, so no call site needs a
+     responsive variant. Title and below are already phone-sized. */
+  --ds-display-large-size: 57px;
+  --ds-display-large-line: 64px;
+  --ds-display-medium-size: 45px;
+  --ds-display-medium-line: 52px;
+  --ds-display-small-size: 36px;
+  --ds-display-small-line: 44px;
+  --ds-headline-large-size: 32px;
+  --ds-headline-large-line: 40px;
 }
 
 [data-theme="dark"] {
   color-scheme: dark;
 
-  --ds-primary: #f56500;
-  --ds-primary-10a: #ffc3991a;
+  /* brand-primary holds at #f56500 in both themes rather than shifting to a
+     lighter tone. This is the one deliberate deviation from M3, and the reason
+     is brand recognition. It stays identity-only in both. */
+  --ds-brand-primary: #f56500;
+  --ds-primary-action: #c24e00;
+  --ds-primary-action-hover: #9b3d00;
+  --ds-primary-action-pressed: #762d00;
+  --ds-primary-label: #ffb18f;
   --ds-on-primary: #ffffff;
-  --ds-on-primary-10a: #ffffff1a;
-  --ds-on-primary-20a: #ffffff33;
-  --ds-primary-container: #331500;
-  --ds-on-primary-container: #ffe1cc;
-  --ds-inverse-primary: #ffc399;
-  --ds-primary-fixed: #ffe1cc;
-  --ds-on-primary-fixed: #331500;
-  --ds-primary-fixed-dim: #ffc399;
-  --ds-on-primary-fixed-variant: #993f00;
+  --ds-primary-container: #762d00;
+  --ds-on-primary-container: #ffd9c9;
+  --ds-inverse-primary: #ffb18f;
 
-  --ds-secondary: #dfc5b9;
-  --ds-on-secondary: #462c20;
-  --ds-secondary-container: #6a422f;
-  --ds-on-secondary-container: #efe2dc;
-  --ds-on-secondary-container-10a: #efe2dc1a;
-  --ds-secondary-fixed: #efe2dc;
-  --ds-on-secondary-fixed: #231610;
-  --ds-secondary-fixed-dim: #dfc5b9;
-  --ds-on-secondary-fixed-variant: #6a422f;
+  --ds-secondary: #e7c170;
+  --ds-on-secondary: #3f2d00;
+  --ds-secondary-container: #5b4200;
+  --ds-on-secondary-container: #fadfaa;
 
-  --ds-tertiary: #e4deb4;
-  --ds-on-tertiary: #4b451b;
-  --ds-tertiary-container: #706829;
-  --ds-on-tertiary-container: #f1efda;
-  --ds-tertiary-fixed: #f1efda;
-  --ds-on-tertiary-fixed: #25230e;
-  --ds-tertiary-dim-lowest: #f1efda;
-  --ds-tertiary-dim-low: #383414;
-  --ds-tertiary-fixed-dim: #e4deb4;
-  --ds-tertiary-fixed-dim-10a: #e4deb41a;
-  --ds-tertiary-fixed-dim-20a: #e4deb433;
-  --ds-on-tertiary-fixed-variant: #706829;
+  --ds-tertiary: #d4b8f7;
+  --ds-on-tertiary: #3e1a5f;
+  --ds-tertiary-container: #582c82;
+  --ds-on-tertiary-container: #eadbff;
+
+  --ds-accent: #92ceff;
+  --ds-on-accent: #003354;
+  --ds-accent-container: #004a78;
+  --ds-on-accent-container: #cae7ff;
 
   --ds-error: #f8a0a6;
   --ds-on-error: #5f070d;
   --ds-error-container: #8e0b14;
   --ds-on-error-container: #fbd0d3;
 
+  /* success-container steps DOWN to T20 rather than up: T30 #009966 gives only
+     3.32:1 under #ccffee, which is what the old system shipped. */
   --ds-success: #99ffdd;
   --ds-on-success: #006644;
-  --ds-success-container: #009966;
+  --ds-success-container: #006644;
   --ds-on-success-container: #ccffee;
 
   --ds-warning: #fedc9a;
@@ -565,20 +531,19 @@
   --ds-warning-container: #8e5d01;
   --ds-on-warning-container: #ffedcc;
 
-  --ds-surface-tint: #ffc399;
-  --ds-surface: #050200;
+  /* Dark surface is neutral N6 rather than the old near-black #050200. True
+     black stays available as a per-app tweak for the customer PWA on OLED. */
+  --ds-surface-tint: #ffb18f;
+  --ds-surface: #100f10;
   --ds-on-surface: #e6e5e6;
-  --ds-primary-text: #f2f2f2;
-  --ds-secondary-text: #cdcbcd;
-  --ds-on-surface-disabled: #e6e5e61a;
+  --ds-on-surface-disabled: #e6e5e61f;
   --ds-on-surface-label-disabled: #e6e5e661;
   --ds-surface-variant: #4d4950;
   --ds-on-surface-variant: #ccc9cf;
-  --ds-on-surface-variant-10a: #ccc9cf1a;
   --ds-inverse-surface: #e6e5e6;
   --ds-inverse-on-surface: #343234;
-  --ds-surface-dim: #1a191a;
-  --ds-surface-bright: #4e4b4e;
+  --ds-surface-dim: #100f10;
+  --ds-surface-bright: #3e3c3e;
   --ds-surface-container-lowest: #0a0a0a;
   --ds-surface-container-low: #1a191a;
   --ds-surface-container: #1f1e1f;
@@ -591,59 +556,34 @@
   --ds-scrim: #00000052;
 }
 
-/* Mobile heading sizes — spacing already matches desktop in source JSON. */
+/* Display and headline drop one step on phones. */
 @media (max-width: 768px) {
   :root {
-    --ds-h1-size: 48px;
-    --ds-h1-line-height: 56px;
-    --ds-h2-size: 40px;
-    --ds-h2-line-height: 48px;
-    --ds-h3-size: 32px;
-    --ds-h3-line-height: 38px;
-    --ds-h4-size: 28px;
-    --ds-h4-line-height: 34px;
+    --ds-display-large-size: 45px;
+    --ds-display-large-line: 52px;
+    --ds-display-medium-size: 36px;
+    --ds-display-medium-line: 44px;
+    --ds-display-small-size: 32px;
+    --ds-display-small-line: 40px;
+    --ds-headline-large-size: 28px;
+    --ds-headline-large-line: 36px;
   }
 }
 
 /* ============================================================================
- * Tailwind v4 directional-shorthand fix.
+ * Interaction feedback — M3 state layers.
  *
- * Tailwind v4 emits *two* competing rules for `rounded-s` / `rounded-l`:
- *   1. .rounded-s { border-radius: var(--radius-s); }       (from @theme)
- *   2. .rounded-s { border-start-start-radius: …; … }       (directional)
- * The second wins by cascade order, so the class only rounds one side.
- *
- * Re-emitting the full-radius rules in the utilities layer AFTER Tailwind's
- * import (tokens.css is imported after tailwindcss in each app's index.css)
- * flips the cascade and makes `rounded-s` / `rounded-l` behave like every
- * other size token.
- *
- * Directional+size combos (`rounded-t-l`, `rounded-bl-s`, `rounded-r-md` …)
- * are unaffected — they use different class names Tailwind parses correctly.
- * ========================================================================= */
-@layer utilities {
-  .rounded-s {
-    border-radius: var(--radius-s);
-  }
-  .rounded-l {
-    border-radius: var(--radius-l);
-  }
-}
-
-/* ============================================================================
- * Interaction feedback.
- *
- * Every one of the three apps shipped with no visible press state and no
- * focus indicator at all. The shared buttons carried `active:scale-[0.99]` —
- * a 1% shrink, half a pixel on a 52px button, which nobody has ever seen.
+ * The on-color at a fixed opacity over the container: 8% hover, 12% focus and
+ * press. One rule per state instead of the per-colour `*-10a` / `*-20a` alpha
+ * tokens the old system carried.
  *
  * This matters more here than the word "polish" suggests. The customer app is
  * used on a phone, on restaurant wifi, by someone who has just tapped "Place
  * Order" and cannot tell whether it registered. Without feedback they tap
  * again, and the thing they are double-tapping is an order.
  *
- * Defined at base level so all ~117 interactive elements get it rather than
- * the handful wired by hand; per-component utilities still override.
+ * Defined at base level so all ~117 interactive elements get it rather than the
+ * handful wired by hand; per-component utilities still override.
  * ========================================================================= */
 @layer base {
   /* The OS tap flash is grey, arrives late, and differs per platform. Ours
@@ -656,12 +596,11 @@
     -webkit-tap-highlight-color: transparent;
   }
 
-  /* There was no focus ring anywhere, in any app. A keyboard user could not
-     tell which control they were on — not a polish issue, an access one.
-     `:focus-visible` rather than `:focus`, so a mouse press does not leave a
-     ring behind. */
+  /* `:focus-visible` rather than `:focus`, so a mouse press does not leave a
+     ring behind. The ring is primary-action, not the brand fill — it is an
+     interface signal, and it has to hold contrast against every surface step. */
   :focus-visible {
-    outline: 2px solid var(--ds-primary);
+    outline: 3px solid var(--ds-primary-action);
     outline-offset: 2px;
   }
 
@@ -674,11 +613,10 @@
       filter 110ms ease-out;
   }
 
-  /* The `scale` property, not `transform: scale()`. Tailwind v4's
-     `active:scale-*` utility sets `scale`, and the two are applied
-     independently — a button carrying both would shrink by 6% rather than 3%.
-     Matching the property lets a per-component utility override this cleanly
-     instead of compounding with it. */
+  /* The `scale` property, not `transform: scale()`. Tailwind v4 `active:scale-*`
+     sets `scale`, and the two apply independently — a button carrying both
+     would shrink by 6% rather than 3%. Matching the property lets a
+     per-component utility override this cleanly instead of compounding. */
   button:not(:disabled):active,
   summary:active,
   [role="button"]:not([aria-disabled="true"]):active,
@@ -693,7 +631,8 @@
   }
 
   /* Feedback still has to exist without motion — dropping it entirely would
-     leave these users worse off than before, not safer. */
+     leave these users worse off than before, not safer. The state layer carries
+     it when the scale cannot. */
   @media (prefers-reduced-motion: reduce) {
     button:not(:disabled),
     summary,

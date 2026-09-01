@@ -93,7 +93,7 @@ function MenuView({ tableId }: { tableId: string }) {
           {/* The name sits over the photo, so it needs a floor to stay legible
               no matter what the picture is doing underneath it. */}
           <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
-          <p className="absolute bottom-md left-md font-display text-display-h3 font-semibold text-white drop-shadow">
+          <p className="absolute bottom-md left-md font-display text-title-medium font-semibold text-white drop-shadow">
             {tableQuery.data.restaurant.name}
           </p>
         </div>
@@ -109,7 +109,7 @@ function MenuView({ tableId }: { tableId: string }) {
 
       <section className="p-md flex flex-col gap-md">
         <div className="flex justify-between items-center">
-          <h2 className="font-display text-display-h2 font-semibold text-primary-text">
+          <h2 className="font-display text-title-large font-semibold text-on-surface">
             {activeCategory === "All" ? "Full Menu" : activeCategory}
           </h2>
           <button
@@ -126,7 +126,7 @@ function MenuView({ tableId }: { tableId: string }) {
         </div>
 
         {searchOpen && (
-          <div className="flex items-center gap-s px-md py-s rounded-lg bg-surface-container-low border border-outline-variant">
+          <div className="flex items-center gap-s px-md py-s rounded-sm bg-surface-container-low border border-outline-variant">
             <i className="mgc_search_line text-lg text-on-surface-variant" />
             <input
               type="text"
@@ -134,13 +134,13 @@ function MenuView({ tableId }: { tableId: string }) {
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               autoFocus
-              className="flex-1 bg-transparent outline-none border-none text-p text-primary-text placeholder:text-secondary-text"
+              className="flex-1 bg-transparent outline-none border-none text-body-large text-on-surface placeholder:text-on-surface-variant"
             />
           </div>
         )}
 
         {isLoading ? (
-          <div className="flex flex-col items-center justify-center min-h-[60vh] gap-md text-secondary-text">
+          <div className="flex flex-col items-center justify-center min-h-[60vh] gap-md text-on-surface-variant">
             <div className="oshap-spinner" />
             <p>Loading menu...</p>
           </div>
@@ -164,7 +164,7 @@ function MenuView({ tableId }: { tableId: string }) {
             ))}
             {filteredItems.length === 0 && (
               <div className="py-xl text-center">
-                <p className="text-secondary-text">
+                <p className="text-on-surface-variant">
                   No items found in this category.
                 </p>
               </div>

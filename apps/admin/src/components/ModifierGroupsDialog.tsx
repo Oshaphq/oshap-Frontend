@@ -15,7 +15,7 @@ import type { ModifierGroup } from "@oshap/shared";
 import { PrimaryButton, SecondaryButton, toast } from "@oshap/shared/ui";
 
 const inputClass =
-  "px-md py-s rounded-lg bg-surface-container border border-outline-variant text-p2 text-primary-text placeholder:text-outline outline-none focus:border-primary transition-colors";
+  "px-md py-s rounded-sm bg-surface-container border border-outline-variant text-body-medium text-on-surface placeholder:text-outline outline-none focus:border-primary transition-colors";
 
 /**
  * Manages the restaurant's reusable option groups.
@@ -61,13 +61,13 @@ export default function ModifierGroupsDialog({ onClose }: { onClose: () => void 
 
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center bg-scrim backdrop-blur-sm p-md">
-      <div className="w-full max-w-[640px] max-h-[88vh] rounded-md bg-surface-container-high flex flex-col border border-outline-variant shadow-xl">
+      <div className="w-full max-w-[640px] max-h-[88vh] rounded-lg bg-surface-container-high flex flex-col border border-outline-variant shadow-xl">
         <header className="flex items-start justify-between gap-md p-l border-b border-outline-variant">
           <div className="flex flex-col gap-0.5">
-            <h2 className="font-display text-display-h3 font-semibold text-primary-text">
+            <h2 className="font-display text-title-medium font-semibold text-on-surface">
               Options
             </h2>
-            <p className="text-caption-md text-secondary-text">
+            <p className="text-body-medium text-on-surface-variant">
               Sizes, extras and choices. Attach a group to as many dishes as you like —
               editing it once updates all of them.
             </p>
@@ -76,7 +76,7 @@ export default function ModifierGroupsDialog({ onClose }: { onClose: () => void 
             type="button"
             onClick={onClose}
             aria-label="Close"
-            className="w-9 h-9 shrink-0 flex items-center justify-center rounded-4xl bg-surface-container text-on-surface-variant hover:bg-surface-container-highest transition-colors"
+            className="w-9 h-9 shrink-0 flex items-center justify-center rounded-full bg-surface-container text-on-surface-variant hover:bg-surface-container-highest transition-colors"
           >
             <i className="mgc_close_line text-xl" />
           </button>
@@ -88,7 +88,7 @@ export default function ModifierGroupsDialog({ onClose }: { onClose: () => void 
               <div className="oshap-spinner" />
             </div>
           ) : groups.length === 0 ? (
-            <p className="text-p2 text-secondary-text text-center py-l">
+            <p className="text-body-medium text-on-surface-variant text-center py-l">
               No option groups yet. Create one below — for example
               &ldquo;Size&rdquo; or &ldquo;Spice level&rdquo;.
             </p>
@@ -171,7 +171,7 @@ function GroupRow({
   };
 
   return (
-    <section className="rounded-md bg-surface-container-low border border-outline-variant overflow-hidden">
+    <section className="rounded-lg bg-surface-container-low border border-outline-variant overflow-hidden">
       <div className="flex items-center justify-between gap-md p-md">
         <button
           type="button"
@@ -180,14 +180,14 @@ function GroupRow({
           className="flex items-center gap-s flex-1 min-w-0 text-left"
         >
           <i
-            className={`mgc_right_line text-lg text-secondary-text transition-transform ${
+            className={`mgc_right_line text-lg text-on-surface-variant transition-transform ${
               isOpen ? "rotate-90" : ""
             }`}
           />
-          <span className="text-label-l3 font-semibold text-primary-text truncate">
+          <span className="text-title-medium font-semibold text-on-surface truncate">
             {group.name}
           </span>
-          <span className="text-caption-sm text-secondary-text shrink-0">
+          <span className="text-body-small text-on-surface-variant shrink-0">
             {group.options.length} option{group.options.length === 1 ? "" : "s"}
             {group.required ? " · required" : ""}
           </span>
@@ -197,7 +197,7 @@ function GroupRow({
           onClick={onDelete}
           aria-label={`Delete ${group.name}`}
           title="Delete group — it will be removed from every dish using it"
-          className="p-xs text-secondary-text hover:text-error transition-colors"
+          className="p-xs text-on-surface-variant hover:text-error transition-colors"
         >
           <i className="mgc_delete_line text-lg" />
         </button>
@@ -206,7 +206,7 @@ function GroupRow({
       {isOpen && (
         <div className="px-md pb-md flex flex-col gap-md border-t border-outline-variant pt-md">
           <div className="flex flex-wrap items-center gap-md">
-            <label className="flex items-center gap-s text-p2 text-primary-text">
+            <label className="flex items-center gap-s text-body-medium text-on-surface">
               <input
                 type="checkbox"
                 checked={group.required}
@@ -225,7 +225,7 @@ function GroupRow({
               />
               Guest must choose
             </label>
-            <label className="flex items-center gap-s text-p2 text-secondary-text">
+            <label className="flex items-center gap-s text-body-medium text-on-surface-variant">
               Max choices
               <input
                 type="number"
@@ -243,9 +243,9 @@ function GroupRow({
             </label>
           </div>
 
-          <div className="flex flex-col rounded-md bg-surface-container overflow-hidden">
+          <div className="flex flex-col rounded-lg bg-surface-container overflow-hidden">
             {group.options.length === 0 && (
-              <p className="text-caption-md text-secondary-text px-md py-s">
+              <p className="text-body-medium text-on-surface-variant px-md py-s">
                 No options yet.
               </p>
             )}
@@ -254,10 +254,10 @@ function GroupRow({
                 key={option.id}
                 className="flex items-center gap-s px-md py-s border-b border-outline-variant/40 last:border-none"
               >
-                <span className="flex-1 text-p2 text-primary-text min-w-0 truncate">
+                <span className="flex-1 text-body-medium text-on-surface min-w-0 truncate">
                   {option.name}
                 </span>
-                <span className="text-label-l5 text-secondary-text tabular-nums">
+                <span className="text-label-medium text-on-surface-variant tabular-nums">
                   {option.price_delta === 0
                     ? "—"
                     : `${option.price_delta > 0 ? "+" : "−"}${formatCurrency(
@@ -272,9 +272,9 @@ function GroupRow({
                       payload: { available: !option.available },
                     })
                   }
-                  className={`px-s py-xs rounded-4xl text-caption-xs font-bold uppercase tracking-wider transition-colors ${
+                  className={`px-s py-xs rounded-full text-label-small font-bold uppercase tracking-wider transition-colors ${
                     option.available
-                      ? "bg-surface-container-high text-secondary-text"
+                      ? "bg-surface-container-high text-on-surface-variant"
                       : "bg-error-container text-on-error-container"
                   }`}
                 >
@@ -284,7 +284,7 @@ function GroupRow({
                   type="button"
                   onClick={() => deleteOption.mutate(option.id)}
                   aria-label={`Delete ${option.name}`}
-                  className="p-xs text-secondary-text hover:text-error transition-colors"
+                  className="p-xs text-on-surface-variant hover:text-error transition-colors"
                 >
                   <i className="mgc_delete_line" />
                 </button>

@@ -1,0 +1,11 @@
+{
+  // Typechecks the test files tsconfig.json excludes. Adds node types, which
+  // the library itself must not have: the brandCssVars guard reads tokens.css
+  // off disk, because vitest stubs CSS imports to an empty module.
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "types": ["vite/client", "node"]
+  },
+  "include": ["src/**/*.test.ts", "src/**/*.test.tsx"],
+  "exclude": []
+}

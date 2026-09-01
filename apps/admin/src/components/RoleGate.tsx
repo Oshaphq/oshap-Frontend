@@ -22,10 +22,10 @@ export default function RoleGate({ allowedRoles }: RoleGateProps) {
         <div className="w-16 h-16 rounded-full bg-error-container text-on-error-container flex items-center justify-center text-3xl">
           <i className="mgc_close_fill" />
         </div>
-        <h2 className="font-display text-display-h2 font-semibold text-primary-text">
+        <h2 className="font-display text-title-large font-semibold text-on-surface">
           Access Denied
         </h2>
-        <p className="text-p2 text-secondary-text max-w-[384px]">
+        <p className="text-body-medium text-on-surface-variant max-w-[384px]">
           You do not have permission to view this page.
         </p>
       </div>

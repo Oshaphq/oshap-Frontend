@@ -280,7 +280,7 @@ export default function MenuPage() {
 
   if (menuQuery.isLoading) {
     return (
-      <div className="flex flex-col items-center justify-center min-h-[60vh] gap-md text-secondary-text">
+      <div className="flex flex-col items-center justify-center min-h-[60vh] gap-md text-on-surface-variant">
         <div className="oshap-spinner" />
         <p>Loading menu...</p>
       </div>
@@ -306,7 +306,7 @@ export default function MenuPage() {
           that gave way — squeezed on a phone, and pinned to the far left of a
           wide screen from the buttons it belongs with. */}
       <header className="flex flex-col gap-s">
-        <h1 className="font-display text-display-h2 font-semibold text-primary-text">
+        <h1 className="font-display text-title-large font-semibold text-on-surface">
           Menu Management
         </h1>
         <div className="flex items-center gap-s flex-wrap">
@@ -434,10 +434,10 @@ export default function MenuPage() {
         {items.length === 0 && !showNewForm && (
           <div className="flex flex-col items-center justify-center gap-s py-10 px-md text-center">
             <i className="mgc_cook_line text-5xl text-outline-variant opacity-40" />
-            <span className="font-display text-display-h4 font-semibold text-primary-text">
+            <span className="font-display text-title-medium font-semibold text-on-surface">
               No menu items yet
             </span>
-            <p className="text-p2 text-secondary-text">
+            <p className="text-body-medium text-on-surface-variant">
               Click <span className="font-semibold">+ Add Item</span> to create
               your first menu item.
             </p>
@@ -507,7 +507,7 @@ function MenuItemRow({
 
   return (
     <div
-      className={`rounded-md bg-surface-container-low border border-transparent transition-all hover:border-outline-variant overflow-hidden ${
+      className={`rounded-lg bg-surface-container-low border border-transparent transition-all hover:border-outline-variant overflow-hidden ${
         !item.available ? "opacity-55" : ""
       }`}
     >
@@ -527,22 +527,22 @@ function MenuItemRow({
               <img
                 src={item.image_url}
                 alt={item.name}
-                className="w-16 h-16 object-cover rounded-lg border border-outline-variant shrink-0"
+                className="w-16 h-16 object-cover rounded-sm border border-outline-variant shrink-0"
               />
             ) : (
-              <div className="w-16 h-16 rounded-lg bg-primary-container flex items-center justify-center shrink-0">
+              <div className="w-16 h-16 rounded-sm bg-primary-container flex items-center justify-center shrink-0">
                 <i className="mgc_fork_spoon_line text-2xl text-on-primary-container" />
               </div>
             )}
             <div className="flex flex-col gap-xs min-w-0">
-              <span className="font-bold text-primary-text truncate">
+              <span className="font-bold text-on-surface truncate">
                 {item.name}
               </span>
-              <span className="text-caption-md text-secondary-text">
+              <span className="text-body-medium text-on-surface-variant">
                 {item.category} · {formatCurrency(item.price)}
               </span>
               {item.description && (
-                <span className="text-caption-sm text-outline line-clamp-2">
+                <span className="text-body-small text-outline line-clamp-2">
                   {item.description}
                 </span>
               )}
@@ -554,7 +554,7 @@ function MenuItemRow({
               goes neutral rather than red — it is a choice, not a fault, and
               the card already dims. */}
           <span
-            className={`shrink-0 px-s py-0.5 rounded-4xl font-bold text-caption-xs uppercase tracking-wider whitespace-nowrap ${
+            className={`shrink-0 px-s py-0.5 rounded-full font-bold text-label-small uppercase tracking-wider whitespace-nowrap ${
               item.available
                 ? "bg-success-container text-on-success-container"
                 : "bg-surface-container-high text-outline"
@@ -568,7 +568,7 @@ function MenuItemRow({
             a manager taps to restock was the narrowest thing on the card. */}
         {isStockEditing ? (
           <div className="flex flex-wrap items-end gap-s">
-            <label className="flex flex-col gap-xs text-caption-xs text-secondary-text">
+            <label className="flex flex-col gap-xs text-label-small text-on-surface-variant">
               Plates left
               <input
                 type="number"
@@ -583,14 +583,14 @@ function MenuItemRow({
                   if (e.key === "Enter") onStockSave();
                   if (e.key === "Escape") onStockCancel();
                 }}
-                className="w-28 px-s py-xs rounded-md border border-outline-variant bg-surface-container-low text-caption-md text-primary-text outline-none focus:border-primary"
+                className="w-28 px-s py-xs rounded-lg border border-outline-variant bg-surface-container-low text-body-medium text-on-surface outline-none focus:border-primary"
                 autoFocus
               />
             </label>
             {/* The threshold was settable through the API and nowhere in
                 the UI, so every dish sat on whatever default it was
                 created with. */}
-            <label className="flex flex-col gap-xs text-caption-xs text-secondary-text">
+            <label className="flex flex-col gap-xs text-label-small text-on-surface-variant">
               Warn at
               <input
                 type="number"
@@ -603,20 +603,20 @@ function MenuItemRow({
                   if (e.key === "Enter") onStockSave();
                   if (e.key === "Escape") onStockCancel();
                 }}
-                className="w-24 px-s py-xs rounded-md border border-outline-variant bg-surface-container-low text-caption-md text-primary-text outline-none focus:border-primary"
+                className="w-24 px-s py-xs rounded-lg border border-outline-variant bg-surface-container-low text-body-medium text-on-surface outline-none focus:border-primary"
               />
             </label>
             <button
               type="button"
               onClick={onStockSave}
-              className="text-caption-sm font-bold text-success hover:underline pb-xs"
+              className="text-body-small font-bold text-success hover:underline pb-xs"
             >
               Save
             </button>
             <button
               type="button"
               onClick={onStockCancel}
-              className="text-caption-sm text-outline hover:underline pb-xs"
+              className="text-body-small text-outline hover:underline pb-xs"
             >
               Cancel
             </button>
@@ -625,7 +625,7 @@ function MenuItemRow({
           <button
             type="button"
             onClick={onStockEditStart}
-            className={`w-fit px-s py-0.5 rounded-4xl text-caption-xs font-bold flex items-center gap-xs transition-colors ${
+            className={`w-fit px-s py-0.5 rounded-full text-label-small font-bold flex items-center gap-xs transition-colors ${
               isOut
                 ? "bg-error-container text-on-error-container"
                 : isLow
@@ -653,25 +653,25 @@ function MenuItemRow({
           <button
             type="button"
             onClick={onToggle}
-            className="px-md py-s rounded-s bg-surface-container text-secondary-text text-caption-sm font-semibold hover:bg-surface-container-high hover:text-primary-text transition-colors"
+            className="px-md py-s rounded-sm bg-surface-container text-on-surface-variant text-body-small font-semibold hover:bg-surface-container-high hover:text-on-surface transition-colors"
           >
             {item.available ? "Mark Unavailable" : "Mark Available"}
           </button>
           <button
             type="button"
             onClick={onEdit}
-            className="px-md py-s rounded-s bg-surface-container text-secondary-text text-caption-sm font-semibold hover:bg-surface-container-high hover:text-primary-text transition-colors"
+            className="px-md py-s rounded-sm bg-surface-container text-on-surface-variant text-body-small font-semibold hover:bg-surface-container-high hover:text-on-surface transition-colors"
           >
             Edit
           </button>
           <button
             type="button"
             onClick={onEditOptions}
-            className="px-md py-s rounded-s bg-surface-container text-secondary-text text-caption-sm font-semibold hover:bg-surface-container-high hover:text-primary-text transition-colors"
+            className="px-md py-s rounded-sm bg-surface-container text-on-surface-variant text-body-small font-semibold hover:bg-surface-container-high hover:text-on-surface transition-colors"
           >
             Options
             {(item.modifier_groups?.length ?? 0) > 0 && (
-              <span className="ml-xs text-primary font-bold">
+              <span className="ml-xs text-primary-label font-bold">
                 {item.modifier_groups!.length}
               </span>
             )}
@@ -679,14 +679,14 @@ function MenuItemRow({
           <button
             type="button"
             onClick={onEditRecipe}
-            className="px-md py-s rounded-s bg-surface-container text-secondary-text text-caption-sm font-semibold hover:bg-surface-container-high hover:text-primary-text transition-colors"
+            className="px-md py-s rounded-sm bg-surface-container text-on-surface-variant text-body-small font-semibold hover:bg-surface-container-high hover:text-on-surface transition-colors"
           >
             Recipe
           </button>
           <button
             type="button"
             onClick={onDelete}
-            className="px-md py-s rounded-s border border-error bg-transparent text-error text-caption-sm font-bold hover:bg-error hover:text-on-error transition-all"
+            className="px-md py-s rounded-sm border border-error bg-transparent text-error text-body-small font-bold hover:bg-error hover:text-on-error transition-all"
           >
             Delete
           </button>
@@ -736,11 +736,11 @@ function MenuItemForm({
   };
 
   const inputClass =
-    "px-md py-s rounded-lg bg-surface-container-low border border-outline-variant text-p2 text-primary-text placeholder:text-outline outline-none focus:border-primary transition-colors";
+    "px-md py-s rounded-sm bg-surface-container-low border border-outline-variant text-body-medium text-on-surface placeholder:text-outline outline-none focus:border-primary transition-colors";
 
   return (
-    <div className="rounded-md bg-surface-container-low p-l flex flex-col gap-md border border-primary">
-      <h3 className="font-bold text-primary-text">{heading}</h3>
+    <div className="rounded-lg bg-surface-container-low p-l flex flex-col gap-md border border-primary">
+      <h3 className="font-bold text-on-surface">{heading}</h3>
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-s">
         <input
           className={inputClass}
@@ -787,7 +787,7 @@ function MenuItemForm({
           type="button"
           onClick={() => fileInputRef.current?.click()}
           disabled={uploadImage.isPending}
-          className="self-start inline-flex items-center gap-s py-s px-md rounded-lg border border-dashed border-primary bg-transparent text-primary text-caption-md font-semibold transition-all hover:bg-primary/5 disabled:opacity-50 disabled:cursor-not-allowed"
+          className="self-start inline-flex items-center gap-s py-s px-md rounded-sm border border-dashed border-primary bg-transparent text-primary-label text-body-medium font-semibold transition-all hover:bg-primary/5 disabled:opacity-50 disabled:cursor-not-allowed"
         >
           {uploadImage.isPending ? "Uploading..." : "Upload Image"}
         </button>
@@ -801,7 +801,7 @@ function MenuItemForm({
           <img
             src={form.image_url}
             alt="Preview"
-            className="w-24 h-24 object-cover rounded-lg border border-outline-variant"
+            className="w-24 h-24 object-cover rounded-sm border border-outline-variant"
           />
         )}
       </div>
@@ -859,9 +859,9 @@ function SelectionBar({
   const allSelected = items.length > 0 && chosen.length === items.length;
 
   return (
-    <div className="sticky top-0 z-20 flex flex-col gap-s p-md rounded-md bg-surface-container-high border border-outline-variant shadow-lg">
+    <div className="sticky top-0 z-20 flex flex-col gap-s p-md rounded-lg bg-surface-container-high border border-outline-variant shadow-lg">
       <div className="flex items-center justify-between gap-md flex-wrap">
-        <label className="flex items-center gap-s text-caption-md font-semibold text-primary-text cursor-pointer select-none">
+        <label className="flex items-center gap-s text-body-medium font-semibold text-on-surface cursor-pointer select-none">
           <input
             type="checkbox"
             checked={allSelected}
@@ -893,9 +893,9 @@ function SelectionBar({
 
       {confirming && chosen.length > 0 && (
         <div className="flex flex-col gap-s pt-s border-t border-outline-variant">
-          <p className="text-caption-md text-secondary-text">
+          <p className="text-body-medium text-on-surface-variant">
             Delete{" "}
-            <span className="font-semibold text-primary-text">
+            <span className="font-semibold text-on-surface">
               {listNames(chosen.map((i) => i.name))}
             </span>
             ? Guests will stop seeing {chosen.length === 1 ? "it" : "them"}{" "}

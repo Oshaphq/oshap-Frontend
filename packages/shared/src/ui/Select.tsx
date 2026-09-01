@@ -19,7 +19,7 @@ import type { SelectHTMLAttributes } from "react";
  */
 
 const BASE =
-  "appearance-none w-full rounded-lg bg-surface-container-low border border-outline-variant text-primary-text outline-none focus:border-primary transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed";
+  "appearance-none w-full rounded-sm bg-surface-container-low border border-outline-variant text-on-surface outline-none focus:border-primary transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed";
 
 /**
  * Left inset and chevron inset are the same value in every density — that
@@ -28,11 +28,11 @@ const BASE =
  */
 const DENSITY = {
   md: {
-    field: "pl-md pr-10 py-s text-p2",
+    field: "pl-md pr-10 py-s text-body-medium",
     icon: "right-md",
   },
   sm: {
-    field: "pl-s pr-xl py-xs text-caption-md",
+    field: "pl-s pr-xl py-xs text-body-medium",
     icon: "right-s text-sm",
   },
 } as const;

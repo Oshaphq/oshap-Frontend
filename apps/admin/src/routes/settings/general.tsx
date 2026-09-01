@@ -107,14 +107,14 @@ export default function GeneralSettings() {
   }
 
   const inputClass =
-    "w-full px-md py-s rounded-s bg-surface-container border border-outline-variant text-p2 text-primary-text placeholder:text-outline outline-none focus:border-primary transition-colors disabled:opacity-50 disabled:cursor-not-allowed";
+    "w-full px-md py-s rounded-sm bg-surface-container border border-outline-variant text-body-medium text-on-surface placeholder:text-outline outline-none focus:border-primary transition-colors disabled:opacity-50 disabled:cursor-not-allowed";
   const labelClass =
-    "block text-caption-md font-semibold text-primary-text mb-xs";
+    "block text-body-medium font-semibold text-on-surface mb-xs";
 
   return (
     <div className="flex flex-col gap-md pb-10">
-      <div className="bg-surface-container-low rounded-md p-l flex flex-col gap-md">
-        <h3 className="font-bold text-primary-text">The restaurant</h3>
+      <div className="bg-surface-container-low rounded-lg p-l flex flex-col gap-md">
+        <h3 className="font-bold text-on-surface">The restaurant</h3>
 
         <div>
           <label className={labelClass} htmlFor="name">
@@ -157,7 +157,7 @@ export default function GeneralSettings() {
             placeholder="12 Adeola Odeku Street, Victoria Island, Lagos"
             className={inputClass}
           />
-          <p className="text-caption-xs text-secondary-text mt-xs">
+          <p className="text-label-small text-on-surface-variant mt-xs">
             Shown to guests as &ldquo;You&rsquo;re sitting at&hellip;&rdquo;.
             Write it the way a person would say it, not the way a courier would.
           </p>
@@ -179,8 +179,8 @@ export default function GeneralSettings() {
         </div>
       </div>
 
-      <div className="bg-surface-container-low rounded-md p-l flex flex-col gap-md">
-        <h3 className="font-bold text-primary-text">Opening hours</h3>
+      <div className="bg-surface-container-low rounded-lg p-l flex flex-col gap-md">
+        <h3 className="font-bold text-on-surface">Opening hours</h3>
         <div>
           <label className={labelClass} htmlFor="operating_hours">
             Hours of operation
@@ -197,13 +197,13 @@ export default function GeneralSettings() {
         </div>
       </div>
 
-      <div className="bg-surface-container-low rounded-md p-l flex flex-col gap-md">
+      <div className="bg-surface-container-low rounded-lg p-l flex flex-col gap-md">
         <div className="flex flex-col gap-0.5">
-          <h3 className="font-bold text-primary-text">Charges</h3>
+          <h3 className="font-bold text-on-surface">Charges</h3>
           {/* Until these are set a restaurant charges neither, silently — the
               totals simply come out lower than they should and nothing
               anywhere reports a problem. */}
-          <p className="text-caption-xs text-secondary-text">
+          <p className="text-label-small text-on-surface-variant">
             Added to every bill and shown to guests as separate lines. Leave
             blank to charge neither. VAT applies after any discount and includes
             the service charge in its base.

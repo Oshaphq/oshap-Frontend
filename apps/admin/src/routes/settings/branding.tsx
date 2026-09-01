@@ -88,16 +88,16 @@ export default function BrandingSettings() {
 
   return (
     <div className="flex flex-col gap-md pb-10">
-      <div className="bg-surface-container-low rounded-md p-l flex flex-col gap-md">
+      <div className="bg-surface-container-low rounded-lg p-l flex flex-col gap-md">
         <div className="flex flex-col gap-0.5">
-          <h3 className="font-bold text-primary-text">Logo</h3>
-          <p className="text-caption-xs text-secondary-text">
+          <h3 className="font-bold text-on-surface">Logo</h3>
+          <p className="text-label-small text-on-surface-variant">
             Shown on receipts and at the top of the guest&rsquo;s menu. A square
             image works best.
           </p>
         </div>
         <div
-          className="w-32 h-32 rounded-md bg-surface-container border border-dashed border-outline-variant flex items-center justify-center overflow-hidden cursor-pointer hover:border-primary transition-colors"
+          className="w-32 h-32 rounded-lg bg-surface-container border border-dashed border-outline-variant flex items-center justify-center overflow-hidden cursor-pointer hover:border-primary transition-colors"
           onClick={() => logoInput.current?.click()}
         >
           {logoUrl ? (
@@ -105,9 +105,9 @@ export default function BrandingSettings() {
           ) : uploadImage.isPending ? (
             <div className="oshap-spinner" />
           ) : (
-            <div className="text-center text-secondary-text">
+            <div className="text-center text-on-surface-variant">
               <i className="mgc_upload_line text-2xl" />
-              <div className="text-caption-md mt-xs">Upload</div>
+              <div className="text-body-medium mt-xs">Upload</div>
             </div>
           )}
         </div>
@@ -115,7 +115,7 @@ export default function BrandingSettings() {
           <button
             type="button"
             onClick={() => setLogoUrl("")}
-            className="self-start text-caption-sm font-semibold text-error hover:underline"
+            className="self-start text-body-small font-semibold text-error hover:underline"
           >
             Remove logo
           </button>
@@ -129,10 +129,10 @@ export default function BrandingSettings() {
         />
       </div>
 
-      <div className="bg-surface-container-low rounded-md p-l flex flex-col gap-md">
+      <div className="bg-surface-container-low rounded-lg p-l flex flex-col gap-md">
         <div className="flex flex-col gap-0.5">
-          <h3 className="font-bold text-primary-text">Cover photo</h3>
-          <p className="text-caption-xs text-secondary-text">
+          <h3 className="font-bold text-on-surface">Cover photo</h3>
+          <p className="text-label-small text-on-surface-variant">
             Shown across the top of your guests&rsquo; menu, with your name over
             it. Landscape works best. Leave it empty and the menu simply starts
             at the food.
@@ -140,7 +140,7 @@ export default function BrandingSettings() {
         </div>
 
         <div
-          className="relative w-full h-36 rounded-md bg-surface-container border border-dashed border-outline-variant flex items-center justify-center overflow-hidden cursor-pointer hover:border-primary transition-colors"
+          className="relative w-full h-36 rounded-lg bg-surface-container border border-dashed border-outline-variant flex items-center justify-center overflow-hidden cursor-pointer hover:border-primary transition-colors"
           onClick={() => coverInput.current?.click()}
         >
           {coverUrl ? (
@@ -149,12 +149,12 @@ export default function BrandingSettings() {
               {/* The same scrim the guest sees, so what is previewed here is
                   what lands on their phone rather than a cleaner version. */}
               <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
-              <p className="absolute bottom-md left-md font-display text-display-h4 font-semibold text-white drop-shadow">
+              <p className="absolute bottom-md left-md font-display text-title-medium font-semibold text-white drop-shadow">
                 {settings?.name || "Your restaurant"}
               </p>
             </>
           ) : (
-            <span className="text-caption-md text-secondary-text">
+            <span className="text-body-medium text-on-surface-variant">
               {uploadImage.isPending ? "Uploading…" : "Tap to add a cover photo"}
             </span>
           )}
@@ -164,7 +164,7 @@ export default function BrandingSettings() {
           <button
             type="button"
             onClick={() => setCoverUrl("")}
-            className="self-start text-caption-sm font-semibold text-error hover:underline"
+            className="self-start text-body-small font-semibold text-error hover:underline"
           >
             Remove cover photo
           </button>
@@ -179,7 +179,7 @@ export default function BrandingSettings() {
         />
       </div>
 
-      <div className="bg-surface-container-low rounded-md p-l">
+      <div className="bg-surface-container-low rounded-lg p-l">
         <BrandColourField value={colour} onChange={setColour} />
       </div>
 

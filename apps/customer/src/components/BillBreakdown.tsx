@@ -28,7 +28,7 @@ export default function BillBreakdown({
 }) {
   return (
     <section className="py-l px-md bg-surface-container-low border-b-[6px] border-surface-container flex flex-col gap-md">
-      <h2 className="font-display text-display-h3 font-semibold text-primary-text">
+      <h2 className="font-display text-title-medium font-semibold text-on-surface">
         {heading}
       </h2>
 
@@ -36,13 +36,13 @@ export default function BillBreakdown({
         <div className="flex flex-col gap-s">
           {items.map((item) => (
             <div key={item.id} className="flex items-start justify-between gap-md">
-              <span className="text-p2 text-primary-text min-w-0">
-                <span className="text-secondary-text tabular-nums">
+              <span className="text-body-medium text-on-surface min-w-0">
+                <span className="text-on-surface-variant tabular-nums">
                   {item.quantity}×{" "}
                 </span>
                 {item.name}
               </span>
-              <span className="text-p2 text-primary-text tabular-nums shrink-0">
+              <span className="text-body-medium text-on-surface tabular-nums shrink-0">
                 {formatCurrency(item.price * item.quantity)}
               </span>
             </div>
@@ -62,8 +62,8 @@ export default function BillBreakdown({
         {(tip ?? 0) > 0 && <BillLine label="Tip" value={tip ?? 0} />}
 
         <div className="flex items-center justify-between gap-md pt-s mt-xs border-t border-outline-variant">
-          <span className="text-label-l3 font-semibold text-primary-text">Total</span>
-          <span className="text-label-l2 font-semibold text-primary tabular-nums">
+          <span className="text-title-medium font-semibold text-on-surface">Total</span>
+          <span className="text-title-large font-semibold text-primary-label tabular-nums">
             {formatCurrency(total)}
           </span>
         </div>
@@ -76,10 +76,10 @@ function BillLine({ label, value }: { label: string; value: number }) {
   const isDeduction = value < 0;
   return (
     <div className="flex items-center justify-between gap-md py-xs">
-      <span className="text-p2 text-secondary-text">{label}</span>
+      <span className="text-body-medium text-on-surface-variant">{label}</span>
       <span
-        className={`text-p2 tabular-nums ${
-          isDeduction ? "text-error" : "text-primary-text"
+        className={`text-body-medium tabular-nums ${
+          isDeduction ? "text-error" : "text-on-surface"
         }`}
       >
         {isDeduction ? `− ${formatCurrency(-value)}` : formatCurrency(value)}

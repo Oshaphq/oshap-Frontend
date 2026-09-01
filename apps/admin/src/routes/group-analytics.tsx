@@ -25,7 +25,7 @@ export default function GroupAnalyticsPage() {
 
   if (isLoading) {
     return (
-      <div className="flex flex-col items-center justify-center min-h-[60vh] gap-md text-secondary-text">
+      <div className="flex flex-col items-center justify-center min-h-[60vh] gap-md text-on-surface-variant">
         <div className="oshap-spinner" />
         <p>Loading group analytics...</p>
       </div>
@@ -55,14 +55,14 @@ export default function GroupAnalyticsPage() {
     <main className="p-md flex flex-col gap-l">
       <header className="flex items-center justify-between">
         <div>
-          <h1 className="font-display text-display-h2 font-semibold text-primary-text">
+          <h1 className="font-display text-title-large font-semibold text-on-surface">
             Group Analytics
           </h1>
-          <p className="text-p2 text-secondary-text">{group.name}</p>
+          <p className="text-body-medium text-on-surface-variant">{group.name}</p>
         </div>
         <Link
           to="/analytics"
-          className="text-caption-md font-semibold text-primary hover:underline no-underline"
+          className="text-body-medium font-semibold text-primary-label hover:underline no-underline"
         >
           ← Single Branch View
         </Link>
@@ -70,35 +70,35 @@ export default function GroupAnalyticsPage() {
 
       {/* Summary KPIs */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-md">
-        <div className="bg-surface-container-low rounded-md p-md flex flex-col gap-xs">
-          <span className="text-label-l4 font-semibold text-secondary-text uppercase tracking-wider">
+        <div className="bg-surface-container-low rounded-lg p-md flex flex-col gap-xs">
+          <span className="text-label-large font-semibold text-on-surface-variant uppercase tracking-wider">
             Total Revenue
           </span>
-          <span className="font-display text-display-h2 font-semibold text-primary-text">
+          <span className="font-display text-title-large font-semibold text-on-surface">
             {formatCurrency(analytics.total_revenue)}
           </span>
         </div>
-        <div className="bg-surface-container-low rounded-md p-md flex flex-col gap-xs">
-          <span className="text-label-l4 font-semibold text-secondary-text uppercase tracking-wider">
+        <div className="bg-surface-container-low rounded-lg p-md flex flex-col gap-xs">
+          <span className="text-label-large font-semibold text-on-surface-variant uppercase tracking-wider">
             Total Orders
           </span>
-          <span className="font-display text-display-h2 font-semibold text-primary-text">
+          <span className="font-display text-title-large font-semibold text-on-surface">
             {analytics.total_orders.toLocaleString()}
           </span>
         </div>
-        <div className="bg-surface-container-low rounded-md p-md flex flex-col gap-xs">
-          <span className="text-label-l4 font-semibold text-secondary-text uppercase tracking-wider">
+        <div className="bg-surface-container-low rounded-lg p-md flex flex-col gap-xs">
+          <span className="text-label-large font-semibold text-on-surface-variant uppercase tracking-wider">
             Branches
           </span>
-          <span className="font-display text-display-h2 font-semibold text-primary-text">
+          <span className="font-display text-title-large font-semibold text-on-surface">
             {group.branches.length}
           </span>
         </div>
       </div>
 
       {/* Bar chart */}
-      <div className="bg-surface-container-low rounded-md p-md">
-        <h2 className="text-label-l2 font-semibold text-primary-text mb-md">
+      <div className="bg-surface-container-low rounded-lg p-md">
+        <h2 className="text-title-large font-semibold text-on-surface mb-md">
           Revenue by Branch
         </h2>
         <div className="h-[280px] w-full">
@@ -126,7 +126,7 @@ export default function GroupAnalyticsPage() {
               />
               <Bar
                 dataKey="total_revenue"
-                fill="var(--ds-primary)"
+                fill="var(--ds-brand-primary)"
                 radius={[4, 4, 0, 0]}
                 name="Revenue"
               />
@@ -137,7 +137,7 @@ export default function GroupAnalyticsPage() {
 
       {/* Per-branch breakdown */}
       <div className="flex flex-col gap-md">
-        <h2 className="text-label-l2 font-semibold text-primary-text">
+        <h2 className="text-title-large font-semibold text-on-surface">
           Branch Breakdown
         </h2>
         {analytics.branches.map((branch) => {
@@ -146,15 +146,15 @@ export default function GroupAnalyticsPage() {
           return (
             <div
               key={branch.branch_id}
-              className="bg-surface-container-low rounded-md p-md flex flex-col gap-s"
+              className="bg-surface-container-low rounded-lg p-md flex flex-col gap-s"
             >
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-s">
-                  <span className="font-bold text-primary-text">
+                  <span className="font-bold text-on-surface">
                     {branch.branch_name}
                   </span>
                   <span
-                    className={`px-s py-xs rounded-4xl text-caption-xs font-bold uppercase tracking-wider ${
+                    className={`px-s py-xs rounded-full text-label-small font-bold uppercase tracking-wider ${
                       meta?.is_active
                         ? "bg-success-container text-on-success-container"
                         : "bg-surface-container-high text-outline"
@@ -163,7 +163,7 @@ export default function GroupAnalyticsPage() {
                     {meta?.is_active ? "Active" : "Inactive"}
                   </span>
                 </div>
-                <span className="text-caption-md font-semibold text-secondary-text">
+                <span className="text-body-medium font-semibold text-on-surface-variant">
                   {branch.total_orders} orders
                 </span>
               </div>
@@ -175,15 +175,15 @@ export default function GroupAnalyticsPage() {
                     style={{ width: `${share}%` }}
                   />
                 </div>
-                <span className="text-caption-md font-bold text-primary-text shrink-0 min-w-[80px] text-right">
+                <span className="text-body-medium font-bold text-on-surface shrink-0 min-w-[80px] text-right">
                   {formatCurrency(branch.total_revenue)}
                 </span>
               </div>
 
-              <div className="flex flex-wrap items-center gap-l text-caption-sm text-secondary-text">
+              <div className="flex flex-wrap items-center gap-l text-body-small text-on-surface-variant">
                 <span>
                   Avg order:{" "}
-                  <strong className="text-primary-text">
+                  <strong className="text-on-surface">
                     {formatCurrency(branch.avg_order_value)}
                   </strong>
                 </span>

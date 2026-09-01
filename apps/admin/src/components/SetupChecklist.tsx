@@ -129,15 +129,15 @@ export default function SetupChecklist({
   // who ticked the last box should see that it's done.
   if (allDone) {
     return (
-      <section className="flex items-center justify-between gap-md px-md py-s rounded-md bg-surface-container-low">
-        <span className="text-p2 text-primary-text">
+      <section className="flex items-center justify-between gap-md px-md py-s rounded-lg bg-surface-container-low">
+        <span className="text-body-medium text-on-surface">
           <i className="mgc_check_circle_fill text-success mr-xs" />
           Setup complete — you&rsquo;re ready to open.
         </span>
         <button
           type="button"
           onClick={dismiss}
-          className="text-caption-md font-semibold text-primary hover:underline"
+          className="text-body-medium font-semibold text-primary-label hover:underline"
         >
           Dismiss
         </button>
@@ -146,20 +146,20 @@ export default function SetupChecklist({
   }
 
   return (
-    <section className="rounded-md bg-surface-container-low overflow-hidden">
+    <section className="rounded-lg bg-surface-container-low overflow-hidden">
       <header className="flex items-center justify-between gap-md px-md py-s border-b border-outline-variant">
         <div className="flex flex-col gap-0.5">
-          <h2 className="text-label-l2 font-semibold text-primary-text">
+          <h2 className="text-title-large font-semibold text-on-surface">
             Finish setting up
           </h2>
-          <p className="text-caption-md text-secondary-text">
+          <p className="text-body-medium text-on-surface-variant">
             {complete} of {steps.length} done
           </p>
         </div>
         <button
           type="button"
           onClick={dismiss}
-          className="text-caption-md text-secondary-text hover:text-primary-text transition-colors"
+          className="text-body-medium text-on-surface-variant hover:text-on-surface transition-colors"
         >
           Hide
         </button>
@@ -174,7 +174,7 @@ export default function SetupChecklist({
             >
               <span
                 aria-hidden="true"
-                className={`w-5 h-5 mt-0.5 shrink-0 flex items-center justify-center rounded-4xl border-2 ${
+                className={`w-5 h-5 mt-0.5 shrink-0 flex items-center justify-center rounded-full border-2 ${
                   step.done
                     ? "bg-success border-success text-on-success"
                     : "border-outline"
@@ -186,16 +186,16 @@ export default function SetupChecklist({
               </span>
               <span className="flex flex-col gap-0.5 min-w-0">
                 <span
-                  className={`text-p2 font-semibold ${
+                  className={`text-body-medium font-semibold ${
                     step.done
-                      ? "text-secondary-text line-through"
-                      : "text-primary-text"
+                      ? "text-on-surface-variant line-through"
+                      : "text-on-surface"
                   }`}
                 >
                   {step.label}
                 </span>
                 {!step.done && (
-                  <span className="text-caption-md text-secondary-text">
+                  <span className="text-body-medium text-on-surface-variant">
                     {step.detail}
                   </span>
                 )}

@@ -38,12 +38,12 @@ export default function RestaurantsPage() {
   return (
     <main className="p-md flex flex-col gap-l">
       <header className="flex items-center justify-between">
-        <h1 className="font-display text-display-h2 font-semibold text-primary-text">
+        <h1 className="font-display text-title-large font-semibold text-on-surface">
           Restaurants
         </h1>
         <Link
           to="/restaurants/new"
-          className="inline-flex items-center justify-center gap-xs py-3 px-l rounded-lg bg-primary text-on-primary text-label-l4 leading-4 tracking-normal font-semibold font-display no-underline transition duration-100 ease-out hover:opacity-90 active:scale-[0.97] active:brightness-95"
+          className="inline-flex items-center justify-center gap-xs py-3 px-l rounded-sm bg-primary-action text-on-primary text-label-large leading-4 tracking-normal font-semibold font-display no-underline transition duration-100 ease-out hover:opacity-90 active:scale-[0.97] active:brightness-95"
         >
           <i className="mgc_add_line" />
           Onboard New
@@ -58,7 +58,7 @@ export default function RestaurantsPage() {
           placeholder="Search name or email..."
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          className="px-md py-s rounded-lg border border-outline-variant bg-surface-container-low text-p2 text-primary-text placeholder:text-outline outline-none focus:border-primary transition-colors flex-1 min-w-[180px] max-w-[320px]"
+          className="px-md py-s rounded-sm border border-outline-variant bg-surface-container-low text-body-medium text-on-surface placeholder:text-outline outline-none focus:border-primary transition-colors flex-1 min-w-[180px] max-w-[320px]"
         />
         <Select
           aria-label="Filter by subscription tier"
@@ -100,7 +100,7 @@ export default function RestaurantsPage() {
       {!query.isLoading && !query.isError && filtered.length === 0 && (
         <div className="flex flex-col items-center gap-s py-10 text-center">
           <i className="mgc_fork_spoon_line text-5xl text-outline-variant opacity-40" />
-          <p className="text-p2 text-secondary-text">No restaurants match your filters.</p>
+          <p className="text-body-medium text-on-surface-variant">No restaurants match your filters.</p>
         </div>
       )}
 
@@ -109,36 +109,36 @@ export default function RestaurantsPage() {
           <Link
             key={r.id}
             to={`/restaurants/${r.id}`}
-            className="bg-surface-container-low rounded-md p-md flex items-center justify-between gap-md no-underline hover:bg-surface-container-high transition-colors"
+            className="bg-surface-container-low rounded-lg p-md flex items-center justify-between gap-md no-underline hover:bg-surface-container-high transition-colors"
           >
             <div className="flex items-center gap-md min-w-0 flex-1">
-              <div className="w-10 h-10 rounded-lg bg-primary-container flex items-center justify-center shrink-0">
+              <div className="w-10 h-10 rounded-sm bg-primary-container flex items-center justify-center shrink-0">
                 <i className="mgc_fork_spoon_line text-on-primary-container text-lg" />
               </div>
               <div className="min-w-0">
-                <p className="font-semibold text-primary-text truncate">{r.name}</p>
-                <p className="text-caption-sm text-secondary-text truncate">
+                <p className="font-semibold text-on-surface truncate">{r.name}</p>
+                <p className="text-body-small text-on-surface-variant truncate">
                   {r.owner_phone ? formatPhone(r.owner_phone) : r.owner_email} · {r.table_count} tables
                 </p>
               </div>
             </div>
 
             <div className="flex items-center gap-s shrink-0">
-              <span className={`px-s py-xs rounded-4xl text-caption-xs font-bold uppercase tracking-wider ${TIER_COLORS[r.subscription_tier]}`}>
+              <span className={`px-s py-xs rounded-full text-label-small font-bold uppercase tracking-wider ${TIER_COLORS[r.subscription_tier]}`}>
                 {r.subscription_tier}
               </span>
               {/* Only annual is marked. Monthly is the default and labelling
                   every row with it would bury the handful that renew yearly,
                   which is the thing an operator is actually scanning for. */}
               {r.billing_period === "ANNUAL" && (
-                <span className="px-s py-xs rounded-4xl text-caption-xs font-bold uppercase tracking-wider bg-surface-container-high text-secondary-text">
+                <span className="px-s py-xs rounded-full text-label-small font-bold uppercase tracking-wider bg-surface-container-high text-on-surface-variant">
                   Annual
                 </span>
               )}
-              <span className={`px-s py-xs rounded-4xl text-caption-xs font-bold uppercase tracking-wider ${r.is_active ? "bg-success-container text-on-success-container" : "bg-surface-container-high text-outline"}`}>
+              <span className={`px-s py-xs rounded-full text-label-small font-bold uppercase tracking-wider ${r.is_active ? "bg-success-container text-on-success-container" : "bg-surface-container-high text-outline"}`}>
                 {r.is_active ? "Active" : "Inactive"}
               </span>
-              <span className="text-caption-sm text-secondary-text hidden sm:inline">
+              <span className="text-body-small text-on-surface-variant hidden sm:inline">
                 {r.monthly_orders} orders/mo
               </span>
               <i className="mgc_right_line text-outline" />

@@ -175,15 +175,15 @@ export default function AlertCenter() {
           key={a.id}
           role="status"
           aria-live="polite"
-          className="flex items-start gap-s p-md rounded-lg bg-inverse-surface text-inverse-on-surface shadow-lg"
+          className="flex items-start gap-s p-md rounded-sm bg-inverse-surface text-inverse-on-surface shadow-lg"
           style={{ animation: "slide-down 220ms ease-out" }}
         >
           <i className={`${a.iconClass} text-2xl shrink-0 ${a.iconColorClass}`} />
           <div className="flex flex-col gap-0.5 min-w-0">
-            <span className="text-label-l4 font-semibold font-display">
+            <span className="text-label-large font-semibold font-display">
               {a.title}
             </span>
-            <p className="text-label-l5 text-outline-variant">{a.body}</p>
+            <p className="text-label-medium text-outline-variant">{a.body}</p>
           </div>
         </div>
       ))}

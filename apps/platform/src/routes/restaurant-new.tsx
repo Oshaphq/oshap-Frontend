@@ -95,23 +95,23 @@ export default function RestaurantNewPage() {
   };
 
   const inputClass =
-    "w-full px-md py-s rounded-lg bg-surface-container-low border border-outline-variant text-p2 text-primary-text placeholder:text-outline outline-none focus:border-primary transition-colors";
+    "w-full px-md py-s rounded-sm bg-surface-container-low border border-outline-variant text-body-medium text-on-surface placeholder:text-outline outline-none focus:border-primary transition-colors";
 
   if (setupUrl) {
     return (
       <main className="p-md flex flex-col gap-l max-w-[36rem]">
         <header className="flex flex-col gap-xs">
-          <h1 className="font-display text-display-h2 font-semibold text-primary-text">
+          <h1 className="font-display text-title-large font-semibold text-on-surface">
             {created} is ready
           </h1>
-          <p className="text-p2 text-secondary-text">
+          <p className="text-body-medium text-on-surface-variant">
             Send this link to {formatPhone(tryNormalizePhone(form.owner_phone) ?? "")} so
             the owner can set their password. It works once and then expires.
           </p>
         </header>
 
-        <div className="bg-surface-container-low rounded-md p-md flex flex-col gap-s">
-          <code className="text-caption-sm text-primary-text break-all font-mono">
+        <div className="bg-surface-container-low rounded-lg p-md flex flex-col gap-s">
+          <code className="text-body-small text-on-surface break-all font-mono">
             {setupUrl}
           </code>
           <SecondaryButton
@@ -124,7 +124,7 @@ export default function RestaurantNewPage() {
           </SecondaryButton>
         </div>
 
-        <p className="text-caption-md text-secondary-text">
+        <p className="text-body-medium text-on-surface-variant">
           This is the only time it is shown. If it is lost, the owner can request
           a new one from the sign-in screen.
         </p>
@@ -139,22 +139,22 @@ export default function RestaurantNewPage() {
   return (
     <main className="p-md flex flex-col gap-l max-w-[36rem]">
       <header>
-        <h1 className="font-display text-display-h2 font-semibold text-primary-text">
+        <h1 className="font-display text-title-large font-semibold text-on-surface">
           Onboard Restaurant
         </h1>
         <div className="flex items-center gap-s mt-s">
           {([1, 2] as const).map((s) => (
             <div key={s} className="flex items-center gap-s">
               <div
-                className={`w-7 h-7 rounded-full flex items-center justify-center text-caption-xs font-bold transition-colors ${
+                className={`w-7 h-7 rounded-full flex items-center justify-center text-label-small font-bold transition-colors ${
                   step >= s
-                    ? "bg-primary text-on-primary"
+                    ? "bg-primary-action text-on-primary"
                     : "bg-surface-container-high text-outline"
                 }`}
               >
                 {s}
               </div>
-              <span className={`text-caption-sm font-medium ${step >= s ? "text-primary-text" : "text-secondary-text"}`}>
+              <span className={`text-body-small font-medium ${step >= s ? "text-on-surface" : "text-on-surface-variant"}`}>
                 {s === 1 ? "Restaurant Info" : "Banking & Tables"}
               </span>
               {s < 2 && <i className="mgc_right_line text-outline text-sm" />}
@@ -165,16 +165,16 @@ export default function RestaurantNewPage() {
 
       {step === 1 && (
         <form onSubmit={handleNext} className="flex flex-col gap-md">
-          <div className="bg-surface-container-low rounded-md p-md flex flex-col gap-md">
-            <h2 className="text-label-l2 font-semibold text-primary-text">Restaurant Details</h2>
+          <div className="bg-surface-container-low rounded-lg p-md flex flex-col gap-md">
+            <h2 className="text-title-large font-semibold text-on-surface">Restaurant Details</h2>
             <input className={inputClass} aria-label="Restaurant name" placeholder="Restaurant name *" value={form.name} onChange={set("name")} />
             <input className={inputClass} aria-label="Owner full name" placeholder="Owner full name *" value={form.owner_name} onChange={set("owner_name")} />
             <input className={inputClass} type="tel" inputMode="tel" aria-label="Owner phone number" placeholder="Owner phone number * — 0803 123 4567" value={form.owner_phone} onChange={set("owner_phone")} />
             <input className={inputClass} type="email" aria-label="Owner email" placeholder="Owner email (optional)" value={form.owner_email} onChange={set("owner_email")} />
           </div>
 
-          <div className="bg-surface-container-low rounded-md p-md flex flex-col gap-md">
-            <h2 className="text-label-l2 font-semibold text-primary-text">Subscription Tier</h2>
+          <div className="bg-surface-container-low rounded-lg p-md flex flex-col gap-md">
+            <h2 className="text-title-large font-semibold text-on-surface">Subscription Tier</h2>
             {/* Phase 1 plans only. Enterprise belongs to Phase 2, alongside
                 payment infrastructure that does not exist — offering it here
                 would be selling something we cannot deliver. */}
@@ -184,15 +184,15 @@ export default function RestaurantNewPage() {
                   key={tier}
                   type="button"
                   onClick={() => setForm((p) => ({ ...p, subscription_tier: tier }))}
-                  className={`py-s px-md rounded-lg border-2 text-left transition-all ${
+                  className={`py-s px-md rounded-sm border-2 text-left transition-all ${
                     form.subscription_tier === tier
                       ? "border-primary bg-primary-container text-on-primary-container"
-                      : "border-outline-variant bg-surface-container-low text-primary-text hover:border-outline"
+                      : "border-outline-variant bg-surface-container-low text-on-surface hover:border-outline"
                   }`}
                 >
-                  <p className="font-bold text-caption-md">{tier}</p>
-                  <p className="text-caption-xs opacity-70">{tierPriceLabel(tier)}</p>
-                  <p className="text-caption-xs opacity-50">{tierAnnualLabel(tier)}</p>
+                  <p className="font-bold text-body-medium">{tier}</p>
+                  <p className="text-label-small opacity-70">{tierPriceLabel(tier)}</p>
+                  <p className="text-label-small opacity-50">{tierAnnualLabel(tier)}</p>
                 </button>
               ))}
             </div>
@@ -201,7 +201,7 @@ export default function RestaurantNewPage() {
                 and we never sent it, so every restaurant onboarded so far reads
                 as monthly — including any that signed for a year. */}
             <div className="flex flex-col gap-s">
-              <span className="text-caption-md font-semibold text-primary-text">
+              <span className="text-body-medium font-semibold text-on-surface">
                 Billing
               </span>
               <div className="grid grid-cols-2 gap-s">
@@ -210,21 +210,21 @@ export default function RestaurantNewPage() {
                     key={period}
                     type="button"
                     onClick={() => setForm((p) => ({ ...p, billing_period: period }))}
-                    className={`py-s px-md rounded-lg border-2 text-left transition-all ${
+                    className={`py-s px-md rounded-sm border-2 text-left transition-all ${
                       form.billing_period === period
                         ? "border-primary bg-primary-container text-on-primary-container"
-                        : "border-outline-variant bg-surface-container-low text-primary-text hover:border-outline"
+                        : "border-outline-variant bg-surface-container-low text-on-surface hover:border-outline"
                     }`}
                   >
-                    <p className="font-bold text-caption-md">
+                    <p className="font-bold text-body-medium">
                       {period === "MONTHLY" ? "Monthly" : "Annual"}
                     </p>
-                    <p className="text-caption-xs opacity-70">
+                    <p className="text-label-small opacity-70">
                       {period === "MONTHLY"
                         ? tierPriceLabel(form.subscription_tier)
                         : tierAnnualLabel(form.subscription_tier)}
                     </p>
-                    <p className="text-caption-xs opacity-50">
+                    <p className="text-label-small opacity-50">
                       {period === "MONTHLY" ? "Billed each month" : "Ten months' price"}
                     </p>
                   </button>
@@ -239,8 +239,8 @@ export default function RestaurantNewPage() {
 
       {step === 2 && (
         <form onSubmit={handleCreate} className="flex flex-col gap-md">
-          <div className="bg-surface-container-low rounded-md p-md flex flex-col gap-md">
-            <h2 className="text-label-l2 font-semibold text-primary-text">Tables</h2>
+          <div className="bg-surface-container-low rounded-lg p-md flex flex-col gap-md">
+            <h2 className="text-title-large font-semibold text-on-surface">Tables</h2>
             <input
               className={inputClass}
               type="number"
@@ -252,8 +252,8 @@ export default function RestaurantNewPage() {
             />
           </div>
 
-          <div className="bg-surface-container-low rounded-md p-md flex flex-col gap-md">
-            <h2 className="text-label-l2 font-semibold text-primary-text">Bank Details (optional)</h2>
+          <div className="bg-surface-container-low rounded-lg p-md flex flex-col gap-md">
+            <h2 className="text-title-large font-semibold text-on-surface">Bank Details (optional)</h2>
             <input className={inputClass} aria-label="Bank name" placeholder="Bank name" value={form.bank_name} onChange={set("bank_name")} />
             <input className={inputClass} aria-label="Account number" placeholder="Account number" value={form.account_number} onChange={set("account_number")} />
             <input className={inputClass} aria-label="Account name" placeholder="Account name" value={form.account_name} onChange={set("account_name")} />

@@ -21,7 +21,7 @@ export default function AddButton({
       onClick={onClick}
       disabled={disabled}
       aria-label={ariaLabel}
-      className={`py-s px-l bg-transparent text-primary border-2 border-primary rounded-lg text-label-l4 font-semibold uppercase font-display transition-colors hover:bg-primary hover:text-on-primary active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed ${className}`}
+      className={`py-s px-l bg-transparent text-primary-label border-2 border-primary rounded-sm text-label-large font-semibold uppercase font-display transition-colors hover:bg-primary-action hover:text-on-primary active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed ${className}`}
     >
       {label}
     </button>

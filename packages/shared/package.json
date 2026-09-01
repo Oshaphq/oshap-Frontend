@@ -13,7 +13,7 @@
     "./tokens.css": "./src/tokens/tokens.css"
   },
   "scripts": {
-    "typecheck": "tsc --noEmit",
+    "typecheck": "tsc --noEmit && tsc -p tsconfig.test.json --noEmit",
     "lint": "eslint ."
   },
   "peerDependencies": {

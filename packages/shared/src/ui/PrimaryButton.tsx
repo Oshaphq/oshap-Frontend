@@ -1,14 +1,19 @@
 import type { ReactNode } from "react";
+import Button from "./Button";
 
+/**
+ * The one primary action per view. Fills with `primary-action`, not the brand.
+ *
+ * Kept as a named wrapper over {@link Button} so the ~100 existing call sites
+ * do not all move in the DS v2 migration. New code should reach for `Button`
+ * with an explicit `variant`, which also opens the elevated, text and
+ * destructive rungs of the ladder.
+ */
 interface PrimaryButtonProps {
   children: ReactNode;
   /**
-   * `lg` — full-width hero CTA: 16/16 padding, fixed 52px height, fills its
-   *        container width. Use for top-level actions (Login, Place Order,
-   *        Confirm Order, "I've Sent the Money", Verify Payment).
-   * `md` — compact action: 12/24 padding, hugs content (both axes). Use for
-   *        in-flow actions (Start Session, Browse Menu, Add Item, Save).
-   *        Pass `className="w-full"` if you need fill in a specific spot.
+   * `lg` — full-width CTA, 48px. The mobile primary action.
+   * `md` — hugs its label, 40px. The default everywhere else.
    *
    * @default "lg"
    */
@@ -29,18 +34,18 @@ export default function PrimaryButton({
   className = "",
   "aria-label": ariaLabel,
 }: PrimaryButtonProps) {
-  const sizeClass =
-    size === "lg" ? "w-full h-[52px] p-md" : "py-3 px-l";
-
   return (
-    <button
-      type={type}
+    <Button
+      variant="filled"
+      size={size}
+      fullWidth={size === "lg"}
       onClick={onClick}
       disabled={disabled}
+      type={type}
       aria-label={ariaLabel}
-      className={`inline-flex items-center justify-center gap-xs ${sizeClass} rounded-lg bg-primary text-on-primary text-label-l4 leading-4 tracking-normal font-semibold font-display transition duration-100 ease-out hover:opacity-90 active:scale-[0.97] active:brightness-95 disabled:opacity-50 disabled:cursor-not-allowed disabled:active:scale-100 disabled:active:brightness-100 ${className}`}
+      className={className}
     >
       {children}
-    </button>
+    </Button>
   );
 }

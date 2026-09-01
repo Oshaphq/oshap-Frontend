@@ -1,3 +1,13 @@
+export { default as Button } from "./Button";
+export type { ButtonProps, ButtonVariant, ButtonSize } from "./Button";
+export { default as IconButton } from "./IconButton";
+export type { IconButtonProps, IconButtonVariant } from "./IconButton";
+export { default as Fab } from "./Fab";
+export type { FabProps } from "./Fab";
+export { default as Chip } from "./Chip";
+export type { ChipProps } from "./Chip";
+export { default as StatusBadge } from "./StatusBadge";
+export type { StatusBadgeProps, StatusTone } from "./StatusBadge";
 export { default as PrimaryButton } from "./PrimaryButton";
 export { default as SecondaryButton } from "./SecondaryButton";
 export { default as TertiaryButton } from "./TertiaryButton";

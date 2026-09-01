@@ -62,7 +62,7 @@ describe("state reads as a pill", () => {
   it("unavailable is neutral, not an error", () => {
     // A dish taken off the menu is a choice, not a fault.
     const pill = src.slice(
-      src.indexOf("shrink-0 px-s py-0.5 rounded-4xl"),
+      src.indexOf("shrink-0 px-s py-0.5 rounded-full"),
       src.indexOf('{item.available ? "Available" : "Unavailable"}'),
     );
     expect(pill).toContain("bg-surface-container-high");
@@ -82,7 +82,7 @@ describe("state reads as a pill", () => {
 
 describe("the low stock banner gives its width to the chips", () => {
   it("the icon sits on the heading line", () => {
-    expect(banner).toContain("flex items-center gap-s text-label-l4");
+    expect(banner).toContain("flex items-center gap-s text-label-large");
   });
 
   it("and the list is no longer indented behind it", () => {
@@ -90,6 +90,6 @@ describe("the low stock banner gives its width to the chips", () => {
   });
 
   it("chips are pills", () => {
-    expect(banner).toContain("rounded-4xl");
+    expect(banner).toContain("rounded-full");
   });
 });

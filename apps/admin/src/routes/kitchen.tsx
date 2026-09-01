@@ -73,7 +73,7 @@ export default function KitchenPage() {
 
   if (kitchenQuery.isLoading || (isStationRole && menuQuery.isLoading)) {
     return (
-      <div className="flex flex-col items-center justify-center min-h-[60vh] gap-md text-secondary-text">
+      <div className="flex flex-col items-center justify-center min-h-[60vh] gap-md text-on-surface-variant">
         <div className="oshap-spinner" />
         <p>Loading orders...</p>
       </div>
@@ -164,19 +164,19 @@ export default function KitchenPage() {
           line of its own, and they sit back on one row from `sm` up where
           there is room for both. */}
       <header className="flex flex-col items-start gap-s px-md py-s sm:flex-row sm:items-center sm:justify-between sm:gap-md bg-surface border-b border-outline-variant shrink-0 sm:min-h-[56px]">
-        <h1 className="font-display text-display-h2 font-semibold text-primary-text">
+        <h1 className="font-display text-title-large font-semibold text-on-surface">
           {user?.role === "BARTENDER" ? "Bar Orders" : "Kitchen Display"}
         </h1>
         {/* Wraps only where three pills genuinely cannot fit, rather than
             running off the edge of the screen. */}
         <div className="flex items-center gap-s flex-wrap">
-          <span className="px-s py-xs rounded-4xl font-bold text-caption-sm bg-primary-container text-on-primary-container">
+          <span className="px-s py-xs rounded-full font-bold text-body-small bg-primary-container text-on-primary-container">
             {newOrders.length} new
           </span>
-          <span className="px-s py-xs rounded-4xl font-bold text-caption-sm bg-warning-container text-on-warning-container">
+          <span className="px-s py-xs rounded-full font-bold text-body-small bg-warning-container text-on-warning-container">
             {inProgress.length} preparing
           </span>
-          <span className="px-s py-xs rounded-4xl font-bold text-caption-sm bg-success-container text-on-success-container">
+          <span className="px-s py-xs rounded-full font-bold text-body-small bg-success-container text-on-success-container">
             {ready.length} ready
           </span>
         </div>
@@ -189,10 +189,10 @@ export default function KitchenPage() {
         {isStationRole && !canSplit && (
           <div
             role="alert"
-            className="flex items-start gap-s p-md rounded-md bg-warning-container text-on-warning-container"
+            className="flex items-start gap-s p-md rounded-lg bg-warning-container text-on-warning-container"
           >
             <i className="mgc_alert_line text-lg shrink-0" aria-hidden />
-            <p className="text-caption-sm font-semibold">
+            <p className="text-body-small font-semibold">
               Showing every ticket — we couldn’t load the menu, so drinks and
               food can’t be told apart right now.
             </p>
@@ -201,10 +201,10 @@ export default function KitchenPage() {
         {orders.length === 0 ? (
           <div className="flex flex-col items-center justify-center h-full gap-s text-center py-20">
             <i className="mgc_knife_line text-5xl text-outline-variant opacity-40" />
-            <span className="font-display text-display-h4 font-semibold text-primary-text">
+            <span className="font-display text-title-medium font-semibold text-on-surface">
               No orders yet
             </span>
-            <p className="text-p2 text-secondary-text">
+            <p className="text-body-medium text-on-surface-variant">
               {hiddenByStationFilter
                 ? `${rawOrders.length} active order${rawOrders.length === 1 ? "" : "s"}, none for this station.`
                 : "Waiting for new orders..."}
@@ -277,9 +277,9 @@ export default function KitchenPage() {
  */
 function StationRoutingHint() {
   return (
-    <div className="flex items-start gap-s p-md mt-s max-w-[480px] rounded-lg bg-warning-container text-on-warning-container text-left">
+    <div className="flex items-start gap-s p-md mt-s max-w-[480px] rounded-sm bg-warning-container text-on-warning-container text-left">
       <i className="mgc_alert_line text-xl shrink-0 mt-0.5" />
-      <p className="text-label-l5">
+      <p className="text-label-medium">
         Kitchen and bar orders are split by a menu category named{" "}
         <span className="font-semibold">&ldquo;{DRINKS_CATEGORY}&rdquo;</span>,
         and your menu has no such category. Rename your drinks category in{" "}
@@ -314,7 +314,7 @@ const ACCENT_CLS: Record<
 > = {
   primary: {
     headerBorder: "border-b-primary",
-    qty: "text-primary",
+    qty: "text-primary-label",
   },
   warning: {
     headerBorder: "border-b-warning",
@@ -340,7 +340,7 @@ function KitchenColumn({
   return (
     <div className="flex flex-col gap-md">
       <h2
-        className={`font-semibold uppercase tracking-wider text-caption-md pb-s border-b-2 flex items-center gap-s text-primary-text ${cls.headerBorder}`}
+        className={`font-semibold uppercase tracking-wider text-body-medium pb-s border-b-2 flex items-center gap-s text-on-surface ${cls.headerBorder}`}
       >
         {title}
       </h2>
@@ -353,21 +353,21 @@ function KitchenColumn({
             return (
               <div
                 key={order.id}
-                className="rounded-md p-md flex flex-col gap-s bg-surface-container-low transition-shadow hover:shadow-md"
+                className="rounded-lg p-md flex flex-col gap-s bg-surface-container-low transition-shadow hover:shadow-md"
               >
                 <div className="flex items-center justify-between gap-s">
                   <div className="flex items-center gap-s">
-                    <span className="font-bold text-primary-text">
+                    <span className="font-bold text-on-surface">
                       {order.table_id}
                     </span>
-                    <span className="text-caption-sm text-secondary-text">
+                    <span className="text-body-small text-on-surface-variant">
                       {timeAgo(order.created_at)}
                     </span>
                   </div>
                   <Link
                     to={`/orders/${order.id}`}
                     title="Open the bill"
-                    className="text-caption-sm text-outline font-mono hover:text-primary transition-colors no-underline"
+                    className="text-body-small text-outline font-mono hover:text-primary-label transition-colors no-underline"
                   >
                     #{stripRef(order.reference)}
                   </Link>
@@ -379,7 +379,7 @@ function KitchenColumn({
                         {item.quantity}x
                       </span>
                       <div className="flex flex-col min-w-0">
-                        <span className="text-primary-text">{item.name}</span>
+                        <span className="text-on-surface">{item.name}</span>
                         {/* The whole point of modifiers: a cook who can't see
                             "No pepper" is cooking the wrong dish. Prices are
                             deliberately omitted — the kitchen doesn't need
@@ -387,13 +387,13 @@ function KitchenColumn({
                         {item.modifiers?.map((modifier, i) => (
                           <span
                             key={`${modifier.option}-${i}`}
-                            className="text-caption-md text-secondary-text"
+                            className="text-body-medium text-on-surface-variant"
                           >
                             + {modifier.option}
                           </span>
                         ))}
                         {item.notes && (
-                          <span className="text-caption-md font-semibold text-warning italic">
+                          <span className="text-body-medium font-semibold text-warning italic">
                             {item.notes}
                           </span>
                         )}
@@ -402,7 +402,7 @@ function KitchenColumn({
                   ))}
                 </ul>
                 <div className="flex flex-col gap-xl pt-s border-t border-surface-container-high">
-                  <span className="text-caption-md font-bold text-secondary-text">
+                  <span className="text-body-medium font-bold text-on-surface-variant">
                     {formatCurrency(order.total)}
                   </span>
                   {ctaLabel != null && (

@@ -20,14 +20,14 @@ function Metric({
       : "bg-surface-container-low border-transparent";
 
   return (
-    <div className={`rounded-md p-md flex flex-col gap-xs border ${statusCls}`}>
-      <span className="text-label-l4 font-semibold uppercase tracking-wider opacity-70">
+    <div className={`rounded-lg p-md flex flex-col gap-xs border ${statusCls}`}>
+      <span className="text-label-large font-semibold uppercase tracking-wider opacity-70">
         {label}
       </span>
-      <span className="font-display text-display-h3 font-semibold">
+      <span className="font-display text-title-medium font-semibold">
         {value}
         {unit && (
-          <span className="text-label-l4 font-normal opacity-60 ml-xs">{unit}</span>
+          <span className="text-label-large font-normal opacity-60 ml-xs">{unit}</span>
         )}
       </span>
     </div>
@@ -49,14 +49,14 @@ export default function HealthPage() {
     <main className="p-md flex flex-col gap-l">
       <header className="flex items-center justify-between">
         <div>
-          <h1 className="font-display text-display-h2 font-semibold text-primary-text">
+          <h1 className="font-display text-title-large font-semibold text-on-surface">
             System Health
           </h1>
-          <p className="text-p2 text-secondary-text">Live mock metrics — refreshes every 30 s</p>
+          <p className="text-body-medium text-on-surface-variant">Live mock metrics — refreshes every 30 s</p>
         </div>
         {h && (
           <div
-            className={`flex items-center gap-s px-md py-s rounded-xl font-bold text-caption-md ${
+            className={`flex items-center gap-s px-md py-s rounded-2xl font-bold text-body-medium ${
               uptimeStatus === "ok" && errorStatus === "ok"
                 ? "bg-success-container text-on-success-container"
                 : "bg-warning-container text-on-warning-container"
@@ -120,23 +120,23 @@ export default function HealthPage() {
             />
           </div>
 
-          <div className="bg-surface-container-low rounded-md p-md flex flex-col gap-s">
-            <h2 className="text-label-l2 font-semibold text-primary-text">Thresholds</h2>
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-md text-caption-sm text-secondary-text">
+          <div className="bg-surface-container-low rounded-lg p-md flex flex-col gap-s">
+            <h2 className="text-title-large font-semibold text-on-surface">Thresholds</h2>
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-md text-body-small text-on-surface-variant">
               <div>
-                <p className="font-semibold text-primary-text mb-xs">Uptime</p>
+                <p className="font-semibold text-on-surface mb-xs">Uptime</p>
                 <p><span className="text-success font-bold">≥ 99.5%</span> — Healthy</p>
                 <p><span className="text-warning font-bold">≥ 98%</span> — Degraded</p>
                 <p><span className="text-error font-bold">&lt; 98%</span> — Critical</p>
               </div>
               <div>
-                <p className="font-semibold text-primary-text mb-xs">Response Time</p>
+                <p className="font-semibold text-on-surface mb-xs">Response Time</p>
                 <p><span className="text-success font-bold">&lt; 200 ms</span> — Fast</p>
                 <p><span className="text-warning font-bold">&lt; 500 ms</span> — Slow</p>
                 <p><span className="text-error font-bold">≥ 500 ms</span> — Critical</p>
               </div>
               <div>
-                <p className="font-semibold text-primary-text mb-xs">Error Rate</p>
+                <p className="font-semibold text-on-surface mb-xs">Error Rate</p>
                 <p><span className="text-success font-bold">&lt; 1%</span> — Normal</p>
                 <p><span className="text-warning font-bold">&lt; 3%</span> — Elevated</p>
                 <p><span className="text-error font-bold">≥ 3%</span> — Critical</p>

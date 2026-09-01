@@ -31,11 +31,11 @@ export default function BrandColourField({
     <div className="flex flex-col gap-s">
       <label
         htmlFor="primary_color"
-        className="text-caption-md font-semibold text-primary-text"
+        className="text-body-medium font-semibold text-on-surface"
       >
         Brand colour
       </label>
-      <p className="text-caption-xs text-secondary-text">
+      <p className="text-label-small text-on-surface-variant">
         Used on your guests&rsquo; menu — buttons, the header, highlights. Your
         staff screens stay the same.
       </p>
@@ -46,7 +46,7 @@ export default function BrandColourField({
           aria-label="Pick a brand colour"
           value={palette?.light.primary ?? "#f56500"}
           onChange={(e) => onChange(e.target.value)}
-          className="w-12 h-12 shrink-0 rounded-lg bg-surface-container-low border border-outline-variant cursor-pointer"
+          className="w-12 h-12 shrink-0 rounded-sm bg-surface-container-low border border-outline-variant cursor-pointer"
         />
         <input
           id="primary_color"
@@ -55,18 +55,18 @@ export default function BrandColourField({
           onChange={(e) => onChange(e.target.value)}
           placeholder="#F56500"
           spellCheck={false}
-          className="flex-1 px-md py-s rounded-lg bg-surface-container-low border border-outline-variant text-p2 text-primary-text placeholder:text-outline outline-none focus:border-primary transition-colors font-mono"
+          className="flex-1 px-md py-s rounded-sm bg-surface-container-low border border-outline-variant text-body-medium text-on-surface placeholder:text-outline outline-none focus:border-primary transition-colors font-mono"
         />
       </div>
 
       {unusable && (
-        <p className="text-caption-xs text-warning">
+        <p className="text-label-small text-warning">
           That isn&rsquo;t a colour we can read — guests will see the default
           until it&rsquo;s a hex like <span className="font-mono">#F56500</span>.
         </p>
       )}
 
-      <span className="text-caption-xs font-semibold text-secondary-text uppercase tracking-wider mt-xs">
+      <span className="text-label-small font-semibold text-on-surface-variant uppercase tracking-wider mt-xs">
         What your guests see
       </span>
       <div className="grid grid-cols-2 gap-s">
@@ -101,13 +101,13 @@ function BrandPreview({
     <div
       data-theme={mode}
       style={vars ?? undefined}
-      className="rounded-lg border border-outline-variant bg-surface p-md flex flex-col gap-s"
+      className="rounded-sm border border-outline-variant bg-surface p-md flex flex-col gap-s"
     >
-      <span className="text-caption-xs text-secondary-text capitalize">{mode}</span>
-      <div className="rounded-md bg-primary text-on-primary px-md py-s text-center text-caption-md font-semibold font-display">
+      <span className="text-label-small text-on-surface-variant capitalize">{mode}</span>
+      <div className="rounded-lg bg-primary-action text-on-primary px-md py-s text-center text-body-medium font-semibold font-display">
         Place order
       </div>
-      <div className="rounded-md bg-primary-container text-on-primary-container px-md py-xs text-caption-xs">
+      <div className="rounded-lg bg-primary-container text-on-primary-container px-md py-xs text-label-small">
         Jollof rice &middot; ₦3,500
       </div>
     </div>
