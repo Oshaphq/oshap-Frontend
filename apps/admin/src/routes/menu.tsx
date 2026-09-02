@@ -332,7 +332,7 @@ export default function MenuPage() {
               }
             >
               <i
-                className={selecting ? "mgc_close_line" : "mgc_check_2_line"}
+                className={selecting ? "mgc_close_line" : "mgc_check_line"}
               />{" "}
               {selecting ? "Done" : "Select"}
             </SecondaryButton>
@@ -886,7 +886,7 @@ function SelectionBar({
             disabled={chosen.length === 0 || pending}
             onClick={() => setConfirming(true)}
           >
-            <i className="mgc_delete_2_line" /> Delete
+            <i className="mgc_delete_line" /> Delete
           </PrimaryButton>
         </div>
       </div>

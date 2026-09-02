@@ -108,7 +108,7 @@ export const NOTIFICATION_META: Record<NotificationType, NotificationMeta> = {
     claimable: false,
   },
   low_stock: {
-    iconClass: "mgc_box_2_line",
+    iconClass: "mgc_box_3_line",
     iconColorClass: "text-warning",
     chime: false,
     title: "Running low",
