@@ -100,7 +100,7 @@ export default function CartDrawer({ tableId }: CartDrawerProps) {
                         updateQuantity(item.lineId, item.quantity - 1)
                       }
                       aria-label={`Decrease ${item.name}`}
-                      className="w-8 h-8 flex items-center justify-center rounded-full bg-surface-container text-on-surface-variant hover:bg-primary-action hover:text-on-primary transition-colors"
+                      className="w-8 h-8 flex items-center justify-center rounded-full bg-surface-container text-on-surface-variant hover:bg-primary hover:text-on-primary transition-colors"
                     >
                       <i className="mgc_minimize_line" />
                     </button>
@@ -113,7 +113,7 @@ export default function CartDrawer({ tableId }: CartDrawerProps) {
                         updateQuantity(item.lineId, item.quantity + 1)
                       }
                       aria-label={`Increase ${item.name}`}
-                      className="w-8 h-8 flex items-center justify-center rounded-full bg-surface-container text-on-surface-variant hover:bg-primary-action hover:text-on-primary transition-colors"
+                      className="w-8 h-8 flex items-center justify-center rounded-full bg-surface-container text-on-surface-variant hover:bg-primary hover:text-on-primary transition-colors"
                     >
                       <i className="mgc_add_line" />
                     </button>

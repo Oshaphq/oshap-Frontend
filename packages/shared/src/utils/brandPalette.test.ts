@@ -198,16 +198,14 @@ describe("the brand stays recognisable", () => {
 
 describe("brandCssVars", () => {
   it("names the variables the token file actually reads", () => {
-    // bg-primary resolves through --color-primary to --ds-brand-primary, so
+    // bg-primary resolves through --color-primary to --ds-primary, so
     // these names are the whole mechanism — a typo silently does nothing.
     const vars = brandCssVars(deriveBrandPalette("#d32f2f")!.light);
+    // Five, not eight: v3 deleted the derived action fill and its two states.
     expect(Object.keys(vars).sort()).toEqual([
-      "--ds-brand-primary",
       "--ds-on-primary",
       "--ds-on-primary-container",
-      "--ds-primary-action",
-      "--ds-primary-action-hover",
-      "--ds-primary-action-pressed",
+      "--ds-primary",
       "--ds-primary-container",
       "--ds-primary-label",
     ]);
@@ -216,7 +214,7 @@ describe("brandCssVars", () => {
   /**
    * The v1 -> v2 rename broke exactly this and nothing caught it: the generator
    * kept writing `--ds-primary`, the token file had moved to
-   * `--ds-brand-primary`, and every tenant would have silently kept Oshap
+   * `--ds-primary`, and every tenant would have silently kept Oshap
    * orange. A dangling custom property is valid CSS, so only reading the token
    * file can tell.
    */
@@ -229,34 +227,13 @@ describe("brandCssVars", () => {
     expect(written.filter((name) => !declared.has(name))).toEqual([]);
   });
 
-  /**
-   * A tenant whose action fill cannot carry a white label is the failure this
-   * whole role exists to prevent, so it is asserted across the seed range
-   * rather than on one convenient hex.
-   */
-  it.each(["#d32f2f", "#1a237e", "#ffd700", "#00897b", "#f56500"])(
-    "derives an action fill that clears 4.5:1 under white for %s",
-    (seed) => {
-      const { light, dark } = deriveBrandPalette(seed)!;
-      for (const roles of [light, dark]) {
-        expect(contrastRatio(roles.primaryAction, "#ffffff")).toBeGreaterThanOrEqual(4.5);
-        // States walk DOWN the ramp, so contrast only improves under the label.
-        expect(contrastRatio(roles.primaryActionHover, "#ffffff")).toBeGreaterThanOrEqual(
-          contrastRatio(roles.primaryAction, "#ffffff"),
-        );
-        expect(contrastRatio(roles.primaryActionPressed, "#ffffff")).toBeGreaterThanOrEqual(
-          contrastRatio(roles.primaryActionHover, "#ffffff"),
-        );
-      }
-    },
-  );
-
   it.each(["#d32f2f", "#1a237e", "#ffd700", "#00897b", "#f56500"])(
     "derives a label that clears 4.5:1 on the surface it sits on for %s",
     (seed) => {
       const { light, dark } = deriveBrandPalette(seed)!;
-      expect(contrastRatio("#fafafa", light.primaryLabel)).toBeGreaterThanOrEqual(4.5);
-      expect(contrastRatio("#100f10", dark.primaryLabel)).toBeGreaterThanOrEqual(4.5);
+      // v3 surfaces are warm neutrals: N98 light, N6 dark.
+      expect(contrastRatio("#fff8f5", light.primaryLabel)).toBeGreaterThanOrEqual(4.5);
+      expect(contrastRatio("#181210", dark.primaryLabel)).toBeGreaterThanOrEqual(4.5);
     },
   );
 });

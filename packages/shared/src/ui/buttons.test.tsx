@@ -63,21 +63,43 @@ describe("a disabled button does not pretend to work", () => {
 });
 
 /**
- * The v2 rule that is easiest to undo by accident. White on the brand #f56500
- * is 3.11:1 — WCAG's non-text bar, not its text bar — so a *labelled* button
- * fills with `primary-action` #c24e00 at 4.79:1 instead. An icon-only button
- * may still take the brand, because a glyph is a UI component.
+ * The v3 rule that is easiest to undo by accident.
+ *
+ * v3 deletes the derived interface fill: `filled` uses the seed #F56500, where
+ * white measures 3.11:1 — AA for large text and UI components, NOT for body
+ * copy. The whole exception rests on the label never dropping below large-text
+ * size, so that is asserted at every height rather than trusted to call sites.
  */
-describe("a filled button never puts a white label on the brand fill", () => {
-  it.each(["sm", "md", "lg"] as const)("%s fills with primary-action", (size) => {
+describe("a filled button keeps its label at large-text size", () => {
+  it.each(["sm", "md", "lg"] as const)("%s pins the label to 16px", (size) => {
     const html = renderToStaticMarkup(
       <Button variant="filled" size={size}>
         Place Order
       </Button>,
     );
-    expect(html).toContain("bg-primary-action");
-    // `bg-primary` is the pinned brand, and would be 3.11:1 under this label.
-    expect(html).not.toMatch(/\bbg-primary\b(?!-action)/);
+    expect(html).toContain("bg-primary");
+    expect(html).toContain("text-[16px]");
+    // 13px or 14px white-on-seed is the failure this rule exists to prevent.
+    expect(html).not.toContain("text-[13px]");
+    expect(html).not.toContain("text-label-large");
+  });
+
+  it("lets the other variants drop to 14px, since none sits on the seed", () => {
+    const html = renderToStaticMarkup(
+      <Button variant="outlined" size="md">
+        Edit table
+      </Button>,
+    );
+    expect(html).toContain("text-label-large");
+    expect(html).not.toContain("text-[16px]");
+  });
+
+  it("puts tonal on the primary container, not secondary", () => {
+    // v2 used secondary-container here. In v3 secondary is a muted brown for
+    // weight, and the tonal button is P90/P10.
+    const html = renderToStaticMarkup(<Button variant="tonal">Add to order</Button>);
+    expect(html).toContain("bg-primary-container");
+    expect(html).not.toContain("bg-secondary-container");
   });
 });
 

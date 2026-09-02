@@ -404,7 +404,7 @@ export default function PayPage() {
                     aria-pressed={isSelected}
                     className={`px-md py-s rounded-full text-label-medium font-semibold transition-colors ${
                       isSelected
-                        ? "bg-primary-action text-on-primary"
+                        ? "bg-primary text-on-primary"
                         : "bg-surface-container text-on-surface-variant hover:bg-surface-container-high"
                     }`}
                   >

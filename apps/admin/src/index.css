@@ -38,7 +38,7 @@ body {
   width: 40px;
   height: 40px;
   border: 3px solid var(--ds-surface-container-high);
-  border-top-color: var(--ds-brand-primary);
+  border-top-color: var(--ds-primary);
   border-radius: 50%;
   animation: spin 0.8s linear infinite;
 }

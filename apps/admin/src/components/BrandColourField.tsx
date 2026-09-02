@@ -104,7 +104,7 @@ function BrandPreview({
       className="rounded-sm border border-outline-variant bg-surface p-md flex flex-col gap-s"
     >
       <span className="text-label-small text-on-surface-variant capitalize">{mode}</span>
-      <div className="rounded-lg bg-primary-action text-on-primary px-md py-s text-center text-body-medium font-semibold font-display">
+      <div className="rounded-lg bg-primary text-on-primary px-md py-s text-center text-body-medium font-semibold font-display">
         Place order
       </div>
       <div className="rounded-lg bg-primary-container text-on-primary-container px-md py-xs text-label-small">

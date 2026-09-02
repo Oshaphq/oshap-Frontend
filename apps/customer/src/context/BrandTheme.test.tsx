@@ -17,7 +17,7 @@ beforeEach(() => {
 
 describe("a restaurant with a brand colour", () => {
   it("overrides the token the utilities actually read", () => {
-    // `bg-primary` resolves through `--color-primary` to `--ds-brand-primary`.
+    // `bg-primary` resolves through `--color-primary` to `--ds-primary`.
     // If the name is wrong nothing breaks visibly — it just silently stays
     // orange, which is how the v1 name survived the v2 rename unnoticed.
     const html = render(
@@ -25,13 +25,13 @@ describe("a restaurant with a brand colour", () => {
         <span>menu</span>
       </BrandTheme>,
     );
-    expect(html).toContain("--ds-brand-primary:");
+    expect(html).toContain("--ds-primary:");
     expect(html).toContain("--ds-on-primary:");
     expect(html).toContain("--ds-primary-container:");
     // The interface fill is the role a filled button actually paints with, so a
     // tenant that rebrands only the identity colour would still ship Oshap
     // orange buttons.
-    expect(html).toContain("--ds-primary-action:");
+    expect(html).toContain("--ds-primary:");
     expect(html).toContain("--ds-primary-label:");
     expect(html).toContain("data-brand");
   });
@@ -72,7 +72,7 @@ describe("a restaurant without a usable one", () => {
           <span>menu</span>
         </BrandTheme>,
       );
-      expect(html).not.toContain("--ds-brand-primary:");
+      expect(html).not.toContain("--ds-primary:");
       expect(html).toContain("menu");
     },
   );
@@ -142,7 +142,7 @@ describe("while the table is still loading", () => {
         <span>menu</span>
       </BrandTheme>,
     );
-    expect(html).not.toContain("--ds-brand-primary:");
+    expect(html).not.toContain("--ds-primary:");
   });
 
   it("keeps each table's brand separate", () => {
@@ -154,6 +154,6 @@ describe("while the table is still loading", () => {
         <span>menu</span>
       </BrandTheme>,
     );
-    expect(other).not.toContain("--ds-brand-primary:");
+    expect(other).not.toContain("--ds-primary:");
   });
 });

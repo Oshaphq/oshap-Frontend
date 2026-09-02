@@ -161,7 +161,7 @@ export default function CashPaymentDialog({
                     aria-pressed={method === m.value}
                     className={`flex-1 flex items-center justify-center gap-xs px-s py-s rounded-sm text-body-medium font-semibold transition-colors ${
                       method === m.value
-                        ? "bg-primary-action text-on-primary"
+                        ? "bg-primary text-on-primary"
                         : "bg-surface-container text-on-surface-variant hover:bg-surface-container-highest"
                     }`}
                   >

@@ -242,7 +242,7 @@ export default function RestaurantDetailPage() {
                 type="button"
                 onClick={handleSaveTier}
                 disabled={update.isPending || !pendingTier || !pendingPeriod}
-                className="px-md py-s rounded-sm font-bold text-body-medium bg-primary-action text-on-primary hover:opacity-90 disabled:opacity-50 transition-all"
+                className="px-md py-s rounded-sm font-bold text-body-medium bg-primary text-on-primary hover:opacity-90 disabled:opacity-50 transition-all"
               >
                 {update.isPending ? "Saving..." : "Save"}
               </button>

@@ -16,7 +16,7 @@ export default function NotificationBell() {
       >
         <i className="mgc_notification_line" />
         {unreadCount > 0 && (
-          <span className="absolute top-0 right-0 inline-flex items-center justify-center min-w-4 h-4 px-xs text-[10px] font-bold text-on-primary bg-primary-action rounded-full transform translate-x-1 -translate-y-1 shadow-sm">
+          <span className="absolute top-0 right-0 inline-flex items-center justify-center min-w-4 h-4 px-xs text-[10px] font-bold text-on-primary bg-primary rounded-full transform translate-x-1 -translate-y-1 shadow-sm">
             {unreadCount > 9 ? "9+" : unreadCount}
           </span>
         )}

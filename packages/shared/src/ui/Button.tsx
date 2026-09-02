@@ -1,27 +1,35 @@
 import type { ButtonHTMLAttributes, ReactNode } from "react";
 
 /**
- * The DS v2 button — one emphasis ladder, five variants, three heights.
+ * The DS v3 button — five variants in one emphasis ladder.
  *
- * Every filled variant fills with `primary-action` #c24e00, never the brand
- * #f56500. White on the brand measures 3.11:1, which clears WCAG's non-text bar
- * and fails the 4.5:1 text bar; white on `primary-action` measures 4.79:1. So
- * the fill carries the contrast and the label size is free to follow the
- * density of the screen, which is the way round it should be.
+ * The filled variant fills with the seed #F56500 and a white label. v2 derived
+ * a second, darker token to reach 4.5:1; v3 deletes it and states the cost
+ * instead: white on the seed is 3.11:1, which meets AA for large text and UI
+ * components but NOT for body copy.
  *
- * Radius stays at `sm` 8px. M3 draws buttons as pills; Oshap does not, so no
- * button silhouette moves in this migration.
+ * That makes ONE rule load-bearing, and it is enforced here rather than left to
+ * call sites: a filled button's label is always 16px semibold, whatever height
+ * it is rendered at. Every other variant puts its label on a surface or a
+ * container tone, where 14px clears comfortably.
+ *
+ * Radius stays 8px. M3 draws buttons as pills; a pill next to a rectangular
+ * price field reads as a different generation of UI, and the apps are full of
+ * rectangular price fields.
  */
 export type ButtonVariant =
   | "filled"
-  | "elevated"
   | "tonal"
   | "outlined"
+  | "elevated"
   | "text"
   | "destructive";
 
-/** `sm` never stands alone on a mobile surface — 32px fails the 48px touch
- *  minimum unless it sits in a row that provides the target. */
+/**
+ * v3 works in two densities — 48px comfortable, 40px compact. `sm` predates
+ * that ladder and survives for inline actions inside a dense row; it never
+ * stands alone on a mobile surface, where 32px fails the touch minimum.
+ */
 export type ButtonSize = "sm" | "md" | "lg";
 
 export interface ButtonProps
@@ -34,33 +42,44 @@ export interface ButtonProps
   className?: string;
 }
 
-/**
- * Heights and labels are 32/13, 40/14, 48/16. Only `md` lands exactly on a type
- * role (`label-large`); the other two set size and tracking directly rather
- * than borrow a body role, which would drag its 400 weight and 0.5px tracking
- * onto a label that wants Archivo 600 at 0.1px.
- */
+/** Height and padding only — the label size is decided by the variant. */
 const SIZE: Record<ButtonSize, string> = {
-  sm: "h-8 px-md gap-xs text-[13px] tracking-[0.1px]",
-  md: "h-10 px-l gap-s text-label-large",
-  lg: "h-12 px-7 gap-s text-[16px] tracking-[0.1px]",
+  sm: "h-8 px-md gap-xs",
+  md: "h-10 px-l gap-s",
+  lg: "h-12 px-7 gap-s",
 };
 
 const VARIANT: Record<ButtonVariant, string> = {
-  filled:
-    "bg-primary-action text-on-primary hover:brightness-95 active:brightness-90",
-  elevated:
-    "bg-surface-container-low text-on-surface shadow-sm hover:shadow-md active:bg-surface-container",
+  // Seed / white. The 3:1 exception, which is why the label is pinned at 16px.
+  filled: "bg-primary text-on-primary hover:brightness-95 active:brightness-90",
+  // P90 / P10 — v3 moves tonal onto the primary container, not secondary.
   tonal:
-    "bg-secondary-container text-on-secondary-container hover:brightness-95 active:brightness-90",
+    "bg-primary-container text-on-primary-container hover:brightness-95 active:brightness-90",
+  // NV50 border, P40 label.
   outlined:
     "border border-outline text-primary-label hover:bg-primary/8 active:bg-primary/12",
+  elevated:
+    "bg-surface-container-low text-on-surface shadow-sm hover:shadow-md active:bg-surface-container",
   text: "text-primary-label hover:bg-primary/8 active:bg-primary/12",
   destructive:
     "bg-error text-on-error hover:brightness-95 active:brightness-90",
 };
 
-/** `text` is the one variant that hugs its label rather than sitting in a slab. */
+/**
+ * A white label on the seed is only legible at large-text size, so `filled`
+ * takes 16px semibold at every height. `destructive` fills with E40, which
+ * clears 4.5:1 under white and needs no such pin.
+ */
+const LABEL: Record<ButtonVariant, (size: ButtonSize) => string> = {
+  filled: () => "text-[16px] tracking-[0.1px]",
+  tonal: (s) => (s === "sm" ? "text-[13px] tracking-[0.1px]" : "text-label-large"),
+  outlined: (s) => (s === "sm" ? "text-[13px] tracking-[0.1px]" : "text-label-large"),
+  elevated: (s) => (s === "sm" ? "text-[13px] tracking-[0.1px]" : "text-label-large"),
+  text: (s) => (s === "sm" ? "text-[13px] tracking-[0.1px]" : "text-label-large"),
+  destructive: (s) => (s === "sm" ? "text-[13px] tracking-[0.1px]" : "text-label-large"),
+};
+
+/** `text` hugs its label rather than sitting in a slab. */
 const TEXT_PADDING: Record<ButtonSize, string> = {
   sm: "px-s",
   md: "px-s",
@@ -83,7 +102,7 @@ export default function Button({
     <button
       type={type}
       disabled={disabled}
-      className={`inline-flex items-center justify-center rounded-sm font-display font-semibold whitespace-nowrap transition duration-100 ease-out active:scale-[0.97] disabled:cursor-not-allowed disabled:border-transparent disabled:bg-on-surface-disabled disabled:text-on-surface-label-disabled disabled:shadow-none disabled:brightness-100 disabled:active:scale-100 ${SIZE[size]} ${padding} ${VARIANT[variant]} ${fullWidth ? "w-full" : ""} ${className}`}
+      className={`inline-flex items-center justify-center rounded-sm font-display font-semibold whitespace-nowrap transition duration-100 ease-out active:scale-[0.97] disabled:cursor-not-allowed disabled:border-transparent disabled:bg-on-surface-disabled disabled:text-on-surface-label-disabled disabled:shadow-none disabled:brightness-100 disabled:active:scale-100 ${SIZE[size]} ${padding} ${LABEL[variant](size)} ${VARIANT[variant]} ${fullWidth ? "w-full" : ""} ${className}`}
       {...rest}
     >
       {children}

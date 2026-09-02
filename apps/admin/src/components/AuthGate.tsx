@@ -225,7 +225,7 @@ export default function AuthGate() {
                 end={tab.end}
                 className={({ isActive }) =>
                   `px-md py-s rounded-sm text-label-large font-semibold font-display whitespace-nowrap transition-colors no-underline shrink-0 ${isActive
-                    ? "bg-primary-action text-on-primary"
+                    ? "bg-primary text-on-primary"
                     : "text-on-surface-variant hover:bg-surface-container-high"
                   }`
                 }
@@ -299,7 +299,7 @@ export default function AuthGate() {
                 onClick={() => setMenuOpen(false)}
                 className={({ isActive }) =>
                   `px-md py-s rounded-sm text-label-large font-semibold font-display transition-colors no-underline ${isActive
-                    ? "bg-primary-action text-on-primary"
+                    ? "bg-primary text-on-primary"
                     : "text-on-surface-variant hover:bg-surface-container-high"
                   }`
                 }

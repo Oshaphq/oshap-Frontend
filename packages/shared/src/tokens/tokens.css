@@ -1,31 +1,49 @@
 /*
- * Oshap design tokens — DS v2, a Material 3 system.
+ * Oshap design tokens — DS v3, Material 3 solved rather than approximated.
  *
- * Rendered reference: `Oshap Design System v2.dc.html`.
- * Derivation notes:   `ds-v2-plan.md`.
- * Usage rules:        `docs/color-usage.md`.
+ * Rendered reference: `Oshap Design System v3.dc.html`.
+ * Palette output:     `m3-tokens.json` — the source of every hex below.
  *
  * Token tiers:
- *   1. Tonal ramps (primary-50, neutral-90, …) — 14 steps, tone = CIE L*.
- *   2. Semantic roles (primary-action, surface-container-low, …) — swap on dark.
- *   3. Type, shape, spacing.
+ *   1. Key palettes (primary-40, neutral-98, …) — HCT tones from one seed.
+ *   2. Semantic roles (surface-container-low, on-primary-container, …).
+ *   3. Type, shape, spacing — unchanged from v2.
  *
- * The palette is generated from ONE key color, #F56500 (OKLCH L 0.679 · C 0.196
- * · H 44.6), the same way every tenant palette is. Four ramps rotate hue off it:
- * secondary H+40, tertiary H+260, accent H+200. Neutrals and the status ramps
- * (error/success/warning) are fixed — a tenant brand never tints them, because a
- * restaurant with a red brand must not get a red "paid" chip.
+ * WHAT CHANGED FROM v2, in one place:
  *
- * The brand hex is pinned at tone 60, the step nearest its own lightness, so it
- * appears in the ramp exactly rather than as a re-derived approximation.
+ * Every value is solved, not chosen. Five key palettes come out of the seed
+ * #F56500 in HCT (H 43.54 · C 75.92 · T 60.53) via the M3 reference solver,
+ * plus fixed-hue error/success/warning run through the same solver. v2 walked a
+ * candidate list until something passed WCAG, which produced right answers by a
+ * route nobody could re-derive. Here a role names a palette and a tone; the
+ * ratios are measured after the fact, not searched for.
+ *
+ * Neutrals are warm. Oshap grey is gone — surfaces carry the seed hue at chroma
+ * 4, which is the single most visible change in the apps.
+ *
+ * `primary-action` is deleted. Primary is the seed in both modes with white on
+ * top, and there is no derived interface variant to keep in sync. The cost is
+ * stated rather than hidden: white on #F56500 is 3.11:1, which meets AA for
+ * large text and UI components but NOT for body copy. Two rules follow, and
+ * they are load-bearing — see `Button.tsx` and `docs/color-usage.md`:
+ *   1. Filled-button labels are 16px semibold minimum.
+ *   2. The seed never carries a paragraph. Body-size brand text on a light
+ *      surface uses `primary-label` (P40), which clears 6.16:1.
+ *
+ * Step numbers now mean HCT tone, so every number moved even where the role did
+ * not. There is no tone 99 any more, and the neutral palette carries six extra
+ * tones (4, 6, 12, 17, 22, 24, 87, 92, 94, 96) purely for the surface ladder.
+ *
+ * Regenerating: this is a build step, not a runtime one.
+ *   import { argbFromHex, themeFromSourceColor } from "@material/material-color-utilities";
+ *   const t = themeFromSourceColor(argbFromHex("#F56500"));
+ *   t.palettes.neutral.tone(98);
+ * Then override the one role the solver would get differently: primary stays
+ * the seed. Ship flat custom properties either way.
  *
  * Dark mode: every semantic role is `@theme inline` over a `--ds-*` variable
  * that swaps on [data-theme="dark"]. `bg-surface`, `text-on-surface` etc. just
  * work — no `dark:` prefix in markup, ever.
- *
- * Responsive type: `--ds-*-size` vars swap under (max-width: 768px), so
- * `text-display-large` resolves smaller on a phone with no variant at the call
- * site.
  */
 
 @custom-variant dark (&:where([data-theme="dark"], [data-theme="dark"] *));
@@ -34,187 +52,159 @@
  * Tier 1 + 2: Tailwind theme tokens (utility classes)
  * ========================================================================= */
 @theme inline {
-  /* ---------- Font families ----------
-   * Two, not three. Archivo carries display/headline/title/label; the
-   * "emphasized" voice is a weight (600) rather than a third webfont.
-   * Instrument Sans carries body, on the same metrics envelope as Inter so
-   * nothing reflows, with tabular figures for naira columns. */
+  /* ---------- Font families — unchanged from v2 ---------- */
   --font-sans: "Instrument Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
   --font-display: "Archivo", system-ui, sans-serif;
   --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
 
-  /* ---------- Tonal ramps ----------
-   * Steps are 0 10 20 30 40 50 60 70 80 90 95 98 99 100. Tone is CIE L*, so
-   * tone 40 is the same perceived lightness in every ramp. */
+  /* ---------- Key palettes (HCT tones) ---------- */
 
-  /* primary — the brand, H 44.6. #f56500 sits at tone 60. */
+  /* primary — the seed. H 43.54 · C 75.9. #f56500 is tone 60. */
   --color-primary-0: #000000;
-  --color-primary-10: #330f00;
-  --color-primary-20: #531d00;
-  --color-primary-30: #762d00;
-  --color-primary-40: #9b3d00;
-  --color-primary-50: #c24e00;
-  --color-primary-60: #f56500;
-  --color-primary-70: #fa8751;
-  --color-primary-80: #ffb18f;
-  --color-primary-90: #ffd9c9;
-  --color-primary-95: #ffece4;
-  --color-primary-98: #fff8f4;
-  --color-primary-99: #fffbfa;
+  --color-primary-10: #450000;
+  --color-primary-20: #690200;
+  --color-primary-30: #832700;
+  --color-primary-40: #a63b00;
+  --color-primary-50: #cd4e00;
+  --color-primary-60: #f36400;
+  --color-primary-70: #ff8c52;
+  --color-primary-80: #ffb593;
+  --color-primary-90: #ffdbcc;
+  --color-primary-95: #ffede6;
+  --color-primary-98: #fff8f5;
   --color-primary-100: #ffffff;
 
-  /* secondary — amber, H +40 · C ×0.90 */
+  /* secondary — same hue, chroma 16. A muted brown: use it for weight, not
+   * for emphasis. Note S90/S95/S98 are byte-identical to primary's at this
+   * chroma, which is what forces the secondary-container departure below. */
   --color-secondary-0: #000000;
-  --color-secondary-10: #251900;
-  --color-secondary-20: #3f2d00;
-  --color-secondary-30: #5b4200;
-  --color-secondary-40: #785900;
-  --color-secondary-50: #977000;
-  --color-secondary-60: #b78900;
-  --color-secondary-70: #d4a329;
-  --color-secondary-80: #e7c170;
-  --color-secondary-90: #fadfaa;
-  --color-secondary-95: #ffefcf;
-  --color-secondary-98: #fff9ec;
-  --color-secondary-99: #fffcf5;
+  --color-secondary-10: #2c160b;
+  --color-secondary-20: #442a1f;
+  --color-secondary-30: #5c4033;
+  --color-secondary-40: #76574a;
+  --color-secondary-50: #917061;
+  --color-secondary-60: #ad8979;
+  --color-secondary-70: #c9a393;
+  --color-secondary-80: #e6bead;
+  --color-secondary-90: #ffdbcc;
+  --color-secondary-95: #ffede6;
+  --color-secondary-98: #fff8f5;
   --color-secondary-100: #ffffff;
 
-  /* tertiary — violet, H +260 · C ×0.75.
-   * Rotated off the generator default of H+140, which put its T90 container
-   * 10.8° from success-container: two pale mint chips in the same column of the
-   * payments table, where PAID means settled and SPLIT does not. */
+  /* tertiary — H +60 (103.54) · C 24. Categorical tags only. */
   --color-tertiary-0: #000000;
-  --color-tertiary-10: #250c3c;
-  --color-tertiary-20: #3e1a5f;
-  --color-tertiary-30: #582c82;
-  --color-tertiary-40: #7243a0;
-  --color-tertiary-50: #8b5dbc;
-  --color-tertiary-60: #a47ad3;
-  --color-tertiary-70: #bc98e7;
-  --color-tertiary-80: #d4b8f7;
-  --color-tertiary-90: #eadbff;
-  --color-tertiary-95: #f4edff;
-  --color-tertiary-98: #fbf8ff;
-  --color-tertiary-99: #fdfbff;
+  --color-tertiary-10: #201c00;
+  --color-tertiary-20: #363107;
+  --color-tertiary-30: #4d471b;
+  --color-tertiary-40: #665f31;
+  --color-tertiary-50: #7f7847;
+  --color-tertiary-60: #9a925e;
+  --color-tertiary-70: #b5ac76;
+  --color-tertiary-80: #d1c88f;
+  --color-tertiary-90: #eee4a9;
+  --color-tertiary-95: #fcf2b6;
+  --color-tertiary-98: #fff9e5;
   --color-tertiary-100: #ffffff;
 
-  /* accent — blue, H +200 · C ×0.85. Attention without action. */
-  --color-accent-0: #000000;
-  --color-accent-10: #001d34;
-  --color-accent-20: #003354;
-  --color-accent-30: #004a78;
-  --color-accent-40: #00639d;
-  --color-accent-50: #007dc4;
-  --color-accent-60: #2198e7;
-  --color-accent-70: #5ab3f9;
-  --color-accent-80: #92ceff;
-  --color-accent-90: #cae7ff;
-  --color-accent-95: #e5f3ff;
-  --color-accent-98: #f4faff;
-  --color-accent-99: #fafdff;
-  --color-accent-100: #ffffff;
-
-  /* neutral — surfaces, text */
+  /* neutral — surfaces and text. Seed hue at chroma 4, so every surface is
+   * warm. The extra tones exist only to give the surface ladder its steps. */
   --color-neutral-0: #000000;
-  --color-neutral-10: #1a191a;
-  --color-neutral-20: #343234;
-  --color-neutral-30: #4e4b4e;
-  --color-neutral-40: #615d61;
-  --color-neutral-50: #827d82;
-  --color-neutral-60: #9b979b;
-  --color-neutral-70: #b4b1b4;
-  --color-neutral-80: #cdcbcd;
-  --color-neutral-90: #e6e5e6;
-  --color-neutral-95: #f2f2f2;
-  --color-neutral-98: #fafafa;
-  --color-neutral-99: #fcfcfc;
+  --color-neutral-4: #120d0b;
+  --color-neutral-6: #181210;
+  --color-neutral-10: #201a18;
+  --color-neutral-12: #251e1c;
+  --color-neutral-17: #2f2926;
+  --color-neutral-20: #362f2c;
+  --color-neutral-22: #3a3330;
+  --color-neutral-24: #3f3835;
+  --color-neutral-30: #4d4542;
+  --color-neutral-40: #655d59;
+  --color-neutral-50: #7f7571;
+  --color-neutral-60: #998f8b;
+  --color-neutral-70: #b4a9a5;
+  --color-neutral-80: #d0c4c0;
+  --color-neutral-87: #e4d7d3;
+  --color-neutral-90: #ede0db;
+  --color-neutral-92: #f2e6e1;
+  --color-neutral-94: #f8ebe7;
+  --color-neutral-95: #fbeee9;
+  --color-neutral-96: #fef1ec;
+  --color-neutral-98: #fff8f5;
   --color-neutral-100: #ffffff;
 
-  /* neutral-variant — outlines */
+  /* neutral-variant — outlines. Seed hue at chroma 8. */
   --color-neutral-variant-0: #000000;
-  --color-neutral-variant-10: #1a181b;
-  --color-neutral-variant-20: #343036;
-  --color-neutral-variant-30: #4d4950;
-  --color-neutral-variant-40: #625c66;
-  --color-neutral-variant-50: #817986;
-  --color-neutral-variant-60: #9a949e;
-  --color-neutral-variant-70: #b3aeb6;
-  --color-neutral-variant-80: #ccc9cf;
-  --color-neutral-variant-90: #e6e4e7;
-  --color-neutral-variant-95: #f2f2f3;
-  --color-neutral-variant-98: #fafafa;
-  --color-neutral-variant-99: #fcfcfd;
+  --color-neutral-variant-10: #251914;
+  --color-neutral-variant-20: #3b2d28;
+  --color-neutral-variant-30: #52443d;
+  --color-neutral-variant-40: #6b5b54;
+  --color-neutral-variant-50: #85736c;
+  --color-neutral-variant-60: #a08d85;
+  --color-neutral-variant-70: #bba79f;
+  --color-neutral-variant-80: #d7c2ba;
+  --color-neutral-variant-90: #f4ded5;
+  --color-neutral-variant-95: #ffede6;
+  --color-neutral-variant-98: #fff8f5;
   --color-neutral-variant-100: #ffffff;
 
-  /* error — owes, rejected */
+  /* error — H 25 · C 84. Fixed hue, not seed-derived. */
   --color-error-0: #000000;
-  --color-error-10: #2f0407;
-  --color-error-20: #5f070d;
-  --color-error-30: #8e0b14;
-  --color-error-40: #bd0f1b;
-  --color-error-50: #ec1322;
-  --color-error-60: #f0424e;
-  --color-error-70: #f4717a;
-  --color-error-80: #f8a0a6;
-  --color-error-90: #fbd0d3;
-  --color-error-95: #fde7e9;
-  --color-error-98: #fef6f6;
-  --color-error-99: #fffafb;
+  --color-error-10: #450000;
+  --color-error-20: #6d0000;
+  --color-error-30: #960004;
+  --color-error-40: #ba1a1a;
+  --color-error-50: #de3730;
+  --color-error-60: #ff5448;
+  --color-error-70: #ff897c;
+  --color-error-80: #ffb3aa;
+  --color-error-90: #ffdad5;
+  --color-error-95: #ffedea;
+  --color-error-98: #fff8f6;
   --color-error-100: #ffffff;
 
-  /* success — paid, verified. Runs bright, so its roles step down. */
+  /* success — H 160.91 · C 56.7. Fixed hue: a green "paid" chip has to stay
+   * green in a restaurant whose brand is red. */
   --color-success-0: #000000;
-  --color-success-10: #003322;
-  --color-success-20: #006644;
-  --color-success-30: #009966;
-  --color-success-40: #00cc88;
-  --color-success-50: #00ffaa;
-  --color-success-60: #33ffbb;
-  --color-success-70: #66ffcc;
-  --color-success-80: #99ffdd;
-  --color-success-90: #ccffee;
-  --color-success-95: #e5fff6;
-  --color-success-98: #f5fffc;
-  --color-success-99: #fafffd;
+  --color-success-10: #00230c;
+  --color-success-20: #003a1e;
+  --color-success-30: #005330;
+  --color-success-40: #006d42;
+  --color-success-50: #008955;
+  --color-success-60: #00a669;
+  --color-success-70: #37c182;
+  --color-success-80: #59de9b;
+  --color-success-90: #78fbb6;
+  --color-success-95: #beffd6;
+  --color-success-98: #e7ffec;
   --color-success-100: #ffffff;
 
-  /* warning — says paid, low stock.
-   * -10 and -20 are both #654301 in the Figma source; not a transcription slip. */
+  /* warning — H 76.41 · C 48.4. Fixed hue. */
   --color-warning-0: #000000;
-  --color-warning-10: #654301;
-  --color-warning-20: #654301;
-  --color-warning-30: #8e5d01;
-  --color-warning-40: #a36b01;
-  --color-warning-50: #fda602;
-  --color-warning-60: #feb834;
-  --color-warning-70: #feca67;
-  --color-warning-80: #fedc9a;
-  --color-warning-90: #ffedcc;
-  --color-warning-95: #fff6e6;
-  --color-warning-98: #fffbf5;
-  --color-warning-99: #fffdfa;
+  --color-warning-10: #331300;
+  --color-warning-20: #4c2800;
+  --color-warning-30: #653e00;
+  --color-warning-40: #835500;
+  --color-warning-50: #a36c00;
+  --color-warning-60: #c18513;
+  --color-warning-70: #df9f30;
+  --color-warning-80: #feba4a;
+  --color-warning-90: #ffddaf;
+  --color-warning-95: #ffeeda;
+  --color-warning-98: #fff8f2;
   --color-warning-100: #ffffff;
 
   /* ---------- Semantic roles (light/dark via --ds-* indirection) ---------- */
 
-  /* Brand vs interface. `brand-primary` is identity only and is judged against
-   * WCAG's NON-TEXT 3:1 bar (SC 1.4.11) — the mark and other graphical objects,
-   * never a label. `primary-action` is the interface fill, where white clears
-   * 4.5:1 at any label size. White on #f56500 is 3.11:1; on #c24e00, 4.79:1. */
-  --color-brand-primary: var(--ds-brand-primary);
-  --color-primary: var(--ds-brand-primary);
-  --color-primary-action: var(--ds-primary-action);
-  /* The brand as a LABEL on a surface — outlined and text buttons, links.
-   * M3 would call this `primary`, but that name is taken here by the pinned
-   * brand fill, which is unreadable as small text on either theme. Light takes
-   * tone 40 (6.85:1 on `surface`), dark tone 80. */
-  --color-primary-label: var(--ds-primary-label);
-  --color-primary-action-hover: var(--ds-primary-action-hover);
-  --color-primary-action-pressed: var(--ds-primary-action-pressed);
+  /* Primary is the seed in both modes. There is no interface variant: the
+   * 3:1 exception is stated in the header and enforced by the two rules there. */
+  --color-primary: var(--ds-primary);
   --color-on-primary: var(--ds-on-primary);
   --color-primary-container: var(--ds-primary-container);
   --color-on-primary-container: var(--ds-on-primary-container);
   --color-inverse-primary: var(--ds-inverse-primary);
+  /* The seed at body size on a light surface, where 3.11:1 would fail. P40,
+   * 6.16:1. This is the only brand colour allowed to carry a sentence. */
+  --color-primary-label: var(--ds-primary-label);
 
   --color-secondary: var(--ds-secondary);
   --color-on-secondary: var(--ds-on-secondary);
@@ -225,11 +215,6 @@
   --color-on-tertiary: var(--ds-on-tertiary);
   --color-tertiary-container: var(--ds-tertiary-container);
   --color-on-tertiary-container: var(--ds-on-tertiary-container);
-
-  --color-accent: var(--ds-accent);
-  --color-on-accent: var(--ds-on-accent);
-  --color-accent-container: var(--ds-accent-container);
-  --color-on-accent-container: var(--ds-on-accent-container);
 
   --color-error: var(--ds-error);
   --color-on-error: var(--ds-on-error);
@@ -268,10 +253,7 @@
   --color-shadow: var(--ds-shadow);
   --color-scrim: var(--ds-scrim);
 
-  /* ---------- Spacing ----------
-   * 6xl 72px closes the gap where `p-6xl` silently resolved to nothing while
-   * 7xl held 72; everything from 7xl up shifts one step. No call site used the
-   * shifted names, so this renumber is invisible outside this file. */
+  /* ---------- Spacing — unchanged from v2 (the 4pt grid) ---------- */
   --spacing-xs: 4px;
   --spacing-s: 8px;
   --spacing-md: 16px;
@@ -290,15 +272,10 @@
   --spacing-button-py: 10px;
   --spacing-button-px: 20px;
 
-  /* ---------- Shape — the M3 shape scale ----------
-   * Buttons and fields stay at `sm` 8px: M3 draws buttons as pills, Oshap does
-   * not, so no button silhouette moves. `md` compact cards · `lg` cards · `xl`
-   * dialogs and bottom-sheet top corners · `full` pills, chips, FAB, nav.
-   *
-   * The old single-letter tokens (`--radius-s`, `--radius-l`) are gone, and so
-   * is the `@layer utilities` override they needed: they collided with Tailwind
-   * v4 directional shorthands of the same name, and that collision is better
-   * lost than patched. */
+  /* ---------- Shape — unchanged from v2 ----------
+   * Buttons stay at `sm` 8px rather than M3's full-round: a pill next to a
+   * rectangular price field reads as a different generation of UI, and the
+   * apps are full of rectangular price fields. */
   --radius-none: 0px;
   --radius-xs: 4px;
   --radius-sm: 8px;
@@ -309,10 +286,7 @@
   --radius-3xl: 40px;
   --radius-full: 100px;
 
-  /* ---------- Typography — the 15 M3 roles ----------
-   * Tracking is ~0 at display sizes and POSITIVE below 16px, replacing the old
-   * blanket −1.75px. Positive tracking is what actually helps at 11–12px on a
-   * phone, which is where most of these labels render. */
+  /* ---------- Typography — unchanged from v2, the 15 M3 roles ---------- */
   --text-display-large: var(--ds-display-large-size);
   --text-display-large--line-height: var(--ds-display-large-line);
   --text-display-large--letter-spacing: -0.25px;
@@ -385,94 +359,78 @@
 :root {
   /**
    * Tells the browser which scheme it is painting, so native controls follow
-   * the app rather than the operating system.
-   *
-   * Everything else here swaps on `[data-theme]`, but the parts of a control
-   * the browser draws itself — a date field's text and calendar icon, its
-   * dropdown panel, scrollbars, spin buttons — take no notice of CSS variables.
-   * Without this they follow the OS preference, so the date pickers on
-   * analytics, history and the Z-report stayed dark on a dark machine even with
-   * the app in light mode.
-   *
-   * Inherited, so declaring it once at the root is enough.
+   * the app rather than the operating system. The parts of a control the
+   * browser draws itself — a date field's calendar icon, its dropdown panel,
+   * scrollbars — take no notice of CSS variables.
    */
   color-scheme: light;
 
   /* ---- Accent & status roles — light ----
-   * Base roles take tone 40, not 50: white fails on tertiary-50 (4.25:1) and
-   * accent-50 (4.44:1). Containers are tone 90 over a tone 20 on-color, which
-   * gives 10:1 or better across all four families. */
-  --ds-brand-primary: #f56500;
-  --ds-primary-action: #c24e00;
-  --ds-primary-action-hover: #9b3d00;
-  --ds-primary-action-pressed: #762d00;
-  --ds-primary-label: #9b3d00;
+   * Each role names a palette and a tone; the ratio after it is measured, not
+   * searched for. */
+  --ds-primary: #f56500; /* seed · white on it is 3.11:1, the stated exception */
   --ds-on-primary: #ffffff;
-  --ds-primary-container: #ffd9c9;
-  --ds-on-primary-container: #531d00;
-  --ds-inverse-primary: #ffb18f;
+  --ds-primary-container: #ffdbcc; /* P90 / P10 · 12.97:1 */
+  --ds-on-primary-container: #450000;
+  --ds-inverse-primary: #ffb593; /* P80 */
+  --ds-primary-label: #a63b00; /* P40 · 6.16:1 on surface */
 
-  --ds-secondary: #785900;
+  --ds-secondary: #76574a; /* S40 / S100 · 6.50:1 */
   --ds-on-secondary: #ffffff;
-  --ds-secondary-container: #fadfaa;
-  --ds-on-secondary-container: #3f2d00;
+  /* DEPARTURE from the M3 map. M3 says S90, which at chroma 16 is
+   * byte-identical to P90 #ffdbcc — the nav pill and the primary tag would be
+   * the same fill. Dropped to S80. Revisit if the seed hue ever changes. */
+  --ds-secondary-container: #e6bead; /* S80 / S10 · 10.05:1 */
+  --ds-on-secondary-container: #2c160b;
 
-  --ds-tertiary: #7243a0;
+  --ds-tertiary: #665f31; /* T40 / T100 */
   --ds-on-tertiary: #ffffff;
-  --ds-tertiary-container: #eadbff;
-  --ds-on-tertiary-container: #3e1a5f;
+  --ds-tertiary-container: #eee4a9; /* T90 / T10 · 13.28:1 */
+  --ds-on-tertiary-container: #201c00;
 
-  --ds-accent: #00639d;
-  --ds-on-accent: #ffffff;
-  --ds-accent-container: #cae7ff;
-  --ds-on-accent-container: #003354;
-
-  --ds-error: #bd0f1b;
+  --ds-error: #ba1a1a; /* E40 / E100 */
   --ds-on-error: #ffffff;
-  --ds-error-container: #fbd0d3;
-  --ds-on-error-container: #5f070d;
+  --ds-error-container: #ffdad5; /* E90 / E10 · 12.96:1 */
+  --ds-on-error-container: #450000;
 
-  /* success and warning run bright, so their light roles step down a tone:
-     success takes T20 rather than T30, warning T30 rather than T40. */
-  --ds-success: #006644;
+  --ds-success: #006d42; /* Su40 / Su100 */
   --ds-on-success: #ffffff;
-  --ds-success-container: #ccffee;
-  --ds-on-success-container: #006644;
+  --ds-success-container: #78fbb6; /* Su90 / Su10 · 13.06:1 */
+  --ds-on-success-container: #00230c;
 
-  --ds-warning: #8e5d01;
+  --ds-warning: #835500; /* Wa40 / Wa100 */
   --ds-on-warning: #ffffff;
-  --ds-warning-container: #ffedcc;
-  --ds-on-warning-container: #654301;
+  --ds-warning-container: #ffddaf; /* Wa90 / Wa10 · 13.14:1 */
+  --ds-on-warning-container: #331300;
 
   /* ---- Surfaces — light ----
-   * The page is LIGHTER than the cards. M3 puts the floor at near-white and
-   * steps down in lightness as elevation rises, which inverts the old
-   * grey-page/white-card look and is the most visible change in the system.
-   * `lowest` #ffffff remains for surfaces that must be pure white. */
+   * Five container levels plus dim and bright, all neutral. Elevation is a
+   * tone change, not a shadow; shadows are for things that actually float.
+   * The ladder steps in twos because the eye cannot separate 98 from 96 at a
+   * glance — it should read as one warm sheet with structure in it. */
   --ds-surface-tint: #f56500;
-  --ds-surface: #fafafa;
-  --ds-on-surface: #1a191a;
-  --ds-on-surface-disabled: #1a191a1f;
-  --ds-on-surface-label-disabled: #1a191a61;
-  --ds-surface-variant: #e6e4e7;
-  --ds-on-surface-variant: #4d4950;
-  --ds-inverse-surface: #343234;
-  --ds-inverse-on-surface: #f2f2f2;
-  --ds-surface-dim: #dfdddf;
-  --ds-surface-bright: #fafafa;
-  --ds-surface-container-lowest: #ffffff;
-  --ds-surface-container-low: #f5f5f5;
-  --ds-surface-container: #f0eff0;
-  --ds-surface-container-high: #ebeaeb;
-  --ds-surface-container-highest: #e6e5e6;
+  --ds-surface: #fff8f5; /* N98 */
+  --ds-on-surface: #201a18; /* N10 · 16.36:1 */
+  --ds-on-surface-disabled: #201a181f; /* 12% */
+  --ds-on-surface-label-disabled: #201a1861; /* 38% */
+  --ds-surface-variant: #f4ded5; /* NV90 */
+  --ds-on-surface-variant: #52443d; /* NV30 · 8.88:1 */
+  --ds-inverse-surface: #362f2c; /* N20 · 11.57:1 */
+  --ds-inverse-on-surface: #fbeee9; /* N95 */
+  --ds-surface-dim: #e4d7d3; /* N87 */
+  --ds-surface-bright: #fff8f5; /* N98 */
+  --ds-surface-container-lowest: #ffffff; /* N100 */
+  --ds-surface-container-low: #fef1ec; /* N96 */
+  --ds-surface-container: #f8ebe7; /* N94 */
+  --ds-surface-container-high: #f2e6e1; /* N92 */
+  --ds-surface-container-highest: #ede0db; /* N90 */
 
-  --ds-outline: #817986;
-  --ds-outline-variant: #ccc9cf;
+  --ds-outline: #85736c; /* NV50 · 4.29:1 */
+  --ds-outline-variant: #d7c2ba; /* NV80 */
   --ds-shadow: #00000052;
   --ds-scrim: #00000052;
 
-  /* Display and headline shrink one step ≤768px, so no call site needs a
-     responsive variant. Title and below are already phone-sized. */
+  /* Display and headline shrink one step ≤768px. */
   --ds-display-large-size: 57px;
   --ds-display-large-line: 64px;
   --ds-display-medium-size: 45px;
@@ -486,72 +444,62 @@
 [data-theme="dark"] {
   color-scheme: dark;
 
-  /* brand-primary holds at #f56500 in both themes rather than shifting to a
-     lighter tone. This is the one deliberate deviation from M3, and the reason
-     is brand recognition. It stays identity-only in both. */
-  --ds-brand-primary: #f56500;
-  --ds-primary-action: #c24e00;
-  --ds-primary-action-hover: #9b3d00;
-  --ds-primary-action-pressed: #762d00;
-  --ds-primary-label: #ffb18f;
+  /* Primary holds the seed in dark too — that is the whole point of deleting
+   * the derived variant. */
+  --ds-primary: #f56500;
   --ds-on-primary: #ffffff;
-  --ds-primary-container: #762d00;
-  --ds-on-primary-container: #ffd9c9;
-  --ds-inverse-primary: #ffb18f;
+  --ds-primary-container: #832700; /* P30 / P90 · 7.21:1 */
+  --ds-on-primary-container: #ffdbcc;
+  --ds-inverse-primary: #a63b00; /* P40 */
+  --ds-primary-label: #ffb593; /* P80 */
 
-  --ds-secondary: #e7c170;
-  --ds-on-secondary: #3f2d00;
-  --ds-secondary-container: #5b4200;
-  --ds-on-secondary-container: #fadfaa;
+  --ds-secondary: #e6bead; /* S80 / S20 · 10.05:1 */
+  --ds-on-secondary: #442a1f;
+  --ds-secondary-container: #5c4033; /* S30 / S90 · 7.27:1 */
+  --ds-on-secondary-container: #ffdbcc;
 
-  --ds-tertiary: #d4b8f7;
-  --ds-on-tertiary: #3e1a5f;
-  --ds-tertiary-container: #582c82;
-  --ds-on-tertiary-container: #eadbff;
+  --ds-tertiary: #d1c88f; /* T80 / T20 */
+  --ds-on-tertiary: #363107;
+  --ds-tertiary-container: #4d471b; /* T30 / T90 · 7.30:1 */
+  --ds-on-tertiary-container: #eee4a9;
 
-  --ds-accent: #92ceff;
-  --ds-on-accent: #003354;
-  --ds-accent-container: #004a78;
-  --ds-on-accent-container: #cae7ff;
+  --ds-error: #ffb3aa; /* E80 / E20 */
+  --ds-on-error: #6d0000;
+  --ds-error-container: #960004; /* E30 / E90 · 7.07:1 */
+  --ds-on-error-container: #ffdad5;
 
-  --ds-error: #f8a0a6;
-  --ds-on-error: #5f070d;
-  --ds-error-container: #8e0b14;
-  --ds-on-error-container: #fbd0d3;
+  /* success-container sits at Su20, not Su30: the palette runs bright, and
+   * Su30 under Su90 does not hold the same band as the other containers. */
+  --ds-success: #59de9b; /* Su80 / Su20 */
+  --ds-on-success: #003a1e;
+  --ds-success-container: #003a1e; /* Su20 / Su90 · 10.02:1 */
+  --ds-on-success-container: #78fbb6;
 
-  /* success-container steps DOWN to T20 rather than up: T30 #009966 gives only
-     3.32:1 under #ccffee, which is what the old system shipped. */
-  --ds-success: #99ffdd;
-  --ds-on-success: #006644;
-  --ds-success-container: #006644;
-  --ds-on-success-container: #ccffee;
+  --ds-warning: #feba4a; /* Wa80 / Wa20 */
+  --ds-on-warning: #4c2800;
+  --ds-warning-container: #653e00; /* Wa30 / Wa90 · 7.23:1 */
+  --ds-on-warning-container: #ffddaf;
 
-  --ds-warning: #fedc9a;
-  --ds-on-warning: #654301;
-  --ds-warning-container: #8e5d01;
-  --ds-on-warning-container: #ffedcc;
+  /* ---- Surfaces — dark ---- */
+  --ds-surface-tint: #f56500;
+  --ds-surface: #181210; /* N6 */
+  --ds-on-surface: #ede0db; /* N90 · 14.38:1 */
+  --ds-on-surface-disabled: #ede0db1f;
+  --ds-on-surface-label-disabled: #ede0db61;
+  --ds-surface-variant: #52443d; /* NV30 */
+  --ds-on-surface-variant: #d7c2ba; /* NV80 · 10.87:1 */
+  --ds-inverse-surface: #ede0db; /* N90 */
+  --ds-inverse-on-surface: #362f2c; /* N20 */
+  --ds-surface-dim: #181210; /* N6 */
+  --ds-surface-bright: #3f3835; /* N24 */
+  --ds-surface-container-lowest: #120d0b; /* N4 */
+  --ds-surface-container-low: #201a18; /* N10 */
+  --ds-surface-container: #251e1c; /* N12 */
+  --ds-surface-container-high: #2f2926; /* N17 */
+  --ds-surface-container-highest: #3a3330; /* N22 */
 
-  /* Dark surface is neutral N6 rather than the old near-black #050200. True
-     black stays available as a per-app tweak for the customer PWA on OLED. */
-  --ds-surface-tint: #ffb18f;
-  --ds-surface: #100f10;
-  --ds-on-surface: #e6e5e6;
-  --ds-on-surface-disabled: #e6e5e61f;
-  --ds-on-surface-label-disabled: #e6e5e661;
-  --ds-surface-variant: #4d4950;
-  --ds-on-surface-variant: #ccc9cf;
-  --ds-inverse-surface: #e6e5e6;
-  --ds-inverse-on-surface: #343234;
-  --ds-surface-dim: #100f10;
-  --ds-surface-bright: #3e3c3e;
-  --ds-surface-container-lowest: #0a0a0a;
-  --ds-surface-container-low: #1a191a;
-  --ds-surface-container: #1f1e1f;
-  --ds-surface-container-high: #2c2b2c;
-  --ds-surface-container-highest: #393739;
-
-  --ds-outline: #9a949e;
-  --ds-outline-variant: #4d4950;
+  --ds-outline: #a08d85; /* NV60 · 5.86:1 */
+  --ds-outline-variant: #52443d; /* NV30 */
   --ds-shadow: #00000052;
   --ds-scrim: #00000052;
 }
@@ -574,16 +522,12 @@
  * Interaction feedback — M3 state layers.
  *
  * The on-color at a fixed opacity over the container: 8% hover, 12% focus and
- * press. One rule per state instead of the per-colour `*-10a` / `*-20a` alpha
- * tokens the old system carried.
+ * press. Disabled is the container at 12% with the label at 38%.
  *
  * This matters more here than the word "polish" suggests. The customer app is
  * used on a phone, on restaurant wifi, by someone who has just tapped "Place
  * Order" and cannot tell whether it registered. Without feedback they tap
  * again, and the thing they are double-tapping is an order.
- *
- * Defined at base level so all ~117 interactive elements get it rather than the
- * handful wired by hand; per-component utilities still override.
  * ========================================================================= */
 @layer base {
   /* The OS tap flash is grey, arrives late, and differs per platform. Ours
@@ -597,10 +541,10 @@
   }
 
   /* `:focus-visible` rather than `:focus`, so a mouse press does not leave a
-     ring behind. The ring is primary-action, not the brand fill — it is an
-     interface signal, and it has to hold contrast against every surface step. */
+     ring behind. The ring is the seed: a focus ring is a UI component, held to
+     3:1, so the 3.11:1 exception covers it without qualification. */
   :focus-visible {
-    outline: 3px solid var(--ds-primary-action);
+    outline: 3px solid var(--ds-primary);
     outline-offset: 2px;
   }
 
@@ -615,8 +559,7 @@
 
   /* The `scale` property, not `transform: scale()`. Tailwind v4 `active:scale-*`
      sets `scale`, and the two apply independently — a button carrying both
-     would shrink by 6% rather than 3%. Matching the property lets a
-     per-component utility override this cleanly instead of compounding. */
+     would shrink by 6% rather than 3%. */
   button:not(:disabled):active,
   summary:active,
   [role="button"]:not([aria-disabled="true"]):active,
@@ -631,8 +574,7 @@
   }
 
   /* Feedback still has to exist without motion — dropping it entirely would
-     leave these users worse off than before, not safer. The state layer carries
-     it when the scale cannot. */
+     leave these users worse off than before, not safer. */
   @media (prefers-reduced-motion: reduce) {
     button:not(:disabled),
     summary,
