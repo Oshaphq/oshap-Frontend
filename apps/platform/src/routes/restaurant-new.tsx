@@ -148,7 +148,7 @@ export default function RestaurantNewPage() {
               <div
                 className={`w-7 h-7 rounded-full flex items-center justify-center text-label-small font-bold transition-colors ${
                   step >= s
-                    ? "bg-primary-action text-on-primary"
+                    ? "bg-primary text-on-primary"
                     : "bg-surface-container-high text-outline"
                 }`}
               >

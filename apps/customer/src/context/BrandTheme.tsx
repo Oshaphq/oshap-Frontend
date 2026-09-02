@@ -4,7 +4,7 @@ import { brandCssVars, deriveBrandPalette, type BrandPalette } from "@oshap/shar
 /**
  * Paints the guest's app in the restaurant's colour.
  *
- * `bg-primary` resolves through `--color-primary` to `--ds-brand-primary`, so setting
+ * `bg-primary` resolves through `--color-primary` to `--ds-primary`, so setting
  * that group on one wrapper rebrands every utility at once — no rebuild, no
  * inline styles on components, no markup changes anywhere else.
  *

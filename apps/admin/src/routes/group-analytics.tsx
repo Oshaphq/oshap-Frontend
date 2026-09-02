@@ -126,7 +126,7 @@ export default function GroupAnalyticsPage() {
               />
               <Bar
                 dataKey="total_revenue"
-                fill="var(--ds-brand-primary)"
+                fill="var(--ds-primary)"
                 radius={[4, 4, 0, 0]}
                 name="Revenue"
               />

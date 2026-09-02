@@ -33,10 +33,17 @@ function getFormattedDate(daysAgo = 0) {
 
 // Chart series palette, referenced from the design-token ramp (resolved via
 // CSS vars) so charts stay on-brand and follow any future palette change.
+//
+// The third entry was --color-accent-2-50 until DS v3 removed the accent
+// palettes; it resolved to nothing, which is invisible in CSS and drew an
+// unstroked line. v3 has no wide-hue categorical set — primary, secondary,
+// tertiary and warning are all within 60 degrees of the seed — so these five
+// separate mostly by tone. A chart needing more series than this needs its own
+// scale, not more design-system roles.
 const CHART_COLORS = [
   "var(--color-primary)",
   "var(--color-success-40)",
-  "var(--color-accent-2-50)",
+  "var(--color-tertiary-50)",
   "var(--color-warning-50)",
   "var(--color-secondary-50)",
 ];
@@ -261,7 +268,7 @@ export default function Analytics() {
                     <XAxis dataKey="hour" stroke="var(--color-outline)" tick={{ fontSize: 12 }} />
                     <YAxis stroke="var(--color-outline)" tick={{ fontSize: 12 }} />
                     <Tooltip />
-                    <Line type="monotone" dataKey="order_count" stroke="var(--color-accent-2-50)" strokeWidth={3} />
+                    <Line type="monotone" dataKey="order_count" stroke="var(--color-tertiary-50)" strokeWidth={3} />
                   </LineChart>
                 </ResponsiveContainer>
               </div>

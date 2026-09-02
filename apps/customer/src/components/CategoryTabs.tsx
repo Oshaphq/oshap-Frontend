@@ -29,7 +29,7 @@ export default function CategoryTabs({
             onClick={() => onSelect(cat.name)}
             className={`shrink-0 py-s px-md rounded-full transition-colors text-label-large ${
               active
-                ? "bg-primary-action text-on-primary"
+                ? "bg-primary text-on-primary"
                 : "bg-surface-container-high text-on-surface-variant border border-outline-variant/30 hover:bg-surface-container-highest"
             }`}
           >

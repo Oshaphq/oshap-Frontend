@@ -87,7 +87,7 @@ export default function DashboardPage() {
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-md">
         <Link
           to="/restaurants/new"
-          className="bg-primary-action text-on-primary rounded-lg p-md flex items-center gap-md no-underline hover:opacity-90 transition-opacity"
+          className="bg-primary text-on-primary rounded-lg p-md flex items-center gap-md no-underline hover:opacity-90 transition-opacity"
         >
           <i className="mgc_add_circle_line text-2xl" />
           <div>

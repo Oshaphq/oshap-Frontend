@@ -38,17 +38,6 @@ const MIN_ON_PRIMARY = 3;
  */
 const MIN_ON_CONTAINER = 4.5;
 
-/**
- * WCAG AA for body text, applied to the *action* fill under a white label.
- *
- * This is the v2 rule that replaced sizing the label up until 3:1 was allowed.
- * Inflating type until the contrast bar is technically met is the tail wagging
- * the dog — label size should follow the density of the screen, not the fill
- * behind it. So the fill moves instead, and the brand keeps its own hex for
- * identity.
- */
-const MIN_ON_ACTION = 4.5;
-
 /** Beyond this, containers vibrate against text at the sizes a menu uses. */
 const MAX_CHROMA = 0.19;
 
@@ -61,20 +50,20 @@ const PRIMARY_L_MIN = 0.45;
 const PRIMARY_L_MAX = 0.78;
 
 export interface BrandRoles {
-  /** Identity only — the venue mark, the splash. Held to the 3:1 non-text bar. */
+  /**
+   * The seed itself, and the fill every filled control uses. DS v3 deleted the
+   * derived interface variant: rather than darkening the brand until a label
+   * clears 4.5:1, the label is pinned at large-text size and the fill is left
+   * alone. See `Button.tsx`, which enforces that end of the bargain.
+   */
   primary: string;
   onPrimary: string;
   primaryContainer: string;
   onPrimaryContainer: string;
   /**
-   * The interface fill: filled buttons, FAB, active indicators, focus rings.
-   * Derived by walking the brand down until white clears 4.5:1, so a label on
-   * it is readable at any size rather than only when it is large and bold.
+   * The brand as body-size text on a surface, where the fill's own contrast
+   * would fail. Outlined and text buttons, links.
    */
-  primaryAction: string;
-  primaryActionHover: string;
-  primaryActionPressed: string;
-  /** The brand as a LABEL on a surface — outlined and text buttons, links. */
   primaryLabel: string;
 }
 
@@ -299,27 +288,6 @@ function resolveOnContainer(base: Oklch, container: string, startL: number, dire
 }
 
 /**
- * Walk the brand down its own ramp until white clears body-text contrast.
- *
- * Measured rather than nominal: the ramps here are OKLCH steps, so a fixed
- * "tone 50" is not the same contrast for every hue. Oshap's own orange lands on
- * #c24e00 this way, which is the value the reference page shows.
- */
-function resolveAction(base: Oklch, startL: number): string {
-  let lightness = startL;
-  let hex = toneHex(base, lightness);
-  for (
-    let step = 0;
-    step < 60 && contrastRatio(hex, "#ffffff") < MIN_ON_ACTION;
-    step += 1
-  ) {
-    lightness = Math.max(0.05, lightness - 0.015);
-    hex = toneHex(base, lightness);
-  }
-  return hex;
-}
-
-/**
  * The brand as small text on a surface — an outlined button, a link.
  *
  * The action fill is not reusable here: it was derived against white, and this
@@ -369,11 +337,6 @@ export function deriveBrandPalette(input: string | null | undefined): BrandPalet
 
   // States walk down the same ramp, so contrast only improves as the user
   // interacts — the fill never gets lighter under a label that is already white.
-  const action = resolveAction(base, Math.min(base.l, PRIMARY_L_MAX));
-  const actionL = rgbToOklch(parseHex(action)!).l;
-  const actionHover = toneHex(base, Math.max(0.05, actionL - 0.06));
-  const actionPressed = toneHex(base, Math.max(0.05, actionL - 0.12));
-
   const roles = (
     container: string,
     onStart: number,
@@ -386,24 +349,20 @@ export function deriveBrandPalette(input: string | null | undefined): BrandPalet
     onPrimary,
     primaryContainer: container,
     onPrimaryContainer: resolveOnContainer(base, container, onStart, dir),
-    primaryAction: action,
-    primaryActionHover: actionHover,
-    primaryActionPressed: actionPressed,
     primaryLabel: resolveLabel(base, surface, labelStart, labelDir),
   });
 
-  // The surfaces the label is measured against are the v2 defaults: N98 in
-  // light, N6 in dark.
+  // Measured against the v3 surfaces: warm N98 in light, N6 in dark.
   return {
-    light: roles(lightContainer, 0.38, -1, "#fafafa", actionL, -1),
-    dark: roles(darkContainer, 0.9, 1, "#100f10", 0.78, 1),
+    light: roles(lightContainer, 0.38, -1, "#fff8f5", Math.min(base.l, PRIMARY_L_MAX), -1),
+    dark: roles(darkContainer, 0.9, 1, "#181210", 0.78, 1),
   };
 }
 
 /**
  * The custom properties to set on a wrapper element.
  *
- * `bg-primary` resolves through `--color-primary` to `--ds-brand-primary`, so
+ * `bg-primary` resolves through `--color-primary` to `--ds-primary`, so
  * overriding this group rebrands every utility at once — no rebuild, no inline
  * styles on components, no markup changes.
  *
@@ -414,13 +373,10 @@ export function deriveBrandPalette(input: string | null | undefined): BrandPalet
  */
 export function brandCssVars(roles: BrandRoles): Record<string, string> {
   return {
-    "--ds-brand-primary": roles.primary,
+    "--ds-primary": roles.primary,
     "--ds-on-primary": roles.onPrimary,
     "--ds-primary-container": roles.primaryContainer,
     "--ds-on-primary-container": roles.onPrimaryContainer,
-    "--ds-primary-action": roles.primaryAction,
-    "--ds-primary-action-hover": roles.primaryActionHover,
-    "--ds-primary-action-pressed": roles.primaryActionPressed,
     "--ds-primary-label": roles.primaryLabel,
   };
 }

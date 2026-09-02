@@ -146,7 +146,7 @@ export default function MenuCard({ item }: MenuCardProps) {
                   type="button"
                   onClick={() => updateQuantity(plainLine!.lineId, quantity - 1)}
                   aria-label={`Decrease ${item.name} quantity`}
-                  className="w-8 h-8 flex items-center justify-center rounded-full bg-surface-container-high text-on-surface text-lg font-bold transition-colors hover:bg-primary-action hover:text-on-primary"
+                  className="w-8 h-8 flex items-center justify-center rounded-full bg-surface-container-high text-on-surface text-lg font-bold transition-colors hover:bg-primary hover:text-on-primary"
                 >
                   <i className="mgc_minimize_line" />
                 </button>
@@ -163,7 +163,7 @@ export default function MenuCard({ item }: MenuCardProps) {
                       ? undefined
                       : `Only ${item.stock_count} left today`
                   }
-                  className="w-8 h-8 flex items-center justify-center rounded-full bg-surface-container-high text-on-surface text-lg font-bold transition-colors hover:bg-primary-action hover:text-on-primary disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-surface-container-high disabled:hover:text-on-surface"
+                  className="w-8 h-8 flex items-center justify-center rounded-full bg-surface-container-high text-on-surface text-lg font-bold transition-colors hover:bg-primary hover:text-on-primary disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-surface-container-high disabled:hover:text-on-surface"
                 >
                   <i className="mgc_add_line" />
                 </button>

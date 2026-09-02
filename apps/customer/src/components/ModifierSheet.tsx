@@ -234,7 +234,7 @@ export default function ModifierSheet({ item, onClose, onAdd, remaining = null }
                               group.max === 1 ? "rounded-full" : "rounded-xs"
                             } ${
                               isSelected
-                                ? "bg-primary-action border-primary text-on-primary"
+                                ? "bg-primary border-primary text-on-primary"
                                 : "border-outline"
                             }`}
                           >
@@ -293,7 +293,7 @@ export default function ModifierSheet({ item, onClose, onAdd, remaining = null }
               onClick={() => setQuantity((q) => Math.max(1, q - 1))}
               disabled={quantity <= 1}
               aria-label="Decrease quantity"
-              className="w-9 h-9 flex items-center justify-center rounded-full bg-surface-container-high text-on-surface text-lg font-bold transition-colors hover:bg-primary-action hover:text-on-primary disabled:opacity-40 disabled:hover:bg-surface-container-high disabled:hover:text-on-surface"
+              className="w-9 h-9 flex items-center justify-center rounded-full bg-surface-container-high text-on-surface text-lg font-bold transition-colors hover:bg-primary hover:text-on-primary disabled:opacity-40 disabled:hover:bg-surface-container-high disabled:hover:text-on-surface"
             >
               <i className="mgc_minimize_line" />
             </button>
@@ -312,7 +312,7 @@ export default function ModifierSheet({ item, onClose, onAdd, remaining = null }
                   ? `Only ${remaining} left today`
                   : undefined
               }
-              className="w-9 h-9 flex items-center justify-center rounded-full bg-surface-container-high text-on-surface text-lg font-bold transition-colors hover:bg-primary-action hover:text-on-primary disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-surface-container-high disabled:hover:text-on-surface"
+              className="w-9 h-9 flex items-center justify-center rounded-full bg-surface-container-high text-on-surface text-lg font-bold transition-colors hover:bg-primary hover:text-on-primary disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-surface-container-high disabled:hover:text-on-surface"
             >
               <i className="mgc_add_line" />
             </button>

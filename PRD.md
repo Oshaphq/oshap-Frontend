@@ -351,7 +351,7 @@ transient action/error toasts that also feed the center.
 ### Design system
 - Tailwind v4 `@theme` block in [`packages/shared/src/tokens/tokens.css`](packages/shared/src/tokens/tokens.css) — single source of truth for tokens.
 - Semantic color utilities (`bg-primary`, `text-on-surface-variant`, …) auto-swap on `[data-theme="dark"]`.
-- **Color usage rule** (mandatory for every new UI) — [`docs/color-usage.md`](docs/color-usage.md): page & top nav `surface` (near-white, lighter than cards); card/sheet/drawer/rail `surface-container-low`; nested-in-card `surface-container`; modal `surface-container-high`; filled buttons `primary-action`, never the brand.
+- **Color usage rule** (mandatory for every new UI) — [`docs/color-usage.md`](docs/color-usage.md): page & top nav `surface` (warm near-white, lighter than cards); card/sheet/drawer/rail `surface-container-low`; nested-in-card `surface-container`; modal `surface-container-high`; filled buttons use the seed `primary` with a 16px semibold white label.
 - **Dark mode** — manual `<ThemeToggle />` (from `@oshap/shared/ui`); choice persists in `localStorage` under `oshap-theme`; an inline script applies it before React mounts (no light flash); first-time visitors fall back to the OS `prefers-color-scheme`.
 
 ---
