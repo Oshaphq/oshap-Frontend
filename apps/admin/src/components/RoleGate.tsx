@@ -20,7 +20,7 @@ export default function RoleGate({ allowedRoles }: RoleGateProps) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[60vh] gap-md text-center px-md">
         <div className="w-16 h-16 rounded-full bg-error-container text-on-error-container flex items-center justify-center text-3xl">
-          <i className="mgc_close_fill" />
+          <i className="mgc_close_line" />
         </div>
         <h2 className="font-display text-title-large font-semibold text-on-surface">
           Access Denied

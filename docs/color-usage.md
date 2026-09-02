@@ -187,6 +187,121 @@ layer carries the feedback; it never disappears entirely.
 
 ---
 
+## Color role usage — do's and don'ts
+
+M3 assigns every role a job. These rules are the M3 ones, with Oshap's two documented
+departures (`primary` at 3:1, `secondary-container` at S80) folded in where they change
+the advice.
+
+The pairing rule underneath all of them: **a role and its `on-` role are a pair.** Text
+or an icon on `X` takes `on-X`. Never take an on-color from a different family, and never
+put a base role on its own container.
+
+### primary / on-primary
+
+High-emphasis fills, and only those: the one filled button per view, the FAB, an active
+indicator, the focus ring.
+
+| ✅ Do | ❌ Don't |
+|---|---|
+| Use it for the single most important action on a screen | Use it as a large background or a page fill — it is a fill for components, not areas |
+| Keep filled-button labels at **16px semibold** | Put body-size or 14px white text on it — 3.11:1 fails below large-text size |
+| Let icons sit on it unadjusted — a glyph is held to 3:1 | Put a paragraph on it at any size |
+| Reach for `primary-label` (P40) for brand-coloured text on a surface | Use `primary` as text on `surface` — it fails 4.5:1 |
+
+### primary-container / on-primary-container
+
+One step down in emphasis: the tonal button, a selected state, the chef's-pick tag.
+
+| ✅ Do | ❌ Don't |
+|---|---|
+| Use it where an action matters but is not *the* action | Place `primary` on `primary-container` — near-identical lightness, no separation |
+| Pair it strictly with `on-primary-container` | Use `on-primary` on it |
+| Use it for the tonal button (v3 moved tonal here from secondary) | Use it to signal status — status has its own families |
+
+### secondary / secondary-container
+
+At Oshap's seed hue `secondary` is a muted brown. **Use it for weight, not emphasis** —
+navigation that is present but not shouting, a filter chip at rest.
+
+| ✅ Do | ❌ Don't |
+|---|---|
+| Use `secondary-container` for the selected nav destination and selected chips | Use it as a second primary — it is deliberately quiet |
+| Remember it sits at **S80**, not M3's S90 | Change it back to S90 — S90 is byte-identical to P90 here, so the nav pill and the primary tag would collide |
+
+### tertiary-container
+
+Categorical only — menu sections, dietary marks.
+
+| ✅ Do | ❌ Don't |
+|---|---|
+| Use it to label *what a thing is* | Use it for *what state a thing is in* — never a status |
+| Keep it to one meaning per screen | Mix it into the payments column, where it reads as another status chip |
+
+### error / success / warning
+
+Fixed hues, not seed-derived and not tenant-derived. That is the only reason a green
+"paid" chip stays green in a restaurant whose brand is red.
+
+| ✅ Do | ❌ Don't |
+|---|---|
+| Always pair a status colour with a **label or icon** | Rely on colour alone — it is invisible to a colour-blind waiter closing a bill |
+| Use the container roles for chips and quiet banners | Tint them toward the tenant's brand |
+| Use `error` for destructive confirmation and failed payment | Use `error` for "unavailable" or "out of stock" — that is `warning` or a neutral |
+
+### Surfaces
+
+Elevation is a **tone change, not a shadow**. Shadows are for things that genuinely float.
+
+| ✅ Do | ❌ Don't |
+|---|---|
+| Follow the ladder: page `surface` → card `surface-container-low` → nested `surface-container` → dialog `surface-container-high` | Skip levels to force contrast — the ladder steps in twos on purpose |
+| Step **one level up** on hover | Add a shadow to fake depth on a static block |
+| Use `surface-container-lowest` when something must be pure white | Use a raw palette step (`bg-neutral-90`) as a surface |
+| Let the warm neutral show — it is the system, not a tint bug | Mix a grey from outside the palette into a surface |
+
+### on-surface / on-surface-variant
+
+| ✅ Do | ❌ Don't |
+|---|---|
+| `on-surface` for primary text, `on-surface-variant` for secondary | Use `outline` as a text colour — at 4.29:1 it is a boundary tone, not a text tone |
+| Use `on-surface-variant` for placeholders | Use `outline` for placeholders — it fails AA on every surface step |
+
+### outline / outline-variant
+
+| ✅ Do | ❌ Don't |
+|---|---|
+| `outline` for interactive boundaries — text field borders, outlined buttons | Use `outline-variant` on a control the user can focus |
+| `outline-variant` for decorative dividers and separators | Use `outline` for every divider — it is heavier than a divider needs |
+
+### inverse-surface
+
+| ✅ Do | ❌ Don't |
+|---|---|
+| Snackbars, and nothing else | Use it as a "dark card" — it inverts against the theme and will look wrong in dark mode |
+| Pair with `inverse-on-surface`, and use `inverse-primary` for its action | Give a snackbar icon a status colour — it will wear the dark-theme error tone on a light-theme inverse surface |
+
+### Universal don'ts
+
+- **No raw hex.** Ever, in any app.
+- **No raw palette step as a surface.** Steps are the palette; roles are the system.
+- **No `dark:` prefix.** Roles swap on `[data-theme="dark"]` already.
+- **No `outline: none`.** It sits in a utility layer and beats the `:focus-visible` ring
+  the token file defines in `@layer base`.
+- **No colour-only state.** Always a label or an icon alongside.
+
+### Contrast bars, so the exception stays legible
+
+| Bar | Applies to | Oshap |
+|---|---|---|
+| **4.5:1** | Body text | Every text/on-color pair here clears it |
+| **3:1** | Large text (≥18.66px bold / 24px regular), icons, UI boundaries | `primary` under white sits here at 3.11:1 — the one stated exception |
+
+An icon is a UI component, so a glyph on the seed needs no size adjustment where a text
+label does. That asymmetry is the whole reason the 16px rule exists.
+
+---
+
 ## Touch & accessibility
 
 - 48×48 minimum for anything tappable in `apps/customer`; 40px is acceptable for

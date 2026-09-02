@@ -325,7 +325,7 @@ function AccountRow({
                 aria-label={`Remove ${account.bank_name} account`}
                 className="w-9 h-9 flex items-center justify-center rounded-full bg-surface-container-high text-on-surface-variant hover:bg-error-container hover:text-on-error-container transition-colors"
               >
-                <i className="mgc_delete_2_line" />
+                <i className="mgc_delete_line" />
               </button>
             </>
           )}

@@ -85,7 +85,7 @@ function StaffRow() {
   return (
     <Row
       to="/settings/staff"
-      icon="mgc_group_2_line"
+      icon="mgc_group_line"
       title="Staff"
       subtitle={
         staff.length === 0
