@@ -8,10 +8,10 @@ import type { ReactNode } from "react";
  * to skim past. That rule is what keeps the payments table readable to a
  * colour-blind waiter closing a bill.
  *
- * `tertiary` is violet rather than the olive the old system used. The palette
- * generator's default hue put tertiary's container 10.8° from
- * `success-container`, which would have put two pale mint chips in the same
- * column — where PAID means settled and SPLIT does not.
+ * `tertiary` is the olive at H 103.54 — 60° off the seed, and far enough from
+ * `success-container` that SPLIT and PAID never read as the same pale chip in
+ * the payments column. Use it for what a thing *is*, never for what state it
+ * is in.
  */
 export type StatusTone =
   | "success"
@@ -19,7 +19,6 @@ export type StatusTone =
   | "error"
   | "primary"
   | "tertiary"
-  | "accent"
   | "neutral";
 
 export interface StatusBadgeProps {
@@ -36,9 +35,6 @@ const TONE: Record<StatusTone, string> = {
   error: "bg-error-container text-on-error-container",
   primary: "bg-primary-container text-on-primary-container",
   tertiary: "bg-tertiary-container text-on-tertiary-container",
-  // Attention without action — an open table, a promo, an unread count.
-  // Never a payment state, which a guest could misread.
-  accent: "bg-accent-container text-on-accent-container",
   neutral: "bg-surface-container-high text-on-surface-variant",
 };
 
