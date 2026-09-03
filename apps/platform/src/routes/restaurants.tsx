@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { QueryError, Select } from "@oshap/shared/ui";
+import { EmptyState, QueryError, Select } from "@oshap/shared/ui";
 import { Link } from "react-router";
 import { formatPhone, usePlatformRestaurants } from "@oshap/shared";
 // Every tier, not just the ones on sale — an existing Enterprise restaurant
@@ -98,10 +98,10 @@ export default function RestaurantsPage() {
         />}
 
       {!query.isLoading && !query.isError && filtered.length === 0 && (
-        <div className="flex flex-col items-center gap-s py-10 text-center">
-          <i className="mgc_fork_spoon_line text-5xl text-on-surface-variant" />
-          <p className="text-body-medium text-on-surface-variant">No restaurants match your filters.</p>
-        </div>
+        <EmptyState
+          icon="mgc_fork_spoon_line"
+          title="No restaurants match your filters"
+        />
       )}
 
       <div className="flex flex-col gap-s">

@@ -19,13 +19,7 @@ import {
   IMAGE_ACCEPT_ATTR,
 } from "@oshap/shared";
 import type { MenuItem } from "@oshap/shared";
-import {
-  Button,
-  PrimaryButton,
-  SecondaryButton,
-  Select,
-  toast,
-} from "@oshap/shared/ui";
+import { Button, EmptyState, PrimaryButton, SecondaryButton, Select, toast } from "@oshap/shared/ui";
 import QueryError from "../components/QueryError";
 import LowStockBanner from "../components/LowStockBanner";
 import MenuImportDialog from "../components/MenuImportDialog";
@@ -435,16 +429,16 @@ export default function MenuPage() {
         })}
 
         {items.length === 0 && !showNewForm && (
-          <div className="flex flex-col items-center justify-center gap-s py-10 px-md text-center">
-            <i className="mgc_chef_hat_line text-5xl text-on-surface-variant" />
-            <span className="font-display text-title-medium font-semibold text-on-surface">
-              No menu items yet
-            </span>
-            <p className="text-body-medium text-on-surface-variant">
-              Click <span className="font-semibold">+ Add Item</span> to create
-              your first menu item.
-            </p>
-          </div>
+          <EmptyState
+            icon="mgc_chef_hat_line"
+            title="No menu items yet"
+            message={
+              <>
+                Click <span className="font-semibold">+ Add Item</span> to create
+                your first menu item.
+              </>
+            }
+          />
         )}
       </div>
 

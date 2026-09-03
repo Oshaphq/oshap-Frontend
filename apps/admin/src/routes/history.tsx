@@ -6,7 +6,7 @@ import {
   formatApiDate,
   formatApiTime,
 } from "@oshap/shared";
-import { Button } from "@oshap/shared/ui";
+import { Button, EmptyState } from "@oshap/shared/ui";
 import QueryError from "../components/QueryError";
 
 /**
@@ -150,15 +150,11 @@ export default function HistoryPage() {
       ) : historyQuery.isError ? (
         <QueryError error={historyQuery.error} action="load the history" onRetry={() => historyQuery.refetch()} />
       ) : orders.length === 0 ? (
-        <div className="flex flex-col items-center justify-center gap-s py-10 px-md text-center">
-          <i className="mgc_history_line text-5xl text-on-surface-variant" />
-          <span className="font-display text-title-medium font-semibold text-on-surface">
-            No transactions found
-          </span>
-          <p className="text-body-medium text-on-surface-variant">
-            Try a different filter or date range.
-          </p>
-        </div>
+        <EmptyState
+          icon="mgc_history_line"
+          title="No transactions found"
+          message="Try a different filter or date range."
+        />
       ) : (
         <div className="flex flex-col gap-md">
           {orders.map((order) => {

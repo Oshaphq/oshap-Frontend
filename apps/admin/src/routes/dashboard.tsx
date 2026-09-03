@@ -13,7 +13,7 @@ import {
   describeError,
 } from "@oshap/shared";
 import type { AdminTableStatus, Bill } from "@oshap/shared";
-import { Button, PrimaryButton, SecondaryButton, toast } from "@oshap/shared/ui";
+import { Button, EmptyState, PrimaryButton, SecondaryButton, toast } from "@oshap/shared/ui";
 import QueryError from "../components/QueryError";
 import CashPaymentDialog from "../components/CashPaymentDialog";
 import TableBills from "../components/TableBills";
@@ -407,15 +407,11 @@ export default function DashboardPage() {
       </div>
 
       {tables.length === 0 && (
-        <div className="flex flex-col items-center justify-center gap-s py-10 px-md text-center">
-          <i className="mgc_table_line text-5xl text-on-surface-variant" />
-          <span className="font-display text-title-medium font-semibold text-on-surface">
-            No tables configured
-          </span>
-          <p className="text-body-medium text-on-surface-variant">
-            Add tables in your restaurant settings to get started.
-          </p>
-        </div>
+        <EmptyState
+          icon="mgc_table_line"
+          title="No tables configured"
+          message="Add tables in your restaurant settings to get started."
+        />
       )}
 
       {cashTarget && (

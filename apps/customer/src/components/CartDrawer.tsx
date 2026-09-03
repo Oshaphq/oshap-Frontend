@@ -2,7 +2,7 @@ import { useNavigate } from "react-router";
 import { formatCurrency } from "@oshap/shared";
 import { unitPrice, useCart } from "../context/CartContext";
 import { useDragToDismiss } from "../hooks/useDragToDismiss";
-import { PrimaryButton } from "@oshap/shared/ui";
+import { EmptyState, PrimaryButton } from "@oshap/shared/ui";
 
 interface CartDrawerProps {
   tableId: string;
@@ -58,10 +58,11 @@ export default function CartDrawer({ tableId }: CartDrawerProps) {
         </div>
 
         {items.length === 0 ? (
-          <div className="flex flex-col items-center gap-s py-10 px-md text-center">
-            <i className="mgc_shopping_cart_1_line text-5xl text-on-surface-variant" />
-            <p className="text-body-medium text-on-surface-variant">Your cart is empty</p>
-          </div>
+          <EmptyState
+            icon="mgc_shopping_cart_1_line"
+            title="Your cart is empty"
+            card={false}
+          />
         ) : (
           <>
             <div className="flex-1 overflow-y-auto px-md py-md flex flex-col gap-md">
