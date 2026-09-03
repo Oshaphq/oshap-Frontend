@@ -311,22 +311,24 @@ export default function MenuPage() {
           Menu Management
         </h1>
         <div className="flex items-center gap-s flex-wrap">
-          <SecondaryButton
+          <Button
+            variant="text"
             size="md"
             onClick={handleExport}
             disabled={exportMenu.isPending || items.length === 0}
           >
             <i className="mgc_download_2_line" />
             {exportMenu.isPending ? "Exporting…" : "Export"}
-          </SecondaryButton>
-          <SecondaryButton size="md" onClick={() => setShowImport(true)}>
+          </Button>
+          <Button variant="text" size="md" onClick={() => setShowImport(true)}>
             <i className="mgc_file_upload_line" /> Import
-          </SecondaryButton>
-          <SecondaryButton size="md" onClick={() => setShowGroups(true)}>
+          </Button>
+          <Button variant="text" size="md" onClick={() => setShowGroups(true)}>
             <i className="mgc_list_check_line" /> Options
-          </SecondaryButton>
+          </Button>
           {items.length > 0 && (
-            <SecondaryButton
+            <Button
+              variant="text"
               size="md"
               onClick={() =>
                 selecting ? leaveSelection() : setSelecting(true)
@@ -336,7 +338,7 @@ export default function MenuPage() {
                 className={selecting ? "mgc_close_line" : "mgc_check_line"}
               />{" "}
               {selecting ? "Done" : "Select"}
-            </SecondaryButton>
+            </Button>
           )}
           <PrimaryButton
             size="md"

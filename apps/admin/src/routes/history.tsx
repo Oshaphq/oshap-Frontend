@@ -6,7 +6,7 @@ import {
   formatApiDate,
   formatApiTime,
 } from "@oshap/shared";
-import { SecondaryButton } from "@oshap/shared/ui";
+import { Button } from "@oshap/shared/ui";
 import QueryError from "../components/QueryError";
 
 /**
@@ -89,7 +89,8 @@ export default function HistoryPage() {
         <h1 className="font-display text-title-large font-semibold text-on-surface">
           Transaction History
         </h1>
-        <SecondaryButton
+        <Button
+          variant="text"
           size="md"
           onClick={() => historyQuery.refetch()}
           disabled={historyQuery.isRefetching}
@@ -102,7 +103,7 @@ export default function HistoryPage() {
             }
           />{" "}
           {historyQuery.isRefetching ? "Refreshing…" : "Refresh"}
-        </SecondaryButton>
+        </Button>
       </header>
 
       <div className="flex flex-col sm:flex-row gap-md">
@@ -254,23 +255,25 @@ export default function HistoryPage() {
 
       {pagination.total_pages > 1 && (
         <div className="flex items-center justify-center gap-md">
-          <SecondaryButton
+          <Button
+            variant="outlined"
             size="md"
             onClick={() => setPage(pagination.page - 1)}
             disabled={pagination.page <= 1}
           >
             Prev
-          </SecondaryButton>
+          </Button>
           <span className="text-body-medium font-medium text-on-surface-variant">
             Page {pagination.page} of {pagination.total_pages}
           </span>
-          <SecondaryButton
+          <Button
+            variant="outlined"
             size="md"
             onClick={() => setPage(pagination.page + 1)}
             disabled={pagination.page >= pagination.total_pages}
           >
             Next
-          </SecondaryButton>
+          </Button>
         </div>
       )}
     </main>

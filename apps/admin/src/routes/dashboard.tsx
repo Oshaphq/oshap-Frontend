@@ -169,7 +169,8 @@ export default function DashboardPage() {
         <h1 className="font-display text-title-large font-semibold text-on-surface">
           Waiter Dashboard
         </h1>
-        <SecondaryButton
+        <Button
+          variant="text"
           size="md"
           onClick={() => tablesQuery.refetch()}
           disabled={tablesQuery.isRefetching}
@@ -182,7 +183,7 @@ export default function DashboardPage() {
             }
           />{" "}
           {tablesQuery.isRefetching ? "Refreshing…" : "Refresh"}
-        </SecondaryButton>
+        </Button>
       </header>
 
       {/* Stat cards, per the Figma extract of this screen.

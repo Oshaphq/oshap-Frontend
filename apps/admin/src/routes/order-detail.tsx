@@ -119,9 +119,9 @@ export default function OrderDetailPage() {
             Table {data.table} · {data.status}
           </p>
         </div>
-        <SecondaryButton size="md" onClick={() => setPrintingReceipt(true)}>
+        <Button variant="text" size="md" onClick={() => setPrintingReceipt(true)}>
           <i className="mgc_print_line" /> Receipt
-        </SecondaryButton>
+        </Button>
       </header>
 
       {printingReceipt && (
