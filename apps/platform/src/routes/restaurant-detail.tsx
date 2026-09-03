@@ -14,7 +14,7 @@ import {
   parseApiDate,
 } from "@oshap/shared";
 import type { BillingPeriod, SubscriptionTier } from "@oshap/shared";
-import { toast } from "@oshap/shared/ui";
+import { PrimaryButton, SecondaryButton, toast } from "@oshap/shared/ui";
 
 
 export default function RestaurantDetailPage() {
@@ -238,25 +238,23 @@ export default function RestaurantDetailPage() {
             </div>
 
             <div className="flex gap-s">
-              <button
-                type="button"
+              <PrimaryButton
+                size="md"
                 onClick={handleSaveTier}
                 disabled={update.isPending || !pendingTier || !pendingPeriod}
-                className="px-md py-s rounded-sm font-bold text-body-medium bg-primary text-on-primary hover:opacity-90 disabled:opacity-50 transition-all"
               >
                 {update.isPending ? "Saving..." : "Save"}
-              </button>
-              <button
-                type="button"
+              </PrimaryButton>
+              <SecondaryButton
+                size="md"
                 onClick={() => {
                   setEditTier(false);
                   setPendingTier(null);
                   setPendingPeriod(null);
                 }}
-                className="px-md py-s rounded-sm font-bold text-body-medium border border-outline-variant text-on-surface-variant hover:bg-surface-container-high transition-all"
               >
                 Cancel
-              </button>
+              </SecondaryButton>
             </div>
           </div>
         ) : (
