@@ -223,7 +223,7 @@ export default function PayPage() {
           </>
         ) : (
           <EmptyState
-            icon="mgc_check_double_fill"
+            icon="mgc_checks_fill"
             iconClassName="text-success"
             title="All Settled"
             message="You have no pending bills. Ready for more?"

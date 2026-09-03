@@ -433,7 +433,7 @@ export default function MenuPage() {
 
         {items.length === 0 && !showNewForm && (
           <div className="flex flex-col items-center justify-center gap-s py-10 px-md text-center">
-            <i className="mgc_cook_line text-5xl text-outline-variant opacity-40" />
+            <i className="mgc_chef_hat_line text-5xl text-outline-variant opacity-40" />
             <span className="font-display text-title-medium font-semibold text-on-surface">
               No menu items yet
             </span>
