@@ -78,7 +78,7 @@ function PlatformLogin({ onLogin }: { onLogin: () => void }) {
         className="w-full max-w-[360px] bg-surface-container-low rounded-2xl p-xl flex flex-col items-center gap-md"
       >
         <div className="w-14 h-14 rounded-full bg-primary-container flex items-center justify-center text-2xl text-on-primary-container">
-          <i className="mgc_shield_keyhole_line" />
+          <i className="mgc_shield_line" />
         </div>
         <h1 className="font-display text-title-medium font-semibold text-on-surface">
           Oshap Platform
