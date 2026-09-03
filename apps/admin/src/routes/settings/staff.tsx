@@ -235,7 +235,7 @@ export default function StaffSettings() {
 
       {isModalOpen && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center bg-scrim backdrop-blur-sm p-md">
-          <div className="w-full max-w-[448px] rounded-lg bg-surface-container-high p-l flex flex-col gap-md border border-primary shadow-xl">
+          <div className="w-full max-w-[448px] rounded-xl bg-surface-container-high p-l flex flex-col gap-md border border-primary shadow-xl">
             <h3 className="font-bold text-on-surface">
               {editingId ? "Edit Staff" : "Add Staff"}
             </h3>

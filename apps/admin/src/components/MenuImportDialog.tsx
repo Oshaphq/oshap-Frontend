@@ -75,7 +75,7 @@ export default function MenuImportDialog({ onClose }: Props) {
         role="dialog"
         aria-modal="true"
         aria-label="Import menu from CSV"
-        className="w-full max-w-[560px] max-h-[85vh] overflow-y-auto rounded-lg bg-surface-container-high p-l flex flex-col gap-md shadow-xl"
+        className="w-full max-w-[560px] max-h-[85vh] overflow-y-auto rounded-xl bg-surface-container-high p-l flex flex-col gap-md shadow-xl"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex items-start justify-between gap-md">

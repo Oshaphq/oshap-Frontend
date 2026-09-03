@@ -114,7 +114,7 @@ export default function CashPaymentDialog({
         role="dialog"
         aria-modal="true"
         aria-label={`Record cash payment for table ${tableName}`}
-        className="w-full max-w-[420px] rounded-lg bg-surface-container-high p-l flex flex-col gap-md shadow-xl"
+        className="w-full max-w-[420px] rounded-xl bg-surface-container-high p-l flex flex-col gap-md shadow-xl"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex items-start justify-between gap-md">

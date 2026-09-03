@@ -19,7 +19,7 @@ import type { SelectHTMLAttributes } from "react";
  */
 
 const BASE =
-  "appearance-none w-full rounded-sm bg-surface-container-low border border-outline-variant text-on-surface outline-none focus:border-primary transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed";
+  "appearance-none w-full rounded-sm bg-surface-container-low border border-outline text-on-surface outline-none focus:border-primary transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed";
 
 /**
  * Left inset and chevron inset are the same value in every density — that
@@ -67,7 +67,7 @@ export default function Select({
         {children}
       </select>
       <i
-        className={`mgc_down_line absolute ${icon} top-1/2 -translate-y-1/2 text-outline pointer-events-none`}
+        className={`mgc_down_line absolute ${icon} top-1/2 -translate-y-1/2 text-on-surface-variant pointer-events-none`}
         aria-hidden
       />
     </div>

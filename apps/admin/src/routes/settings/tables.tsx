@@ -237,7 +237,7 @@ export default function TablesSettings() {
 
       {isModalOpen && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center bg-scrim backdrop-blur-sm p-md">
-          <div className="w-full max-w-[400px] rounded-lg bg-surface-container-high p-l flex flex-col gap-md border border-primary shadow-xl">
+          <div className="w-full max-w-[400px] rounded-xl bg-surface-container-high p-l flex flex-col gap-md border border-primary shadow-xl">
             <h3 className="font-bold text-on-surface">Add Table</h3>
             <div>
               <label className="block text-body-medium font-semibold text-on-surface mb-xs">
