@@ -9,7 +9,7 @@ export default function PlaceOrderPill({
 }: PlaceOrderPillProps) {
   return (
     <span
-      className={`inline-flex items-center py-xs px-s rounded-xs bg-primary text-on-primary text-label-small font-medium ${className}`}
+      className={`inline-flex items-center py-xs px-s rounded-xs bg-primary-container text-on-primary-container text-label-small font-medium ${className}`}
     >
       {label}
     </span>

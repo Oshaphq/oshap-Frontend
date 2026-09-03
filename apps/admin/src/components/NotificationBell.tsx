@@ -232,7 +232,7 @@ export function NotificationRow({
                 ),
             })
           }
-          className="shrink-0 px-s py-1 rounded-full bg-primary text-on-primary text-label-small font-semibold hover:opacity-90 active:scale-[0.97] disabled:opacity-50 focus-visible:outline-2 focus-visible:outline-primary focus-visible:outline-offset-2 transition"
+          className="shrink-0 px-s py-1 rounded-full bg-primary-container text-on-primary-container text-label-small font-semibold hover:opacity-90 active:scale-[0.97] disabled:opacity-50 focus-visible:outline-2 focus-visible:outline-primary focus-visible:outline-offset-2 transition"
         >
           {resolve.isPending ? "…" : "I'll go"}
         </button>
