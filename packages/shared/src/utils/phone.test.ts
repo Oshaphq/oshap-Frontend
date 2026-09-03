@@ -1,7 +1,8 @@
 import { describe, it, expect } from "vitest";
 import {
-  formatPhone,
   InvalidPhoneError,
+  formatPhone,
+  isMalformedPhone,
   looksLikePhone,
   normalizePhone,
   tryNormalizePhone,
@@ -75,5 +76,50 @@ describe("formatPhone", () => {
 
   it("passes anything unexpected through untouched", () => {
     expect(formatPhone("garbage")).toBe("garbage");
+  });
+});
+
+describe("isMalformedPhone", () => {
+  it("catches a number that is one digit short", () => {
+    // The case that sent a manager back to retype their password: a 10-digit
+    // local number normalizes to +234 plus nine digits, and needs ten.
+    expect(isMalformedPhone("0810818337")).toBe(true);
+    expect(isMalformedPhone("08108183370")).toBe(false);
+  });
+
+  it("accepts every shape normalizePhone accepts", () => {
+    for (const ok of [
+      "08108183370",
+      "0810 818-3370",
+      "+2348108183370",
+      "2348108183370",
+      "  08108183370  ",
+    ]) {
+      expect(isMalformedPhone(ok)).toBe(false);
+    }
+  });
+
+  it("never refuses an email", () => {
+    // The whole reason this is gated on looksLikePhone: staff sign in with
+    // either, and an address must not be rejected for failing to be a number.
+    expect(isMalformedPhone("manager@bukka.ng")).toBe(false);
+    expect(isMalformedPhone("a@b.co")).toBe(false);
+  });
+
+  it("rejects a Nigerian number with an impossible prefix", () => {
+    // +234 mobiles begin 7, 8 or 9.
+    expect(isMalformedPhone("0110818337")).toBe(true);
+  });
+
+  it("passes a too-short numeric string through to the server", () => {
+    // Under seven characters is not phone-shaped, so it is treated as an
+    // identifier of some other kind rather than a broken number — which is
+    // exactly how the backend routes it.
+    expect(isMalformedPhone("08108")).toBe(false);
+  });
+
+  it("tolerates empty and whitespace input", () => {
+    expect(isMalformedPhone("")).toBe(false);
+    expect(isMalformedPhone("   ")).toBe(false);
   });
 });
