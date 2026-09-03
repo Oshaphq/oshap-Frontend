@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { useCallWaiter } from "@oshap/shared";
+import { Fab } from "@oshap/shared/ui";
 import { useSession } from "../context/SessionContext";
 
 const TOAST_VISIBLE_MS = 3_500;
@@ -55,22 +56,20 @@ export default function CallWaiterFab({ tableId }: { tableId: string }) {
           visible call-out, and an unlabelled bell is not a control guests
           reliably discover. `shrink-0` keeps the label intact on narrow
           phones — the header title truncates instead. */}
-      <button
-        type="button"
+      <Fab
         onClick={handleClick}
         disabled={callWaiter.isPending}
         title="Call a waiter"
-        className="fixed right-4 bottom-[calc(4rem+1rem+env(safe-area-inset-bottom,0px))] z-40 flex items-center gap-xs h-12 px-md rounded-full text-xl shadow-lg bg-primary text-on-primary font-display transition duration-100 ease-out hover:opacity-90 active:scale-[0.97] active:brightness-95 disabled:opacity-50 disabled:cursor-wait"
-      >
-        {callWaiter.isPending ? (
-          <i className="mgc_loading_line animate-spin" />
-        ) : (
-          <ServiceBellIcon />
-        )}
-        <span className="text-label-large font-semibold whitespace-nowrap">
-          {callWaiter.isPending ? "Calling…" : "Call a waiter"}
-        </span>
-      </button>
+        label={callWaiter.isPending ? "Calling…" : "Call a waiter"}
+        icon={
+          callWaiter.isPending ? (
+            <i className="mgc_loading_line animate-spin" />
+          ) : (
+            <ServiceBellIcon />
+          )
+        }
+        className="fixed right-4 bottom-[calc(4rem+1rem+env(safe-area-inset-bottom,0px))] z-40"
+      />
       {toastVisible &&
         typeof document !== "undefined" &&
         createPortal(<WaiterToast key={toastKey} />, document.body)}

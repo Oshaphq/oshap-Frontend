@@ -6,7 +6,7 @@ import {
   useAdminUpdateBankAccount,
 } from "@oshap/shared/hooks";
 import type { BankAccount } from "@oshap/shared";
-import { PrimaryButton, SecondaryButton, toast } from "@oshap/shared/ui";
+import { PrimaryButton, SecondaryButton, StatusBadge, toast } from "@oshap/shared/ui";
 
 const EMPTY_DRAFT = { bank_name: "", account_number: "", account_name: "" };
 
@@ -253,14 +253,10 @@ function AccountRow({
             {account.bank_name}
           </span>
           {account.is_default && (
-            <span className="shrink-0 px-s py-0.5 rounded-full bg-success-container text-on-success-container text-label-small font-semibold uppercase tracking-wider">
-              Default
-            </span>
+            <StatusBadge tone="success">Default</StatusBadge>
           )}
           {!account.is_active && (
-            <span className="shrink-0 px-s py-0.5 rounded-full bg-surface-container-high text-outline text-label-small font-semibold uppercase tracking-wider">
-              Hidden
-            </span>
+            <StatusBadge>Hidden</StatusBadge>
           )}
         </div>
         <span className="text-label-medium text-on-surface-variant tracking-wider">

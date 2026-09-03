@@ -1,17 +1,28 @@
 import type { ReactNode } from "react";
 
 /**
- * Chips no longer change token by context.
+ * A filter pill. The customer menu's category row is the only place it ships.
  *
- * They are outlined at rest and take `secondary-container` when selected. A
- * border reads against every step of the surface ladder, so whoever places a
- * chip no longer has to know what it is sitting on — which is what went wrong
- * when the resting fill was a surface step and the chip moved onto a card.
+ * Selected is `bg-primary` with `on-primary` — the system-wide selected
+ * language, shared with the nav indicator, the selection controls and the
+ * selected list row. It replaces the `secondary-container` this component used
+ * to carry, which was an M3 default nothing in the product ever rendered.
+ *
+ * At rest it is `surface-container-high` with a 30%-opacity `outline-variant`
+ * hairline rather than a full-strength border: the fill already separates it
+ * from the page, so a solid outline on top reads as two boundaries.
+ *
+ * 48px tall, not the 36 the hand-rolled version used. `apps/customer` holds
+ * everything tappable to 48, and a category row is the first thing a guest
+ * touches. The row is 12px taller for it.
+ *
+ * The label stays 14px: it is a control label, so the seed's 3.11:1 sits in the
+ * same bucket as a filled button's, not in body-copy territory.
  */
 export interface ChipProps {
   children: ReactNode;
   selected?: boolean;
-  /** MingCute class. On a selected chip M3 shows a check; pass `mgc_check_line`. */
+  /** MingCute class. M3 shows a check on a selected chip; pass `mgc_check_line`. */
   icon?: string;
   onClick?: () => void;
   disabled?: boolean;
@@ -26,18 +37,19 @@ export default function Chip({
   disabled = false,
   className = "",
 }: ChipProps) {
-  const skin = selected
-    ? "bg-secondary-container text-on-secondary-container border-transparent"
-    : "bg-transparent text-on-surface-variant border-outline hover:bg-on-surface/8";
+  const skin = disabled
+    ? "bg-on-surface-disabled text-on-surface-label-disabled border-transparent"
+    : selected
+      ? "bg-primary text-on-primary border-transparent"
+      : "bg-surface-container-high text-on-surface-variant border-outline-variant/30 hover:bg-surface-container-highest";
 
   return (
     <button
       type="button"
-      role="option"
-      aria-selected={selected}
+      aria-pressed={selected}
       onClick={onClick}
       disabled={disabled}
-      className={`inline-flex h-8 shrink-0 items-center gap-xs rounded-full border px-l text-label-large whitespace-nowrap transition duration-100 ease-out active:scale-[0.97] disabled:cursor-not-allowed disabled:border-transparent disabled:bg-on-surface-disabled disabled:text-on-surface-label-disabled disabled:active:scale-100 ${skin} ${className}`}
+      className={`inline-flex h-12 shrink-0 items-center gap-xs rounded-full border px-md text-label-large whitespace-nowrap transition-colors active:scale-[0.97] disabled:cursor-not-allowed disabled:active:scale-100 ${skin} ${className}`}
     >
       {icon && <i className={icon} aria-hidden="true" />}
       {children}
