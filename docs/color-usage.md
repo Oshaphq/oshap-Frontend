@@ -13,11 +13,14 @@ Never hardcode a hex. Never use a raw palette step as a surface. Tokens swap on
 
 ## Method
 
-Five key palettes come out of the seed `#F56500` in HCT (H 43.54 · C 75.92 · T 60.53)
+Three accent palettes come out of the seed `#F56500` in HCT (H 43.54 · C 75.92 · T 60.53)
 through the M3 reference solver, plus fixed-hue error, success and warning run through
 the same solver. A role names a palette and a tone. **Ratios are measured after the
 fact, not searched for** — v2 walked a candidate list until something passed, which
 produced right answers by a route nobody could re-derive.
+
+**The neutrals are the exception, and it is deliberate.** They are not solved from the
+seed at all — see [Surfaces](#surfaces).
 
 Regenerating is a build step, not a runtime one:
 
@@ -31,9 +34,10 @@ Then override the single role the solver would get differently — primary stays
 Ship flat custom properties either way. The same generator runs on tenant save with the
 seed swapped, so there is no second implementation.
 
-**Step numbers mean HCT tone.** They are not the v2 numbers. There is no tone 99, and
-the neutral palette carries six extra tones (4, 6, 12, 17, 22, 24, 87, 92, 94, 96) that
-exist only to give the surface ladder its steps.
+**Step numbers mean HCT tone — for the accent palettes only.** They are not the v2
+numbers, and there is no tone 99. The neutral steps keep their source names (`N0`…`N1000`,
+`DN0`…`DN1100`) because they are positions in a fixed ramp rather than tones, and a tone
+number there would be a lie.
 
 ---
 
@@ -71,7 +75,7 @@ A focus ring is a UI component, so the 3:1 exception covers it without qualifica
 | `error-container` | E90 `#FFDAD5` / E10 — 12.96:1 | E30 `#960004` / E90 — 7.07:1 |
 | `success-container` | Su90 `#78FBB6` / Su10 — 13.06:1 | Su20 `#003A1E` / Su90 — 10.02:1 |
 | `warning-container` | Wa90 `#FFDDAF` / Wa10 — 13.14:1 | Wa30 `#653E00` / Wa90 — 7.23:1 |
-| `inverse-surface` | N20 `#362F2C` / N95 — 11.57:1 | N90 `#EDE0DB` / N20 |
+| `inverse-surface` | N1000 `#172B4D` / N200 — 13.61:1 | DN1100 `#DEE4EA` / DN100 |
 
 **The `secondary-container` departure.** M3 says S90, which at chroma 16 is
 byte-identical to P90 `#FFDBCC` — the nav pill and the primary tag would be the same
@@ -89,29 +93,40 @@ it with a label or an icon.
 
 ## Surfaces
 
-**Neutrals are warm.** Oshap grey is gone; surfaces carry the seed hue at chroma 4. This
-is the single most visible change in the apps, and every screenshot in every doc looks
-different because of it.
+**Neutrals are fixed, not derived.** This is the one place v3 does not use HCT. Surfaces,
+text and borders are a fixed greyscale ramp that every tenant shares, so the seed only
+ever reaches accents. That is the point: a tenant seeded near blue gets blue buttons, not
+blue-grey chrome, and two tenants side by side have the same page under different brands.
+
+**Light (`N*`) and dark (`DN*`) are separate ramps, not inversions of one another.** This
+is the structural break from a solved neutral: a symmetric tone ladder let a single step
+be both a light surface and a dark text colour, and a fixed ramp cannot. Two families,
+not one — building it as one ladder puts navy where a dark surface belongs.
 
 | Level | Light | Dark |
 |---|---|---|
-| `surface-container-lowest` | N100 `#FFFFFF` | N4 `#120D0B` |
-| `surface` | N98 `#FFF8F5` | N6 `#181210` |
-| `surface-container-low` | N96 `#FEF1EC` | N10 `#201A18` |
-| `surface-container` | N94 `#F8EBE7` | N12 `#251E1C` |
-| `surface-container-high` | N92 `#F2E6E1` | N17 `#2F2926` |
-| `surface-container-highest` | N90 `#EDE0DB` | N22 `#3A3330` |
-| `surface-dim` | N87 `#E4D7D3` | N6 `#181210` |
-| `surface-bright` | N98 `#FFF8F5` | N24 `#3F3835` |
-| `on-surface` | N10 `#201A18` — 16.36:1 | N90 `#EDE0DB` — 14.38:1 |
-| `on-surface-variant` | NV30 `#52443D` — 8.88:1 | NV80 `#D7C2BA` — 10.87:1 |
-| `outline` | NV50 `#85736C` — 4.29:1 | NV60 `#A08D85` — 5.86:1 |
-| `outline-variant` | NV80 `#D7C2BA` | NV30 `#52443D` |
+| `surface-container-lowest` | N0 `#FFFFFF` | DN0 `#0C1014` |
+| `surface` | N10 `#FAFBFC` | DN50 `#161A1D` |
+| `surface-container-low` | N100 `#F7F8F9` | DN100 `#1D2125` |
+| `surface-container` | N20 `#F4F5F7` | DN200 `#22272B` |
+| `surface-container-high` | N30 `#EBECF0` | DN300 `#2C333A` |
+| `surface-container-highest` | N40 `#DFE1E6` | DN350 `#38414A` |
+| `surface-dim` | N300 `#DCDFE4` | DN0 `#0C1014` |
+| `surface-bright` | N10 `#FAFBFC` | DN400 `#454F59` |
+| `on-surface` | N1000 `#172B4D` — 13.61:1 | DN1100 `#DEE4EA` — 13.66:1 |
+| `on-surface-variant` | N800 `#44546F` — 7.39:1 | DN800 `#9FADBC` — 7.65:1 |
+| `outline` | N500 `#8590A2` — **3.11:1** | DN600 `#738496` — 4.56:1 |
+| `outline-variant` | N300 `#DCDFE4` | DN400 `#454F59` |
 
 **Elevation is a tone change, not a shadow.** Shadows are reserved for things that
-actually float above the page. The light ladder steps in twos because the eye cannot
-separate 98 from 96 at a glance — that is the point: it reads as one warm sheet with
+actually float above the page. The light ladder steps in small increments because the eye
+cannot separate them at a glance — that is the point: it reads as one sheet with
 structure in it.
+
+**`outline` in light sits at 3.11:1.** It clears the 3:1 non-text bar for a boundary and
+nothing more, so it is a border tone only — never a text colour, never a placeholder. On
+the previous warm ramp it had 4.29:1 of headroom; the fixed ramp spends that, which is a
+real cost of sharing one neutral across tenants.
 
 `outline` is for interactive borders; `outline-variant` for decorative dividers.
 
@@ -257,8 +272,8 @@ Elevation is a **tone change, not a shadow**. Shadows are for things that genuin
 |---|---|
 | Follow the ladder: page `surface` → card `surface-container-low` → nested `surface-container` → dialog `surface-container-high` | Skip levels to force contrast — the ladder steps in twos on purpose |
 | Step **one level up** on hover | Add a shadow to fake depth on a static block |
-| Use `surface-container-lowest` when something must be pure white | Use a raw palette step (`bg-neutral-90`) as a surface |
-| Let the warm neutral show — it is the system, not a tint bug | Mix a grey from outside the palette into a surface |
+| Use `surface-container-lowest` when something must be pure white | Use a raw palette step (`bg-neutral-n40`) as a surface |
+| Keep every surface on the shared ramp — it is what makes tenants comparable | Tint a surface toward the tenant's brand, or mix in a grey from outside the ramp |
 
 ### on-surface / on-surface-variant
 
@@ -336,7 +351,10 @@ the seed fill needs no size adjustment where a text label does.
   series than that needs its own scale, not more design-system roles.
 - **Tenant seeds near red.** A tenant seeded close to H 25 gets a primary near the fixed
   error hue, and a red "Place Order" beside a red "Void" is a genuine confusion. Nothing
-  in the algorithm prevents it. Unresolved in v3.
+  in the algorithm prevents it. Unresolved.
+- **`outline` has no headroom in light.** 3.11:1 is the bar, not a margin over it. If the
+  fixed ramp ever needs a heavier border, `N400` is the next step up and would need its
+  own contrast check.
 
 ---
 

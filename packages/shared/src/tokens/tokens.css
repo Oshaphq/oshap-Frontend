@@ -18,8 +18,10 @@
  * route nobody could re-derive. Here a role names a palette and a tone; the
  * ratios are measured after the fact, not searched for.
  *
- * Neutrals are warm. Oshap grey is gone — surfaces carry the seed hue at chroma
- * 4, which is the single most visible change in the apps.
+ * Neutrals are NOT seed-derived. Surfaces, text and borders are a fixed
+ * greyscale ramp shared by every tenant, so the seed only ever reaches
+ * accents — a tenant seeded near blue gets blue buttons, not blue-grey
+ * chrome. Light (N*) and dark (DN*) are separate ramps, not inversions.
  *
  * `primary-action` is deleted. Primary is the seed in both modes with white on
  * top, and there is no derived interface variant to keep in sync. The cost is
@@ -30,9 +32,9 @@
  *   2. The seed never carries a paragraph. Body-size brand text on a light
  *      surface uses `primary-label` (P40), which clears 6.16:1.
  *
- * Step numbers now mean HCT tone, so every number moved even where the role did
- * not. There is no tone 99 any more, and the neutral palette carries six extra
- * tones (4, 6, 12, 17, 22, 24, 87, 92, 94, 96) purely for the surface ladder.
+ * Step numbers mean HCT tone for the ACCENT palettes only. The neutral steps
+ * keep their Atlassian names (N0…N1000, DN0…DN1100) because they are positions
+ * in a fixed ramp, not tones, and a tone number there would be a lie.
  *
  * Regenerating: this is a build step, not a runtime one.
  *   import { argbFromHex, themeFromSourceColor } from "@material/material-color-utilities";
@@ -106,46 +108,47 @@
   --color-tertiary-98: #fff9e5;
   --color-tertiary-100: #ffffff;
 
-  /* neutral — surfaces and text. Seed hue at chroma 4, so every surface is
-   * warm. The extra tones exist only to give the surface ladder its steps. */
-  --color-neutral-0: #000000;
-  --color-neutral-4: #120d0b;
-  --color-neutral-6: #181210;
-  --color-neutral-10: #201a18;
-  --color-neutral-12: #251e1c;
-  --color-neutral-17: #2f2926;
-  --color-neutral-20: #362f2c;
-  --color-neutral-22: #3a3330;
-  --color-neutral-24: #3f3835;
-  --color-neutral-30: #4d4542;
-  --color-neutral-40: #655d59;
-  --color-neutral-50: #7f7571;
-  --color-neutral-60: #998f8b;
-  --color-neutral-70: #b4a9a5;
-  --color-neutral-80: #d0c4c0;
-  --color-neutral-87: #e4d7d3;
-  --color-neutral-90: #ede0db;
-  --color-neutral-92: #f2e6e1;
-  --color-neutral-94: #f8ebe7;
-  --color-neutral-95: #fbeee9;
-  --color-neutral-96: #fef1ec;
-  --color-neutral-98: #fff8f5;
-  --color-neutral-100: #ffffff;
+  /* neutral — FIXED greyscale. The one place v3 does not use HCT.
+   *
+   * Surfaces, text and borders are a fixed ramp that every tenant shares, so
+   * the seed only ever reaches accents. That is the whole point: a tenant
+   * seeded near blue gets blue buttons, not blue-grey chrome, and two tenants
+   * side by side have the same page under different brands.
+   *
+   * Light (N*) and dark (DN*) are SEPARATE ramps, not inversions of one
+   * another. This is the structural break from the HCT neutrals: a symmetric
+   * tone ladder let a single step be both a light surface and a dark text
+   * colour, and a fixed ramp cannot — so there are two families, not one.
+   *
+   * Values are Atlassian's neutral scale. Steps keep their source names rather
+   * than being renumbered, because they are positions in a fixed ramp now, not
+   * HCT tones, and a tone number here would be a lie. */
+  --color-neutral-n0: #ffffff;
+  --color-neutral-n10: #fafbfc;
+  --color-neutral-n100: #f7f8f9;
+  --color-neutral-n20: #f4f5f7;
+  --color-neutral-n200: #f1f2f4;
+  --color-neutral-n30: #ebecf0;
+  --color-neutral-n40: #dfe1e6;
+  --color-neutral-n300: #dcdfe4;
+  --color-neutral-n400: #b3b9c4;
+  --color-neutral-n500: #8590a2;
+  --color-neutral-n700: #626f86;
+  --color-neutral-n800: #44546f;
+  --color-neutral-n1000: #172b4d;
 
-  /* neutral-variant — outlines. Seed hue at chroma 8. */
-  --color-neutral-variant-0: #000000;
-  --color-neutral-variant-10: #251914;
-  --color-neutral-variant-20: #3b2d28;
-  --color-neutral-variant-30: #52443d;
-  --color-neutral-variant-40: #6b5b54;
-  --color-neutral-variant-50: #85736c;
-  --color-neutral-variant-60: #a08d85;
-  --color-neutral-variant-70: #bba79f;
-  --color-neutral-variant-80: #d7c2ba;
-  --color-neutral-variant-90: #f4ded5;
-  --color-neutral-variant-95: #ffede6;
-  --color-neutral-variant-98: #fff8f5;
-  --color-neutral-variant-100: #ffffff;
+  --color-neutral-dn0: #0c1014;
+  --color-neutral-dn50: #161a1d;
+  --color-neutral-dn100: #1d2125;
+  --color-neutral-dn200: #22272b;
+  --color-neutral-dn300: #2c333a;
+  --color-neutral-dn350: #38414a;
+  --color-neutral-dn400: #454f59;
+  --color-neutral-dn500: #596773;
+  --color-neutral-dn600: #738496;
+  --color-neutral-dn800: #9fadbc;
+  --color-neutral-dn900: #b6c2cf;
+  --color-neutral-dn1100: #dee4ea;
 
   /* error — H 25 · C 84. Fixed hue, not seed-derived. */
   --color-error-0: #000000;
@@ -409,24 +412,24 @@
    * The ladder steps in twos because the eye cannot separate 98 from 96 at a
    * glance — it should read as one warm sheet with structure in it. */
   --ds-surface-tint: #f56500;
-  --ds-surface: #fff8f5; /* N98 */
-  --ds-on-surface: #201a18; /* N10 · 16.36:1 */
-  --ds-on-surface-disabled: #201a181f; /* 12% */
-  --ds-on-surface-label-disabled: #201a1861; /* 38% */
-  --ds-surface-variant: #f4ded5; /* NV90 */
-  --ds-on-surface-variant: #52443d; /* NV30 · 8.88:1 */
-  --ds-inverse-surface: #362f2c; /* N20 · 11.57:1 */
-  --ds-inverse-on-surface: #fbeee9; /* N95 */
-  --ds-surface-dim: #e4d7d3; /* N87 */
-  --ds-surface-bright: #fff8f5; /* N98 */
-  --ds-surface-container-lowest: #ffffff; /* N100 */
-  --ds-surface-container-low: #fef1ec; /* N96 */
-  --ds-surface-container: #f8ebe7; /* N94 */
-  --ds-surface-container-high: #f2e6e1; /* N92 */
-  --ds-surface-container-highest: #ede0db; /* N90 */
+  --ds-surface: #fafbfc; /* N10 */
+  --ds-on-surface: #172b4d; /* N1000 · 13.61:1 */
+  --ds-on-surface-disabled: #172b4d1f; /* 12% */
+  --ds-on-surface-label-disabled: #172b4d61; /* 38% */
+  --ds-surface-variant: #ebecf0; /* N30 */
+  --ds-on-surface-variant: #44546f; /* N800 · 7.39:1 */
+  --ds-inverse-surface: #172b4d; /* N1000 */
+  --ds-inverse-on-surface: #f1f2f4; /* N200 */
+  --ds-surface-dim: #dcdfe4; /* N300 */
+  --ds-surface-bright: #fafbfc; /* N10 */
+  --ds-surface-container-lowest: #ffffff; /* N0 */
+  --ds-surface-container-low: #f7f8f9; /* N100 */
+  --ds-surface-container: #f4f5f7; /* N20 */
+  --ds-surface-container-high: #ebecf0; /* N30 */
+  --ds-surface-container-highest: #dfe1e6; /* N40 */
 
-  --ds-outline: #85736c; /* NV50 · 4.29:1 */
-  --ds-outline-variant: #d7c2ba; /* NV80 */
+  --ds-outline: #8590a2; /* N500 · 3.11:1, a boundary tone */
+  --ds-outline-variant: #dcdfe4; /* N300 */
   --ds-shadow: #00000052;
   --ds-scrim: #00000052;
 
@@ -482,24 +485,24 @@
 
   /* ---- Surfaces — dark ---- */
   --ds-surface-tint: #f56500;
-  --ds-surface: #181210; /* N6 */
-  --ds-on-surface: #ede0db; /* N90 · 14.38:1 */
-  --ds-on-surface-disabled: #ede0db1f;
-  --ds-on-surface-label-disabled: #ede0db61;
-  --ds-surface-variant: #52443d; /* NV30 */
-  --ds-on-surface-variant: #d7c2ba; /* NV80 · 10.87:1 */
-  --ds-inverse-surface: #ede0db; /* N90 */
-  --ds-inverse-on-surface: #362f2c; /* N20 */
-  --ds-surface-dim: #181210; /* N6 */
-  --ds-surface-bright: #3f3835; /* N24 */
-  --ds-surface-container-lowest: #120d0b; /* N4 */
-  --ds-surface-container-low: #201a18; /* N10 */
-  --ds-surface-container: #251e1c; /* N12 */
-  --ds-surface-container-high: #2f2926; /* N17 */
-  --ds-surface-container-highest: #3a3330; /* N22 */
+  --ds-surface: #161a1d; /* DN50 */
+  --ds-on-surface: #dee4ea; /* DN1100 · 13.66:1 */
+  --ds-on-surface-disabled: #dee4ea1f; /* 12% */
+  --ds-on-surface-label-disabled: #dee4ea61; /* 38% */
+  --ds-surface-variant: #2c333a; /* DN300 */
+  --ds-on-surface-variant: #9fadbc; /* DN800 · 7.65:1 */
+  --ds-inverse-surface: #dee4ea; /* DN1100 */
+  --ds-inverse-on-surface: #1d2125; /* DN100 */
+  --ds-surface-dim: #0c1014; /* DN0 */
+  --ds-surface-bright: #454f59; /* DN400 */
+  --ds-surface-container-lowest: #0c1014; /* DN0 */
+  --ds-surface-container-low: #1d2125; /* DN100 */
+  --ds-surface-container: #22272b; /* DN200 */
+  --ds-surface-container-high: #2c333a; /* DN300 */
+  --ds-surface-container-highest: #38414a; /* DN350 */
 
-  --ds-outline: #a08d85; /* NV60 · 5.86:1 */
-  --ds-outline-variant: #52443d; /* NV30 */
+  --ds-outline: #738496; /* DN600 · 4.56:1 */
+  --ds-outline-variant: #454f59; /* DN400 */
   --ds-shadow: #00000052;
   --ds-scrim: #00000052;
 }
