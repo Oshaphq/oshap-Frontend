@@ -20,6 +20,7 @@ import {
 } from "@oshap/shared";
 import type { MenuItem } from "@oshap/shared";
 import {
+  Button,
   PrimaryButton,
   SecondaryButton,
   Select,
@@ -905,7 +906,10 @@ function SelectionBar({
             <SecondaryButton size="md" onClick={() => setConfirming(false)}>
               Keep them
             </SecondaryButton>
-            <PrimaryButton
+            {/* The one place a filled button should not be the brand: this
+                deletes items guests are currently looking at. */}
+            <Button
+              variant="destructive"
               size="md"
               disabled={pending}
               onClick={() => onDelete(chosen)}
@@ -913,7 +917,7 @@ function SelectionBar({
               {pending
                 ? "Deleting…"
                 : `Yes, delete ${chosen.length === 1 ? "it" : `all ${chosen.length}`}`}
-            </PrimaryButton>
+            </Button>
           </div>
         </div>
       )}
