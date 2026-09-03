@@ -138,8 +138,10 @@
   --color-grey-32: #333333;
   --color-grey-37: #404040;
   --color-grey-46: #585858;
+  --color-grey-52: #696969;
   --color-grey-56: #747474;
   --color-grey-58: #7a7a7a;
+  --color-grey-62: #868686;
   --color-grey-70: #9e9e9e;
   --color-grey-78: #b7b7b7;
   --color-grey-88: #d7d7d7;
@@ -241,6 +243,10 @@
   --color-on-surface-label-disabled: var(--ds-on-surface-label-disabled);
   --color-surface-variant: var(--ds-surface-variant);
   --color-on-surface-variant: var(--ds-on-surface-variant);
+  /* Placeholder text only. Quieter than on-surface-variant, but never the
+   * boundary tone: `outline` is 4.29:1 on a card, which fails AA, and using a
+   * border colour as text is a documented don't. */
+  --color-on-surface-placeholder: var(--ds-on-surface-placeholder);
   --color-inverse-surface: var(--ds-inverse-surface);
   --color-inverse-on-surface: var(--ds-inverse-on-surface);
   --color-surface-dim: var(--ds-surface-dim);
@@ -418,6 +424,7 @@
   --ds-on-surface-label-disabled: #2e2e2e61; /* 38% */
   --ds-surface-variant: #e8e8e8; /* grey-93 */
   --ds-on-surface-variant: #585858; /* grey-46 · 6.92:1 */
+  --ds-on-surface-placeholder: #696969; /* grey-52 · 5.04:1 on a card */
   --ds-inverse-surface: #2e2e2e; /* grey-30 */
   --ds-inverse-on-surface: #eeeeee; /* grey-95 */
   --ds-surface-dim: #d7d7d7; /* grey-88 */
@@ -491,6 +498,7 @@
   --ds-on-surface-label-disabled: #d7d7d761; /* 38% */
   --ds-surface-variant: #292929; /* grey-28 */
   --ds-on-surface-variant: #9e9e9e; /* grey-70 · 7.16:1 */
+  --ds-on-surface-placeholder: #868686; /* grey-62 · 4.88:1 on a card */
   --ds-inverse-surface: #d7d7d7; /* grey-88 */
   --ds-inverse-on-surface: #181818; /* grey-21 */
   --ds-surface-dim: #060606; /* grey-12 */

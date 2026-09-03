@@ -21,7 +21,7 @@ import {
 import QueryError from "../components/QueryError";
 
 const inputClass =
-  "px-md py-s rounded-sm bg-surface-container-low border border-outline-variant text-body-medium text-on-surface placeholder:text-outline outline-none focus:border-primary transition-colors";
+  "px-md py-s rounded-sm bg-surface-container-low border border-outline-variant text-body-medium text-on-surface placeholder:text-on-surface-placeholder outline-none focus:border-primary transition-colors";
 
 /**
  * Staff-facing wording for the reasons stock moves. The `value` is the
@@ -129,7 +129,7 @@ export default function InventoryPage() {
         </div>
       ) : ingredients.length === 0 ? (
         <div className="flex flex-col items-center gap-xs py-10 px-md text-center rounded-lg bg-surface-container-low">
-          <i className="mgc_box_3_line text-5xl text-outline-variant opacity-40" />
+          <i className="mgc_box_3_line text-5xl text-on-surface-variant" />
           <span className="font-display text-title-medium font-semibold text-on-surface">
             No ingredients yet
           </span>

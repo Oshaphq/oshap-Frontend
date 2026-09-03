@@ -307,7 +307,7 @@ export default function OrderDetailPage() {
                 value={amount}
                 onChange={(e) => setAmount(e.target.value)}
                 placeholder="Amount in ₦"
-                className="w-full px-md py-s rounded-sm bg-surface-container border border-outline-variant text-body-medium text-on-surface placeholder:text-outline outline-none focus:border-primary transition-colors"
+                className="w-full px-md py-s rounded-sm bg-surface-container border border-outline-variant text-body-medium text-on-surface placeholder:text-on-surface-placeholder outline-none focus:border-primary transition-colors"
               />
               {openAdjustment === "refund" && (
                 <p className="text-body-medium text-on-surface-variant">

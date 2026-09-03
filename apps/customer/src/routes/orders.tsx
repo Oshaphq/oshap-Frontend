@@ -274,7 +274,7 @@ function OrdersView({ tableId }: { tableId: string }) {
 
         {myOrders.length === 0 ? (
           <div className="flex flex-col items-center gap-s py-10 px-md">
-            <i className="mgc_shopping_bag_2_line text-5xl text-outline-variant" />
+            <i className="mgc_shopping_bag_2_line text-5xl text-on-surface-variant" />
             <span className="font-display text-title-medium font-semibold text-on-surface">
               No orders yet
             </span>
@@ -360,7 +360,7 @@ function OrdersView({ tableId }: { tableId: string }) {
               <span className="text-label-large font-semibold font-display text-inverse-on-surface">
                 See what others are ordering
               </span>
-              <span className="text-label-medium text-outline-variant truncate">
+              <span className="text-label-medium text-on-surface-variant truncate">
                 {otherItemNames.join(", ")}
               </span>
             </div>

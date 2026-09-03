@@ -433,7 +433,7 @@ export default function MenuPage() {
 
         {items.length === 0 && !showNewForm && (
           <div className="flex flex-col items-center justify-center gap-s py-10 px-md text-center">
-            <i className="mgc_chef_hat_line text-5xl text-outline-variant opacity-40" />
+            <i className="mgc_chef_hat_line text-5xl text-on-surface-variant" />
             <span className="font-display text-title-medium font-semibold text-on-surface">
               No menu items yet
             </span>
@@ -736,7 +736,7 @@ function MenuItemForm({
   };
 
   const inputClass =
-    "px-md py-s rounded-sm bg-surface-container-low border border-outline-variant text-body-medium text-on-surface placeholder:text-outline outline-none focus:border-primary transition-colors";
+    "px-md py-s rounded-sm bg-surface-container-low border border-outline-variant text-body-medium text-on-surface placeholder:text-on-surface-placeholder outline-none focus:border-primary transition-colors";
 
   return (
     <div className="rounded-lg bg-surface-container-low p-l flex flex-col gap-md border border-primary">

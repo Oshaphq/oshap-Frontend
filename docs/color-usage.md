@@ -126,6 +126,7 @@ split — the roles simply pick different steps.
 | `surface-bright` | `grey-99` `#FCFCFC` | `grey-37` `#404040` |
 | `on-surface` | `grey-30` `#2E2E2E` — 13.25:1 | `grey-88` `#D7D7D7` — 13.32:1 |
 | `on-surface-variant` | `grey-46` `#585858` — 6.92:1 | `grey-70` `#9E9E9E` — 7.16:1 |
+| `on-surface-placeholder` | `grey-52` `#696969` — 5.04:1 | `grey-62` `#868686` — 4.88:1 |
 | `outline` | `grey-56` `#747474` — 4.52:1 | `grey-58` `#7A7A7A` — 4.46:1 |
 | `outline-variant` | `grey-88` `#D7D7D7` | `grey-32` `#333333` |
 
@@ -289,8 +290,14 @@ Elevation is a **tone change, not a shadow**. Shadows are for things that genuin
 
 | ✅ Do | ❌ Don't |
 |---|---|
-| `on-surface` for primary text, `on-surface-variant` for secondary | Use `outline` as a text colour — at 4.29:1 it is a boundary tone, not a text tone |
-| Use `on-surface-variant` for placeholders | Use `outline` for placeholders — it fails AA on every surface step |
+| `on-surface` for primary text, `on-surface-variant` for secondary | Use `outline` as a text colour — it is a boundary tone, not a text tone |
+| Use `on-surface-placeholder` for placeholder text | Use `outline` for placeholders — 4.29:1 on a card, which fails AA |
+| Keep `outline-variant` for dividers and separators — nothing else | Use `outline-variant` as text or as an icon tint — **1.32:1**, effectively invisible |
+
+**`on-surface-placeholder` exists so placeholders are not borrowed from the border
+palette.** It sits at 5.04:1 light and 4.88:1 dark — quieter than
+`on-surface-variant` so an empty field reads as empty, but comfortably clear of the
+4.5:1 bar, which `outline` is not once a field sits on a card rather than the page.
 
 ### outline / outline-variant
 
@@ -346,7 +353,14 @@ A glyph takes the on-color of what it sits on, exactly like text. Icons inherit
 a glyph its own hex.
 
 A glyph is a UI component, so its bar is 3:1 rather than 4.5:1 — which is why an icon on
-the seed fill needs no size adjustment where a text label does.
+the seed fill needs no size adjustment where a text label does. **3:1 is still a bar.** A
+neutral glyph takes `on-surface-variant` (6.93:1), never `outline-variant`, which lands at
+1.40:1 and disappears.
+
+**Do not fade a glyph to make it quiet.** `opacity-40` on `on-surface-variant` composites
+to 1.89:1 — below the bar the full-strength colour cleared comfortably. A quiet icon comes
+from choosing a lighter token, not from thinning a dark one; opacity multiplies against the
+surface and silently undoes the contrast the token was chosen for.
 
 `_line` at rest, `_fill` for active or selected. 24px default, 20px dense, 18px inline,
 32px empty states.

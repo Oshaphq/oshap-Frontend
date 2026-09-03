@@ -58,7 +58,7 @@ export default function RestaurantsPage() {
           placeholder="Search name or email..."
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          className="px-md py-s rounded-sm border border-outline-variant bg-surface-container-low text-body-medium text-on-surface placeholder:text-outline outline-none focus:border-primary transition-colors flex-1 min-w-[180px] max-w-[320px]"
+          className="px-md py-s rounded-sm border border-outline-variant bg-surface-container-low text-body-medium text-on-surface placeholder:text-on-surface-placeholder outline-none focus:border-primary transition-colors flex-1 min-w-[180px] max-w-[320px]"
         />
         <Select
           aria-label="Filter by subscription tier"
@@ -99,7 +99,7 @@ export default function RestaurantsPage() {
 
       {!query.isLoading && !query.isError && filtered.length === 0 && (
         <div className="flex flex-col items-center gap-s py-10 text-center">
-          <i className="mgc_fork_spoon_line text-5xl text-outline-variant opacity-40" />
+          <i className="mgc_fork_spoon_line text-5xl text-on-surface-variant" />
           <p className="text-body-medium text-on-surface-variant">No restaurants match your filters.</p>
         </div>
       )}
