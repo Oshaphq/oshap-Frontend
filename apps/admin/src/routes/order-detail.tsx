@@ -11,7 +11,7 @@ import {
   useAdminVoidOrderItem,
   useOrder,
 } from "@oshap/shared";
-import { PrimaryButton, SecondaryButton, toast } from "@oshap/shared/ui";
+import { Button, SecondaryButton, toast } from "@oshap/shared/ui";
 import QueryError from "../components/QueryError";
 import ReceiptSheet from "../components/ReceiptSheet";
 
@@ -318,9 +318,17 @@ export default function OrderDetailPage() {
                 <SecondaryButton size="md" onClick={closeAdjustment}>
                   Cancel
                 </SecondaryButton>
-                <PrimaryButton size="md" onClick={applyAdjustment} disabled={busy}>
+                {/* One button, three jobs. Only a refund is destructive — it
+                    removes the order from the day's takings, which the copy
+                    above already warns about — so only that one wears error. */}
+                <Button
+                  variant={openAdjustment === "refund" ? "destructive" : "filled"}
+                  size="md"
+                  onClick={applyAdjustment}
+                  disabled={busy}
+                >
                   {busy ? "Applying…" : "Apply"}
-                </PrimaryButton>
+                </Button>
               </div>
             </div>
           ) : (

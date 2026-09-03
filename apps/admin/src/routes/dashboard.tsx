@@ -13,7 +13,7 @@ import {
   describeError,
 } from "@oshap/shared";
 import type { AdminTableStatus, Bill } from "@oshap/shared";
-import { PrimaryButton, SecondaryButton, toast } from "@oshap/shared/ui";
+import { Button, PrimaryButton, SecondaryButton, toast } from "@oshap/shared/ui";
 import QueryError from "../components/QueryError";
 import CashPaymentDialog from "../components/CashPaymentDialog";
 import TableBills from "../components/TableBills";
@@ -601,13 +601,16 @@ function BillActions({
           >
             Cancel
           </SecondaryButton>
-          <PrimaryButton
+          {/* Rejecting tells a guest their payment claim was not believed.
+              It carries error, not the brand. */}
+          <Button
+            variant="destructive"
             className="flex-1"
             onClick={onReject}
             disabled={rejectPending}
           >
             {rejectPending ? "Rejecting…" : "Confirm Reject"}
-          </PrimaryButton>
+          </Button>
         </div>
       </div>
     );
