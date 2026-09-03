@@ -59,7 +59,7 @@ export default function CartDrawer({ tableId }: CartDrawerProps) {
 
         {items.length === 0 ? (
           <div className="flex flex-col items-center gap-s py-10 px-md text-center">
-            <i className="mgc_shopping_cart_1_line text-5xl text-outline-variant" />
+            <i className="mgc_shopping_cart_1_line text-5xl text-on-surface-variant" />
             <p className="text-body-medium text-on-surface-variant">Your cart is empty</p>
           </div>
         ) : (
@@ -71,7 +71,7 @@ export default function CartDrawer({ tableId }: CartDrawerProps) {
                   className="flex items-start justify-between gap-md"
                 >
                   <div className="flex items-start gap-s flex-1 min-w-0">
-                    <i className="mgc_fork_spoon_line text-xl text-outline-variant mt-0.5" />
+                    <i className="mgc_fork_spoon_line text-xl text-on-surface-variant mt-0.5" />
                     <div className="flex flex-col gap-0.5 min-w-0">
                       <span className="text-title-medium font-semibold text-on-surface truncate">
                         {item.name}

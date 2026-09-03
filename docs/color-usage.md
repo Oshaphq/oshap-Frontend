@@ -292,7 +292,7 @@ Elevation is a **tone change, not a shadow**. Shadows are for things that genuin
 |---|---|
 | `on-surface` for primary text, `on-surface-variant` for secondary | Use `outline` as a text colour — it is a boundary tone, not a text tone |
 | Use `on-surface-placeholder` for placeholder text | Use `outline` for placeholders — 4.29:1 on a card, which fails AA |
-| Keep `outline-variant` for dividers and decorative glyphs | Use `outline-variant` as text — **1.32:1**, effectively invisible |
+| Keep `outline-variant` for dividers and separators — nothing else | Use `outline-variant` as text or as an icon tint — **1.32:1**, effectively invisible |
 
 **`on-surface-placeholder` exists so placeholders are not borrowed from the border
 palette.** It sits at 5.04:1 light and 4.88:1 dark — quieter than
@@ -353,7 +353,14 @@ A glyph takes the on-color of what it sits on, exactly like text. Icons inherit
 a glyph its own hex.
 
 A glyph is a UI component, so its bar is 3:1 rather than 4.5:1 — which is why an icon on
-the seed fill needs no size adjustment where a text label does.
+the seed fill needs no size adjustment where a text label does. **3:1 is still a bar.** A
+neutral glyph takes `on-surface-variant` (6.93:1), never `outline-variant`, which lands at
+1.40:1 and disappears.
+
+**Do not fade a glyph to make it quiet.** `opacity-40` on `on-surface-variant` composites
+to 1.89:1 — below the bar the full-strength colour cleared comfortably. A quiet icon comes
+from choosing a lighter token, not from thinning a dark one; opacity multiplies against the
+surface and silently undoes the contrast the token was chosen for.
 
 `_line` at rest, `_fill` for active or selected. 24px default, 20px dense, 18px inline,
 32px empty states.

@@ -78,7 +78,7 @@ export default function ZReportPage() {
         </div>
       ) : !hasTakings ? (
         <div className="flex flex-col items-center gap-xs py-10 px-md text-center rounded-lg bg-surface-container-low">
-          <i className="mgc_bill_line text-5xl text-outline-variant opacity-40" />
+          <i className="mgc_bill_line text-5xl text-on-surface-variant" />
           <span className="font-display text-title-medium font-semibold text-on-surface">
             Nothing settled on this date
           </span>

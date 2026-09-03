@@ -99,7 +99,7 @@ export default function RestaurantsPage() {
 
       {!query.isLoading && !query.isError && filtered.length === 0 && (
         <div className="flex flex-col items-center gap-s py-10 text-center">
-          <i className="mgc_fork_spoon_line text-5xl text-outline-variant opacity-40" />
+          <i className="mgc_fork_spoon_line text-5xl text-on-surface-variant" />
           <p className="text-body-medium text-on-surface-variant">No restaurants match your filters.</p>
         </div>
       )}

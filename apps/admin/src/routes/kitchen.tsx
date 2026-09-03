@@ -200,7 +200,7 @@ export default function KitchenPage() {
         )}
         {orders.length === 0 ? (
           <div className="flex flex-col items-center justify-center h-full gap-s text-center py-20">
-            <i className="mgc_knife_line text-5xl text-outline-variant opacity-40" />
+            <i className="mgc_knife_line text-5xl text-on-surface-variant" />
             <span className="font-display text-title-medium font-semibold text-on-surface">
               No orders yet
             </span>

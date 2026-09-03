@@ -112,7 +112,7 @@ function CheckoutView({ tableId }: { tableId: string }) {
         />
         <div className="flex flex-col items-center gap-l py-10 px-md text-center">
           <div className="flex flex-col items-center gap-s">
-            <i className="mgc_clipboard_line text-5xl text-outline-variant" />
+            <i className="mgc_clipboard_line text-5xl text-on-surface-variant" />
             <span className="font-display text-title-medium font-semibold text-on-surface">
               No items yet
             </span>

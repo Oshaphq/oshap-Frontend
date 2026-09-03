@@ -118,7 +118,7 @@ export default function BankAccountsSection({ canEdit }: { canEdit: boolean }) {
         </div>
       ) : list.length === 0 && !isAdding ? (
         <div className="flex flex-col items-center gap-xs py-l px-md text-center rounded-sm bg-surface-container">
-          <i className="mgc_bank_card_line text-3xl text-outline-variant" />
+          <i className="mgc_bank_card_line text-3xl text-on-surface-variant" />
           <p className="text-body-medium text-on-surface-variant">
             No bank account yet — guests can only pay by POS.
           </p>

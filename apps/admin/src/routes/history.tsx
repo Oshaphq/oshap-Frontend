@@ -150,7 +150,7 @@ export default function HistoryPage() {
         <QueryError error={historyQuery.error} action="load the history" onRetry={() => historyQuery.refetch()} />
       ) : orders.length === 0 ? (
         <div className="flex flex-col items-center justify-center gap-s py-10 px-md text-center">
-          <i className="mgc_history_line text-5xl text-outline-variant opacity-40" />
+          <i className="mgc_history_line text-5xl text-on-surface-variant" />
           <span className="font-display text-title-medium font-semibold text-on-surface">
             No transactions found
           </span>

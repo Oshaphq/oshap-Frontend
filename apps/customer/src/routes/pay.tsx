@@ -258,7 +258,7 @@ export default function PayPage() {
         />
         <EmptyState
           icon={isPos ? "mgc_card_pay_line" : "mgc_time_line"}
-          iconClassName={isPos ? "text-primary-label" : "text-outline-variant"}
+          iconClassName={isPos ? "text-primary-label" : "text-on-surface-variant"}
           title={isPos ? "POS On The Way" : "Payment Claimed"}
           message={
             isPos
@@ -441,7 +441,7 @@ export default function PayPage() {
 
 function EmptyState({
   icon,
-  iconClassName = "text-outline-variant",
+  iconClassName = "text-on-surface-variant",
   title,
   message,
   cta,

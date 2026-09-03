@@ -274,7 +274,7 @@ function OrdersView({ tableId }: { tableId: string }) {
 
         {myOrders.length === 0 ? (
           <div className="flex flex-col items-center gap-s py-10 px-md">
-            <i className="mgc_shopping_bag_2_line text-5xl text-outline-variant" />
+            <i className="mgc_shopping_bag_2_line text-5xl text-on-surface-variant" />
             <span className="font-display text-title-medium font-semibold text-on-surface">
               No orders yet
             </span>
