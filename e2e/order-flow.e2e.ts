@@ -164,7 +164,11 @@ test.describe("customer ordering", () => {
     await page.getByRole("button", { name: "Confirm Order" }).click();
 
     await expect(page).toHaveURL(/\/orders/, { timeout: 15_000 });
-    await expect(page.getByText("Coca-Cola")).toBeVisible();
+    // `exact`, because the "Coca-Cola added" toast from the ADD step lives for
+    // 1800ms and everything between here and there is mocked. On a fast runner
+    // the toast is still up when this asserts, and a loose match resolves to
+    // both it and the order line — so this fails precisely when CI is quick.
+    await expect(page.getByText("Coca-Cola", { exact: true })).toBeVisible();
   });
 
   test("survives a reload with the cart intact", async ({ page }) => {
