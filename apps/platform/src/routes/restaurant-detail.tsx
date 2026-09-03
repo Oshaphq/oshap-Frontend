@@ -76,7 +76,7 @@ export default function RestaurantDetailPage() {
       <header className="flex items-center gap-md">
         <Link
           to="/restaurants"
-          className="w-9 h-9 flex items-center justify-center rounded-sm border border-outline-variant text-on-surface-variant hover:bg-surface-container-high transition-colors no-underline"
+          className="w-10 h-10 flex items-center justify-center rounded-sm border border-outline-variant text-on-surface-variant hover:bg-surface-container-high transition-colors no-underline"
         >
           <i className="mgc_left_line" />
         </Link>

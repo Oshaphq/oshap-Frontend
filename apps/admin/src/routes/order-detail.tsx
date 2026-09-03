@@ -107,7 +107,7 @@ export default function OrderDetailPage() {
         <Link
           to="/"
           aria-label="Back to tables"
-          className="w-9 h-9 shrink-0 flex items-center justify-center rounded-sm border border-outline-variant text-on-surface-variant hover:bg-surface-container-high transition-colors no-underline"
+          className="w-10 h-10 shrink-0 flex items-center justify-center rounded-sm border border-outline-variant text-on-surface-variant hover:bg-surface-container-high transition-colors no-underline"
         >
           <i className="mgc_left_line" />
         </Link>

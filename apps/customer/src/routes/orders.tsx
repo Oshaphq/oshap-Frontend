@@ -180,7 +180,7 @@ function OrdersView({ tableId }: { tableId: string }) {
             type="button"
             onClick={() => navigate(`/menu?table=${tableId}`)}
             aria-label="Back"
-            className="w-9 h-9 flex items-center justify-center rounded-full bg-surface-container hover:bg-surface-container-high transition-colors"
+            className="w-12 h-12 flex items-center justify-center rounded-full bg-surface-container hover:bg-surface-container-high transition-colors"
           >
             <i className="mgc_left_line text-xl" />
           </button>
@@ -408,7 +408,7 @@ function OrdersView({ tableId }: { tableId: string }) {
                 type="button"
                 onClick={() => setShowOthersDetail(false)}
                 aria-label="Close"
-                className="w-9 h-9 flex items-center justify-center rounded-full bg-surface-container text-on-surface-variant hover:bg-surface-container-high transition-colors"
+                className="w-12 h-12 flex items-center justify-center rounded-full bg-surface-container text-on-surface-variant hover:bg-surface-container-high transition-colors"
               >
                 <i className="mgc_close_line text-xl" />
               </button>

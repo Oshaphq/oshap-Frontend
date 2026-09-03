@@ -48,7 +48,7 @@ export default function NotificationBell() {
             : "Notifications"
         }
         aria-expanded={open}
-        className="relative w-9 h-9 flex items-center justify-center rounded-full bg-surface-container-high text-on-surface-variant hover:bg-surface-container-highest active:scale-[0.97] focus-visible:outline-2 focus-visible:outline-primary focus-visible:outline-offset-2 transition-colors"
+        className="relative w-10 h-10 flex items-center justify-center rounded-full bg-surface-container-high text-on-surface-variant hover:bg-surface-container-highest active:scale-[0.97] focus-visible:outline-2 focus-visible:outline-primary focus-visible:outline-offset-2 transition-colors"
       >
         <i className="mgc_notification_line text-lg" aria-hidden />
         {unresolved > 0 && (

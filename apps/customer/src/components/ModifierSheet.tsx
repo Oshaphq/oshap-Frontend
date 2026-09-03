@@ -175,7 +175,7 @@ export default function ModifierSheet({ item, onClose, onAdd, remaining = null }
               type="button"
               onClick={onClose}
               aria-label="Close"
-              className="w-9 h-9 shrink-0 flex items-center justify-center rounded-full bg-surface-container text-on-surface-variant hover:bg-surface-container-high transition-colors"
+              className="w-12 h-12 shrink-0 flex items-center justify-center rounded-full bg-surface-container text-on-surface-variant hover:bg-surface-container-high transition-colors"
             >
               <i className="mgc_close_line text-xl" />
             </button>

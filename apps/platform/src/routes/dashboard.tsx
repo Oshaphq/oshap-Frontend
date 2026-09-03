@@ -134,7 +134,7 @@ export default function DashboardPage() {
                   className="bg-surface-container-low rounded-lg p-md flex items-center justify-between gap-md no-underline hover:bg-surface-container-high transition-colors"
                 >
                   <div className="flex items-center gap-md min-w-0">
-                    <div className="w-9 h-9 rounded-sm bg-primary-container flex items-center justify-center shrink-0">
+                    <div className="w-10 h-10 rounded-sm bg-primary-container flex items-center justify-center shrink-0">
                       <i className="mgc_fork_spoon_line text-on-primary-container" />
                     </div>
                     <div className="min-w-0">
