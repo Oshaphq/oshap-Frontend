@@ -26,11 +26,13 @@ export type ButtonVariant =
   | "destructive";
 
 /**
- * v3 works in two densities — 48px comfortable, 40px compact. `sm` predates
- * that ladder and survives for inline actions inside a dense row; it never
- * stands alone on a mobile surface, where 32px fails the touch minimum.
+ * Two densities — 48px comfortable, 40px compact.
+ *
+ * There was a third, `sm`, at 32px. It predated the ladder, was reachable from
+ * no wrapper, was passed by no call site, and failed the touch minimum on a
+ * mobile surface. It existed only to be asserted against in its own test.
  */
-export type ButtonSize = "sm" | "md" | "lg";
+export type ButtonSize = "md" | "lg";
 
 export interface ButtonProps
   extends Omit<ButtonHTMLAttributes<HTMLButtonElement>, "className"> {
@@ -44,7 +46,6 @@ export interface ButtonProps
 
 /** Height and padding only — the label size is decided by the variant. */
 const SIZE: Record<ButtonSize, string> = {
-  sm: "h-8 px-md gap-xs",
   md: "h-10 px-l gap-s",
   lg: "h-12 px-7 gap-s",
 };
@@ -69,19 +70,22 @@ const VARIANT: Record<ButtonVariant, string> = {
  * A white label on the seed is only legible at large-text size, so `filled`
  * takes 16px semibold at every height. `destructive` fills with E40, which
  * clears 4.5:1 under white and needs no such pin.
+ *
+ * Every other variant is label-large. This used to vary by size, purely to
+ * give `sm` a 13px label — the one off-scale font size in the system. With
+ * `sm` gone it is a constant.
  */
-const LABEL: Record<ButtonVariant, (size: ButtonSize) => string> = {
-  filled: () => "text-[16px] tracking-[0.1px]",
-  tonal: (s) => (s === "sm" ? "text-[13px] tracking-[0.1px]" : "text-label-large"),
-  outlined: (s) => (s === "sm" ? "text-[13px] tracking-[0.1px]" : "text-label-large"),
-  elevated: (s) => (s === "sm" ? "text-[13px] tracking-[0.1px]" : "text-label-large"),
-  text: (s) => (s === "sm" ? "text-[13px] tracking-[0.1px]" : "text-label-large"),
-  destructive: (s) => (s === "sm" ? "text-[13px] tracking-[0.1px]" : "text-label-large"),
+const LABEL: Record<ButtonVariant, string> = {
+  filled: "text-[16px] tracking-[0.1px]",
+  tonal: "text-label-large",
+  outlined: "text-label-large",
+  elevated: "text-label-large",
+  text: "text-label-large",
+  destructive: "text-label-large",
 };
 
 /** `text` hugs its label rather than sitting in a slab. */
 const TEXT_PADDING: Record<ButtonSize, string> = {
-  sm: "px-s",
   md: "px-s",
   lg: "px-md",
 };
@@ -102,7 +106,7 @@ export default function Button({
     <button
       type={type}
       disabled={disabled}
-      className={`inline-flex items-center justify-center rounded-sm font-display font-semibold whitespace-nowrap transition duration-100 ease-out active:scale-[0.97] disabled:cursor-not-allowed disabled:border-transparent disabled:bg-on-surface-disabled disabled:text-on-surface-label-disabled disabled:shadow-none disabled:brightness-100 disabled:active:scale-100 ${SIZE[size]} ${padding} ${LABEL[variant](size)} ${VARIANT[variant]} ${fullWidth ? "w-full" : ""} ${className}`}
+      className={`inline-flex items-center justify-center rounded-sm font-display font-semibold whitespace-nowrap transition duration-100 ease-out active:scale-[0.97] disabled:cursor-not-allowed disabled:border-transparent disabled:bg-on-surface-disabled disabled:text-on-surface-label-disabled disabled:shadow-none disabled:brightness-100 disabled:active:scale-100 ${SIZE[size]} ${padding} ${LABEL[variant]} ${VARIANT[variant]} ${fullWidth ? "w-full" : ""} ${className}`}
       {...rest}
     >
       {children}
