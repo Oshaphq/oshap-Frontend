@@ -58,7 +58,7 @@ export default function RestaurantsPage() {
           placeholder="Search name or email..."
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          className="px-md py-s rounded-sm border border-outline-variant bg-surface-container-low text-body-medium text-on-surface placeholder:text-outline outline-none focus:border-primary transition-colors flex-1 min-w-[180px] max-w-[320px]"
+          className="px-md py-s rounded-sm border border-outline-variant bg-surface-container-low text-body-medium text-on-surface placeholder:text-on-surface-placeholder outline-none focus:border-primary transition-colors flex-1 min-w-[180px] max-w-[320px]"
         />
         <Select
           aria-label="Filter by subscription tier"

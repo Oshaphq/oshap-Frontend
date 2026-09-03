@@ -113,7 +113,7 @@ export default function AuthGate() {
           </p>
 
           <input
-            className={`w-full px-md py-md rounded-sm bg-surface-container-low border-2 text-body-large text-on-surface placeholder:text-outline outline-none transition-colors ${error ? "border-error" : "border-outline-variant focus:border-primary"}`}
+            className={`w-full px-md py-md rounded-sm bg-surface-container-low border-2 text-body-large text-on-surface placeholder:text-on-surface-placeholder outline-none transition-colors ${error ? "border-error" : "border-outline-variant focus:border-primary"}`}
             // Not type="email": most staff sign in with a phone number, and
             // the browser would reject one as malformed before we ever ask.
             type="text"
@@ -139,7 +139,7 @@ export default function AuthGate() {
                 setPassword(e.target.value);
                 setError("");
               }}
-              className={`w-full px-md py-md rounded-sm bg-surface-container-low border-2 text-body-large text-on-surface placeholder:text-outline outline-none transition-colors pr-12 ${error ? "border-error" : "border-outline-variant focus:border-primary"}`}
+              className={`w-full px-md py-md rounded-sm bg-surface-container-low border-2 text-body-large text-on-surface placeholder:text-on-surface-placeholder outline-none transition-colors pr-12 ${error ? "border-error" : "border-outline-variant focus:border-primary"}`}
               required
             />
             <button

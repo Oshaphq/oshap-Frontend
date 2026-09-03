@@ -183,7 +183,7 @@ export default function AlertCenter() {
             <span className="text-label-large font-semibold font-display">
               {a.title}
             </span>
-            <p className="text-label-medium text-outline-variant">{a.body}</p>
+            <p className="text-label-medium text-on-surface-variant">{a.body}</p>
           </div>
         </div>
       ))}

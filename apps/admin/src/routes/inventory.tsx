@@ -21,7 +21,7 @@ import {
 import QueryError from "../components/QueryError";
 
 const inputClass =
-  "px-md py-s rounded-sm bg-surface-container-low border border-outline-variant text-body-medium text-on-surface placeholder:text-outline outline-none focus:border-primary transition-colors";
+  "px-md py-s rounded-sm bg-surface-container-low border border-outline-variant text-body-medium text-on-surface placeholder:text-on-surface-placeholder outline-none focus:border-primary transition-colors";
 
 /**
  * Staff-facing wording for the reasons stock moves. The `value` is the

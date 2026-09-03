@@ -360,7 +360,7 @@ function OrdersView({ tableId }: { tableId: string }) {
               <span className="text-label-large font-semibold font-display text-inverse-on-surface">
                 See what others are ordering
               </span>
-              <span className="text-label-medium text-outline-variant truncate">
+              <span className="text-label-medium text-on-surface-variant truncate">
                 {otherItemNames.join(", ")}
               </span>
             </div>

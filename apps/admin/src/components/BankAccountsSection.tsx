@@ -11,7 +11,7 @@ import { PrimaryButton, SecondaryButton, toast } from "@oshap/shared/ui";
 const EMPTY_DRAFT = { bank_name: "", account_number: "", account_name: "" };
 
 const inputClass =
-  "w-full px-md py-s rounded-sm bg-surface-container-low border border-outline-variant text-body-medium text-on-surface placeholder:text-outline outline-none focus:border-primary transition-colors disabled:opacity-50 disabled:cursor-not-allowed";
+  "w-full px-md py-s rounded-sm bg-surface-container-low border border-outline-variant text-body-medium text-on-surface placeholder:text-on-surface-placeholder outline-none focus:border-primary transition-colors disabled:opacity-50 disabled:cursor-not-allowed";
 const labelClass = "block text-body-medium font-semibold text-on-surface mb-xs";
 
 /**

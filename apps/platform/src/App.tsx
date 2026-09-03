@@ -96,7 +96,7 @@ function PlatformLogin({ onLogin }: { onLogin: () => void }) {
             setToken(e.target.value);
             setError("");
           }}
-          className={`w-full px-md py-md rounded-sm bg-surface-container-low border-2 text-body-large text-on-surface placeholder:text-outline outline-none transition-colors ${
+          className={`w-full px-md py-md rounded-sm bg-surface-container-low border-2 text-body-large text-on-surface placeholder:text-on-surface-placeholder outline-none transition-colors ${
             error ? "border-error" : "border-outline-variant focus:border-primary"
           }`}
         />

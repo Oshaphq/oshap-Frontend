@@ -114,7 +114,7 @@ export default function HistoryPage() {
             setTableFilter(e.target.value.toUpperCase());
             setPage(1);
           }}
-          className="flex-1 px-md py-md rounded-sm bg-surface-container-low border border-outline-variant text-body-medium text-on-surface placeholder:text-outline outline-none focus:border-primary transition-colors"
+          className="flex-1 px-md py-md rounded-sm bg-surface-container-low border border-outline-variant text-body-medium text-on-surface placeholder:text-on-surface-placeholder outline-none focus:border-primary transition-colors"
         />
         <input
           type="date"
