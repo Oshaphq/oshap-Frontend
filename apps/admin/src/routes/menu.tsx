@@ -24,6 +24,7 @@ import {
   PrimaryButton,
   SecondaryButton,
   Select,
+  TextField,
   toast,
 } from "@oshap/shared/ui";
 import QueryError from "../components/QueryError";
@@ -738,21 +739,18 @@ function MenuItemForm({
     }
   };
 
-  const inputClass =
-    "px-md py-s rounded-sm bg-surface-container-low border border-outline-variant text-body-medium text-on-surface placeholder:text-on-surface-placeholder outline-none focus:border-primary transition-colors";
-
   return (
     <div className="rounded-lg bg-surface-container-low p-l flex flex-col gap-md border border-primary">
       <h3 className="font-bold text-on-surface">{heading}</h3>
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-s">
-        <input
-          className={inputClass}
+        <TextField
+          aria-label="Name"
           placeholder="Name"
           value={form.name}
           onChange={(e) => setForm({ ...form, name: e.target.value })}
         />
-        <input
-          className={inputClass}
+        <TextField
+          aria-label="Price in naira"
           placeholder="Price in ₦ (e.g. 2500)"
           type="number"
           value={form.price}
@@ -767,8 +765,8 @@ function MenuItemForm({
             <option key={c}>{c}</option>
           ))}
         </Select>
-        <input
-          className={inputClass}
+        <TextField
+          aria-label="Description"
           placeholder="Description"
           value={form.description}
           onChange={(e) => setForm({ ...form, description: e.target.value })}
@@ -794,8 +792,8 @@ function MenuItemForm({
         >
           {uploadImage.isPending ? "Uploading..." : "Upload Image"}
         </button>
-        <input
-          className={`w-full ${inputClass}`}
+        <TextField
+          aria-label="Image URL"
           placeholder="Or paste image URL"
           value={form.image_url}
           onChange={(e) => setForm({ ...form, image_url: e.target.value })}

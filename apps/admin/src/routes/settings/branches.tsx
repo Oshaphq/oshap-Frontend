@@ -6,12 +6,15 @@ import {
 } from "@oshap/shared/hooks";
 import { errorMessage } from "@oshap/shared";
 import type { RestaurantBranch } from "@oshap/shared";
-import { PrimaryButton, SecondaryButton, QueryError, toast } from "@oshap/shared/ui";
+import {
+  PrimaryButton,
+  SecondaryButton,
+  QueryError,
+  TextField,
+  toast,
+} from "@oshap/shared/ui";
 import { useAuth } from "../../context/AuthContext";
 
-const inputClass =
-  "w-full px-md py-s rounded-sm bg-surface-container-low border border-outline-variant text-body-medium text-on-surface placeholder:text-on-surface-placeholder outline-none focus:border-primary transition-colors";
-const labelClass = "block text-body-medium font-semibold text-on-surface mb-xs";
 
 const EMPTY = { name: "", address: "", operating_hours: "", table_count: "" };
 
@@ -160,55 +163,46 @@ export default function BranchesSettings() {
             {editing ? `Edit ${editing.name}` : "New branch"}
           </h4>
 
-          <div>
-            <label className={labelClass}>Name</label>
-            <input
-              className={inputClass}
-              value={form.name}
-              onChange={(e) => setForm({ ...form, name: e.target.value })}
-              placeholder="Ikeja"
-            />
-            <p className="text-label-small text-on-surface-variant mt-xs">
-              What staff will see in the switcher. Somewhere recognisable beats
-              something formal — &ldquo;Ikeja&rdquo;, not &ldquo;Branch 2&rdquo;.
-            </p>
-          </div>
+          <TextField
+            label="Name"
+            value={form.name}
+            onChange={(e) => setForm({ ...form, name: e.target.value })}
+            placeholder="Ikeja"
+            hint={
+              <>
+                What staff will see in the switcher. Somewhere recognisable
+                beats something formal — &ldquo;Ikeja&rdquo;, not
+                &ldquo;Branch 2&rdquo;.
+              </>
+            }
+          />
 
-          <div>
-            <label className={labelClass}>Address</label>
-            <input
-              className={inputClass}
-              value={form.address}
-              onChange={(e) => setForm({ ...form, address: e.target.value })}
-              placeholder="12 Allen Avenue, Ikeja, Lagos"
-            />
-          </div>
+          <TextField
+            label="Address"
+            value={form.address}
+            onChange={(e) => setForm({ ...form, address: e.target.value })}
+            placeholder="12 Allen Avenue, Ikeja, Lagos"
+          />
 
-          <div>
-            <label className={labelClass}>Opening hours</label>
-            <input
-              className={inputClass}
-              value={form.operating_hours}
-              onChange={(e) => setForm({ ...form, operating_hours: e.target.value })}
-              placeholder="Mon–Sat, 11am–11pm"
-            />
-          </div>
+          <TextField
+            label="Opening hours"
+            value={form.operating_hours}
+            onChange={(e) =>
+              setForm({ ...form, operating_hours: e.target.value })
+            }
+            placeholder="Mon–Sat, 11am–11pm"
+          />
 
           {!editing && (
-            <div>
-              <label className={labelClass}>Number of tables</label>
-              <input
-                className={`${inputClass} max-w-[10rem]`}
-                value={form.table_count}
-                onChange={(e) => setForm({ ...form, table_count: e.target.value })}
-                placeholder="12"
-                inputMode="numeric"
-              />
-              <p className="text-label-small text-on-surface-variant mt-xs">
-                Creates them ready to print QR codes for. You can add or remove
-                tables afterwards.
-              </p>
-            </div>
+            <TextField
+              label="Number of tables"
+              className="max-w-[10rem]"
+              value={form.table_count}
+              onChange={(e) => setForm({ ...form, table_count: e.target.value })}
+              placeholder="12"
+              inputMode="numeric"
+              hint="Creates them ready to print QR codes for. You can add or remove tables afterwards."
+            />
           )}
 
           <div className="flex gap-s justify-end pt-s">
