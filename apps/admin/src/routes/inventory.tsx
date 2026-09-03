@@ -459,7 +459,7 @@ function AdjustDialog({
 
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center bg-scrim backdrop-blur-sm p-md">
-      <div className="w-full max-w-[440px] rounded-lg bg-surface-container-high p-l flex flex-col gap-md border border-outline-variant shadow-xl">
+      <div className="w-full max-w-[440px] rounded-xl bg-surface-container-high p-l flex flex-col gap-md border border-outline-variant shadow-xl">
         <div className="flex flex-col gap-0.5">
           <h3 className="font-display text-title-medium font-semibold text-on-surface">
             {ingredient.name}
@@ -571,7 +571,7 @@ function NewIngredientDialog({ onClose }: { onClose: () => void }) {
 
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center bg-scrim backdrop-blur-sm p-md">
-      <div className="w-full max-w-[440px] rounded-lg bg-surface-container-high p-l flex flex-col gap-md border border-outline-variant shadow-xl">
+      <div className="w-full max-w-[440px] rounded-xl bg-surface-container-high p-l flex flex-col gap-md border border-outline-variant shadow-xl">
         <h3 className="font-display text-title-medium font-semibold text-on-surface">
           Add ingredient
         </h3>
@@ -695,7 +695,7 @@ function EditIngredientDialog({
 
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center bg-scrim backdrop-blur-sm p-md">
-      <div className="w-full max-w-[440px] rounded-lg bg-surface-container-high p-l flex flex-col gap-md border border-outline-variant shadow-xl">
+      <div className="w-full max-w-[440px] rounded-xl bg-surface-container-high p-l flex flex-col gap-md border border-outline-variant shadow-xl">
         <div className="flex flex-col gap-0.5">
           <h3 className="font-display text-title-medium font-semibold text-on-surface">
             Edit {ingredient.name}

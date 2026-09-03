@@ -251,8 +251,16 @@ describe("the notes field in the detail sheet", () => {
     expect(notes.className).toContain("rounded-sm");
     // `outline: none` is forbidden outright — it removes the focus ring.
     expect(notes.className).not.toContain("outline-none");
-    // text-outline measures 3.65:1 on this container and fails AA.
-    expect(notes.className).toContain("placeholder:text-on-surface-variant");
+    // Never the boundary tone: `outline` measures 4.03:1 light and 3.84:1 dark
+    // on surface-container, and fails AA both ways. `on-surface-placeholder`
+    // is the role that exists for this — 4.73:1 and 4.53:1 here.
+    //
+    // Note the dark figure. The role is specced against surface-container-low
+    // (4.88:1), and this field sits one ladder step up inside the sheet, which
+    // spends most of its headroom. It passes, but it is the tightest pair in
+    // the system: re-check it if the grey ramp ever moves.
+    expect(notes.className).toContain("placeholder:text-on-surface-placeholder");
+    expect(notes.className).not.toContain("placeholder:text-outline");
     // It grows instead of scrolling, so centring never costs the guest text.
     expect(notes.className).toContain("overflow-hidden");
     expect(notes.className).toContain("resize-none");

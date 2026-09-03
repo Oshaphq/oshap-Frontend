@@ -7,8 +7,8 @@ import type { ButtonHTMLAttributes } from "react";
  *
  * `filled` is the one place the brand fill is still allowed under a white
  * glyph: an icon is a UI component, held to WCAG's 3:1 non-text bar, and
- * #f56500 clears it at 3.11:1. A *labelled* button in the same position would
- * need `primary-action` instead — see {@link Button}.
+ * #f56500 clears it at 3.11:1. A *labelled* button in the same position needs
+ * a 16px semibold label to clear the same bar — see {@link Button}.
  */
 export type IconButtonVariant = "standard" | "filled" | "tonal" | "outlined";
 

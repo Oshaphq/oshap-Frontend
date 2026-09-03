@@ -281,7 +281,7 @@ export default function ModifierSheet({ item, onClose, onAdd, remaining = null }
               rows={1}
               maxLength={140}
               placeholder="e.g. no onions, well done"
-              className="w-full px-md py-md rounded-sm bg-surface-container border border-outline-variant text-body-medium text-on-surface placeholder:text-on-surface-variant focus:border-primary transition-colors resize-none overflow-hidden"
+              className="w-full px-md py-md rounded-sm bg-surface-container border border-outline text-body-medium text-on-surface placeholder:text-on-surface-placeholder focus:border-primary transition-colors resize-none overflow-hidden"
             />
           </div>
         </div>

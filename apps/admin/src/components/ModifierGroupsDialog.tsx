@@ -61,7 +61,7 @@ export default function ModifierGroupsDialog({ onClose }: { onClose: () => void 
 
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center bg-scrim backdrop-blur-sm p-md">
-      <div className="w-full max-w-[640px] max-h-[88vh] rounded-lg bg-surface-container-high flex flex-col border border-outline-variant shadow-xl">
+      <div className="w-full max-w-[640px] max-h-[88vh] rounded-xl bg-surface-container-high flex flex-col border border-outline-variant shadow-xl">
         <header className="flex items-start justify-between gap-md p-l border-b border-outline-variant">
           <div className="flex flex-col gap-0.5">
             <h2 className="font-display text-title-medium font-semibold text-on-surface">

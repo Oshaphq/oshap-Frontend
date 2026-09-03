@@ -2,7 +2,11 @@ import type { ReactNode } from "react";
 import Button from "./Button";
 
 /**
- * The one primary action per view. Fills with `primary-action`, not the brand.
+ * The one primary action per view. Fills with the seed `primary`.
+ *
+ * v2 derived a darker `primary-action` to reach 4.5:1; v3 deleted it and pinned
+ * the label to 16px semibold instead, which is why `Button` sets that size on
+ * `filled` at every height.
  *
  * Kept as a named wrapper over {@link Button} so the ~100 existing call sites
  * do not all move in the DS v2 migration. New code should reach for `Button`
