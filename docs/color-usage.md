@@ -13,11 +13,14 @@ Never hardcode a hex. Never use a raw palette step as a surface. Tokens swap on
 
 ## Method
 
-Five key palettes come out of the seed `#F56500` in HCT (H 43.54 · C 75.92 · T 60.53)
+Three accent palettes come out of the seed `#F56500` in HCT (H 43.54 · C 75.92 · T 60.53)
 through the M3 reference solver, plus fixed-hue error, success and warning run through
 the same solver. A role names a palette and a tone. **Ratios are measured after the
 fact, not searched for** — v2 walked a candidate list until something passed, which
 produced right answers by a route nobody could re-derive.
+
+**The neutrals are the exception, and it is deliberate.** They are not solved from the
+seed at all — see [Surfaces](#surfaces).
 
 Regenerating is a build step, not a runtime one:
 
@@ -31,9 +34,10 @@ Then override the single role the solver would get differently — primary stays
 Ship flat custom properties either way. The same generator runs on tenant save with the
 seed swapped, so there is no second implementation.
 
-**Step numbers mean HCT tone.** They are not the v2 numbers. There is no tone 99, and
-the neutral palette carries six extra tones (4, 6, 12, 17, 22, 24, 87, 92, 94, 96) that
-exist only to give the surface ladder its steps.
+**Step numbers mean HCT tone — for the accent palettes only.** They are not the v2
+numbers, and there is no tone 99. The neutral steps keep their source names (`N0`…`N1000`,
+`DN0`…`DN1100`) because they are positions in a fixed ramp rather than tones, and a tone
+number there would be a lie.
 
 ---
 
@@ -71,7 +75,7 @@ A focus ring is a UI component, so the 3:1 exception covers it without qualifica
 | `error-container` | E90 `#FFDAD5` / E10 — 12.96:1 | E30 `#960004` / E90 — 7.07:1 |
 | `success-container` | Su90 `#78FBB6` / Su10 — 13.06:1 | Su20 `#003A1E` / Su90 — 10.02:1 |
 | `warning-container` | Wa90 `#FFDDAF` / Wa10 — 13.14:1 | Wa30 `#653E00` / Wa90 — 7.23:1 |
-| `inverse-surface` | N20 `#362F2C` / N95 — 11.57:1 | N90 `#EDE0DB` / N20 |
+| `inverse-surface` | `grey-30` `#2E2E2E` / `grey-95` — 11.78:1 | `grey-88` `#D7D7D7` / `grey-21` |
 
 **The `secondary-container` departure.** M3 says S90, which at chroma 16 is
 byte-identical to P90 `#FFDBCC` — the nav pill and the primary tag would be the same
@@ -89,29 +93,50 @@ it with a label or an icon.
 
 ## Surfaces
 
-**Neutrals are warm.** Oshap grey is gone; surfaces carry the seed hue at chroma 4. This
-is the single most visible change in the apps, and every screenshot in every doc looks
-different because of it.
+**Neutrals are a true neutral — built from black and white in OKLCH at zero chroma.**
+This is the one place v3 does not use HCT. Zero chroma means `a = b = 0`, and each
+OKLab→linear-sRGB row sums to exactly 1, so **`R = G = B` for every step**. The greys are
+colourless in the literal sense — not "cool grey", not "warm grey".
+
+That is the whole point: **a colourless surface sits under any brand palette.** A warm
+accent on a cool neutral fights it; on a true neutral it reads as the brand. Surfaces,
+text and borders are fixed and shared by every tenant, so the seed only ever reaches
+accents, and two tenants side by side have the same page under different brands.
+
+Steps are named by OKLCH lightness, because that is what they are: `grey-64` is L=64%.
+Regenerating is one line, `enc((L/100)³)`, with no palette solver involved:
+
+```js
+const enc = c => c <= 0.0031308 ? 12.92*c : 1.055*Math.pow(c, 1/2.4) - 0.055;
+const grey = L => { const v = Math.round(enc((L/100)**3)*255); return [v,v,v]; };
+```
+
+**Light and dark are one family.** A uniform, symmetric ramp does not need a two-family
+split — the roles simply pick different steps.
 
 | Level | Light | Dark |
 |---|---|---|
-| `surface-container-lowest` | N100 `#FFFFFF` | N4 `#120D0B` |
-| `surface` | N98 `#FFF8F5` | N6 `#181210` |
-| `surface-container-low` | N96 `#FEF1EC` | N10 `#201A18` |
-| `surface-container` | N94 `#F8EBE7` | N12 `#251E1C` |
-| `surface-container-high` | N92 `#F2E6E1` | N17 `#2F2926` |
-| `surface-container-highest` | N90 `#EDE0DB` | N22 `#3A3330` |
-| `surface-dim` | N87 `#E4D7D3` | N6 `#181210` |
-| `surface-bright` | N98 `#FFF8F5` | N24 `#3F3835` |
-| `on-surface` | N10 `#201A18` — 16.36:1 | N90 `#EDE0DB` — 14.38:1 |
-| `on-surface-variant` | NV30 `#52443D` — 8.88:1 | NV80 `#D7C2BA` — 10.87:1 |
-| `outline` | NV50 `#85736C` — 4.29:1 | NV60 `#A08D85` — 5.86:1 |
-| `outline-variant` | NV80 `#D7C2BA` | NV30 `#52443D` |
+| `surface-container-lowest` | `grey-100` `#FFFFFF` | `grey-12` `#060606` |
+| `surface` | `grey-99` `#FCFCFC` | `grey-17` `#0F0F0F` |
+| `surface-container-low` | `grey-97` `#F5F5F5` | `grey-21` `#181818` |
+| `surface-container` | `grey-95` `#EEEEEE` | `grey-24` `#1F1F1F` |
+| `surface-container-high` | `grey-93` `#E8E8E8` | `grey-28` `#292929` |
+| `surface-container-highest` | `grey-91` `#E1E1E1` | `grey-32` `#333333` |
+| `surface-dim` | `grey-88` `#D7D7D7` | `grey-12` `#060606` |
+| `surface-bright` | `grey-99` `#FCFCFC` | `grey-37` `#404040` |
+| `on-surface` | `grey-30` `#2E2E2E` — 13.25:1 | `grey-88` `#D7D7D7` — 13.32:1 |
+| `on-surface-variant` | `grey-46` `#585858` — 6.92:1 | `grey-70` `#9E9E9E` — 7.16:1 |
+| `outline` | `grey-56` `#747474` — 4.52:1 | `grey-58` `#7A7A7A` — 4.46:1 |
+| `outline-variant` | `grey-88` `#D7D7D7` | `grey-32` `#333333` |
 
 **Elevation is a tone change, not a shadow.** Shadows are reserved for things that
-actually float above the page. The light ladder steps in twos because the eye cannot
-separate 98 from 96 at a glance — that is the point: it reads as one warm sheet with
+actually float above the page. The light ladder steps in small increments because the eye
+cannot separate them at a glance — that is the point: it reads as one sheet with
 structure in it.
+
+`outline` clears **4.5:1 in both modes**, so an interactive boundary has real headroom
+rather than sitting exactly on the 3:1 bar. It is still a border tone — `on-surface-variant`
+is the one to reach for when text needs to be quiet.
 
 `outline` is for interactive borders; `outline-variant` for decorative dividers.
 
@@ -257,8 +282,8 @@ Elevation is a **tone change, not a shadow**. Shadows are for things that genuin
 |---|---|
 | Follow the ladder: page `surface` → card `surface-container-low` → nested `surface-container` → dialog `surface-container-high` | Skip levels to force contrast — the ladder steps in twos on purpose |
 | Step **one level up** on hover | Add a shadow to fake depth on a static block |
-| Use `surface-container-lowest` when something must be pure white | Use a raw palette step (`bg-neutral-90`) as a surface |
-| Let the warm neutral show — it is the system, not a tint bug | Mix a grey from outside the palette into a surface |
+| Use `surface-container-lowest` when something must be pure white | Use a raw palette step (`bg-grey-91`) as a surface |
+| Keep every surface on the shared ramp — it is what makes tenants comparable | Tint a surface toward the tenant's brand, or mix in a grey from outside the ramp |
 
 ### on-surface / on-surface-variant
 
@@ -336,7 +361,7 @@ the seed fill needs no size adjustment where a text label does.
   series than that needs its own scale, not more design-system roles.
 - **Tenant seeds near red.** A tenant seeded close to H 25 gets a primary near the fixed
   error hue, and a red "Place Order" beside a red "Void" is a genuine confusion. Nothing
-  in the algorithm prevents it. Unresolved in v3.
+  in the algorithm prevents it. Unresolved.
 
 ---
 
