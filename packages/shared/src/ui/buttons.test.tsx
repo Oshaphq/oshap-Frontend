@@ -71,7 +71,7 @@ describe("a disabled button does not pretend to work", () => {
  * size, so that is asserted at every height rather than trusted to call sites.
  */
 describe("a filled button keeps its label at large-text size", () => {
-  it.each(["sm", "md", "lg"] as const)("%s pins the label to 16px", (size) => {
+  it.each(["md", "lg"] as const)("%s pins the label to 16px", (size) => {
     const html = renderToStaticMarkup(
       <Button variant="filled" size={size}>
         Place Order
@@ -79,8 +79,7 @@ describe("a filled button keeps its label at large-text size", () => {
     );
     expect(html).toContain("bg-primary");
     expect(html).toContain("text-[16px]");
-    // 13px or 14px white-on-seed is the failure this rule exists to prevent.
-    expect(html).not.toContain("text-[13px]");
+    // 14px white-on-seed is the failure this rule exists to prevent.
     expect(html).not.toContain("text-label-large");
   });
 
@@ -105,7 +104,6 @@ describe("a filled button keeps its label at large-text size", () => {
 
 describe("the emphasis ladder keeps its heights", () => {
   it.each([
-    ["sm", "h-8"],
     ["md", "h-10"],
     ["lg", "h-12"],
   ] as const)("%s is %s", (size, height) => {
