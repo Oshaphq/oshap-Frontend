@@ -1,3 +1,5 @@
+import { Chip } from "@oshap/shared/ui";
+
 interface Category {
   name: string;
   image?: string;
@@ -9,6 +11,13 @@ interface CategoryTabsProps {
   onSelect: (category: string) => void;
 }
 
+/**
+ * The menu's category row.
+ *
+ * Named "tabs", built from chips, and correctly so: these are toggles in a
+ * scrolling row, not a tablist. `Chip` sets `aria-pressed`; a real tab would
+ * need `aria-selected` and roving focus, which this has never had.
+ */
 export default function CategoryTabs({
   categories,
   activeCategory,
@@ -19,24 +28,15 @@ export default function CategoryTabs({
       aria-label="Menu categories"
       className="flex justify-between py-md gap-s overflow-x-auto [scrollbar-width:none] [-webkit-overflow-scrolling:touch] [&::-webkit-scrollbar]:hidden"
     >
-      {categories.map((cat) => {
-        const active = cat.name === activeCategory;
-        return (
-          <button
-            key={cat.name}
-            type="button"
-            aria-pressed={active}
-            onClick={() => onSelect(cat.name)}
-            className={`shrink-0 py-s px-md rounded-full transition-colors text-label-large ${
-              active
-                ? "bg-primary text-on-primary"
-                : "bg-surface-container-high text-on-surface-variant border border-outline-variant/30 hover:bg-surface-container-highest"
-            }`}
-          >
-            {cat.name}
-          </button>
-        );
-      })}
+      {categories.map((cat) => (
+        <Chip
+          key={cat.name}
+          selected={cat.name === activeCategory}
+          onClick={() => onSelect(cat.name)}
+        >
+          {cat.name}
+        </Chip>
+      ))}
     </nav>
   );
 }

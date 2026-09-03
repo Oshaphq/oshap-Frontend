@@ -1,5 +1,7 @@
 import { formatCurrency } from "@oshap/shared";
 import type { Bill, BillState } from "@oshap/shared";
+import { StatusBadge } from "@oshap/shared/ui";
+import type { StatusTone } from "@oshap/shared/ui";
 
 /**
  * A table's open bills, one row each.
@@ -14,27 +16,17 @@ import type { Bill, BillState } from "@oshap/shared";
  * would be a guess where "2 bills" is a fact.
  */
 
-const STATE_META: Record<BillState, { label: string; cls: string }> = {
-  claimed: {
-    label: "Says paid",
-    cls: "bg-warning text-on-warning",
-  },
-  part: {
-    label: "Part paid",
-    cls: "bg-warning-container text-on-warning-container",
-  },
-  unpaid: {
-    label: "Owes",
-    cls: "bg-error-container text-on-error-container",
-  },
-  settled: {
-    label: "Paid",
-    cls: "bg-success-container text-on-success-container",
-  },
-  unknown: {
-    label: "Unclear",
-    cls: "bg-surface-container-high text-on-surface-variant",
-  },
+/**
+ * `claimed` was a solid `bg-warning` fill rather than the container, to shout
+ * louder than the rest. It is a chip, and the rules assign chips the container
+ * roles — so it now matches its siblings and carries its urgency in the word.
+ */
+const STATE_META: Record<BillState, { label: string; tone: StatusTone }> = {
+  claimed: { label: "Says paid", tone: "warning" },
+  part: { label: "Part paid", tone: "warning" },
+  unpaid: { label: "Owes", tone: "error" },
+  settled: { label: "Paid", tone: "success" },
+  unknown: { label: "Unclear", tone: "neutral" },
 };
 
 /**
@@ -108,11 +100,7 @@ export default function TableBills({ bills, renderActions }: Props) {
                     bill.state === "settled" ? bill.total : bill.balanceDue,
                   )}
                 </span>
-                <span
-                  className={`px-s py-0.5 rounded-full font-bold text-label-small uppercase tracking-wider whitespace-nowrap ${meta.cls}`}
-                >
-                  {meta.label}
-                </span>
+                <StatusBadge tone={meta.tone}>{meta.label}</StatusBadge>
               </div>
             </div>
 
