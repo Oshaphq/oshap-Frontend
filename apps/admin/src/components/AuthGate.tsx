@@ -230,7 +230,7 @@ export default function AuthGate() {
         <nav className="flex items-center justify-between gap-s px-s sm:px-md py-s">
           {/* Hamburger — mobile & tablet only */}
           <button
-            className="lg:hidden w-9 h-9 flex items-center justify-center rounded-sm text-on-surface-variant hover:bg-surface-container-high transition-colors shrink-0"
+            className="lg:hidden w-10 h-10 flex items-center justify-center rounded-sm text-on-surface-variant hover:bg-surface-container-high transition-colors shrink-0"
             onClick={() => setMenuOpen((o) => !o)}
             aria-label={menuOpen ? "Close menu" : "Open menu"}
           >
@@ -301,7 +301,7 @@ export default function AuthGate() {
             )}
             <button
               onClick={handleLogout}
-              className="w-9 h-9 flex items-center justify-center rounded-full bg-surface-container-high text-on-surface-variant border border-transparent hover:bg-error-container hover:text-on-error-container transition-colors"
+              className="w-10 h-10 flex items-center justify-center rounded-full bg-surface-container-high text-on-surface-variant border border-transparent hover:bg-error-container hover:text-on-error-container transition-colors"
               title="Logout"
             >
               <i className="mgc_exit_line text-lg" />

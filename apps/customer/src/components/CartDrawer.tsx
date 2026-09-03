@@ -51,7 +51,7 @@ export default function CartDrawer({ tableId }: CartDrawerProps) {
             type="button"
             onClick={() => setIsCartOpen(false)}
             aria-label="Close cart"
-            className="w-9 h-9 flex items-center justify-center rounded-full bg-surface-container text-on-surface-variant hover:bg-surface-container-high transition-colors"
+            className="w-12 h-12 flex items-center justify-center rounded-full bg-surface-container text-on-surface-variant hover:bg-surface-container-high transition-colors"
           >
             <i className="mgc_close_line text-xl" />
           </button>

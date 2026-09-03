@@ -100,7 +100,7 @@ export default function RecipeDialog({ item, onClose }: Props) {
             type="button"
             onClick={onClose}
             aria-label="Close"
-            className="w-9 h-9 shrink-0 flex items-center justify-center rounded-full bg-surface-container text-on-surface-variant hover:bg-surface-container-highest transition-colors"
+            className="w-10 h-10 shrink-0 flex items-center justify-center rounded-full bg-surface-container text-on-surface-variant hover:bg-surface-container-highest transition-colors"
           >
             <i className="mgc_close_line text-xl" />
           </button>

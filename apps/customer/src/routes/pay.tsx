@@ -113,7 +113,7 @@ export default function PayPage() {
               type="button"
               onClick={() => navigate(`/menu?table=${tableId}`)}
               aria-label="Back"
-              className="w-9 h-9 flex items-center justify-center rounded-full bg-surface-container hover:bg-surface-container-high transition-colors"
+              className="w-12 h-12 flex items-center justify-center rounded-full bg-surface-container hover:bg-surface-container-high transition-colors"
             >
               <i className="mgc_left_line text-xl" />
             </button>
@@ -184,7 +184,7 @@ export default function PayPage() {
               type="button"
               onClick={() => navigate(`/menu?table=${tableId}`)}
               aria-label="Back"
-              className="w-9 h-9 flex items-center justify-center rounded-full bg-surface-container hover:bg-surface-container-high transition-colors"
+              className="w-12 h-12 flex items-center justify-center rounded-full bg-surface-container hover:bg-surface-container-high transition-colors"
             >
               <i className="mgc_left_line text-xl" />
             </button>
@@ -250,7 +250,7 @@ export default function PayPage() {
               type="button"
               onClick={() => navigate(`/menu?table=${tableId}`)}
               aria-label="Back"
-              className="w-9 h-9 flex items-center justify-center rounded-full bg-surface-container hover:bg-surface-container-high transition-colors"
+              className="w-12 h-12 flex items-center justify-center rounded-full bg-surface-container hover:bg-surface-container-high transition-colors"
             >
               <i className="mgc_left_line text-xl" />
             </button>
@@ -287,7 +287,7 @@ export default function PayPage() {
             type="button"
             onClick={() => navigate(`/menu?table=${tableId}`)}
             aria-label="Back"
-            className="w-9 h-9 flex items-center justify-center rounded-full bg-surface-container hover:bg-surface-container-high transition-colors"
+            className="w-12 h-12 flex items-center justify-center rounded-full bg-surface-container hover:bg-surface-container-high transition-colors"
           >
             <i className="mgc_left_line text-xl" />
           </button>
@@ -506,7 +506,7 @@ function DetailRow({
             type="button"
             onClick={onCopy}
             aria-label={`Copy ${label}`}
-            className={`shrink-0 w-9 h-9 flex items-center justify-center rounded-full transition-colors ${
+            className={`shrink-0 w-12 h-12 flex items-center justify-center rounded-full transition-colors ${
               copied
                 ? "bg-success-container text-on-success-container"
                 : "bg-surface-container hover:bg-surface-container-high text-on-surface-variant"
