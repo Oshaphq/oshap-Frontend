@@ -6,7 +6,7 @@ import {
   errorMessage,
 } from "@oshap/shared";
 import type { OrderWithItems } from "@oshap/shared";
-import { PrimaryButton, toast } from "@oshap/shared/ui";
+import { EmptyState, PrimaryButton, toast } from "@oshap/shared/ui";
 import QueryError from "../components/QueryError";
 import ServeDialog from "../components/ServeDialog";
 import { canAdvanceKitchenTickets } from "../permissions";
@@ -199,20 +199,21 @@ export default function KitchenPage() {
           </div>
         )}
         {orders.length === 0 ? (
-          <div className="flex flex-col items-center justify-center h-full gap-s text-center py-20">
-            <i className="mgc_knife_line text-5xl text-on-surface-variant" />
-            <span className="font-display text-title-medium font-semibold text-on-surface">
-              No orders yet
-            </span>
-            <p className="text-body-medium text-on-surface-variant">
-              {hiddenByStationFilter
+          <EmptyState
+            icon="mgc_knife_line"
+            title="No orders yet"
+            card={false}
+            className="h-full justify-center"
+            message={
+              hiddenByStationFilter
                 ? `${rawOrders.length} active order${rawOrders.length === 1 ? "" : "s"}, none for this station.`
-                : "Waiting for new orders..."}
-            </p>
+                : "Waiting for new orders..."
+            }
+          >
             {hiddenByStationFilter && !hasDrinksCategory && (
               <StationRoutingHint />
             )}
-          </div>
+          </EmptyState>
         ) : (
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-md items-start">
             <KitchenColumn

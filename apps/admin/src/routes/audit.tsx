@@ -7,7 +7,7 @@ import {
   formatApiDateTime,
 } from "@oshap/shared";
 import type { AuditLogEntry } from "@oshap/shared";
-import { Button, Select } from "@oshap/shared/ui";
+import { Button, EmptyState, Select } from "@oshap/shared/ui";
 import QueryError from "../components/QueryError";
 
 /**
@@ -155,17 +155,15 @@ export default function AuditPage() {
           <div className="oshap-spinner" />
         </div>
       ) : entries.length === 0 ? (
-        <div className="flex flex-col items-center gap-xs py-10 px-md text-center rounded-lg bg-surface-container-low">
-          <i className="mgc_history_line text-5xl text-on-surface-variant" />
-          <span className="font-display text-title-medium font-semibold text-on-surface">
-            Nothing recorded
-          </span>
-          <p className="text-body-medium text-on-surface-variant">
-            {action
+        <EmptyState
+          icon="mgc_history_line"
+          title="Nothing recorded"
+          message={
+            action
               ? "No entries of this kind yet."
-              : "Adjustments and payments will appear here as they happen."}
-          </p>
-        </div>
+              : "Adjustments and payments will appear here as they happen."
+          }
+        />
       ) : (
         <div className="bg-surface-container-low rounded-lg overflow-hidden">
           {entries.map((entry) => {

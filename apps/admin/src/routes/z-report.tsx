@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Link } from "react-router";
 import { formatCurrency, useAdminZReport } from "@oshap/shared";
 import type { PaymentMethod } from "@oshap/shared";
-import { Button } from "@oshap/shared/ui";
+import { Button, EmptyState } from "@oshap/shared/ui";
 import QueryError from "../components/QueryError";
 
 const METHOD_LABELS: Record<PaymentMethod, string> = {
@@ -78,15 +78,11 @@ export default function ZReportPage() {
           <div className="oshap-spinner" />
         </div>
       ) : !hasTakings ? (
-        <div className="flex flex-col items-center gap-xs py-10 px-md text-center rounded-lg bg-surface-container-low">
-          <i className="mgc_bill_line text-5xl text-on-surface-variant" />
-          <span className="font-display text-title-medium font-semibold text-on-surface">
-            Nothing settled on this date
-          </span>
-          <p className="text-body-medium text-on-surface-variant">
-            Orders appear here once they&rsquo;re paid for.
-          </p>
-        </div>
+        <EmptyState
+          icon="mgc_bill_line"
+          title="Nothing settled on this date"
+          message="Orders appear here once they&rsquo;re paid for."
+        />
       ) : (
         data && (
           <>
