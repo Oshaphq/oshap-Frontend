@@ -4,6 +4,7 @@ import {
   adminApi,
   getAdminRestaurantId,
   getAdminRestaurantName,
+  isMalformedPhone,
   useAdminBranches,
   useAdminKitchen,
 } from "@oshap/shared";
@@ -47,10 +48,27 @@ export default function AuthGate() {
   const handleLogin = async (e?: React.FormEvent) => {
     e?.preventDefault();
     setError("");
+
+    /**
+     * Shape, not identity.
+     *
+     * A malformed number and a wrong password both come back as one 401, so
+     * without this a manager retypes the password when the number was the
+     * problem. An email is never caught by this — see `isMalformedPhone`.
+     *
+     * Not normalized before sending: /auth/login canonicalizes the identifier
+     * itself, so the raw string is what the contract expects.
+     */
+    const identifier = email.trim();
+    if (isMalformedPhone(identifier)) {
+      setError("Enter a valid Nigerian phone number, or use your email.");
+      return;
+    }
+
     setIsLoggingIn(true);
 
     try {
-      const res = await adminApi.adminLoginEmail({ identifier: email, password });
+      const res = await adminApi.adminLoginEmail({ identifier, password });
       login(res);
     } catch (err: unknown) {
       if (err && typeof err === "object" && "status" in err && err.status === 401) {
@@ -116,8 +134,11 @@ export default function AuthGate() {
             className={`w-full px-md py-md rounded-sm bg-surface-container-low border-2 text-body-large text-on-surface placeholder:text-on-surface-placeholder outline-none transition-colors ${error ? "border-error" : "border-outline-variant focus:border-primary"}`}
             // Not type="email": most staff sign in with a phone number, and
             // the browser would reject one as malformed before we ever ask.
+            // No inputMode either — "email" opened a keyboard with no number
+            // row for the majority case, and "tel" would strip the letters the
+            // minority needs. The default keyboard is the only one that serves
+            // a field taking either.
             type="text"
-            inputMode="email"
             aria-label="Phone number or email"
             placeholder="Phone number or email"
             value={email}

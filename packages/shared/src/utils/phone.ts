@@ -58,6 +58,23 @@ export function looksLikePhone(identifier: string): boolean {
   return PHONE_SHAPED.test((identifier ?? "").trim());
 }
 
+/**
+ * Phone-shaped, but not a phone number.
+ *
+ * The one case a login form can reject on its own. An auth failure has to stay
+ * vague — saying which half was wrong lets a stranger check whether an account
+ * exists — but this is about the shape of what was typed, not whether it
+ * matches anything, so naming it leaks nothing.
+ *
+ * Returns false for an email, which is why `looksLikePhone` gates it: the
+ * backend picks the lookup column the same way, so an address is never refused
+ * for failing to be a number.
+ */
+export function isMalformedPhone(identifier: string): boolean {
+  const id = (identifier ?? "").trim();
+  return looksLikePhone(id) && tryNormalizePhone(id) === null;
+}
+
 /** `+2348031234567` → `0803 123 4567`, for display back to a merchant. */
 export function formatPhone(canonical: string): string {
   const match = /^\+234(\d{3})(\d{3})(\d{4})$/.exec(canonical ?? "");
