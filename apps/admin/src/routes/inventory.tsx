@@ -12,12 +12,7 @@ import {
   formatApiDateTime,
 } from "@oshap/shared";
 import type { StockReason, Ingredient } from "@oshap/shared";
-import {
-  PrimaryButton,
-  SecondaryButton,
-  Select,
-  toast,
-} from "@oshap/shared/ui";
+import { Button, PrimaryButton, SecondaryButton, Select, toast } from "@oshap/shared/ui";
 import QueryError from "../components/QueryError";
 
 const inputClass =
@@ -97,10 +92,10 @@ export default function InventoryPage() {
           </p>
         </div>
         <div className="flex items-center gap-s flex-wrap">
-          <SecondaryButton size="md" onClick={() => setShowLedger((v) => !v)}>
+          <Button variant="text" size="md" onClick={() => setShowLedger((v) => !v)}>
             <i className="mgc_history_line" />{" "}
             {showLedger ? "Hide" : "Movements"}
-          </SecondaryButton>
+          </Button>
           <PrimaryButton size="md" onClick={() => setShowNew(true)}>
             + Add ingredient
           </PrimaryButton>
@@ -389,23 +384,25 @@ function MovementsLedger() {
 
       {totalPages > 1 && (
         <div className="flex items-center justify-between gap-md">
-          <SecondaryButton
+          <Button
+            variant="outlined"
             size="md"
             onClick={() => setPage((p) => Math.max(1, p - 1))}
             disabled={page <= 1}
           >
             Previous
-          </SecondaryButton>
+          </Button>
           <span className="text-body-medium text-on-surface-variant tabular-nums">
             Page {page} of {totalPages}
           </span>
-          <SecondaryButton
+          <Button
+            variant="outlined"
             size="md"
             onClick={() => setPage((p) => p + 1)}
             disabled={page >= totalPages}
           >
             Next
-          </SecondaryButton>
+          </Button>
         </div>
       )}
     </section>

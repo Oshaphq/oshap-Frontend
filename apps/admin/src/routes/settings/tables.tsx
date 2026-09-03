@@ -6,7 +6,7 @@ import {
   useAdminSettings,
 } from "@oshap/shared/hooks";
 import { errorMessage, getAdminRestaurantId } from "@oshap/shared";
-import { PrimaryButton, SecondaryButton, toast } from "@oshap/shared/ui";
+import { Button, PrimaryButton, SecondaryButton, toast } from "@oshap/shared/ui";
 import TableQrDialog from "../../components/TableQrDialog";
 import QrPrintSheet, {
   type QrPrintRequest,
@@ -93,7 +93,8 @@ export default function TablesSettings() {
           {tables.length} table{tables.length !== 1 ? "s" : ""} configured
         </p>
         <div className="flex items-center gap-s">
-          <SecondaryButton
+          <Button
+            variant="text"
             size="md"
             onClick={() =>
               requestPrint(
@@ -103,7 +104,7 @@ export default function TablesSettings() {
             disabled={tables.length === 0}
           >
             <i className="mgc_print_line" /> Print QR Codes
-          </SecondaryButton>
+          </Button>
           <PrimaryButton size="md" onClick={() => setIsModalOpen(true)}>
             <i className="mgc_add_line" /> Add Table
           </PrimaryButton>

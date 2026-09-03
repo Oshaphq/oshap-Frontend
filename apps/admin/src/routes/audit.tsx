@@ -7,7 +7,7 @@ import {
   formatApiDateTime,
 } from "@oshap/shared";
 import type { AuditLogEntry } from "@oshap/shared";
-import { SecondaryButton, Select } from "@oshap/shared/ui";
+import { Button, Select } from "@oshap/shared/ui";
 import QueryError from "../components/QueryError";
 
 /**
@@ -256,23 +256,25 @@ export default function AuditPage() {
 
       {totalPages > 1 && (
         <div className="flex items-center justify-between gap-md">
-          <SecondaryButton
+          <Button
+            variant="outlined"
             size="md"
             onClick={() => setPage((p) => Math.max(1, p - 1))}
             disabled={page <= 1}
           >
             Previous
-          </SecondaryButton>
+          </Button>
           <span className="text-body-medium text-on-surface-variant tabular-nums">
             Page {page} of {totalPages}
           </span>
-          <SecondaryButton
+          <Button
+            variant="outlined"
             size="md"
             onClick={() => setPage((p) => p + 1)}
             disabled={page >= totalPages}
           >
             Next
-          </SecondaryButton>
+          </Button>
         </div>
       )}
     </main>

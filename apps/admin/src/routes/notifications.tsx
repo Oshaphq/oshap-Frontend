@@ -7,12 +7,7 @@ import {
 } from "@oshap/shared";
 import type { NotificationType } from "@oshap/shared";
 import { errorMessage } from "@oshap/shared";
-import {
-  PrimaryButton,
-  SecondaryButton,
-  Select,
-  toast,
-} from "@oshap/shared/ui";
+import { Button, PrimaryButton, SecondaryButton, Select, toast } from "@oshap/shared/ui";
 import QueryError from "../components/QueryError";
 import { NotificationRow, groupByTime } from "../components/NotificationBell";
 import { NOTIFICATION_META } from "../notificationCopy";
@@ -232,23 +227,25 @@ export default function Notifications() {
 
       {lastPage > 1 && (
         <div className="flex items-center justify-between gap-md">
-          <SecondaryButton
+          <Button
+            variant="outlined"
             size="md"
             disabled={page <= 1}
             onClick={() => setPage((p) => Math.max(1, p - 1))}
           >
             Previous
-          </SecondaryButton>
+          </Button>
           <span className="text-body-medium text-on-surface-variant tabular-nums">
             Page {page} of {lastPage}
           </span>
-          <SecondaryButton
+          <Button
+            variant="outlined"
             size="md"
             disabled={page >= lastPage}
             onClick={() => setPage((p) => p + 1)}
           >
             Next
-          </SecondaryButton>
+          </Button>
         </div>
       )}
     </div>

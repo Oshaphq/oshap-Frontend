@@ -8,7 +8,7 @@ import {
   usePlatformCreateRestaurant,
 } from "@oshap/shared";
 import type { BillingPeriod, SubscriptionTier } from "@oshap/shared";
-import { PrimaryButton, SecondaryButton, toast } from "@oshap/shared/ui";
+import { Button, PrimaryButton, SecondaryButton, toast } from "@oshap/shared/ui";
 
 
 interface FormState {
@@ -114,14 +114,15 @@ export default function RestaurantNewPage() {
           <code className="text-body-small text-on-surface break-all font-mono">
             {setupUrl}
           </code>
-          <SecondaryButton
+          <Button
+            variant="text"
             onClick={() => {
               navigator.clipboard?.writeText(setupUrl);
               toast.success("Link copied");
             }}
           >
             Copy link
-          </SecondaryButton>
+          </Button>
         </div>
 
         <p className="text-body-medium text-on-surface-variant">

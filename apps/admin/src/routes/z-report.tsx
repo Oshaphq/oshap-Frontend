@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Link } from "react-router";
 import { formatCurrency, useAdminZReport } from "@oshap/shared";
 import type { PaymentMethod } from "@oshap/shared";
-import { SecondaryButton } from "@oshap/shared/ui";
+import { Button } from "@oshap/shared/ui";
 import QueryError from "../components/QueryError";
 
 const METHOD_LABELS: Record<PaymentMethod, string> = {
@@ -62,13 +62,14 @@ export default function ZReportPage() {
             aria-label="Report date"
             className="px-md py-s rounded-sm bg-surface-container-low border border-outline-variant text-body-medium text-on-surface outline-none focus:border-primary transition-colors"
           />
-          <SecondaryButton
+          <Button
+            variant="text"
             size="md"
             onClick={handlePrint}
             disabled={!hasTakings}
           >
             <i className="mgc_print_line" /> Print
-          </SecondaryButton>
+          </Button>
         </div>
       </header>
 

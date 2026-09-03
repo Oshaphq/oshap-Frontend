@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { PrimaryButton, SecondaryButton, toast } from "@oshap/shared/ui";
+import { Button, PrimaryButton, toast } from "@oshap/shared/ui";
 import {
   buildTableUrl,
   downloadDataUrl,
@@ -133,9 +133,9 @@ export default function TableQrDialog({
         )}
 
         <div className="flex justify-end gap-s pt-s">
-          <SecondaryButton size="md" onClick={handleDownload} disabled={!pngDataUrl}>
+          <Button variant="text" size="md" onClick={handleDownload} disabled={!pngDataUrl}>
             <i className="mgc_download_2_line" /> PNG
-          </SecondaryButton>
+          </Button>
           <PrimaryButton size="md" onClick={onPrint} disabled={!pngDataUrl}>
             <i className="mgc_print_line" /> Print
           </PrimaryButton>
