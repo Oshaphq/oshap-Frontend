@@ -6,6 +6,7 @@ import {
   useAdminSettings,
 } from "@oshap/shared/hooks";
 import { errorMessage, getAdminRestaurantId } from "@oshap/shared";
+import type { AdminTableStatus } from "@oshap/shared";
 import {
   Button,
   DataTable,
@@ -33,6 +34,8 @@ export default function TablesSettings() {
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [tableId, setTableId] = useState("");
+  /** Removing a table is irreversible, and it used to happen on one click. */
+  const [pendingDelete, setPendingDelete] = useState<AdminTableStatus | null>(null);
   const [qrTable, setQrTable] = useState<QrPrintTable | null>(null);
   const [printRequest, setPrintRequest] = useState<QrPrintRequest | null>(null);
 
@@ -75,6 +78,15 @@ export default function TablesSettings() {
     );
   };
 
+  /**
+   * By NAME, not by uuid. Every admin table route keys on the name — the mock
+   * says so in a comment and enforces it with `findTableByName` — and this was
+   * passing `table.id`, so Delete answered "Table not found" every time.
+   *
+   * The names are what make it easy to get wrong: the create body's `id` field
+   * holds the NAME, while the Table object's `id` holds the uuid. Two
+   * different things wearing the same word. Pinned by a test in mock.test.ts.
+   */
   const handleDelete = (id: string) => {
     deleteTable.mutate(id, {
       onSuccess: () => toast.success(`Table "${id}" removed`),
@@ -96,9 +108,19 @@ export default function TablesSettings() {
       <div className="flex items-center justify-between gap-md flex-wrap">
         {/* The count stays; the title does not. The section wrapper names the
             screen already. */}
-        <p className="text-body-medium text-on-surface-variant">
-          {tables.length} table{tables.length !== 1 ? "s" : ""} configured
-        </p>
+        <div className="flex flex-col gap-0.5">
+          <p className="text-body-medium text-on-surface-variant">
+            {tables.length} table{tables.length !== 1 ? "s" : ""} configured
+          </p>
+          {/* "Status" on a settings screen reads as a setting. It is live
+              occupancy, and it is here for one reason: it is why Remove is
+              greyed out on some rows. Saying so beats making someone hover a
+              disabled button to find out. */}
+          <p className="text-body-small text-on-surface-variant">
+            Status is live — a table in use can&rsquo;t be removed until its
+            bill is settled.
+          </p>
+        </div>
         <div className="flex items-center gap-s">
           <Button
             variant="text"
@@ -194,14 +216,18 @@ export default function TablesSettings() {
                     <i className="mgc_qrcode_line text-lg" aria-hidden="true" />
                   </button>
                   <button
-                    onClick={() => handleDelete(table.id)}
+                    onClick={() => setPendingDelete(table)}
                     disabled={!isEmpty || isDeleting}
                     title={
                       isEmpty
-                        ? "Remove table"
-                        : "Cannot remove table with active orders"
+                        ? `Remove ${table.table_id}`
+                        : `${table.table_id} is in use — settle its bill first`
                     }
-                    aria-label={`Remove table ${table.table_id}`}
+                    aria-label={
+                      isEmpty
+                        ? `Remove table ${table.table_id}`
+                        : `Cannot remove table ${table.table_id} — it is in use`
+                    }
                     className="p-xs text-on-surface-variant hover:text-error transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
                   >
                     {isDeleting ? (
@@ -252,7 +278,40 @@ export default function TablesSettings() {
             placeholder="e.g. T14, VIP 1, Bar 2"
             hint="This ID will appear on the QR code for this table."
             autoFocus
-          />        </Dialog>
+          />
+        </Dialog>
+      )}
+
+      {pendingDelete && (
+        <Dialog
+          onClose={() => setPendingDelete(null)}
+          title={`Remove ${pendingDelete.table_id}?`}
+          size="sm"
+          footer={
+            <>
+              <SecondaryButton size="md" onClick={() => setPendingDelete(null)}>
+                Keep it
+              </SecondaryButton>
+              <Button
+                variant="destructive"
+                size="md"
+                disabled={deleteTable.isPending}
+                onClick={() => {
+                  handleDelete(pendingDelete.table_id);
+                  setPendingDelete(null);
+                }}
+              >
+                {deleteTable.isPending ? "Removing…" : "Remove table"}
+              </Button>
+            </>
+          }
+        >
+          <p className="text-body-medium text-on-surface-variant">
+            Its QR code stops working the moment it is removed. Anything already
+            printed and stuck to that table becomes a dead link, so take it down
+            or reprint it under a new name.
+          </p>
+        </Dialog>
       )}
 
       {qrTable && (
