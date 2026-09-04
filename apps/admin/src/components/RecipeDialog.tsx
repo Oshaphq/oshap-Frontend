@@ -11,6 +11,7 @@ import {
   PrimaryButton,
   SecondaryButton,
   Select,
+  Spinner,
   TextField,
   toast,
 } from "@oshap/shared/ui";
@@ -114,7 +115,7 @@ export default function RecipeDialog({ item, onClose }: Props) {
     >
       {recipeQuery.isLoading || ingredientsQuery.isLoading ? (
         <div className="flex justify-center py-xl">
-          <div className="oshap-spinner" />
+          <Spinner />
         </div>
       ) : ingredients.length === 0 ? (
         <p className="text-body-medium text-on-surface-variant text-center py-l">

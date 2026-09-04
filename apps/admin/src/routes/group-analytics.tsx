@@ -1,5 +1,5 @@
 import { Link } from "react-router";
-import { Card } from "@oshap/shared/ui";
+import { Card, Spinner } from "@oshap/shared/ui";
 import {
   useAdminGroup,
   useAdminGroupAnalytics,
@@ -27,7 +27,7 @@ export default function GroupAnalyticsPage() {
   if (isLoading) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[60vh] gap-md text-on-surface-variant">
-        <div className="oshap-spinner" />
+        <Spinner />
         <p>Loading group analytics...</p>
       </div>
     );

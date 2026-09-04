@@ -6,7 +6,11 @@ import {
   formatApiDate,
   formatApiTime,
 } from "@oshap/shared";
-import { Button, EmptyState } from "@oshap/shared/ui";
+import {
+  Button,
+  EmptyState,
+  Spinner,
+} from "@oshap/shared/ui";
 import QueryError from "../components/QueryError";
 
 /**
@@ -144,7 +148,7 @@ export default function HistoryPage() {
 
       {historyQuery.isLoading ? (
         <div className="flex flex-col items-center justify-center min-h-[40vh] gap-md text-on-surface-variant">
-          <div className="oshap-spinner" />
+          <Spinner />
           <p>Loading history...</p>
         </div>
       ) : historyQuery.isError ? (

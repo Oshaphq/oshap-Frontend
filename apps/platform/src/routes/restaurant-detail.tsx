@@ -18,6 +18,7 @@ import {
   Card,
   PrimaryButton,
   SecondaryButton,
+  Spinner,
   toast,
 } from "@oshap/shared/ui";
 
@@ -34,7 +35,7 @@ export default function RestaurantDetailPage() {
   if (query.isLoading) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[60vh] gap-md text-on-surface-variant">
-        <div className="oshap-spinner" />
+        <Spinner />
         <p>Loading restaurant...</p>
       </div>
     );

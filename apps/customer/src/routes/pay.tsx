@@ -8,7 +8,13 @@ import {
   useRequestPos,
   useTable,
 } from "@oshap/shared";
-import { EmptyState, PrimaryButton, SecondaryButton, toast } from "@oshap/shared/ui";
+import {
+  EmptyState,
+  PrimaryButton,
+  SecondaryButton,
+  Spinner,
+  toast,
+} from "@oshap/shared/ui";
 import { readLastOrder } from "../lastOrder";
 import BottomNav from "../components/BottomNav";
 import CustomerHeader from "../components/CustomerHeader";
@@ -120,7 +126,7 @@ export default function PayPage() {
           }
         />
         <div className="flex flex-col items-center gap-s py-10 px-md">
-          <div className="oshap-spinner" />
+          <Spinner />
           <p className="text-body-medium text-on-surface-variant">Loading payment details…</p>
         </div>
         <BottomNav tableId={tableId} />

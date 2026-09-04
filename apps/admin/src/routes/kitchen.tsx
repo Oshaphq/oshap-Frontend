@@ -6,7 +6,13 @@ import {
   errorMessage,
 } from "@oshap/shared";
 import type { OrderWithItems } from "@oshap/shared";
-import { EmptyState, PrimaryButton, toast } from "@oshap/shared/ui";
+import {
+  EmptyState,
+  PrimaryButton,
+  Skeleton,
+  SkeletonGroup,
+  toast,
+} from "@oshap/shared/ui";
 import QueryError from "../components/QueryError";
 import ServeDialog from "../components/ServeDialog";
 import { canAdvanceKitchenTickets } from "../permissions";
@@ -73,10 +79,7 @@ export default function KitchenPage() {
 
   if (kitchenQuery.isLoading || (isStationRole && menuQuery.isLoading)) {
     return (
-      <div className="flex flex-col items-center justify-center min-h-[60vh] gap-md text-on-surface-variant">
-        <div className="oshap-spinner" />
-        <p>Loading orders...</p>
-      </div>
+      <KitchenSkeleton />
     );
   }
 
@@ -421,5 +424,44 @@ function KitchenColumn({
         </div>
       )}
     </div>
+  );
+}
+
+/**
+ * The board's three columns, drawn before the tickets arrive.
+ *
+ * The kitchen screen is the one a cook glances at from across a pass, and a
+ * centred spinner tells them nothing about whether the board is empty or
+ * still loading. The columns are always New, Preparing and Ready, so they are
+ * drawn with their real headings and only the tickets are placeholders.
+ */
+function KitchenSkeleton() {
+  return (
+    <SkeletonGroup
+      label="Loading orders"
+      className="grid grid-cols-1 lg:grid-cols-3 gap-md items-start p-md"
+    >
+      {["New", "Preparing", "Ready"].map((title) => (
+        <div
+          key={title}
+          className="flex flex-col gap-s rounded-lg bg-surface-container-low p-md"
+        >
+          <span className="text-title-medium font-semibold font-display text-on-surface-variant">
+            {title}
+          </span>
+          {[0, 1].map((i) => (
+            <div
+              key={i}
+              className="flex flex-col gap-s rounded-sm bg-surface-container p-md"
+            >
+              <Skeleton width="w-1/3" height="h-5" />
+              <Skeleton width="w-full" height="h-3" />
+              <Skeleton width="w-2/3" height="h-3" />
+              <Skeleton shape="block" width="w-full" height="h-10" />
+            </div>
+          ))}
+        </div>
+      ))}
+    </SkeletonGroup>
   );
 }

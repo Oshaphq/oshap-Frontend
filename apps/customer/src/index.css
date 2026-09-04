@@ -84,22 +84,6 @@ body {
   }
 }
 
-@keyframes spin {
-  to {
-    transform: rotate(360deg);
-  }
-}
-
-/* Reusable spinner — `<div class="oshap-spinner" />` */
-.oshap-spinner {
-  width: 40px;
-  height: 40px;
-  border: 3px solid var(--ds-surface-container-high);
-  border-top-color: var(--ds-primary);
-  border-radius: 50%;
-  animation: spin 0.8s linear infinite;
-}
-
 /* Force Mingcute icons to inherit color from parent — overrides hardcoded #09244b in the icon font CSS */
 [class*="mgc_"]::before {
   color: inherit !important;
