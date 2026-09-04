@@ -3,6 +3,7 @@ import {
   Card,
   QueryError,
   Spinner,
+  Page,
 } from "@oshap/shared/ui";
 
 function Metric({
@@ -50,7 +51,7 @@ export default function HealthPage() {
     !h ? undefined : h.avg_response_ms < 200 ? "ok" : h.avg_response_ms < 500 ? "warn" : "error";
 
   return (
-    <main className="p-md flex flex-col gap-l">
+    <Page width="wide" gap="l">
       <header className="flex items-center justify-between">
         <div>
           <h1 className="font-display text-title-large font-semibold text-on-surface">
@@ -149,6 +150,6 @@ export default function HealthPage() {
           </Card>
         </>
       )}
-    </main>
+    </Page>
   );
 }
