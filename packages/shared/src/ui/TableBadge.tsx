@@ -1,38 +1,40 @@
-interface TableBadgeProps {
-  tableId: string;
-  variant?: "filled" | "outlined";
+/**
+ * A table's identity, as the customer header already draws it: an outlined
+ * primary chip, not a filled one, so it reads as a label on the bar rather
+ * than a button a guest might tap.
+ *
+ * Shaped from the shipping control rather than from the M3 default, which is
+ * the same call made for Chip, Fab and StatusBadge — the product's version is
+ * the real specification.
+ *
+ * `id` is the restaurant's own name for the table. The settings screen offers
+ * "T14, VIP 1, Bar 2" as its examples, so the chip shows exactly what they
+ * typed while `aria-label` supplies the word "Table" — otherwise a screen
+ * reader hears "Table T14", which says it twice, or the visible text has to
+ * read "Table VIP 1", which is not what anyone calls it.
+ *
+ * Not for admin's prose. Four admin screens write "Table {x}" inside a
+ * sentence or a dialog subtitle. That is text doing a text job; a primary
+ * outlined chip in a subtitle competes with the title above it.
+ *
+ * Not for the dashboard's table cards either, where the id is the card's
+ * heading — demoting a heading to a chip would flatten the one screen where a
+ * waiter finds a table by scanning.
+ */
+
+export interface TableBadgeProps {
+  /** The restaurant's own name for the table. Undefined while it loads. */
+  id?: string;
   className?: string;
 }
 
-/**
- * Both variants are pills, per the shape scale — `full` covers pills, chips and
- * the FAB.
- *
- * The outlined label is `primary-label` #9b3d00 rather than the brand #f56500.
- * A 2px brand border is a graphical object and clears WCAG's 3:1 non-text bar,
- * but the label beside it is 12px text held to 4.5:1, and the brand does not
- * reach that on any surface step.
- */
-export default function TableBadge({
-  tableId,
-  variant = "filled",
-  className = "",
-}: TableBadgeProps) {
-  if (variant === "outlined") {
-    return (
-      <span
-        className={`inline-flex items-center rounded-full border-2 border-primary px-md py-xs text-label-medium text-primary-label ${className}`}
-      >
-        Table: {tableId}
-      </span>
-    );
-  }
-
+export default function TableBadge({ id, className = "" }: TableBadgeProps) {
   return (
     <span
-      className={`inline-flex items-center rounded-full bg-primary-container px-2.5 py-xs text-label-medium text-on-primary-container ${className}`}
+      aria-label={id ? `Table ${id}` : "Loading table"}
+      className={`inline-flex items-center px-s py-xs rounded-full border border-primary text-primary-label text-body-medium font-semibold whitespace-nowrap ${className}`}
     >
-      Table: {tableId}
+      <span aria-hidden="true">Table {id ?? "…"}</span>
     </span>
   );
 }

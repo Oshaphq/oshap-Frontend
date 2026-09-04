@@ -1,6 +1,9 @@
 import { ReactNode } from "react";
 import { getDeviceToken, useTable } from "@oshap/shared";
-import { BrandMark } from "@oshap/shared/ui";
+import {
+  BrandMark,
+  TableBadge,
+} from "@oshap/shared/ui";
 import NotificationBell from "./NotificationBell";
 import { useSession } from "../context/SessionContext";
 
@@ -93,9 +96,7 @@ export default function CustomerHeader({
       </div>
 
       <div className="flex items-center gap-s shrink-0">
-        <span className="px-s py-xs rounded-full border border-primary text-primary-label text-body-medium font-semibold whitespace-nowrap">
-          Table {tableName ?? "…"}
-        </span>
+        <TableBadge id={tableName} />
         <NotificationBell />
         {rightSlot}
       </div>

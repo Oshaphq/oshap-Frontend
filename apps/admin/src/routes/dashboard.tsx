@@ -13,7 +13,14 @@ import {
   describeError,
 } from "@oshap/shared";
 import type { AdminTableStatus, Bill } from "@oshap/shared";
-import { Button, EmptyState, PrimaryButton, SecondaryButton, toast } from "@oshap/shared/ui";
+import {
+  Button,
+  EmptyState,
+  PrimaryButton,
+  SecondaryButton,
+  StatusBadge,
+  toast,
+} from "@oshap/shared/ui";
 import QueryError from "../components/QueryError";
 import CashPaymentDialog from "../components/CashPaymentDialog";
 import TableBills from "../components/TableBills";
@@ -241,17 +248,11 @@ export default function DashboardPage() {
                   {table.table_id}
                 </span>
                 {isPending ? (
-                  <span className="px-s py-xs rounded-full font-bold text-label-small uppercase tracking-wider whitespace-nowrap bg-warning text-on-warning">
-                    Verification Req.
-                  </span>
+                  <StatusBadge tone="warning">Verification Req.</StatusBadge>
                 ) : isUnpaid ? (
-                  <span className="px-s py-xs rounded-full font-bold text-label-small uppercase tracking-wider whitespace-nowrap bg-error-container text-on-error-container">
-                    Dining
-                  </span>
+                  <StatusBadge tone="error">Dining</StatusBadge>
                 ) : (
-                  <span className="px-s py-xs rounded-full font-bold text-label-small uppercase tracking-wider whitespace-nowrap bg-surface-container-high text-outline">
-                    Empty
-                  </span>
+                  <StatusBadge tone="neutral">Empty</StatusBadge>
                 )}
               </div>
 
