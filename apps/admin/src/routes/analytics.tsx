@@ -4,10 +4,11 @@ import { useAdminAnalytics, useAdminGroup } from "@oshap/shared/hooks";
 import { formatCurrency } from "@oshap/shared";
 import {
   DataTable,
+  Page,
   PrimaryButton,
   Select,
   Spinner,
-  Page,
+  TextField,
 } from "@oshap/shared/ui";
 import {
   AreaChart,
@@ -115,51 +116,53 @@ export default function Analytics() {
           )}
         </div>
 
-        {/* Controls — two rows: date range | preset + export */}
-        <div className="flex flex-col gap-s sm:items-end">
+        {/* Two rows on a phone, one from `lg`. Five controls need about 620px
+            and the header gives this block roughly half the width, so `sm`
+            would only have made them wrap somewhere less obvious. */}
+        <div className="flex flex-col gap-s sm:items-end lg:flex-row lg:items-center lg:gap-md">
           <div className="flex items-center gap-s flex-wrap">
-            <input
+            <TextField
               type="date"
               aria-label="Start date"
+              density="sm"
               value={startDate}
               onChange={(e) => setStartDate(e.target.value)}
-              className="px-s py-s rounded-lg bg-surface-container-low border border-outline-variant text-body-medium text-on-surface outline-none focus:border-primary"
             />
             <span className="text-on-surface-variant shrink-0">to</span>
-            <input
+            <TextField
               type="date"
               aria-label="End date"
+              density="sm"
               value={endDate}
               onChange={(e) => setEndDate(e.target.value)}
-              className="px-s py-s rounded-lg bg-surface-container-low border border-outline-variant text-body-medium text-on-surface outline-none focus:border-primary"
             />
           </div>
 
           <div className="flex items-center gap-s">
-              <Select
-                aria-label="Date range preset"
-                onChange={(e) => {
-                  const days = parseInt(e.target.value, 10);
-                  if (isNaN(days)) return;
-                  if (days === 30) {
-                    const d = new Date();
-                    setStartDate(new Date(d.getFullYear(), d.getMonth(), 1).toISOString().split("T")[0]!);
-                  } else if (days === 365) {
-                    const d = new Date();
-                    setStartDate(new Date(d.getFullYear(), 0, 1).toISOString().split("T")[0]!);
-                  } else {
-                    setStartDate(getFormattedDate(days));
-                  }
-                  setEndDate(getFormattedDate(0));
-                }}
-              >
-                <option value="">Custom Range...</option>
-                {PRESETS.map((p) => (
-                  <option key={p.label} value={p.days}>
-                    {p.label}
-                  </option>
-                ))}
-              </Select>
+            <Select
+              aria-label="Date range preset"
+              onChange={(e) => {
+                const days = parseInt(e.target.value, 10);
+                if (isNaN(days)) return;
+                if (days === 30) {
+                  const d = new Date();
+                  setStartDate(new Date(d.getFullYear(), d.getMonth(), 1).toISOString().split("T")[0]!);
+                } else if (days === 365) {
+                  const d = new Date();
+                  setStartDate(new Date(d.getFullYear(), 0, 1).toISOString().split("T")[0]!);
+                } else {
+                  setStartDate(getFormattedDate(days));
+                }
+                setEndDate(getFormattedDate(0));
+              }}
+            >
+              <option value="">Custom Range...</option>
+              {PRESETS.map((p) => (
+                <option key={p.label} value={p.days}>
+                  {p.label}
+                </option>
+              ))}
+            </Select>
 
             <PrimaryButton size="md" onClick={handleExportCSV} disabled={!data}>
               Export CSV
