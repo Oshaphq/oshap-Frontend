@@ -11,6 +11,7 @@ import {
   Dialog,
   PrimaryButton,
   SecondaryButton,
+  Spinner,
   toast,
 } from "@oshap/shared/ui";
 
@@ -80,7 +81,7 @@ export default function ItemModifiersDialog({ item, onClose }: Props) {
     >
       {groupsQuery.isLoading ? (
         <div className="flex justify-center py-xl">
-          <div className="oshap-spinner" />
+          <Spinner />
         </div>
       ) : groups.length === 0 ? (
         <p className="text-body-medium text-on-surface-variant text-center py-l">

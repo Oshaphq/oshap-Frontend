@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { Spinner } from "@oshap/shared/ui";
 import {
   errorMessage,
   formatCurrency,
@@ -128,7 +129,7 @@ export default function InventoryPage() {
 
       {ingredientsQuery.isLoading ? (
         <div className="flex justify-center py-xl">
-          <div className="oshap-spinner" />
+          <Spinner />
         </div>
       ) : ingredients.length === 0 ? (
         <EmptyState
@@ -342,7 +343,7 @@ function MovementsLedger() {
 
       {movements.isLoading ? (
         <div className="flex justify-center py-l">
-          <div className="oshap-spinner" />
+          <Spinner />
         </div>
       ) : rows.length === 0 ? (
         <p className="text-body-medium text-on-surface-variant py-l text-center rounded-lg bg-surface-container-low">

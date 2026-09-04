@@ -8,8 +8,9 @@ import { errorMessage } from "@oshap/shared";
 import type { RestaurantBranch } from "@oshap/shared";
 import {
   PrimaryButton,
-  SecondaryButton,
   QueryError,
+  SecondaryButton,
+  Spinner,
   TextField,
   toast,
 } from "@oshap/shared/ui";
@@ -123,7 +124,7 @@ export default function BranchesSettings() {
   if (branchesQuery.isLoading) {
     return (
       <div className="flex justify-center p-xl">
-        <div className="oshap-spinner" />
+        <Spinner />
       </div>
     );
   }

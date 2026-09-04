@@ -8,7 +8,11 @@ import CartBar from "../components/CartBar";
 import CartDrawer from "../components/CartDrawer";
 import CategoryTabs from "../components/CategoryTabs";
 import MenuCard from "../components/MenuCard";
-import { QueryError } from "@oshap/shared/ui";
+import {
+  QueryError,
+  Skeleton,
+  SkeletonGroup,
+} from "@oshap/shared/ui";
 import CustomerHeader from "../components/CustomerHeader";
 
 export default function MenuPage() {
@@ -140,10 +144,7 @@ function MenuView({ tableId }: { tableId: string }) {
         )}
 
         {isLoading ? (
-          <div className="flex flex-col items-center justify-center min-h-[60vh] gap-md text-on-surface-variant">
-            <div className="oshap-spinner" />
-            <p>Loading menu...</p>
-          </div>
+          <MenuSkeleton />
         ) : failed ? (
           /* Without this a failed request fell through to "No items found in
              this category" — a guest at a table with a working kitchen being
@@ -173,5 +174,58 @@ function MenuView({ tableId }: { tableId: string }) {
         )}
       </section>
     </div>
+  );
+}
+
+/**
+ * The menu's shape, drawn before the menu arrives.
+ *
+ * A spinner here threw the layout away and rebuilt it, which is the jump a
+ * guest reads as the page loading twice — on the first screen they ever see.
+ * The category row and the dish cards are the same shape every time, so there
+ * is no reason to hide them.
+ *
+ * Five cards, not one per real dish: the count is unknown, and five is about
+ * a phone screen's worth. One `role="status"` for the block, not per bar.
+ */
+function MenuSkeleton() {
+  return (
+    <SkeletonGroup label="Loading the menu" className="flex flex-col gap-md">
+      <div className="flex gap-s py-md overflow-hidden">
+        {[0, 1, 2, 3].map((i) => (
+          <Skeleton
+            key={i}
+            shape="circle"
+            width="w-24"
+            height="h-12"
+            className="shrink-0"
+          />
+        ))}
+      </div>
+      {[0, 1, 2, 3, 4].map((i) => (
+        <div
+          key={i}
+          className="flex items-center gap-md p-md bg-surface-container-low rounded-lg"
+        >
+          <Skeleton
+            shape="block"
+            width="w-24"
+            height="h-24"
+            className="shrink-0"
+          />
+          <div className="flex-1 flex flex-col gap-s min-w-0">
+            <Skeleton width="w-1/2" height="h-5" />
+            <Skeleton width="w-4/5" height="h-3" />
+            <Skeleton width="w-20" height="h-4" />
+          </div>
+          <Skeleton
+            shape="circle"
+            width="w-12"
+            height="h-12"
+            className="shrink-0"
+          />
+        </div>
+      ))}
+    </SkeletonGroup>
   );
 }

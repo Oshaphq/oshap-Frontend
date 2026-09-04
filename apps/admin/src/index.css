@@ -17,12 +17,6 @@ body {
   text-rendering: optimizeLegibility;
 }
 
-@keyframes spin {
-  to {
-    transform: rotate(360deg);
-  }
-}
-
 @keyframes slide-down {
   from {
     opacity: 0;
@@ -32,15 +26,6 @@ body {
     opacity: 1;
     transform: translateY(0);
   }
-}
-
-.oshap-spinner {
-  width: 40px;
-  height: 40px;
-  border: 3px solid var(--ds-surface-container-high);
-  border-top-color: var(--ds-primary);
-  border-radius: 50%;
-  animation: spin 0.8s linear infinite;
 }
 
 /* Force Mingcute icons to inherit color from parent */

@@ -8,6 +8,7 @@ import { errorMessage, validateImageFile, IMAGE_ACCEPT_ATTR } from "@oshap/share
 import {
   Card,
   PrimaryButton,
+  Spinner,
   toast,
 } from "@oshap/shared/ui";
 import BrandColourField from "../../components/BrandColourField";
@@ -85,7 +86,7 @@ export default function BrandingSettings() {
   if (isLoading) {
     return (
       <div className="flex justify-center p-xl">
-        <div className="oshap-spinner" />
+        <Spinner />
       </div>
     );
   }
@@ -107,7 +108,7 @@ export default function BrandingSettings() {
           {logoUrl ? (
             <img src={logoUrl} alt="Logo" className="w-full h-full object-cover" />
           ) : uploadImage.isPending ? (
-            <div className="oshap-spinner" />
+            <Spinner />
           ) : (
             <div className="text-center text-on-surface-variant">
               <i className="mgc_upload_line text-2xl" />

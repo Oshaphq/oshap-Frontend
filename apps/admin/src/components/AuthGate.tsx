@@ -8,7 +8,12 @@ import {
   useAdminBranches,
   useAdminKitchen,
 } from "@oshap/shared";
-import { PrimaryButton, Select, ThemeToggle } from "@oshap/shared/ui";
+import {
+  PrimaryButton,
+  Select,
+  Spinner,
+  ThemeToggle,
+} from "@oshap/shared/ui";
 import { initFCM } from "../utils/fcm";
 import AlertCenter from "./AlertCenter";
 import NotificationBell from "./NotificationBell";
@@ -111,7 +116,7 @@ export default function AuthGate() {
   if (isLoading) {
     return (
       <div className="flex items-center justify-center min-h-screen bg-surface">
-        <div className="oshap-spinner" />
+        <Spinner />
       </div>
     );
   }

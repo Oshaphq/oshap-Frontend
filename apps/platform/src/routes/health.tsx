@@ -2,6 +2,7 @@ import { usePlatformHealth } from "@oshap/shared";
 import {
   Card,
   QueryError,
+  Spinner,
 } from "@oshap/shared/ui";
 
 function Metric({
@@ -83,7 +84,7 @@ export default function HealthPage() {
 
       {query.isLoading && (
         <div className="flex justify-center py-xl">
-          <div className="oshap-spinner" />
+          <Spinner />
         </div>
       )}
 

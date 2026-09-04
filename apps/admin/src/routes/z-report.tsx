@@ -6,6 +6,7 @@ import {
   Button,
   Card,
   EmptyState,
+  Spinner,
 } from "@oshap/shared/ui";
 import QueryError from "../components/QueryError";
 
@@ -79,7 +80,7 @@ export default function ZReportPage() {
 
       {report.isLoading ? (
         <div className="flex justify-center py-xl">
-          <div className="oshap-spinner" />
+          <Spinner />
         </div>
       ) : !hasTakings ? (
         <EmptyState

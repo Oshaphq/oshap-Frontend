@@ -15,6 +15,7 @@ import {
   Button,
   Card,
   SecondaryButton,
+  Spinner,
   toast,
 } from "@oshap/shared/ui";
 import QueryError from "../components/QueryError";
@@ -91,7 +92,7 @@ export default function OrderDetailPage() {
   if (order.isLoading || !order.data) {
     return (
       <div className="flex justify-center py-xl">
-        <div className="oshap-spinner" />
+        <Spinner />
       </div>
     );
   }

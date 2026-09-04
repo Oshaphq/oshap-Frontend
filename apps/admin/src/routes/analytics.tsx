@@ -6,6 +6,7 @@ import {
   DataTable,
   PrimaryButton,
   Select,
+  Spinner,
 } from "@oshap/shared/ui";
 import {
   AreaChart,
@@ -168,7 +169,7 @@ export default function Analytics() {
 
       {isLoading && (
         <div className="flex justify-center p-xl">
-          <div className="oshap-spinner" />
+          <Spinner />
         </div>
       )}
 
