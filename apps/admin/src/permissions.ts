@@ -58,7 +58,11 @@ export function tabsForRole(role: Role, ctx: NavContext): NavTab[] {
   }
 
   if (["OWNER", "MANAGER", "CASHIER"].includes(role)) {
-    tabs.push({ to: "/z-report", label: "Close" });
+    /* "Daily close", not "Close". Every other destination is a noun naming a
+       place — Menu, Inventory, Orders, History, Settings — so a bare verb read
+       as an action, and it is the same word as the ✕ on every dialog. The page
+       already calls itself Daily close in its own heading. */
+    tabs.push({ to: "/z-report", label: "Daily close" });
   }
 
   if (["OWNER", "MANAGER"].includes(role)) {

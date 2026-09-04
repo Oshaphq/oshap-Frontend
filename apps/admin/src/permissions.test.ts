@@ -54,7 +54,7 @@ describe("who sees Orders", () => {
 });
 
 describe("who closes the till", () => {
-  it.each<Role>(["OWNER", "MANAGER", "CASHIER"])("%s sees Close", (role) => {
+  it.each<Role>(["OWNER", "MANAGER", "CASHIER"])("%s sees Daily close", (role) => {
     expect(pathsFor(role)).toContain("/z-report");
   });
 
