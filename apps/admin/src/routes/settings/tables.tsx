@@ -146,9 +146,11 @@ export default function TablesSettings() {
         </div>
       )}
 
+      {/* Three short columns. The 32rem this carried was inherited from a
+          four-column table and forced a scroll on any phone. */}
       <DataTable
         caption="Tables, their status and their QR codes"
-        minWidth="min-w-[32rem]"
+        minWidth="min-w-[20rem]"
         rows={tables}
         rowKey={(table) => table.table_id}
         empty={
