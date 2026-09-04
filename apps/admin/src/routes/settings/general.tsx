@@ -5,7 +5,12 @@ import {
   percentToBasisPoints,
   errorMessage,
 } from "@oshap/shared";
-import { PrimaryButton, TextField, toast } from "@oshap/shared/ui";
+import {
+  Card,
+  PrimaryButton,
+  TextField,
+  toast,
+} from "@oshap/shared/ui";
 
 /**
  * What the restaurant is and what it charges.
@@ -108,7 +113,7 @@ export default function GeneralSettings() {
 
   return (
     <div className="flex flex-col gap-md pb-10">
-      <div className="bg-surface-container-low rounded-lg p-l flex flex-col gap-md">
+      <Card padding="l" gap="md">
         <h3 className="font-bold text-on-surface">The restaurant</h3>
 
         <TextField
@@ -157,9 +162,9 @@ export default function GeneralSettings() {
           onChange={handleChange}
           placeholder="+234..."
         />
-      </div>
+      </Card>
 
-      <div className="bg-surface-container-low rounded-lg p-l flex flex-col gap-md">
+      <Card padding="l" gap="md">
         <h3 className="font-bold text-on-surface">Opening hours</h3>
         <TextField
           id="operating_hours"
@@ -170,9 +175,9 @@ export default function GeneralSettings() {
           onChange={handleChange}
           placeholder="09:00 - 22:00"
         />
-      </div>
+      </Card>
 
-      <div className="bg-surface-container-low rounded-lg p-l flex flex-col gap-md">
+      <Card padding="l" gap="md">
         <div className="flex flex-col gap-0.5">
           <h3 className="font-bold text-on-surface">Charges</h3>
           {/* Until these are set a restaurant charges neither, silently — the
@@ -206,7 +211,7 @@ export default function GeneralSettings() {
             placeholder="5"
           />
         </div>
-      </div>
+      </Card>
 
       <div className="flex justify-end pt-s">
         <PrimaryButton
