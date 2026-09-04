@@ -8,6 +8,7 @@ import {
 import { errorMessage, getAdminRestaurantId } from "@oshap/shared";
 import {
   Button,
+  Dialog,
   PrimaryButton,
   SecondaryButton,
   TextField,
@@ -239,20 +240,12 @@ export default function TablesSettings() {
       </div>
 
       {isModalOpen && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-scrim backdrop-blur-sm p-md">
-          <div className="w-full max-w-[400px] rounded-xl bg-surface-container-high p-l flex flex-col gap-md border border-primary shadow-xl">
-            <h3 className="font-bold text-on-surface">Add Table</h3>
-            <TextField
-              label="Table ID / Name"
-              type="text"
-              value={tableId}
-              onChange={(e) => setTableId(e.target.value)}
-              onKeyDown={(e) => e.key === "Enter" && handleAdd()}
-              placeholder="e.g. T14, VIP 1, Bar 2"
-              hint="This ID will appear on the QR code for this table."
-              autoFocus
-            />
-            <div className="flex justify-end gap-s pt-s">
+        <Dialog
+          onClose={() => setIsModalOpen(false)}
+          title="Add Table"
+          size="sm"
+          footer={
+            <>
               <SecondaryButton
                 size="md"
                 onClick={() => {
@@ -269,9 +262,19 @@ export default function TablesSettings() {
               >
                 {createTable.isPending ? "Adding..." : "Add Table"}
               </PrimaryButton>
-            </div>
-          </div>
-        </div>
+            </>
+          }
+        >
+          <TextField
+            label="Table ID / Name"
+            type="text"
+            value={tableId}
+            onChange={(e) => setTableId(e.target.value)}
+            onKeyDown={(e) => e.key === "Enter" && handleAdd()}
+            placeholder="e.g. T14, VIP 1, Bar 2"
+            hint="This ID will appear on the QR code for this table."
+            autoFocus
+          />        </Dialog>
       )}
 
       {qrTable && (

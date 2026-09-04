@@ -8,6 +8,7 @@ import {
 import { Role, StaffMember } from "@oshap/shared/types";
 import { errorMessage, formatPhone, tryNormalizePhone } from "@oshap/shared";
 import {
+  Dialog,
   PrimaryButton,
   SecondaryButton,
   Select,
@@ -230,97 +231,11 @@ export default function StaffSettings() {
       </div>
 
       {isModalOpen && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-scrim backdrop-blur-sm p-md">
-          <div className="w-full max-w-[448px] rounded-xl bg-surface-container-high p-l flex flex-col gap-md border border-primary shadow-xl">
-            <h3 className="font-bold text-on-surface">
-              {editingId ? "Edit Staff" : "Add Staff"}
-            </h3>
-
-            <div className="flex flex-col gap-md">
-              <TextField
-                label="Name"
-                type="text"
-                value={form.name}
-                onChange={(e) => setForm({ ...form, name: e.target.value })}
-              />
-              <TextField
-                label="Phone number"
-                type="tel"
-                inputMode="tel"
-                value={form.phone}
-                onChange={(e) => {
-                  setForm({ ...form, phone: e.target.value });
-                  if (phoneError) setPhoneError("");
-                }}
-                placeholder="0803 123 4567"
-                error={phoneError || undefined}
-                hint="How they sign in. Every member of staff needs one."
-              />
-              <TextField
-                label={
-                  <>
-                    Email{" "}
-                    <span className="font-normal text-on-surface-variant">
-                      (optional)
-                    </span>
-                  </>
-                }
-                type="email"
-                value={form.email}
-                onChange={(e) => setForm({ ...form, email: e.target.value })}
-              />
-              <div>
-                <label
-                  htmlFor="staff-role"
-                  className="block text-body-medium font-semibold text-on-surface mb-xs"
-                >
-                  Role
-                </label>
-                <Select
-                  id="staff-role"
-                  value={form.role}
-                  onChange={(e) =>
-                    setForm({ ...form, role: e.target.value as Role })
-                  }
-                  wrapperClassName="block w-full"
-                >
-                  <option value="OWNER">Owner</option>
-                  <option value="MANAGER">Manager</option>
-                  <option value="WAITER">Waiter</option>
-                  <option value="CASHIER">Cashier</option>
-                  <option value="KITCHEN">Kitchen Staff</option>
-                  <option value="BARTENDER">Bartender</option>
-                </Select>
-              </div>
-              <TextField
-                label={editingId ? "New Password (optional)" : "Password"}
-                type={showPassword ? "text" : "password"}
-                value={form.password}
-                onChange={(e) => setForm({ ...form, password: e.target.value })}
-                placeholder={
-                  editingId ? "Leave blank to keep current" : "Choose a password"
-                }
-                trailing={
-                  <button
-                    type="button"
-                    onClick={() => setShowPassword(!showPassword)}
-                    className="w-10 h-10 flex items-center justify-center text-on-surface-variant hover:text-on-surface transition-colors rounded-full"
-                    tabIndex={-1}
-                    aria-label={showPassword ? "Hide password" : "Show password"}
-                  >
-                    <i
-                      className={
-                        showPassword
-                          ? "mgc_eye_close_line text-xl"
-                          : "mgc_eye_line text-xl"
-                      }
-                    />
-                  </button>
-                }
-              />
-            </div>
-
-            <div className="flex justify-end gap-s pt-s">
+        <Dialog
+          onClose={() => setIsModalOpen(false)}
+          title={<>{editingId ? "Edit Staff" : "Add Staff"}</>}
+          footer={
+            <>
               <SecondaryButton size="md" onClick={() => setIsModalOpen(false)}>
                 Cancel
               </SecondaryButton>
@@ -339,9 +254,93 @@ export default function StaffSettings() {
                   ? "Saving..."
                   : "Save"}
               </PrimaryButton>
+            </>
+          }
+        >
+          <div className="flex flex-col gap-md">
+            <TextField
+              label="Name"
+              type="text"
+              value={form.name}
+              onChange={(e) => setForm({ ...form, name: e.target.value })}
+            />
+            <TextField
+              label="Phone number"
+              type="tel"
+              inputMode="tel"
+              value={form.phone}
+              onChange={(e) => {
+                setForm({ ...form, phone: e.target.value });
+                if (phoneError) setPhoneError("");
+              }}
+              placeholder="0803 123 4567"
+              error={phoneError || undefined}
+              hint="How they sign in. Every member of staff needs one."
+            />
+            <TextField
+              label={
+                <>
+                  Email{" "}
+                  <span className="font-normal text-on-surface-variant">
+                    (optional)
+                  </span>
+                </>
+              }
+              type="email"
+              value={form.email}
+              onChange={(e) => setForm({ ...form, email: e.target.value })}
+            />
+            <div>
+              <label
+                htmlFor="staff-role"
+                className="block text-body-medium font-semibold text-on-surface mb-xs"
+              >
+                Role
+              </label>
+              <Select
+                id="staff-role"
+                value={form.role}
+                onChange={(e) =>
+                  setForm({ ...form, role: e.target.value as Role })
+                }
+                wrapperClassName="block w-full"
+              >
+                <option value="OWNER">Owner</option>
+                <option value="MANAGER">Manager</option>
+                <option value="WAITER">Waiter</option>
+                <option value="CASHIER">Cashier</option>
+                <option value="KITCHEN">Kitchen Staff</option>
+                <option value="BARTENDER">Bartender</option>
+              </Select>
             </div>
+            <TextField
+              label={editingId ? "New Password (optional)" : "Password"}
+              type={showPassword ? "text" : "password"}
+              value={form.password}
+              onChange={(e) => setForm({ ...form, password: e.target.value })}
+              placeholder={
+                editingId ? "Leave blank to keep current" : "Choose a password"
+              }
+              trailing={
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="w-10 h-10 flex items-center justify-center text-on-surface-variant hover:text-on-surface transition-colors rounded-full"
+                  tabIndex={-1}
+                  aria-label={showPassword ? "Hide password" : "Show password"}
+                >
+                  <i
+                    className={
+                      showPassword
+                        ? "mgc_eye_close_line text-xl"
+                        : "mgc_eye_line text-xl"
+                    }
+                  />
+                </button>
+              }
+            />
           </div>
-        </div>
+        </Dialog>
       )}
     </div>
   );
