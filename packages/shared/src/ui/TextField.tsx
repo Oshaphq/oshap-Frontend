@@ -40,7 +40,24 @@ import {
 const FIELD =
   "w-full rounded-sm bg-surface-container border text-on-surface placeholder:text-on-surface-placeholder outline-none transition-colors disabled:opacity-50 disabled:cursor-not-allowed";
 
+/**
+ * Height, not padding.
+ *
+ * A field used to size itself from `py-*` plus its line box — 38px at `md` —
+ * while a button sizes itself from an explicit `h-10`, which is 40. Two
+ * different ways of arriving at a height means they never agree by accident,
+ * and a form row of field + select + button came out 38, 38 and 40.
+ *
+ * `md` is `h-10` so it matches `Button` size `md` exactly. `sm` is `h-8` for a
+ * genuinely compact toolbar. A textarea is excluded: its height is its rows.
+ */
 const DENSITY = {
+  md: "h-10 px-md text-body-medium",
+  sm: "h-8 px-s text-body-medium",
+} as const;
+
+/** A textarea grows by rows, so it keeps the old padding-driven box. */
+const MULTILINE_DENSITY = {
   md: "px-md py-s text-body-medium",
   sm: "px-s py-xs text-body-medium",
 } as const;
@@ -94,7 +111,9 @@ export default function TextField({
     id: fieldId,
     "aria-invalid": error ? true : undefined,
     "aria-describedby": describedBy,
-    className: `${FIELD} ${DENSITY[density]} ${
+    className: `${FIELD} ${
+      multiline ? MULTILINE_DENSITY[density] : DENSITY[density]
+    } ${
       error ? "border-error focus:border-error" : "border-outline focus:border-primary"
     } ${trailing ? "pr-12" : ""} ${className}`,
   };

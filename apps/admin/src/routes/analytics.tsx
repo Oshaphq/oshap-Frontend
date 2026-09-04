@@ -124,7 +124,6 @@ export default function Analytics() {
             <TextField
               type="date"
               aria-label="Start date"
-              density="sm"
               value={startDate}
               onChange={(e) => setStartDate(e.target.value)}
             />
@@ -132,7 +131,6 @@ export default function Analytics() {
             <TextField
               type="date"
               aria-label="End date"
-              density="sm"
               value={endDate}
               onChange={(e) => setEndDate(e.target.value)}
             />
