@@ -2608,3 +2608,50 @@ describe("mock API — clearing a stuck backlog", () => {
     expect(await count()).toBe(before - rows.notifications.length);
   });
 });
+
+/**
+ * Every admin table route keys on the table's NAME — "T10", "Bar 1" — not on
+ * its uuid. The mock says so in a comment and enforces it with
+ * `findTableByName`. The admin app was sending `table.id`, the uuid, so Delete
+ * answered "Table not found" every time and no test noticed.
+ *
+ * The naming is what makes it easy to get wrong: the CREATE body's `id` field
+ * holds the name, while the Table object's `id` holds the uuid. Two different
+ * things wearing the same word.
+ */
+describe("admin tables are addressed by name, not uuid", () => {
+  it("DELETE by name removes the table", async () => {
+    const create = await mockRequest(
+      "/admin/tables",
+      "POST",
+      { id: "DEL-1" },
+      q(),
+      true,
+    );
+    expect(create.status).toBe(201);
+
+    const res = await mockRequest("/admin/tables/DEL-1", "DELETE", null, q(), true);
+    expect(res.status).toBe(200);
+  });
+
+  it("DELETE by uuid is a 404 — the failure the admin app was hitting", async () => {
+    await mockRequest("/admin/tables", "POST", { id: "DEL-2" }, q(), true);
+
+    const list = await mockRequest("/admin/tables", "GET", null, q(), true);
+    const tables = (list.body as { tables: Array<{ id: string; table_id: string }> })
+      .tables;
+    const created = tables.find((t) => t.table_id === "DEL-2");
+    expect(created).toBeDefined();
+    expect(created!.id).not.toBe(created!.table_id);
+
+    const res = await mockRequest(
+      `/admin/tables/${created!.id}`,
+      "DELETE",
+      null,
+      q(),
+      true,
+    );
+    expect(res.status).toBe(404);
+  });
+});
+
