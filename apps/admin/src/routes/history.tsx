@@ -10,6 +10,7 @@ import {
   Button,
   EmptyState,
   Spinner,
+  Page,
 } from "@oshap/shared/ui";
 import QueryError from "../components/QueryError";
 
@@ -88,7 +89,7 @@ export default function HistoryPage() {
   };
 
   return (
-    <main className="p-md flex flex-col gap-l">
+    <Page width="wide" gap="l">
       <header className="flex items-center justify-between">
         <h1 className="font-display text-title-large font-semibold text-on-surface">
           Transaction History
@@ -276,7 +277,7 @@ export default function HistoryPage() {
           </Button>
         </div>
       )}
-    </main>
+    </Page>
   );
 }
 

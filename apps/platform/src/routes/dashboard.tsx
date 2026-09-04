@@ -1,6 +1,7 @@
 import { Link } from "react-router";
 import {
   Card,
+  Page,
   QueryError,
 } from "@oshap/shared/ui";
 import { monthlyRecurringKobo } from "../tiers";
@@ -21,7 +22,7 @@ export default function DashboardPage() {
   const mrr = monthlyRecurringKobo(restaurants);
 
   return (
-    <main className="p-md flex flex-col gap-l">
+    <Page width="wide" gap="l">
       <header>
         <h1 className="font-display text-title-large font-semibold text-on-surface">
           Platform Overview
@@ -170,6 +171,6 @@ export default function DashboardPage() {
           </div>
         </div>
       )}
-    </main>
+    </Page>
   );
 }

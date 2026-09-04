@@ -11,6 +11,7 @@ import type { BillingPeriod, SubscriptionTier } from "@oshap/shared";
 import {
   Button,
   Card,
+  Page,
   PrimaryButton,
   SecondaryButton,
   TextField,
@@ -103,7 +104,7 @@ export default function RestaurantNewPage() {
 
   if (setupUrl) {
     return (
-      <main className="p-md flex flex-col gap-l max-w-[36rem]">
+      <Page width="narrow" gap="l">
         <header className="flex flex-col gap-xs">
           <h1 className="font-display text-title-large font-semibold text-on-surface">
             {created} is ready
@@ -137,12 +138,12 @@ export default function RestaurantNewPage() {
         <PrimaryButton onClick={() => navigate("/restaurants")}>
           Done
         </PrimaryButton>
-      </main>
+      </Page>
     );
   }
 
   return (
-    <main className="p-md flex flex-col gap-l max-w-[36rem]">
+    <Page width="narrow" gap="l">
       <header>
         <h1 className="font-display text-title-large font-semibold text-on-surface">
           Onboard Restaurant
@@ -273,6 +274,6 @@ export default function RestaurantNewPage() {
           </div>
         </form>
       )}
-    </main>
+    </Page>
   );
 }
