@@ -311,11 +311,13 @@ export default function MenuPage() {
       {/* The title gets its own line. Beside five actions it was the thing
           that gave way — squeezed on a phone, and pinned to the far left of a
           wide screen from the buttons it belongs with. */}
-      <header className="flex flex-col gap-s">
+      {/* Beside the title from `sm`, stacked below it on a phone — the same
+          shape every other admin screen uses. */}
+      <header className="flex flex-col gap-s sm:flex-row sm:items-start sm:justify-between sm:gap-md">
         <h1 className="font-display text-title-large font-semibold text-on-surface">
           Menu Management
         </h1>
-        <div className="flex items-center gap-s flex-wrap">
+        <div className="flex items-center gap-s flex-wrap sm:shrink-0 sm:justify-end">
           <Button
             variant="text"
             size="md"

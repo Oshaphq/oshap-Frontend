@@ -15,19 +15,29 @@ const src = read("apps/admin/src/routes/menu.tsx");
 const banner = read("apps/admin/src/components/LowStockBanner.tsx");
 const header = src.slice(src.indexOf("<header"), src.indexOf("</header>"));
 
-describe("the menu header stacks", () => {
-  it("the title has its own line above the toolbar", () => {
+describe("the menu header stacks on a phone and not above it", () => {
+  /**
+   * "Five actions never fit one phone-width row" was the reason for stacking,
+   * and it is still true — on a phone. It was being enforced at every width,
+   * which is why a 1500px header had its right-hand half empty. The phone rule
+   * is kept as a breakpoint rather than as an absolute.
+   */
+  it("stacks below sm", () => {
     expect(header).toContain("flex flex-col");
-    expect(header).not.toContain("justify-between");
   });
 
-  it("and the toolbar still wraps rather than overflowing", () => {
-    // Five actions never fit one phone-width row.
+  it("and sits beside the title from sm up", () => {
+    expect(header).toContain("sm:flex-row");
+    expect(header).toContain("sm:justify-between");
+  });
+
+  it("the toolbar still wraps rather than overflowing", () => {
     expect(header).toContain("flex-wrap");
   });
 
-  it("the toolbar is not pushed to the right edge", () => {
-    expect(header).not.toContain("justify-end");
+  it("and only hugs the right edge at the widths where it is beside the title", () => {
+    // `justify-end` unqualified would right-align the stacked phone layout too.
+    expect(header).not.toMatch(/(?<!sm:)justify-end/);
   });
 });
 

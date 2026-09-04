@@ -196,6 +196,14 @@ components:
         to any one bank fail often enough to be a single point of failure.
         `is_default` is exclusive — setting it unsets every other account.
         `is_active` is independent: an inactive account is simply not offered.
+
+        Nothing today guarantees a default exists. Deleting or hiding the
+        default leaves the restaurant with none, and the customer app does not
+        read the flag at all — it takes the first account the server returns,
+        so the ordering is what guests actually experience. The admin app now
+        promotes the next active account when the default is deleted, and warns
+        when none is set, but that is a client holding an invariant the server
+        should own: deleting a default ought to promote a replacement.
       properties:
         id: { type: string, format: uuid }
         bank_name: { type: string }

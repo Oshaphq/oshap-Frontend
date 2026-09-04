@@ -90,11 +90,28 @@ export default function BankAccountsSection({ canEdit }: { canEdit: boolean }) {
     );
   };
 
+  /**
+   * Removing the default used to leave the restaurant with none, and nothing
+   * anywhere put that right — the heading above still promised guests are
+   * "shown the default first" while no account was one. Promote the next
+   * active account in its place.
+   *
+   * First active, not first in the list: a hidden account is not offered to
+   * guests, so making it the default would name an account nobody can pay
+   * into.
+   */
   const handleDelete = (account: BankAccount) => {
+    const heir = account.is_default
+      ? list.find((a) => a.id !== account.id && a.is_active)
+      : undefined;
+
     deleteAccount.mutate(account.id, {
       onSuccess: () => {
         setPendingDeleteId(null);
         toast.success("Bank account removed");
+        if (heir) {
+          updateAccount.mutate({ id: heir.id, payload: { is_default: true } });
+        }
       },
       onError: (err) => fail(err, "Failed to remove account"),
     });
@@ -108,6 +125,15 @@ export default function BankAccountsSection({ canEdit }: { canEdit: boolean }) {
           <p className="text-body-medium text-on-surface-variant">
             Guests are shown the default first, then the rest as fallbacks.
           </p>
+          {/* The sentence above is a promise. When nothing is default it is
+              not true, and the operator has no way to tell — every row just
+              offers "Make default" and none is marked. */}
+          {!isLoading && list.length > 0 && !list.some((a) => a.is_default) && (
+            <p className="text-body-medium text-error font-semibold">
+              No default account. Guests will be offered these in whatever
+              order the server returns — pick one.
+            </p>
+          )}
         </div>
         {canEdit && !isAdding && (
           <SecondaryButton size="md" onClick={() => setIsAdding(true)}>
