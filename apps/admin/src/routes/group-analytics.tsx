@@ -1,5 +1,5 @@
 import { Link } from "react-router";
-import { Card, Spinner } from "@oshap/shared/ui";
+import { Card, Page, Spinner } from "@oshap/shared/ui";
 import {
   useAdminGroup,
   useAdminGroupAnalytics,
@@ -53,7 +53,7 @@ export default function GroupAnalyticsPage() {
   const maxRevenue = Math.max(...analytics.branches.map((b) => b.total_revenue), 1);
 
   return (
-    <main className="p-md flex flex-col gap-l">
+    <Page width="wide" gap="l">
       <header className="flex items-center justify-between">
         <div>
           <h1 className="font-display text-title-large font-semibold text-on-surface">
@@ -195,6 +195,6 @@ export default function GroupAnalyticsPage() {
           );
         })}
       </div>
-    </main>
+    </Page>
   );
 }

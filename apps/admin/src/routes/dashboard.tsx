@@ -20,6 +20,7 @@ import {
   SecondaryButton,
   StatusBadge,
   Spinner,
+  Page,
   toast,
 } from "@oshap/shared/ui";
 import QueryError from "../components/QueryError";
@@ -171,7 +172,7 @@ export default function DashboardPage() {
   const hasLowStock = lowStockCount > 0;
 
   return (
-    <main className="p-md flex flex-col gap-l">
+    <Page width="wide" gap="l">
       {restaurantId && <SetupChecklist restaurantId={restaurantId} />}
       <header className="flex items-center justify-between">
         <h1 className="font-display text-title-large font-semibold text-on-surface">
@@ -424,7 +425,7 @@ export default function DashboardPage() {
           onClose={() => setCashTarget(null)}
         />
       )}
-    </main>
+    </Page>
   );
 }
 

@@ -23,6 +23,7 @@ import {
   Button,
   Checkbox,
   EmptyState,
+  Page,
   PrimaryButton,
   SecondaryButton,
   Select,
@@ -306,7 +307,7 @@ export default function MenuPage() {
   const isSaving = createItem.isPending || updateItem.isPending;
 
   return (
-    <main className="p-md flex flex-col gap-md">
+    <Page width="wide" gap="md">
       {/* The title gets its own line. Beside five actions it was the thing
           that gave way — squeezed on a phone, and pinned to the far left of a
           wide screen from the buttons it belongs with. */}
@@ -465,7 +466,7 @@ export default function MenuPage() {
       {recipeFor && (
         <RecipeDialog item={recipeFor} onClose={() => setRecipeFor(null)} />
       )}
-    </main>
+    </Page>
   );
 }
 

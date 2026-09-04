@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Spinner } from "@oshap/shared/ui";
+import { Page, Spinner } from "@oshap/shared/ui";
 import {
   errorMessage,
   formatCurrency,
@@ -85,7 +85,7 @@ export default function InventoryPage() {
   );
 
   return (
-    <main className="p-md flex flex-col gap-md max-w-[64rem]">
+    <Page width="wide" gap="md">
       {/* Title block above the actions, not beside them. */}
       <header className="flex flex-col gap-s">
         <div className="flex flex-col gap-0.5">
@@ -261,7 +261,7 @@ export default function InventoryPage() {
         />
       )}
       {showNew && <NewIngredientDialog onClose={() => setShowNew(false)} />}
-    </main>
+    </Page>
   );
 }
 

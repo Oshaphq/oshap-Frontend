@@ -16,6 +16,7 @@ import {
   Card,
   SecondaryButton,
   Spinner,
+  Page,
   toast,
 } from "@oshap/shared/ui";
 import QueryError from "../components/QueryError";
@@ -108,7 +109,7 @@ export default function OrderDetailPage() {
     updateItem.isPending || voidItem.isPending || compItem.isPending;
 
   return (
-    <main className="p-md flex flex-col gap-l max-w-[42rem]">
+    <Page width="reading" gap="l">
       <header className="flex items-start gap-md">
         <Link
           to="/"
@@ -362,7 +363,7 @@ export default function OrderDetailPage() {
           )}
         </Card>
       )}
-    </main>
+    </Page>
   );
 }
 

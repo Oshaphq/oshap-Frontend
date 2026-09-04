@@ -7,6 +7,7 @@ import {
   PrimaryButton,
   Select,
   Spinner,
+  Page,
 } from "@oshap/shared/ui";
 import {
   AreaChart,
@@ -97,7 +98,7 @@ export default function Analytics() {
   };
 
   return (
-    <main className="p-md flex flex-col gap-l">
+    <Page width="wide" gap="l">
       <header className="flex flex-col gap-md sm:flex-row sm:items-start sm:justify-between">
         {/* Title + secondary link stacked */}
         <div className="flex flex-col gap-0.5">
@@ -319,6 +320,6 @@ export default function Analytics() {
           </div>
         </div>
       )}
-    </main>
+    </Page>
   );
 }

@@ -7,6 +7,7 @@ import {
   Card,
   EmptyState,
   Spinner,
+  Page,
 } from "@oshap/shared/ui";
 import QueryError from "../components/QueryError";
 
@@ -48,7 +49,7 @@ export default function ZReportPage() {
   const hasTakings = (data?.order_count ?? 0) > 0;
 
   return (
-    <main className="p-md flex flex-col gap-l max-w-[42rem]">
+    <Page width="reading" gap="l">
       <header className="flex flex-wrap items-center justify-between gap-md">
         <div className="flex flex-col gap-0.5">
           <h1 className="font-display text-title-large font-semibold text-on-surface">
@@ -153,7 +154,7 @@ export default function ZReportPage() {
           </>
         )
       )}
-    </main>
+    </Page>
   );
 }
 

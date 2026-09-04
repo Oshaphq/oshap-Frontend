@@ -1,4 +1,5 @@
 import { Link, Routes, Route, Navigate, useLocation } from "react-router";
+import { Page } from "@oshap/shared/ui";
 import {
   useAdminBankAccounts,
   useAdminBranches,
@@ -131,7 +132,7 @@ export default function SettingsLayout() {
   const atIndex = pathname === "/settings" || pathname === "/settings/";
 
   return (
-    <main className="p-md flex flex-col gap-md max-w-[52rem]">
+    <Page width="form" gap="md">
       {atIndex ? (
         <>
           <header className="flex flex-col gap-0.5">
@@ -191,7 +192,7 @@ export default function SettingsLayout() {
           <Route path="*" element={<Navigate to="/settings" replace />} />
         </Routes>
       )}
-    </main>
+    </Page>
   );
 }
 
