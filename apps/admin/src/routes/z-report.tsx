@@ -2,7 +2,11 @@ import { useState } from "react";
 import { Link } from "react-router";
 import { formatCurrency, useAdminZReport } from "@oshap/shared";
 import type { PaymentMethod } from "@oshap/shared";
-import { Button, EmptyState } from "@oshap/shared/ui";
+import {
+  Button,
+  Card,
+  EmptyState,
+} from "@oshap/shared/ui";
 import QueryError from "../components/QueryError";
 
 const METHOD_LABELS: Record<PaymentMethod, string> = {
@@ -86,7 +90,7 @@ export default function ZReportPage() {
       ) : (
         data && (
           <>
-            <section className="bg-surface-container-low rounded-lg p-l flex flex-col gap-md">
+            <Card as="section" padding="l" gap="md">
               <h2 className="text-title-large font-semibold text-on-surface">
                 Takings by method
               </h2>
@@ -115,9 +119,9 @@ export default function ZReportPage() {
                   </span>
                 </div>
               </div>
-            </section>
+            </Card>
 
-            <section className="bg-surface-container-low rounded-lg p-l flex flex-col gap-md">
+            <Card as="section" padding="l" gap="md">
               <h2 className="text-title-large font-semibold text-on-surface">
                 Included in the day
               </h2>
@@ -144,7 +148,7 @@ export default function ZReportPage() {
               >
                 Not adding up? See what changed →
               </Link>
-            </section>
+            </Card>
           </>
         )
       )}

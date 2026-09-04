@@ -1,6 +1,7 @@
 import { usePlatformRestaurants, formatCurrency } from "@oshap/shared";
 import {
   DataTable,
+  Card,
   QueryError,
 } from "@oshap/shared/ui";
 import type { SubscriptionTier } from "@oshap/shared";
@@ -77,26 +78,26 @@ export default function SubscriptionsPage() {
 
       {/* Revenue summary */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-md">
-        <div className="bg-surface-container-low rounded-lg p-md flex flex-col gap-xs">
+        <Card gap="xs">
           <span className="text-label-large font-semibold text-on-surface-variant uppercase tracking-wider">MRR (est.)</span>
           <span className="font-display text-title-medium font-semibold text-on-surface">{formatCurrency(mrr)}</span>
-        </div>
-        <div className="bg-surface-container-low rounded-lg p-md flex flex-col gap-xs">
+        </Card>
+        <Card gap="xs">
           <span className="text-label-large font-semibold text-on-surface-variant uppercase tracking-wider">ARR (est.)</span>
           <span className="font-display text-title-medium font-semibold text-on-surface">{formatCurrency(arr)}</span>
-        </div>
-        <div className="bg-surface-container-low rounded-lg p-md flex flex-col gap-xs">
+        </Card>
+        <Card gap="xs">
           <span className="text-label-large font-semibold text-on-surface-variant uppercase tracking-wider">Active</span>
           <span className="font-display text-title-medium font-semibold text-on-surface">
             {restaurants.filter((r) => r.is_active).length}
           </span>
-        </div>
-        <div className="bg-surface-container-low rounded-lg p-md flex flex-col gap-xs">
+        </Card>
+        <Card gap="xs">
           <span className="text-label-large font-semibold text-on-surface-variant uppercase tracking-wider">Lite Tier</span>
           <span className="font-display text-title-medium font-semibold text-on-surface-variant">
             {byTier.LITE.length}
           </span>
-        </div>
+        </Card>
       </div>
 
       {/* Tier breakdown */}

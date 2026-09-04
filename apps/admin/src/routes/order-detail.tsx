@@ -11,7 +11,12 @@ import {
   useAdminVoidOrderItem,
   useOrder,
 } from "@oshap/shared";
-import { Button, SecondaryButton, toast } from "@oshap/shared/ui";
+import {
+  Button,
+  Card,
+  SecondaryButton,
+  toast,
+} from "@oshap/shared/ui";
 import QueryError from "../components/QueryError";
 import ReceiptSheet from "../components/ReceiptSheet";
 
@@ -139,7 +144,7 @@ export default function OrderDetailPage() {
         </div>
       )}
 
-      <section className="bg-surface-container-low rounded-lg p-l flex flex-col gap-md">
+      <Card as="section" padding="l" gap="md">
         <h2 className="text-title-large font-semibold text-on-surface">Items</h2>
         <div className="flex flex-col">
           {data.items.map((item) => {
@@ -265,9 +270,9 @@ export default function OrderDetailPage() {
             );
           })}
         </div>
-      </section>
+      </Card>
 
-      <section className="bg-surface-container-low rounded-lg p-l flex flex-col gap-md">
+      <Card as="section" padding="l" gap="md">
         <h2 className="text-title-large font-semibold text-on-surface">Bill</h2>
         <div className="flex flex-col">
           <Line label="Subtotal" value={data.subtotal ?? data.total} />
@@ -284,10 +289,10 @@ export default function OrderDetailPage() {
             </span>
           </div>
         </div>
-      </section>
+      </Card>
 
       {!isClosed && (
-        <section className="bg-surface-container-low rounded-lg p-l flex flex-col gap-md">
+        <Card as="section" padding="l" gap="md">
           <h2 className="text-title-large font-semibold text-on-surface">Adjust</h2>
 
           {openAdjustment ? (
@@ -354,7 +359,7 @@ export default function OrderDetailPage() {
               This bill is settled — items can no longer be changed, only refunded.
             </p>
           )}
-        </section>
+        </Card>
       )}
     </main>
   );

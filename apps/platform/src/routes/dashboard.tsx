@@ -1,5 +1,8 @@
 import { Link } from "react-router";
-import { QueryError } from "@oshap/shared/ui";
+import {
+  Card,
+  QueryError,
+} from "@oshap/shared/ui";
 import { monthlyRecurringKobo } from "../tiers";
 import {
   usePlatformRestaurants,
@@ -39,30 +42,30 @@ export default function DashboardPage() {
 
       {/* KPI row */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-md">
-        <div className="bg-surface-container-low rounded-lg p-md flex flex-col gap-xs">
+        <Card gap="xs">
           <span className="text-label-large font-semibold text-on-surface-variant uppercase tracking-wider">
             Total Restaurants
           </span>
           <span className="font-display text-title-large font-semibold text-on-surface">
             {restaurantsQuery.isLoading || restaurantsQuery.isError ? "—" : restaurants.length}
           </span>
-        </div>
-        <div className="bg-surface-container-low rounded-lg p-md flex flex-col gap-xs">
+        </Card>
+        <Card gap="xs">
           <span className="text-label-large font-semibold text-on-surface-variant uppercase tracking-wider">
             Active
           </span>
           <span className="font-display text-title-large font-semibold text-success">
             {restaurantsQuery.isLoading || restaurantsQuery.isError ? "—" : active}
           </span>
-        </div>
-        <div className="bg-surface-container-low rounded-lg p-md flex flex-col gap-xs">
+        </Card>
+        <Card gap="xs">
           <span className="text-label-large font-semibold text-on-surface-variant uppercase tracking-wider">
             Est. MRR
           </span>
           <span className="font-display text-title-large font-semibold text-on-surface">
             {restaurantsQuery.isLoading || restaurantsQuery.isError ? "—" : formatCurrency(mrr)}
           </span>
-        </div>
+        </Card>
         <div
           className={`rounded-lg p-md flex flex-col gap-xs border ${
             health && health.error_rate_pct < 1
