@@ -1,7 +1,28 @@
-import { createPortal } from "react-dom";
+import { Button, EmptyState, Sheet } from "@oshap/shared/ui";
 import { useNotifications } from "../context/NotificationContext";
-import { useDragToDismiss } from "../hooks/useDragToDismiss";
 
+/**
+ * The guest's notification list.
+ *
+ * The shell became `Sheet`; the contents had not caught up and were still
+ * hand-rolled against the design system rather than with it:
+ *
+ * - the two footer actions were bare `<button>`s labelled `text-title-large`,
+ *   a 22px display role used as a button label — three steps above the
+ *   `label-large` every other button in the product uses
+ * - the rows were `rounded-2xl`, which in this scale is 32px: the pill radius,
+ *   on a rectangular list row
+ * - they sat on `bg-surface`, the PAGE tone, inside a `surface-container-low`
+ *   sheet — so a nested block was lighter than the thing containing it, which
+ *   inverts the elevation ladder
+ * - read rows were dimmed with `opacity-75`, which composites the text back
+ *   down instead of choosing a quieter role
+ * - the empty state was hand-drawn next to a shared `EmptyState`
+ *
+ * And one real defect: each row was a `<div onClick>`. Not focusable, no role,
+ * no keyboard. It is a `<button>` now, disabled once read, because a read
+ * notification has nothing left to do and should not be a tab stop.
+ */
 export default function NotificationSheet({
   isOpen,
   onClose,
@@ -9,98 +30,75 @@ export default function NotificationSheet({
   isOpen: boolean;
   onClose: () => void;
 }) {
-  const { notifications, markAsRead, markAllAsRead, clearAll } = useNotifications();
-  const { sheetRef, handleProps } = useDragToDismiss(onClose);
+  const { notifications, markAsRead, markAllAsRead, clearAll } =
+    useNotifications();
 
   if (!isOpen) return null;
 
-  return createPortal(
-    <>
-      <div
-        className="fixed inset-0 bg-scrim z-[90] animate-[fade-in_0.2s_ease]"
-        onClick={onClose}
-      />
-      <div 
-        ref={sheetRef}
-        role="dialog"
-        aria-label="Notifications"
-        className="fixed left-0 right-0 bottom-0 max-h-[80vh] bg-surface-container-low rounded-t-xl z-[100] flex flex-col shadow-[0_-4px_24px_var(--ds-shadow)] animate-[slide-up-drawer_0.3s_ease] will-change-transform"
-      >
-        <div {...handleProps} className="flex justify-center py-s cursor-grab active:cursor-grabbing">
-          <div className="w-10 h-1 rounded-full bg-outline-variant" />
-        </div>
-
-        <div className="flex items-center justify-between px-md pb-md border-b border-outline-variant">
-          <h2 className="text-title-large font-display font-semibold text-on-surface">
-            Notifications
-          </h2>
+  return (
+    <Sheet
+      onClose={onClose}
+      title="Notifications"
+      bodyClassName="flex flex-col gap-s"
+      footer={
+        notifications.length > 0 ? (
+          <div className="flex justify-between gap-s">
+            <Button variant="text" destructive onClick={clearAll}>
+              Clear all
+            </Button>
+            <Button variant="text" onClick={markAllAsRead}>
+              Mark all as read
+            </Button>
+          </div>
+        ) : undefined
+      }
+    >
+      {notifications.length === 0 ? (
+        <EmptyState
+          icon="mgc_notification_off_line"
+          title="Nothing yet"
+          message="Updates about your order will show up here."
+          card={false}
+        />
+      ) : (
+        notifications.map((n) => (
           <button
+            key={n.id}
             type="button"
-            onClick={onClose}
-            aria-label="Close notifications"
-            className="w-12 h-12 flex items-center justify-center rounded-full bg-surface-container text-on-surface-variant hover:bg-surface-container-high transition-colors"
+            disabled={n.read}
+            onClick={() => markAsRead(n.id)}
+            className={`flex items-start gap-s p-md rounded-sm border text-left transition-colors ${
+              n.read
+                ? "bg-surface-container border-transparent"
+                : "bg-surface-container border-primary hover:bg-surface-container-high"
+            }`}
           >
-            <i className="mgc_close_line text-xl" />
-          </button>
-        </div>
-
-        <div className="flex-1 overflow-y-auto p-md space-y-s">
-          {notifications.length === 0 ? (
-            <div className="py-xl text-center text-on-surface-variant">
-              <i className="mgc_notification_off_line text-4xl mb-s opacity-50" />
-              <p>No notifications yet</p>
-            </div>
-          ) : (
-            notifications.map((n) => (
-              <div
-                key={n.id}
-                onClick={() => {
-                  if (!n.read) markAsRead(n.id);
-                }}
-                className={`p-s rounded-2xl border transition-colors cursor-pointer ${
+            <span
+              aria-hidden="true"
+              className={`mt-1.5 shrink-0 w-2 h-2 rounded-full ${
+                n.read ? "bg-transparent" : "bg-primary"
+              }`}
+            />
+            <span className="flex flex-col gap-0.5 min-w-0">
+              <span
+                className={`text-body-medium ${
                   n.read
-                    ? "bg-surface border-transparent opacity-75"
-                    : "bg-surface border-primary"
+                    ? "text-on-surface-variant"
+                    : "text-on-surface font-medium"
                 }`}
               >
-                <div className="flex items-start gap-s">
-                  <div
-                    className={`mt-1.5 flex-shrink-0 w-2 h-2 rounded-full ${
-                      n.read ? "bg-transparent" : "bg-primary"
-                    }`}
-                  />
-                  <div>
-                    <p className={`text-body-medium ${n.read ? "text-on-surface-variant" : "text-on-surface font-medium"}`}>
-                      {n.message}
-                    </p>
-                    <p className="text-body-medium text-on-surface-variant mt-xs">
-                      {new Date(n.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                    </p>
-                  </div>
-                </div>
-              </div>
-            ))
-          )}
-        </div>
-
-        {notifications.length > 0 && (
-          <div className="p-md border-t border-outline-variant flex justify-between gap-s">
-            <button
-              onClick={clearAll}
-              className="px-md py-s rounded-full font-semibold text-title-large text-error hover:bg-error/10 transition-colors"
-            >
-              Clear All
-            </button>
-            <button
-              onClick={markAllAsRead}
-              className="px-md py-s rounded-full font-semibold text-title-large text-primary-label hover:bg-primary/8 transition-colors"
-            >
-              Mark all as read
-            </button>
-          </div>
-        )}
-      </div>
-    </>,
-    document.body
+                {n.message}
+              </span>
+              <span className="text-body-small text-on-surface-variant tabular-nums">
+                {new Date(n.timestamp).toLocaleTimeString([], {
+                  hour: "2-digit",
+                  minute: "2-digit",
+                })}
+              </span>
+            </span>
+          </button>
+        ))
+      )}
+    </Sheet>
   );
 }

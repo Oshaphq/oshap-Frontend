@@ -13,8 +13,12 @@ import { useSession } from "../context/SessionContext";
 import BottomNav from "../components/BottomNav";
 import CartBar from "../components/CartBar";
 import CartDrawer from "../components/CartDrawer";
-import { useDragToDismiss } from "../hooks/useDragToDismiss";
-import { EmptyState, PrimaryButton, SecondaryButton } from "@oshap/shared/ui";
+import {
+  EmptyState,
+  PrimaryButton,
+  SecondaryButton,
+  Sheet,
+} from "@oshap/shared/ui";
 import PinChip from "../components/PinChip";
 import AddButton from "../components/AddButton";
 import CustomerHeader from "../components/CustomerHeader";
@@ -42,8 +46,6 @@ function OrdersView({ tableId }: { tableId: string }) {
   const [showPinInput, setShowPinInput] = useState(false);
   const [pinError, setPinError] = useState("");
   const [showOthersDetail, setShowOthersDetail] = useState(false);
-  const { sheetRef: othersSheetRef, handleProps: othersHandleProps } =
-    useDragToDismiss(() => setShowOthersDetail(false));
 
   // POST /session records against the table's NAME, while the URL carries its
   // uuid — see the note in checkout.tsx.
@@ -382,95 +384,69 @@ function OrdersView({ tableId }: { tableId: string }) {
       </section>
 
       {showOthersDetail && (
-        <>
-          <div
-            className="fixed inset-0 bg-scrim z-[90] animate-[fade-in_0.2s_ease]"
-            onClick={() => setShowOthersDetail(false)}
-          />
-          <div
-            ref={othersSheetRef}
-            role="dialog"
-            aria-label="Others' orders"
-            className="fixed left-0 right-0 bottom-0 max-h-[80vh] bg-surface-container-low rounded-t-xl z-[100] flex flex-col shadow-[0_-4px_24px_var(--ds-shadow)] animate-[slide-up-drawer_0.3s_ease] will-change-transform"
-          >
-            <div {...othersHandleProps} className="flex justify-center py-s cursor-grab active:cursor-grabbing">
-              <div className="w-10 h-1 rounded-full bg-outline-variant" />
-            </div>
-
-            <div className="flex items-center justify-between px-md pb-md border-b border-outline-variant">
-              <h2 className="font-display text-title-large font-semibold text-on-surface">
-                Others' Orders
-              </h2>
-              <button
-                type="button"
-                onClick={() => setShowOthersDetail(false)}
-                aria-label="Close"
-                className="w-12 h-12 flex items-center justify-center rounded-full bg-surface-container text-on-surface-variant hover:bg-surface-container-high transition-colors"
-              >
-                <i className="mgc_close_line text-xl" />
-              </button>
-            </div>
-
-            <div className="flex-1 overflow-y-auto px-md py-md flex flex-col gap-l">
-              {othersByCustomer.map(([name, ordersForName]) => {
-                const customerTotal = ordersForName.reduce(
-                  (sum, o) => sum + o.total,
-                  0,
-                );
-                const items = ordersForName.flatMap((o) => o.order_items);
-                return (
-                  <div key={name} className="flex flex-col gap-s">
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-s">
-                        <div className="w-9 h-9 rounded-full bg-primary-container flex items-center justify-center text-label-medium font-semibold text-on-primary-container">
-                          {name.slice(0, 2).toUpperCase()}
-                        </div>
-                        <span className="text-title-medium font-semibold text-on-surface">
-                          {name}
-                        </span>
-                      </div>
-                      <span className="text-label-large font-semibold text-on-surface">
-                        {formatCurrency(customerTotal)}
-                      </span>
-                    </div>
-                    <div className="flex flex-col gap-s">
-                      {items.map((item) => (
-                        <div
-                          key={item.id}
-                          className="flex items-center justify-between"
-                        >
-                          <div className="flex items-center gap-s">
-                            <i className="mgc_fork_spoon_line text-xl text-primary-label" />
-                            <div className="flex flex-col gap-0.5">
-                              <span className="text-title-medium font-semibold text-on-surface">
-                                {item.name}
-                              </span>
-                              <span className="text-label-medium text-on-surface-variant">
-                                Qty {item.quantity}
-                              </span>
-                            </div>
-                          </div>
-                          <span className="text-label-large text-on-surface">
-                            {formatCurrency(item.price * item.quantity)}
-                          </span>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-
-            <div className="px-md py-md border-t border-outline-variant flex items-center justify-between">
+        <Sheet
+          onClose={() => setShowOthersDetail(false)}
+          title="Others' Orders"
+          bodyClassName="flex flex-col gap-l"
+          footer={
+            <div className="flex items-center justify-between">
               <span className="text-label-large text-on-surface-variant">
-                Others' Total
+                Others&rsquo; Total
               </span>
               <span className="font-display text-title-large font-semibold text-on-surface">
                 {formatCurrency(othersTotal)}
               </span>
             </div>
-          </div>
-        </>
+          }
+        >
+            {othersByCustomer.map(([name, ordersForName]) => {
+              const customerTotal = ordersForName.reduce(
+                (sum, o) => sum + o.total,
+                0,
+              );
+              const items = ordersForName.flatMap((o) => o.order_items);
+              return (
+                <div key={name} className="flex flex-col gap-s">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-s">
+                      <div className="w-9 h-9 rounded-full bg-primary-container flex items-center justify-center text-label-medium font-semibold text-on-primary-container">
+                        {name.slice(0, 2).toUpperCase()}
+                      </div>
+                      <span className="text-title-medium font-semibold text-on-surface">
+                        {name}
+                      </span>
+                    </div>
+                    <span className="text-label-large font-semibold text-on-surface">
+                      {formatCurrency(customerTotal)}
+                    </span>
+                  </div>
+                  <div className="flex flex-col gap-s">
+                    {items.map((item) => (
+                      <div
+                        key={item.id}
+                        className="flex items-center justify-between"
+                      >
+                        <div className="flex items-center gap-s">
+                          <i className="mgc_fork_spoon_line text-xl text-primary-label" />
+                          <div className="flex flex-col gap-0.5">
+                            <span className="text-title-medium font-semibold text-on-surface">
+                              {item.name}
+                            </span>
+                            <span className="text-label-medium text-on-surface-variant">
+                              Qty {item.quantity}
+                            </span>
+                          </div>
+                        </div>
+                        <span className="text-label-large text-on-surface">
+                          {formatCurrency(item.price * item.quantity)}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              );
+            })}
+        </Sheet>
       )}
     </div>
   );

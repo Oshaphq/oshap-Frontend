@@ -51,8 +51,16 @@ function mount(menuItem: MenuItem) {
   });
 }
 
+/**
+ * Scoped to the document, not to `host`. The detail sheet is a `Sheet`, which
+ * portals to `document.body` — so a query rooted at the card's own container
+ * finds the card's buttons and none of the sheet's.
+ */
 const byLabel = (label: string) =>
-  host.querySelector<HTMLButtonElement>(`[aria-label="${label}"]`);
+  document.body.querySelector<HTMLButtonElement>(`[aria-label="${label}"]`);
+
+/** Same reason: the sheet is not inside `host`. */
+const sheet = () => document.body.querySelector('[role="dialog"]');
 
 /**
  * React tracks a controlled input's value on the node, and a plain
@@ -106,7 +114,7 @@ describe("tapping the card body", () => {
     mount(item());
     click(byLabel("View Chicken Shawarma"));
 
-    expect(host.querySelector('[role="dialog"]')).not.toBeNull();
+    expect(sheet()).not.toBeNull();
     // Opening is not ordering.
     expect(byLabel("Decrease Chicken Shawarma quantity")).toBeNull();
   });
@@ -117,7 +125,7 @@ describe("tapping the card body", () => {
     expect(host.textContent).toContain("Unavailable");
     click(byLabel("View Chicken Shawarma"));
 
-    const dialog = host.querySelector('[role="dialog"]');
+    const dialog = sheet();
     expect(dialog).not.toBeNull();
     // Everything shown, nothing addable.
     expect(dialog!.textContent).toContain("Sold out");
@@ -139,7 +147,7 @@ describe("tapping ADD", () => {
     click(byLabel("Add Chicken Shawarma to cart"));
 
     // No sheet: a dish with nothing to choose has nothing to ask.
-    expect(host.querySelector('[role="dialog"]')).toBeNull();
+    expect(sheet()).toBeNull();
     expect(byLabel("Add Chicken Shawarma to cart")).toBeNull();
     expect(byLabel("Increase Chicken Shawarma quantity")).not.toBeNull();
     expect(byLabel("Decrease Chicken Shawarma quantity")).not.toBeNull();
@@ -167,8 +175,8 @@ describe("tapping ADD", () => {
     click(byLabel("Choose options for Chicken Shawarma"));
 
     // A bare "+1" cannot say which variant to add, so it must ask first.
-    expect(host.querySelector('[role="dialog"]')).not.toBeNull();
-    expect(host.textContent).toContain("Choices available");
+    expect(sheet()).not.toBeNull();
+    expect(document.body.textContent).toContain("Choices available");
   });
 });
 
@@ -239,7 +247,9 @@ describe("the notes field in the detail sheet", () => {
     mount(item());
     click(byLabel("View Chicken Shawarma"));
 
-    const notes = host.querySelector<HTMLTextAreaElement>("#oshap-item-notes")!;
+    const notes = document.body.querySelector<HTMLTextAreaElement>(
+      "#oshap-item-notes",
+    )!;
     // A two-row box parks the placeholder against the top edge, where it reads
     // as a misaligned label rather than a prompt.
     expect(notes.rows).toBe(1);
@@ -270,7 +280,9 @@ describe("the notes field in the detail sheet", () => {
     mount(item());
     click(byLabel("View Chicken Shawarma"));
 
-    const notes = host.querySelector<HTMLTextAreaElement>("#oshap-item-notes")!;
+    const notes = document.body.querySelector<HTMLTextAreaElement>(
+      "#oshap-item-notes",
+    )!;
     act(() => {
       type(notes, "no onions please, and extra yaji on the side if you have it");
     });
@@ -310,7 +322,7 @@ describe("what the detail sheet calls itself", () => {
     mount(withChoices());
     click(byLabel("Choose options for Chicken Shawarma"));
 
-    const dialog = host.querySelector('[role="dialog"]')!;
+    const dialog = sheet()!;
     expect(dialog.getAttribute("aria-label")).toBe(
       "Choose options for Chicken Shawarma",
     );
@@ -320,7 +332,7 @@ describe("what the detail sheet calls itself", () => {
     mount(item());
     click(byLabel("View Chicken Shawarma"));
 
-    const dialog = host.querySelector('[role="dialog"]')!;
+    const dialog = sheet()!;
     // "Choose options" would misdescribe a sheet with no options in it.
     expect(dialog.getAttribute("aria-label")).toBe("Chicken Shawarma");
   });

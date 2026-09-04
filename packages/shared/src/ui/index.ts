@@ -18,6 +18,8 @@ export { default as QueryError } from "./QueryError";
 export { default as Dialog } from "./Dialog";
 export type { DialogProps } from "./Dialog";
 export { default as Select } from "./Select";
+export { default as Sheet } from "./Sheet";
+export type { SheetProps } from "./Sheet";
 export type { SelectProps } from "./Select";
 export { default as TextField } from "./TextField";
 export type { TextFieldProps } from "./TextField";

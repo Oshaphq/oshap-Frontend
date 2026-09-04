@@ -25,9 +25,15 @@ async function openMenu(page: Page, table = "tbl-t1") {
 }
 
 /** The sticky bar at the bottom, which only exists once something is in it. */
+/**
+ * The cart sheet names itself from its visible heading — "Your Order (N)".
+ * It used to carry `aria-label="Your cart"`, which contradicted the heading on
+ * screen; adopting `Sheet` made the accessible name the heading, so the
+ * locator follows the words a guest can actually read.
+ */
 async function openCart(page: Page) {
   await page.getByRole("button", { name: /View Cart/i }).click();
-  await expect(page.getByRole("dialog", { name: /Your cart/i })).toBeVisible();
+  await expect(page.getByRole("dialog", { name: /Your Order/i })).toBeVisible();
 }
 
 /** The card for one dish, so actions can be scoped to it. */
@@ -101,7 +107,7 @@ test.describe("customer ordering", () => {
     await sheet.getByRole("button", { name: /^Add ·/ }).click();
 
     await openCart(page);
-    const cart = page.getByRole("dialog", { name: /Your cart/i });
+    const cart = page.getByRole("dialog", { name: /Your Order/i });
     // Every chosen option is listed, in group order — the required spice
     // choice included, since the guest is paying for that line as configured.
     await expect(
@@ -128,7 +134,7 @@ test.describe("customer ordering", () => {
     }
 
     await openCart(page);
-    const cart = page.getByRole("dialog", { name: /Your cart/i });
+    const cart = page.getByRole("dialog", { name: /Your Order/i });
 
     // Two rows, not one row of quantity 2 — they're different food.
     await expect(cart.getByText("Turkey · Mild")).toBeVisible();
@@ -145,7 +151,7 @@ test.describe("customer ordering", () => {
       .click();
     await openCart(page);
     await page
-      .getByRole("dialog", { name: /Your cart/i })
+      .getByRole("dialog", { name: /Your Order/i })
       .getByRole("button", { name: /Place Order/i })
       .click();
 
@@ -189,7 +195,7 @@ test.describe("customer ordering", () => {
     // A guest who locks their phone mid-order should not lose the cart.
     await openCart(page);
     await expect(
-      page.getByRole("dialog", { name: /Your cart/i }).getByText("Large"),
+      page.getByRole("dialog", { name: /Your Order/i }).getByText("Large"),
     ).toBeVisible();
   });
 });
