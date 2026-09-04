@@ -1,8 +1,7 @@
 import { useMemo, useState } from "react";
 import { formatCurrency } from "@oshap/shared";
 import type { MenuItem, ModifierGroup } from "@oshap/shared";
-import { PrimaryButton } from "@oshap/shared/ui";
-import { useDragToDismiss } from "../hooks/useDragToDismiss";
+import { PrimaryButton, Sheet } from "@oshap/shared/ui";
 import { unitPrice, type CartModifier } from "../context/CartContext";
 
 interface Props {
@@ -65,7 +64,6 @@ export default function ModifierSheet({ item, onClose, onAdd, remaining = null }
     el.style.height = `${el.scrollHeight}px`;
   };
   const [quantity, setQuantity] = useState(1);
-  const { sheetRef, handleProps } = useDragToDismiss(onClose);
 
   const toggle = (group: ModifierGroup, optionId: string) => {
     setSelected((prev) => {
@@ -118,32 +116,19 @@ export default function ModifierSheet({ item, onClose, onAdd, remaining = null }
   const linePrice = unitPrice({ basePrice: item.price, modifiers: chosen }) * quantity;
 
   return (
-    <>
-      <div
-        className="fixed inset-0 bg-scrim z-[90] animate-[fade-in_0.2s_ease]"
-        onClick={onClose}
-      />
-      <div
-        ref={sheetRef}
-        role="dialog"
-        /* The name follows the job the sheet is doing. It opens two ways: to
-           pick options, and to read a dish in full. Naming it "Choose options"
-           when there is nothing to choose misdescribes it to a screen reader;
-           naming it for the dish alone loses the purpose when there is. */
-        aria-label={
-          groups.length > 0 ? `Choose options for ${item.name}` : item.name
-        }
-        className="fixed left-0 right-0 bottom-0 max-h-[88vh] bg-surface-container-low rounded-t-xl z-[100] flex flex-col shadow-[0_-4px_24px_var(--ds-shadow)] animate-[slide-up-drawer_0.3s_ease] will-change-transform"
-      >
-        <div
-          {...handleProps}
-          className="flex justify-center py-s cursor-grab active:cursor-grabbing"
-        >
-          <div className="w-10 h-1 rounded-full bg-outline-variant" />
-        </div>
-
-        <div className="flex flex-col gap-md px-md pb-md border-b border-outline-variant">
-          <div className="flex items-start justify-between gap-md">
+    <Sheet
+      onClose={onClose}
+      title={item.name}
+      /* The name follows the job the sheet is doing. It opens two ways: to
+         pick options, and to read a dish in full. Naming it "Choose options"
+         when there is nothing to choose misdescribes it to a screen reader;
+         naming it for the dish alone loses the purpose when there is. */
+      label={groups.length > 0 ? `Choose options for ${item.name}` : item.name}
+      maxHeight="max-h-[88vh]"
+      bodyClassName="flex flex-col gap-l"
+      header={
+        <div className="flex flex-col gap-md min-w-0 flex-1">
+          <div className="flex items-start gap-md">
             <div className="flex items-start gap-md min-w-0">
               <div className="shrink-0 w-16 h-16 rounded-md overflow-hidden bg-primary-container">
                 {item.image_url ? (
@@ -171,14 +156,6 @@ export default function ModifierSheet({ item, onClose, onAdd, remaining = null }
                 </span>
               </div>
             </div>
-            <button
-              type="button"
-              onClick={onClose}
-              aria-label="Close"
-              className="w-12 h-12 shrink-0 flex items-center justify-center rounded-full bg-surface-container text-on-surface-variant hover:bg-surface-container-high transition-colors"
-            >
-              <i className="mgc_close_line text-xl" />
-            </button>
           </div>
 
           {item.description && (
@@ -187,8 +164,56 @@ export default function ModifierSheet({ item, onClose, onAdd, remaining = null }
             </p>
           )}
         </div>
+      }
+      footer={
+        <div className="flex items-center gap-md">
+          <div className="flex items-center gap-s shrink-0">
+            <button
+              type="button"
+              onClick={() => setQuantity((q) => Math.max(1, q - 1))}
+              disabled={quantity <= 1}
+              aria-label="Decrease quantity"
+              className="w-9 h-9 flex items-center justify-center rounded-full bg-surface-container-high text-on-surface text-lg font-bold transition-colors hover:bg-primary hover:text-on-primary disabled:opacity-40 disabled:hover:bg-surface-container-high disabled:hover:text-on-surface"
+            >
+              <i className="mgc_minimize_line" />
+            </button>
+            <span className="font-bold text-body-large min-w-6 text-center text-on-surface tabular-nums">
+              {quantity}
+            </span>
+            <button
+              type="button"
+              onClick={() =>
+                setQuantity((q) => (remaining != null ? Math.min(remaining, q + 1) : q + 1))
+              }
+              disabled={remaining != null && quantity >= remaining}
+              aria-label="Increase quantity"
+              title={
+                remaining != null && quantity >= remaining
+                  ? `Only ${remaining} left today`
+                  : undefined
+              }
+              className="w-9 h-9 flex items-center justify-center rounded-full bg-surface-container-high text-on-surface text-lg font-bold transition-colors hover:bg-primary hover:text-on-primary disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-surface-container-high disabled:hover:text-on-surface"
+            >
+              <i className="mgc_add_line" />
+            </button>
+          </div>
 
-        <div className="flex-1 overflow-y-auto px-md py-md flex flex-col gap-l">
+          <PrimaryButton
+            className="flex-1"
+            disabled={!canAdd}
+            onClick={() => onAdd(chosen, notes.trim(), quantity)}
+          >
+            {soldOut
+              ? "Sold out"
+              : unmet.length > 0
+                ? `Choose ${unmet[0]!.name.toLowerCase()}`
+                : overStock
+                  ? `Only ${remaining} left`
+                  : `Add · ${formatCurrency(linePrice)}`}
+          </PrimaryButton>
+        </div>
+      }
+    >
           {groups.map((group) => {
             const current = selected[group.id] ?? [];
             const full = group.max > 1 && current.length >= group.max;
@@ -284,55 +309,6 @@ export default function ModifierSheet({ item, onClose, onAdd, remaining = null }
               className="w-full px-md py-md rounded-sm bg-surface-container border border-outline text-body-medium text-on-surface placeholder:text-on-surface-placeholder focus:border-primary transition-colors resize-none overflow-hidden"
             />
           </div>
-        </div>
-
-        <div className="border-t border-outline-variant px-md py-md flex items-center gap-md">
-          <div className="flex items-center gap-s shrink-0">
-            <button
-              type="button"
-              onClick={() => setQuantity((q) => Math.max(1, q - 1))}
-              disabled={quantity <= 1}
-              aria-label="Decrease quantity"
-              className="w-9 h-9 flex items-center justify-center rounded-full bg-surface-container-high text-on-surface text-lg font-bold transition-colors hover:bg-primary hover:text-on-primary disabled:opacity-40 disabled:hover:bg-surface-container-high disabled:hover:text-on-surface"
-            >
-              <i className="mgc_minimize_line" />
-            </button>
-            <span className="font-bold text-body-large min-w-6 text-center text-on-surface tabular-nums">
-              {quantity}
-            </span>
-            <button
-              type="button"
-              onClick={() =>
-                setQuantity((q) => (remaining != null ? Math.min(remaining, q + 1) : q + 1))
-              }
-              disabled={remaining != null && quantity >= remaining}
-              aria-label="Increase quantity"
-              title={
-                remaining != null && quantity >= remaining
-                  ? `Only ${remaining} left today`
-                  : undefined
-              }
-              className="w-9 h-9 flex items-center justify-center rounded-full bg-surface-container-high text-on-surface text-lg font-bold transition-colors hover:bg-primary hover:text-on-primary disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-surface-container-high disabled:hover:text-on-surface"
-            >
-              <i className="mgc_add_line" />
-            </button>
-          </div>
-
-          <PrimaryButton
-            className="flex-1"
-            disabled={!canAdd}
-            onClick={() => onAdd(chosen, notes.trim(), quantity)}
-          >
-            {soldOut
-              ? "Sold out"
-              : unmet.length > 0
-                ? `Choose ${unmet[0]!.name.toLowerCase()}`
-                : overStock
-                  ? `Only ${remaining} left`
-                  : `Add · ${formatCurrency(linePrice)}`}
-          </PrimaryButton>
-        </div>
-      </div>
-    </>
+    </Sheet>
   );
 }
