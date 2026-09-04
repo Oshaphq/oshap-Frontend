@@ -8,6 +8,7 @@ import {
 import {
   Card,
   PrimaryButton,
+  Spinner,
   TextField,
   toast,
 } from "@oshap/shared/ui";
@@ -106,7 +107,7 @@ export default function GeneralSettings() {
   if (isLoading) {
     return (
       <div className="flex justify-center p-xl">
-        <div className="oshap-spinner" />
+        <Spinner />
       </div>
     );
   }

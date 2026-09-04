@@ -7,7 +7,12 @@ import {
   formatApiDateTime,
 } from "@oshap/shared";
 import type { AuditLogEntry } from "@oshap/shared";
-import { Button, EmptyState, Select } from "@oshap/shared/ui";
+import {
+  Button,
+  EmptyState,
+  Select,
+  Spinner,
+} from "@oshap/shared/ui";
 import QueryError from "../components/QueryError";
 
 /**
@@ -152,7 +157,7 @@ export default function AuditPage() {
 
       {logs.isLoading ? (
         <div className="flex justify-center py-xl">
-          <div className="oshap-spinner" />
+          <Spinner />
         </div>
       ) : entries.length === 0 ? (
         <EmptyState

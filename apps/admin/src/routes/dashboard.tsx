@@ -19,6 +19,7 @@ import {
   PrimaryButton,
   SecondaryButton,
   StatusBadge,
+  Spinner,
   toast,
 } from "@oshap/shared/ui";
 import QueryError from "../components/QueryError";
@@ -67,7 +68,7 @@ export default function DashboardPage() {
   if (tablesQuery.isLoading) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[60vh] gap-md text-on-surface-variant">
-        <div className="oshap-spinner" />
+        <Spinner />
         <p>Loading tables...</p>
       </div>
     );

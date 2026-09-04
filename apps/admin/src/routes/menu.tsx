@@ -26,6 +26,7 @@ import {
   PrimaryButton,
   SecondaryButton,
   Select,
+  Spinner,
   TextField,
   toast,
 } from "@oshap/shared/ui";
@@ -285,7 +286,7 @@ export default function MenuPage() {
   if (menuQuery.isLoading) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[60vh] gap-md text-on-surface-variant">
-        <div className="oshap-spinner" />
+        <Spinner />
         <p>Loading menu...</p>
       </div>
     );

@@ -9,6 +9,7 @@ import type { BankAccount } from "@oshap/shared";
 import {
   PrimaryButton,
   SecondaryButton,
+  Spinner,
   StatusBadge,
   TextField,
   toast,
@@ -117,7 +118,7 @@ export default function BankAccountsSection({ canEdit }: { canEdit: boolean }) {
 
       {isLoading ? (
         <div className="flex justify-center py-l">
-          <div className="oshap-spinner" />
+          <Spinner />
         </div>
       ) : list.length === 0 && !isAdding ? (
         <div className="flex flex-col items-center gap-xs py-l px-md text-center rounded-sm bg-surface-container">
