@@ -541,6 +541,25 @@
  * again, and the thing they are double-tapping is an order.
  * ========================================================================= */
 @layer base {
+  /* Tailwind v3's preflight set `cursor: pointer` on buttons; v4 dropped it and
+     defers to the UA, whose default for `<button>` is an arrow. So every button
+     in all three apps has been showing the wrong cursor — not a component
+     problem, so not a component fix: one base rule restores it everywhere,
+     rather than `cursor-pointer` sprinkled over hundreds of call sites.
+
+     `:not(:disabled)` keeps it out of the way of the `disabled:cursor-*` the
+     components already declare — a control that is busy says `wait`, one that
+     is forbidden says `not-allowed`, and neither should read as clickable.
+
+     Anchors already get `pointer` from the UA, but only when they have an
+     `href`; `[role="button"]` and `[role="tab"]` never do, so they are named. */
+  button:not(:disabled),
+  summary,
+  [role="button"]:not([aria-disabled="true"]),
+  [role="tab"]:not([aria-disabled="true"]) {
+    cursor: pointer;
+  }
+
   /* The OS tap flash is grey, arrives late, and differs per platform. Ours
      replaces it rather than fighting it. */
   button,

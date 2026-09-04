@@ -10,7 +10,12 @@ import { CartProvider, unitPrice, useCart } from "../context/CartContext";
 import { useSession } from "../context/SessionContext";
 import CustomerHeader from "../components/CustomerHeader";
 import BillBreakdown from "../components/BillBreakdown";
-import { EmptyState, PrimaryButton, toast } from "@oshap/shared/ui";
+import {
+  EmptyState,
+  IconButton,
+  PrimaryButton,
+  toast,
+} from "@oshap/shared/ui";
 
 export default function CheckoutPage() {
   const [params] = useSearchParams();
@@ -100,14 +105,12 @@ function CheckoutView({ tableId }: { tableId: string }) {
           tableId={tableId}
           title="Confirm Order"
           leftSlot={
-            <button
-              type="button"
-              onClick={() => navigate(`/menu?table=${tableId}`)}
+            <IconButton
+              variant="surface"
+              icon="mgc_left_line"
               aria-label="Back to menu"
-              className="w-12 h-12 flex items-center justify-center rounded-full bg-surface-container hover:bg-surface-container-high transition-colors"
-            >
-              <i className="mgc_left_line text-xl" />
-            </button>
+              onClick={() => navigate(`/menu?table=${tableId}`)}
+            />
           }
         />
         <EmptyState
@@ -132,14 +135,12 @@ function CheckoutView({ tableId }: { tableId: string }) {
         tableId={tableId}
         title="Confirm Order"
         leftSlot={
-          <button
-            type="button"
-            onClick={() => navigate(`/menu?table=${tableId}`)}
+          <IconButton
+            variant="surface"
+            icon="mgc_left_line"
             aria-label="Back to menu"
-            className="w-12 h-12 flex items-center justify-center rounded-full bg-surface-container hover:bg-surface-container-high transition-colors"
-          >
-            <i className="mgc_left_line text-xl" />
-          </button>
+            onClick={() => navigate(`/menu?table=${tableId}`)}
+          />
         }
       />
 
