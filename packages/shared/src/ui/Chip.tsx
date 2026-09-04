@@ -12,9 +12,15 @@ import type { ReactNode } from "react";
  * hairline rather than a full-strength border: the fill already separates it
  * from the page, so a solid outline on top reads as two boundaries.
  *
- * 48px tall, not the 36 the hand-rolled version used. `apps/customer` holds
- * everything tappable to 48, and a category row is the first thing a guest
- * touches. The row is 12px taller for it.
+ * 36px tall. It shipped at 48 briefly, on the argument that the customer app
+ * holds everything tappable to 48 — which was overstated: that app runs h-8,
+ * h-9, h-10 and h-12 controls, and 48 was never the rule. At 48 with a 14px
+ * label the chip is mostly padding, and a row of them across the top of the
+ * menu reads as a toolbar rather than a filter.
+ *
+ * 36 is still comfortably over WCAG 2.2's 24px target minimum, and the row
+ * scrolls horizontally, so height was never what made these easy to hit —
+ * width and spacing were.
  *
  * The label stays 14px: it is a control label, so the seed's 3.11:1 sits in the
  * same bucket as a filled button's, not in body-copy territory.
@@ -49,7 +55,7 @@ export default function Chip({
       aria-pressed={selected}
       onClick={onClick}
       disabled={disabled}
-      className={`inline-flex h-12 shrink-0 items-center gap-xs rounded-full border px-md text-label-large whitespace-nowrap transition-colors active:scale-[0.97] disabled:cursor-not-allowed disabled:active:scale-100 ${skin} ${className}`}
+      className={`inline-flex h-9 shrink-0 items-center gap-xs rounded-full border px-md text-label-large whitespace-nowrap transition-colors active:scale-[0.97] disabled:cursor-not-allowed disabled:active:scale-100 ${skin} ${className}`}
     >
       {icon && <i className={icon} aria-hidden="true" />}
       {children}
