@@ -12,10 +12,13 @@ import {
   useAdminUpdateModifierOption,
 } from "@oshap/shared";
 import type { ModifierGroup } from "@oshap/shared";
-import { PrimaryButton, SecondaryButton, toast } from "@oshap/shared/ui";
+import {
+  PrimaryButton,
+  SecondaryButton,
+  TextField,
+  toast,
+} from "@oshap/shared/ui";
 
-const inputClass =
-  "px-md py-s rounded-sm bg-surface-container border border-outline-variant text-body-medium text-on-surface placeholder:text-on-surface-placeholder outline-none focus:border-primary transition-colors";
 
 /**
  * Manages the restaurant's reusable option groups.
@@ -108,8 +111,8 @@ export default function ModifierGroupsDialog({ onClose }: { onClose: () => void 
         </div>
 
         <footer className="p-l border-t border-outline-variant flex items-center gap-s">
-          <input
-            className={`${inputClass} flex-1`}
+          <TextField
+            wrapperClassName="flex-1"
             value={newName}
             onChange={(e) => setNewName(e.target.value)}
             onKeyDown={(e) => e.key === "Enter" && handleCreate()}
@@ -227,7 +230,7 @@ function GroupRow({
             </label>
             <label className="flex items-center gap-s text-body-medium text-on-surface-variant">
               Max choices
-              <input
+              <TextField
                 type="number"
                 min={1}
                 value={group.max}
@@ -238,7 +241,7 @@ function GroupRow({
                   })
                 }
                 aria-label={`Maximum choices for ${group.name}`}
-                className={`${inputClass} w-20`}
+                wrapperClassName="w-20"
               />
             </label>
           </div>
@@ -293,16 +296,16 @@ function GroupRow({
           </div>
 
           <div className="flex items-center gap-s">
-            <input
-              className={`${inputClass} flex-1`}
+            <TextField
+              wrapperClassName="flex-1"
               value={optionName}
               onChange={(e) => setOptionName(e.target.value)}
               onKeyDown={(e) => e.key === "Enter" && addOption()}
               placeholder="Option name"
               aria-label={`New option for ${group.name}`}
             />
-            <input
-              className={`${inputClass} w-32`}
+            <TextField
+              wrapperClassName="w-32"
               value={optionPrice}
               onChange={(e) => setOptionPrice(e.target.value)}
               onKeyDown={(e) => e.key === "Enter" && addOption()}

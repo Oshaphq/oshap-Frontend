@@ -6,13 +6,16 @@ import {
   useAdminUpdateBankAccount,
 } from "@oshap/shared/hooks";
 import type { BankAccount } from "@oshap/shared";
-import { PrimaryButton, SecondaryButton, StatusBadge, toast } from "@oshap/shared/ui";
+import {
+  PrimaryButton,
+  SecondaryButton,
+  StatusBadge,
+  TextField,
+  toast,
+} from "@oshap/shared/ui";
 
 const EMPTY_DRAFT = { bank_name: "", account_number: "", account_name: "" };
 
-const inputClass =
-  "w-full px-md py-s rounded-sm bg-surface-container-low border border-outline-variant text-body-medium text-on-surface placeholder:text-on-surface-placeholder outline-none focus:border-primary transition-colors disabled:opacity-50 disabled:cursor-not-allowed";
-const labelClass = "block text-body-medium font-semibold text-on-surface mb-xs";
 
 /**
  * Manages payout accounts.
@@ -145,50 +148,38 @@ export default function BankAccountsSection({ canEdit }: { canEdit: boolean }) {
       {isAdding && (
         <div className="flex flex-col gap-md p-md rounded-sm bg-surface-container">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-md">
-            <div>
-              <label className={labelClass} htmlFor="bank-name">
-                Bank Name
-              </label>
-              <input
-                id="bank-name"
-                type="text"
-                value={draft.bank_name}
-                onChange={(e) => setDraft((d) => ({ ...d, bank_name: e.target.value }))}
-                className={inputClass}
-                placeholder="Access Bank"
-              />
-            </div>
-            <div>
-              <label className={labelClass} htmlFor="account-number">
-                Account Number
-              </label>
-              <input
-                id="account-number"
-                type="text"
-                inputMode="numeric"
-                value={draft.account_number}
-                onChange={(e) =>
-                  setDraft((d) => ({ ...d, account_number: e.target.value }))
-                }
-                className={inputClass}
-                placeholder="0123456789"
-              />
-            </div>
-            <div className="sm:col-span-2">
-              <label className={labelClass} htmlFor="account-name">
-                Account Name
-              </label>
-              <input
-                id="account-name"
-                type="text"
-                value={draft.account_name}
-                onChange={(e) =>
-                  setDraft((d) => ({ ...d, account_name: e.target.value }))
-                }
-                className={inputClass}
-                placeholder="Aji's Kitchen Ltd"
-              />
-            </div>
+            <TextField
+              id="bank-name"
+              label="Bank Name"
+              type="text"
+              value={draft.bank_name}
+              onChange={(e) =>
+                setDraft((d) => ({ ...d, bank_name: e.target.value }))
+              }
+              placeholder="Access Bank"
+            />
+            <TextField
+              id="account-number"
+              label="Account Number"
+              type="text"
+              inputMode="numeric"
+              value={draft.account_number}
+              onChange={(e) =>
+                setDraft((d) => ({ ...d, account_number: e.target.value }))
+              }
+              placeholder="0123456789"
+            />
+            <TextField
+              id="account-name"
+              label="Account Name"
+              wrapperClassName="sm:col-span-2"
+              type="text"
+              value={draft.account_name}
+              onChange={(e) =>
+                setDraft((d) => ({ ...d, account_name: e.target.value }))
+              }
+              placeholder="Aji's Kitchen Ltd"
+            />
           </div>
           <div className="flex justify-end gap-s">
             <SecondaryButton size="md" onClick={resetDraft}>

@@ -11,6 +11,7 @@ import {
   PrimaryButton,
   SecondaryButton,
   Select,
+  TextField,
   toast,
 } from "@oshap/shared/ui";
 import { useAuth } from "../../context/AuthContext";
@@ -127,11 +128,6 @@ export default function StaffSettings() {
     );
   }
 
-  const inputClass =
-    "w-full px-md py-s rounded-sm bg-surface-container-low border border-outline-variant text-body-medium text-on-surface placeholder:text-on-surface-placeholder outline-none focus:border-primary transition-colors";
-  const labelClass =
-    "block text-body-medium font-semibold text-on-surface mb-xs";
-
   return (
     <div className="flex flex-col gap-md pb-10">
       {/* No heading of its own: the section wrapper names the screen, and two
@@ -241,56 +237,47 @@ export default function StaffSettings() {
             </h3>
 
             <div className="flex flex-col gap-md">
-              <div>
-                <label className={labelClass}>Name</label>
-                <input
-                  type="text"
-                  value={form.name}
-                  onChange={(e) => setForm({ ...form, name: e.target.value })}
-                  className={inputClass}
-                />
-              </div>
-              <div>
-                <label className={labelClass}>Phone number</label>
-                <input
-                  type="tel"
-                  inputMode="tel"
-                  value={form.phone}
-                  onChange={(e) => {
-                    setForm({ ...form, phone: e.target.value });
-                    if (phoneError) setPhoneError("");
-                  }}
-                  placeholder="0803 123 4567"
-                  aria-invalid={Boolean(phoneError)}
-                  className={inputClass}
-                />
-                <p className="text-label-small text-on-surface-variant mt-xs">
-                  {phoneError ? (
-                    <span className="text-error font-semibold">
-                      {phoneError}
+              <TextField
+                label="Name"
+                type="text"
+                value={form.name}
+                onChange={(e) => setForm({ ...form, name: e.target.value })}
+              />
+              <TextField
+                label="Phone number"
+                type="tel"
+                inputMode="tel"
+                value={form.phone}
+                onChange={(e) => {
+                  setForm({ ...form, phone: e.target.value });
+                  if (phoneError) setPhoneError("");
+                }}
+                placeholder="0803 123 4567"
+                error={phoneError || undefined}
+                hint="How they sign in. Every member of staff needs one."
+              />
+              <TextField
+                label={
+                  <>
+                    Email{" "}
+                    <span className="font-normal text-on-surface-variant">
+                      (optional)
                     </span>
-                  ) : (
-                    "How they sign in. Every member of staff needs one."
-                  )}
-                </p>
-              </div>
+                  </>
+                }
+                type="email"
+                value={form.email}
+                onChange={(e) => setForm({ ...form, email: e.target.value })}
+              />
               <div>
-                <label className={labelClass}>
-                  Email{" "}
-                  <span className="font-normal text-on-surface-variant">
-                    (optional)
-                  </span>
+                <label
+                  htmlFor="staff-role"
+                  className="block text-body-medium font-semibold text-on-surface mb-xs"
+                >
+                  Role
                 </label>
-                <input
-                  type="email"
-                  value={form.email}
-                  onChange={(e) => setForm({ ...form, email: e.target.value })}
-                  className={inputClass}
-                />
-              </div>
-              <div>
-                <label className={labelClass}>Role</label>
                 <Select
+                  id="staff-role"
                   value={form.role}
                   onChange={(e) =>
                     setForm({ ...form, role: e.target.value as Role })
@@ -305,32 +292,21 @@ export default function StaffSettings() {
                   <option value="BARTENDER">Bartender</option>
                 </Select>
               </div>
-              <div>
-                <label className={labelClass}>
-                  {editingId ? "New Password (optional)" : "Password"}
-                </label>
-                <div className="relative">
-                  <input
-                    type={showPassword ? "text" : "password"}
-                    value={form.password}
-                    onChange={(e) =>
-                      setForm({ ...form, password: e.target.value })
-                    }
-                    placeholder={
-                      editingId
-                        ? "Leave blank to keep current"
-                        : "Choose a password"
-                    }
-                    className={`${inputClass} pr-12`}
-                  />
+              <TextField
+                label={editingId ? "New Password (optional)" : "Password"}
+                type={showPassword ? "text" : "password"}
+                value={form.password}
+                onChange={(e) => setForm({ ...form, password: e.target.value })}
+                placeholder={
+                  editingId ? "Leave blank to keep current" : "Choose a password"
+                }
+                trailing={
                   <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-xs top-1/2 -translate-y-1/2 w-10 h-10 flex items-center justify-center text-outline hover:text-on-surface transition-colors rounded-full"
+                    className="w-10 h-10 flex items-center justify-center text-on-surface-variant hover:text-on-surface transition-colors rounded-full"
                     tabIndex={-1}
-                    aria-label={
-                      showPassword ? "Hide password" : "Show password"
-                    }
+                    aria-label={showPassword ? "Hide password" : "Show password"}
                   >
                     <i
                       className={
@@ -340,8 +316,8 @@ export default function StaffSettings() {
                       }
                     />
                   </button>
-                </div>
-              </div>
+                }
+              />
             </div>
 
             <div className="flex justify-end gap-s pt-s">

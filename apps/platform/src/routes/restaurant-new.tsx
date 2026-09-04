@@ -8,7 +8,13 @@ import {
   usePlatformCreateRestaurant,
 } from "@oshap/shared";
 import type { BillingPeriod, SubscriptionTier } from "@oshap/shared";
-import { Button, PrimaryButton, SecondaryButton, toast } from "@oshap/shared/ui";
+import {
+  Button,
+  PrimaryButton,
+  SecondaryButton,
+  TextField,
+  toast,
+} from "@oshap/shared/ui";
 
 
 interface FormState {
@@ -94,9 +100,6 @@ export default function RestaurantNewPage() {
     }
   };
 
-  const inputClass =
-    "w-full px-md py-s rounded-sm bg-surface-container-low border border-outline-variant text-body-medium text-on-surface placeholder:text-on-surface-placeholder outline-none focus:border-primary transition-colors";
-
   if (setupUrl) {
     return (
       <main className="p-md flex flex-col gap-l max-w-[36rem]">
@@ -168,10 +171,10 @@ export default function RestaurantNewPage() {
         <form onSubmit={handleNext} className="flex flex-col gap-md">
           <div className="bg-surface-container-low rounded-lg p-md flex flex-col gap-md">
             <h2 className="text-title-large font-semibold text-on-surface">Restaurant Details</h2>
-            <input className={inputClass} aria-label="Restaurant name" placeholder="Restaurant name *" value={form.name} onChange={set("name")} />
-            <input className={inputClass} aria-label="Owner full name" placeholder="Owner full name *" value={form.owner_name} onChange={set("owner_name")} />
-            <input className={inputClass} type="tel" inputMode="tel" aria-label="Owner phone number" placeholder="Owner phone number * — 0803 123 4567" value={form.owner_phone} onChange={set("owner_phone")} />
-            <input className={inputClass} type="email" aria-label="Owner email" placeholder="Owner email (optional)" value={form.owner_email} onChange={set("owner_email")} />
+            <TextField aria-label="Restaurant name" placeholder="Restaurant name *" value={form.name} onChange={set("name")} />
+            <TextField aria-label="Owner full name" placeholder="Owner full name *" value={form.owner_name} onChange={set("owner_name")} />
+            <TextField type="tel" inputMode="tel" aria-label="Owner phone number" placeholder="Owner phone number * — 0803 123 4567" value={form.owner_phone} onChange={set("owner_phone")} />
+            <TextField type="email" aria-label="Owner email" placeholder="Owner email (optional)" value={form.owner_email} onChange={set("owner_email")} />
           </div>
 
           <div className="bg-surface-container-low rounded-lg p-md flex flex-col gap-md">
@@ -242,8 +245,7 @@ export default function RestaurantNewPage() {
         <form onSubmit={handleCreate} className="flex flex-col gap-md">
           <div className="bg-surface-container-low rounded-lg p-md flex flex-col gap-md">
             <h2 className="text-title-large font-semibold text-on-surface">Tables</h2>
-            <input
-              className={inputClass}
+            <TextField
               type="number"
               min={1}
               aria-label="Number of tables"
@@ -255,9 +257,9 @@ export default function RestaurantNewPage() {
 
           <div className="bg-surface-container-low rounded-lg p-md flex flex-col gap-md">
             <h2 className="text-title-large font-semibold text-on-surface">Bank Details (optional)</h2>
-            <input className={inputClass} aria-label="Bank name" placeholder="Bank name" value={form.bank_name} onChange={set("bank_name")} />
-            <input className={inputClass} aria-label="Account number" placeholder="Account number" value={form.account_number} onChange={set("account_number")} />
-            <input className={inputClass} aria-label="Account name" placeholder="Account name" value={form.account_name} onChange={set("account_name")} />
+            <TextField aria-label="Bank name" placeholder="Bank name" value={form.bank_name} onChange={set("bank_name")} />
+            <TextField aria-label="Account number" placeholder="Account number" value={form.account_number} onChange={set("account_number")} />
+            <TextField aria-label="Account name" placeholder="Account name" value={form.account_name} onChange={set("account_name")} />
           </div>
 
           <div className="flex gap-s">

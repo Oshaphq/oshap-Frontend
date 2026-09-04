@@ -17,6 +17,8 @@ export { default as TableBadge } from "./TableBadge";
 export { default as QueryError } from "./QueryError";
 export { default as Select } from "./Select";
 export type { SelectProps } from "./Select";
+export { default as TextField } from "./TextField";
+export type { TextFieldProps } from "./TextField";
 export { default as BrandMark } from "./BrandMark";
 export { default as ThemeToggle } from "./ThemeToggle";
 export { default as Toaster } from "./Toaster";

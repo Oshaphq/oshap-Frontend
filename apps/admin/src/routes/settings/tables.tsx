@@ -6,7 +6,13 @@ import {
   useAdminSettings,
 } from "@oshap/shared/hooks";
 import { errorMessage, getAdminRestaurantId } from "@oshap/shared";
-import { Button, PrimaryButton, SecondaryButton, toast } from "@oshap/shared/ui";
+import {
+  Button,
+  PrimaryButton,
+  SecondaryButton,
+  TextField,
+  toast,
+} from "@oshap/shared/ui";
 import TableQrDialog from "../../components/TableQrDialog";
 import QrPrintSheet, {
   type QrPrintRequest,
@@ -72,9 +78,6 @@ export default function TablesSettings() {
         toast.error(errorMessage(err, "remove the table")),
     });
   };
-
-  const inputClass =
-    "w-full px-md py-s rounded-sm bg-surface-container-low border border-outline-variant text-body-medium text-on-surface placeholder:text-on-surface-placeholder outline-none focus:border-primary transition-colors";
 
   if (tablesQuery.isLoading) {
     return (
@@ -239,23 +242,16 @@ export default function TablesSettings() {
         <div className="fixed inset-0 z-[100] flex items-center justify-center bg-scrim backdrop-blur-sm p-md">
           <div className="w-full max-w-[400px] rounded-xl bg-surface-container-high p-l flex flex-col gap-md border border-primary shadow-xl">
             <h3 className="font-bold text-on-surface">Add Table</h3>
-            <div>
-              <label className="block text-body-medium font-semibold text-on-surface mb-xs">
-                Table ID / Name
-              </label>
-              <input
-                type="text"
-                value={tableId}
-                onChange={(e) => setTableId(e.target.value)}
-                onKeyDown={(e) => e.key === "Enter" && handleAdd()}
-                placeholder="e.g. T14, VIP 1, Bar 2"
-                className={inputClass}
-                autoFocus
-              />
-              <p className="text-label-small text-on-surface-variant mt-xs">
-                This ID will appear on the QR code for this table.
-              </p>
-            </div>
+            <TextField
+              label="Table ID / Name"
+              type="text"
+              value={tableId}
+              onChange={(e) => setTableId(e.target.value)}
+              onKeyDown={(e) => e.key === "Enter" && handleAdd()}
+              placeholder="e.g. T14, VIP 1, Bar 2"
+              hint="This ID will appear on the QR code for this table."
+              autoFocus
+            />
             <div className="flex justify-end gap-s pt-s">
               <SecondaryButton
                 size="md"

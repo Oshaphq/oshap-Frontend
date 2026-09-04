@@ -12,11 +12,18 @@ import {
   formatApiDateTime,
 } from "@oshap/shared";
 import type { StockReason, Ingredient } from "@oshap/shared";
-import { Button, EmptyState, PrimaryButton, SecondaryButton, Select, toast } from "@oshap/shared/ui";
+import {
+  Button,
+  EmptyState,
+  PrimaryButton,
+  SecondaryButton,
+  Select,
+  TextField,
+  toast,
+}
+from "@oshap/shared/ui";
 import QueryError from "../components/QueryError";
 
-const inputClass =
-  "px-md py-s rounded-sm bg-surface-container-low border border-outline-variant text-body-medium text-on-surface placeholder:text-on-surface-placeholder outline-none focus:border-primary transition-colors";
 
 /**
  * Staff-facing wording for the reasons stock moves. The `value` is the
@@ -481,41 +488,41 @@ function AdjustDialog({
           </Select>
         </label>
 
-        <label className="flex flex-col gap-xs">
-          <span className="text-body-medium font-semibold text-on-surface">
-            {isCount
+        <TextField
+          label={
+            isCount
               ? `Counted total (${ingredient.unit})`
-              : `Amount (${ingredient.unit})`}
-          </span>
-          <input
-            value={amount}
-            onChange={(e) => setAmount(e.target.value)}
-            inputMode="decimal"
-            autoFocus
-            placeholder="0"
-            className={inputClass}
-          />
-          {valid && (
-            <span className="text-body-small text-on-surface-variant tabular-nums">
-              {delta >= 0 ? "+" : "−"}
-              {qty(Math.abs(delta))} {ingredient.unit} → new level{" "}
-              {qty(ingredient.stock_qty + delta)} {ingredient.unit}
-            </span>
-          )}
-        </label>
+              : `Amount (${ingredient.unit})`
+          }
+          value={amount}
+          onChange={(e) => setAmount(e.target.value)}
+          inputMode="decimal"
+          autoFocus
+          placeholder="0"
+          hint={
+            valid ? (
+              <span className="tabular-nums">
+                {delta >= 0 ? "+" : "−"}
+                {qty(Math.abs(delta))} {ingredient.unit} → new level{" "}
+                {qty(ingredient.stock_qty + delta)} {ingredient.unit}
+              </span>
+            ) : undefined
+          }
+        />
 
-        <label className="flex flex-col gap-xs">
-          <span className="text-body-medium font-semibold text-on-surface">
-            Note{" "}
-            <span className="font-normal text-on-surface-variant">(optional)</span>
-          </span>
-          <input
-            value={note}
-            onChange={(e) => setNote(e.target.value)}
-            placeholder="e.g. supplier short-delivered"
-            className={inputClass}
-          />
-        </label>
+        <TextField
+          label={
+            <>
+              Note{" "}
+              <span className="font-normal text-on-surface-variant">
+                (optional)
+              </span>
+            </>
+          }
+          value={note}
+          onChange={(e) => setNote(e.target.value)}
+          placeholder="e.g. supplier short-delivered"
+        />
 
         <div className="flex justify-end gap-s pt-s">
           <SecondaryButton size="md" onClick={onClose}>
@@ -571,45 +578,40 @@ function NewIngredientDialog({ onClose }: { onClose: () => void }) {
           Add ingredient
         </h3>
 
-        <input
+        <TextField
           value={name}
           onChange={(e) => setName(e.target.value)}
           placeholder="Name — e.g. Rice"
           aria-label="Ingredient name"
           autoFocus
-          className={inputClass}
         />
         <div className="grid grid-cols-2 gap-s">
-          <input
+          <TextField
             value={unit}
             onChange={(e) => setUnit(e.target.value)}
             placeholder="Unit — kg, L, tin"
             aria-label="Unit"
-            className={inputClass}
           />
-          <input
+          <TextField
             value={stock}
             onChange={(e) => setStock(e.target.value)}
             placeholder="Opening stock"
             aria-label="Opening stock"
             inputMode="decimal"
-            className={inputClass}
           />
-          <input
+          <TextField
             value={threshold}
             onChange={(e) => setThreshold(e.target.value)}
             placeholder="Alert below"
             aria-label="Low stock threshold"
             inputMode="decimal"
-            className={inputClass}
           />
-          <input
+          <TextField
             value={cost}
             onChange={(e) => setCost(e.target.value)}
             placeholder="Cost per unit ₦"
             aria-label="Cost per unit in naira"
             inputMode="decimal"
-            className={inputClass}
           />
         </div>
 
@@ -701,50 +703,37 @@ function EditIngredientDialog({
           </p>
         </div>
 
-        <input
+        <TextField
           value={name}
           onChange={(e) => setName(e.target.value)}
           placeholder="Name — e.g. Rice"
           aria-label="Ingredient name"
           autoFocus
-          className={inputClass}
         />
 
         <div className="grid grid-cols-2 gap-s">
-          <label className="flex flex-col gap-xs text-body-medium text-on-surface-variant">
-            Unit
-            <input
-              value={unit}
-              onChange={(e) => setUnit(e.target.value)}
-              placeholder="kg, L, tin"
-              aria-label="Unit"
-              className={inputClass}
-            />
-          </label>
-          <label className="flex flex-col gap-xs text-body-medium text-on-surface-variant">
-            Low at
-            <input
-              value={threshold}
-              onChange={(e) => setThreshold(e.target.value)}
-              placeholder="Leave blank for none"
-              inputMode="decimal"
-              aria-label="Low stock threshold"
-              className={inputClass}
-            />
-          </label>
+          <TextField
+            label="Unit"
+            value={unit}
+            onChange={(e) => setUnit(e.target.value)}
+            placeholder="kg, L, tin"
+          />
+          <TextField
+            label="Low at"
+            value={threshold}
+            onChange={(e) => setThreshold(e.target.value)}
+            placeholder="Leave blank for none"
+            inputMode="decimal"
+          />
         </div>
 
-        <label className="flex flex-col gap-xs text-body-medium text-on-surface-variant">
-          Cost per {unit.trim() || "unit"} (₦)
-          <input
-            value={cost}
-            onChange={(e) => setCost(e.target.value)}
-            placeholder="Leave blank if you don't track it"
-            inputMode="decimal"
-            aria-label="Cost per unit in naira"
-            className={inputClass}
-          />
-        </label>
+        <TextField
+          label={`Cost per ${unit.trim() || "unit"} (₦)`}
+          value={cost}
+          onChange={(e) => setCost(e.target.value)}
+          placeholder="Leave blank if you don't track it"
+          inputMode="decimal"
+        />
 
         {/* Renaming a unit does not convert anything. Someone switching kg to g
             would otherwise multiply their own stock by a thousand without

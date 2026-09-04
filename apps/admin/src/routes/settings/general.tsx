@@ -5,7 +5,7 @@ import {
   percentToBasisPoints,
   errorMessage,
 } from "@oshap/shared";
-import { PrimaryButton, toast } from "@oshap/shared/ui";
+import { PrimaryButton, TextField, toast } from "@oshap/shared/ui";
 
 /**
  * What the restaurant is and what it charges.
@@ -106,95 +106,70 @@ export default function GeneralSettings() {
     );
   }
 
-  const inputClass =
-    "w-full px-md py-s rounded-sm bg-surface-container border border-outline-variant text-body-medium text-on-surface placeholder:text-on-surface-placeholder outline-none focus:border-primary transition-colors disabled:opacity-50 disabled:cursor-not-allowed";
-  const labelClass =
-    "block text-body-medium font-semibold text-on-surface mb-xs";
-
   return (
     <div className="flex flex-col gap-md pb-10">
       <div className="bg-surface-container-low rounded-lg p-l flex flex-col gap-md">
         <h3 className="font-bold text-on-surface">The restaurant</h3>
 
-        <div>
-          <label className={labelClass} htmlFor="name">
-            Restaurant name
-          </label>
-          <input
-            id="name"
-            type="text"
-            name="name"
-            value={form.name}
-            onChange={handleChange}
-            className={inputClass}
-          />
-        </div>
+        <TextField
+          id="name"
+          label="Restaurant name"
+          type="text"
+          name="name"
+          value={form.name}
+          onChange={handleChange}
+        />
 
-        <div>
-          <label className={labelClass} htmlFor="description">
-            Description
-          </label>
-          <textarea
-            id="description"
-            name="description"
-            value={form.description}
-            onChange={handleChange}
-            rows={3}
-            className={`${inputClass} resize-none`}
-          />
-        </div>
+        <TextField
+          id="description"
+          label="Description"
+          multiline
+          rows={3}
+          name="description"
+          value={form.description}
+          onChange={handleChange}
+          className="resize-none"
+        />
 
-        <div>
-          <label className={labelClass} htmlFor="address">
-            Address
-          </label>
-          <input
-            id="address"
-            type="text"
-            name="address"
-            value={form.address}
-            onChange={handleChange}
-            placeholder="12 Adeola Odeku Street, Victoria Island, Lagos"
-            className={inputClass}
-          />
-          <p className="text-label-small text-on-surface-variant mt-xs">
-            Shown to guests as &ldquo;You&rsquo;re sitting at&hellip;&rdquo;.
-            Write it the way a person would say it, not the way a courier would.
-          </p>
-        </div>
+        <TextField
+          id="address"
+          label="Address"
+          type="text"
+          name="address"
+          value={form.address}
+          onChange={handleChange}
+          placeholder="12 Adeola Odeku Street, Victoria Island, Lagos"
+          hint={
+            <>
+              Shown to guests as &ldquo;You&rsquo;re sitting at&hellip;&rdquo;.
+              Write it the way a person would say it, not the way a courier
+              would.
+            </>
+          }
+        />
 
-        <div>
-          <label className={labelClass} htmlFor="whatsapp_number">
-            WhatsApp number
-          </label>
-          <input
-            id="whatsapp_number"
-            type="text"
-            name="whatsapp_number"
-            value={form.whatsapp_number}
-            onChange={handleChange}
-            placeholder="+234..."
-            className={inputClass}
-          />
-        </div>
+        <TextField
+          id="whatsapp_number"
+          label="WhatsApp number"
+          type="text"
+          name="whatsapp_number"
+          value={form.whatsapp_number}
+          onChange={handleChange}
+          placeholder="+234..."
+        />
       </div>
 
       <div className="bg-surface-container-low rounded-lg p-l flex flex-col gap-md">
         <h3 className="font-bold text-on-surface">Opening hours</h3>
-        <div>
-          <label className={labelClass} htmlFor="operating_hours">
-            Hours of operation
-          </label>
-          <input
-            id="operating_hours"
-            type="text"
-            name="operating_hours"
-            value={form.operating_hours}
-            onChange={handleChange}
-            placeholder="09:00 - 22:00"
-            className={inputClass}
-          />
-        </div>
+        <TextField
+          id="operating_hours"
+          label="Hours of operation"
+          type="text"
+          name="operating_hours"
+          value={form.operating_hours}
+          onChange={handleChange}
+          placeholder="09:00 - 22:00"
+        />
       </div>
 
       <div className="bg-surface-container-low rounded-lg p-l flex flex-col gap-md">
@@ -210,36 +185,26 @@ export default function GeneralSettings() {
           </p>
         </div>
         <div className="grid grid-cols-2 gap-md">
-          <div>
-            <label className={labelClass} htmlFor="vat_rate">
-              VAT (%)
-            </label>
-            <input
-              id="vat_rate"
-              type="text"
-              inputMode="decimal"
-              name="vat_rate"
-              value={form.vat_rate}
-              onChange={handleChange}
-              placeholder="7.5"
-              className={inputClass}
-            />
-          </div>
-          <div>
-            <label className={labelClass} htmlFor="service_charge_rate">
-              Service charge (%)
-            </label>
-            <input
-              id="service_charge_rate"
-              type="text"
-              inputMode="decimal"
-              name="service_charge_rate"
-              value={form.service_charge_rate}
-              onChange={handleChange}
-              placeholder="5"
-              className={inputClass}
-            />
-          </div>
+          <TextField
+            id="vat_rate"
+            label="VAT (%)"
+            type="text"
+            inputMode="decimal"
+            name="vat_rate"
+            value={form.vat_rate}
+            onChange={handleChange}
+            placeholder="7.5"
+          />
+          <TextField
+            id="service_charge_rate"
+            label="Service charge (%)"
+            type="text"
+            inputMode="decimal"
+            name="service_charge_rate"
+            value={form.service_charge_rate}
+            onChange={handleChange}
+            placeholder="5"
+          />
         </div>
       </div>
 

@@ -6,10 +6,14 @@ import {
   useAdminSetRecipe,
 } from "@oshap/shared";
 import type { MenuItem } from "@oshap/shared";
-import { PrimaryButton, SecondaryButton, Select, toast } from "@oshap/shared/ui";
+import {
+  PrimaryButton,
+  SecondaryButton,
+  Select,
+  TextField,
+  toast,
+} from "@oshap/shared/ui";
 
-const inputClass =
-  "px-md py-s rounded-sm bg-surface-container border border-outline-variant text-body-medium text-on-surface placeholder:text-on-surface-placeholder outline-none focus:border-primary transition-colors";
 
 interface Props {
   item: MenuItem;
@@ -150,7 +154,7 @@ export default function RecipeDialog({ item, onClose }: Props) {
                         </option>
                       ))}
                   </Select>
-                  <input
+                  <TextField
                     value={line.qty_per_serving}
                     onChange={(e) =>
                       setLines((prev) =>
@@ -163,7 +167,7 @@ export default function RecipeDialog({ item, onClose }: Props) {
                     }
                     inputMode="decimal"
                     aria-label={`Quantity of ${ingredient?.name ?? "ingredient"} per serving`}
-                    className={`${inputClass} w-24`}
+                    wrapperClassName="w-24"
                   />
                   <span className="text-body-medium text-on-surface-variant w-12 shrink-0">
                     {ingredient?.unit ?? ""}

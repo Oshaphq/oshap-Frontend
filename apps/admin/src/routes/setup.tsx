@@ -2,10 +2,16 @@ import { useEffect, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router";
 import { adminApi, errorMessage } from "@oshap/shared";
 import type { SetupVerifyResponse } from "@oshap/shared";
-import { PrimaryButton, ThemeToggle, toast } from "@oshap/shared/ui";
+import {
+  PrimaryButton,
+  TextField,
+  ThemeToggle,
+  toast,
+} from "@oshap/shared/ui";
 import { useAuth } from "../context/AuthContext";
 
 const MIN_PASSWORD = 10;
+const PASSWORD_RULE = `At least ${MIN_PASSWORD} characters. Length matters more than symbols.`;
 
 /** True only for the status that actually means "this token is finished". */
 function isGone(err: unknown): boolean {
@@ -92,9 +98,6 @@ export default function SetupPage() {
       setSubmitting(false);
     }
   };
-
-  const inputClass =
-    "w-full px-md py-s rounded-sm bg-surface-container border border-outline-variant text-body-medium text-on-surface placeholder:text-on-surface-placeholder outline-none focus:border-primary transition-colors";
 
   if (status === "checking") {
     return (
@@ -183,62 +186,39 @@ export default function SetupPage() {
           </span>
         </p>
 
-        <div className="flex flex-col gap-xs">
-          <label
-            htmlFor="setup-password"
-            className="text-body-medium font-semibold text-on-surface"
-          >
-            Password
-          </label>
-          <div className="relative">
-            <input
-              id="setup-password"
-              type={showPassword ? "text" : "password"}
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              autoFocus
-              autoComplete="new-password"
-              className={inputClass}
-            />
+        <TextField
+          id="setup-password"
+          label="Password"
+          type={showPassword ? "text" : "password"}
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+          autoFocus
+          autoComplete="new-password"
+          trailing={
             <button
               type="button"
               onClick={() => setShowPassword((v) => !v)}
               aria-label={showPassword ? "Hide password" : "Show password"}
-              className="absolute right-md top-1/2 -translate-y-1/2 text-on-surface-variant hover:text-on-surface transition-colors"
+              className="w-10 h-10 flex items-center justify-center text-on-surface-variant hover:text-on-surface transition-colors rounded-full"
             >
-              <i className={showPassword ? "mgc_eye_close_line" : "mgc_eye_line"} />
+              <i
+                className={showPassword ? "mgc_eye_close_line" : "mgc_eye_line"}
+              />
             </button>
-          </div>
-          <p
-            className={`text-label-small ${
-              tooShort ? "text-error font-semibold" : "text-on-surface-variant"
-            }`}
-          >
-            At least {MIN_PASSWORD} characters. Length matters more than symbols.
-          </p>
-        </div>
+          }
+          error={tooShort ? PASSWORD_RULE : undefined}
+          hint={PASSWORD_RULE}
+        />
 
-        <div className="flex flex-col gap-xs">
-          <label
-            htmlFor="setup-confirm"
-            className="text-body-medium font-semibold text-on-surface"
-          >
-            Confirm password
-          </label>
-          <input
-            id="setup-confirm"
-            type={showPassword ? "text" : "password"}
-            value={confirm}
-            onChange={(e) => setConfirm(e.target.value)}
-            autoComplete="new-password"
-            className={inputClass}
-          />
-          {mismatch && (
-            <p className="text-label-small text-error font-semibold">
-              These don&rsquo;t match.
-            </p>
-          )}
-        </div>
+        <TextField
+          id="setup-confirm"
+          label="Confirm password"
+          type={showPassword ? "text" : "password"}
+          value={confirm}
+          onChange={(e) => setConfirm(e.target.value)}
+          autoComplete="new-password"
+          error={mismatch ? "These don’t match." : undefined}
+        />
 
         <PrimaryButton type="submit" disabled={!canSubmit} className="w-full">
           {submitting ? "Setting up…" : "Finish setup"}
