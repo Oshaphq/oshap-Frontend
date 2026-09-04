@@ -6,8 +6,9 @@ import {
   Button,
   Card,
   EmptyState,
-  Spinner,
   Page,
+  Spinner,
+  TextField,
 } from "@oshap/shared/ui";
 import QueryError from "../components/QueryError";
 
@@ -60,13 +61,12 @@ export default function ZReportPage() {
           </p>
         </div>
         <div className="flex items-center gap-s oshap-print-hide">
-          <input
+          <TextField
             type="date"
             value={date}
             max={today()}
             onChange={(e) => setDate(e.target.value)}
             aria-label="Report date"
-            className="px-md py-s rounded-sm bg-surface-container-low border border-outline-variant text-body-medium text-on-surface outline-none focus:border-primary transition-colors"
           />
           <Button
             variant="text"
