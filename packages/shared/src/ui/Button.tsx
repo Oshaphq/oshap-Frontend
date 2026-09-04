@@ -41,6 +41,18 @@ export interface ButtonProps
   size?: ButtonSize;
   /** Stretch to the container. The mobile primary CTA is `lg` + `fullWidth`. */
   fullWidth?: boolean;
+  /**
+   * Recolours `text` and `outlined` to the error role, for a destructive
+   * action that is not the loudest thing on the screen — "Clear All" in a
+   * sheet footer, not "Delete account". The `destructive` VARIANT stays what
+   * it was: a filled error button, for when it should be the loudest thing.
+   *
+   * A boolean rather than two more variants, and applied inside the component
+   * rather than through `className`, because a class override of the same
+   * specificity is settled by the order Tailwind emits the two utilities, not
+   * by the order they are written at the call site.
+   */
+  destructive?: boolean;
   className?: string;
 }
 
@@ -95,18 +107,25 @@ export default function Button({
   variant = "filled",
   size = "md",
   fullWidth = false,
+  destructive = false,
   className = "",
   type = "button",
   disabled = false,
   ...rest
 }: ButtonProps) {
   const padding = variant === "text" ? TEXT_PADDING[size] : "";
+  // Only the unfilled variants can carry it; a filled container has already
+  // chosen its on-color, and recolouring the label would break the pair.
+  const intent =
+    destructive && (variant === "text" || variant === "outlined")
+      ? "text-error hover:bg-error/8 active:bg-error/12"
+      : "";
 
   return (
     <button
       type={type}
       disabled={disabled}
-      className={`inline-flex items-center justify-center rounded-sm font-display font-semibold whitespace-nowrap transition duration-100 ease-out active:scale-[0.97] disabled:cursor-not-allowed disabled:border-transparent disabled:bg-on-surface-disabled disabled:text-on-surface-label-disabled disabled:shadow-none disabled:brightness-100 disabled:active:scale-100 ${SIZE[size]} ${padding} ${LABEL[variant]} ${VARIANT[variant]} ${fullWidth ? "w-full" : ""} ${className}`}
+      className={`inline-flex items-center justify-center rounded-sm font-display font-semibold whitespace-nowrap transition duration-100 ease-out active:scale-[0.97] disabled:cursor-not-allowed disabled:border-transparent disabled:bg-on-surface-disabled disabled:text-on-surface-label-disabled disabled:shadow-none disabled:brightness-100 disabled:active:scale-100 ${SIZE[size]} ${padding} ${LABEL[variant]} ${VARIANT[variant]} ${intent} ${fullWidth ? "w-full" : ""} ${className}`}
       {...rest}
     >
       {children}
