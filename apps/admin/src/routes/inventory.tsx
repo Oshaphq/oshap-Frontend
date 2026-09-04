@@ -14,6 +14,7 @@ import {
 import type { StockReason, Ingredient } from "@oshap/shared";
 import {
   Button,
+  Dialog,
   EmptyState,
   PrimaryButton,
   SecondaryButton,
@@ -460,71 +461,12 @@ function AdjustDialog({
   };
 
   return (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center bg-scrim backdrop-blur-sm p-md">
-      <div className="w-full max-w-[440px] rounded-xl bg-surface-container-high p-l flex flex-col gap-md border border-outline-variant shadow-xl">
-        <div className="flex flex-col gap-0.5">
-          <h3 className="font-display text-title-medium font-semibold text-on-surface">
-            {ingredient.name}
-          </h3>
-          <p className="text-body-medium text-on-surface-variant">
-            Currently {qty(ingredient.stock_qty)} {ingredient.unit}
-          </p>
-        </div>
-
-        <label className="flex flex-col gap-xs">
-          <span className="text-body-medium font-semibold text-on-surface">
-            What happened?
-          </span>
-          <Select
-            value={reason}
-            onChange={(e) => setReason(e.target.value as StockReason)}
-            wrapperClassName="block w-full"
-          >
-            {REASONS.map((r) => (
-              <option key={r.value} value={r.value}>
-                {r.label}
-              </option>
-            ))}
-          </Select>
-        </label>
-
-        <TextField
-          label={
-            isCount
-              ? `Counted total (${ingredient.unit})`
-              : `Amount (${ingredient.unit})`
-          }
-          value={amount}
-          onChange={(e) => setAmount(e.target.value)}
-          inputMode="decimal"
-          autoFocus
-          placeholder="0"
-          hint={
-            valid ? (
-              <span className="tabular-nums">
-                {delta >= 0 ? "+" : "−"}
-                {qty(Math.abs(delta))} {ingredient.unit} → new level{" "}
-                {qty(ingredient.stock_qty + delta)} {ingredient.unit}
-              </span>
-            ) : undefined
-          }
-        />
-
-        <TextField
-          label={
-            <>
-              Note{" "}
-              <span className="font-normal text-on-surface-variant">
-                (optional)
-              </span>
-            </>
-          }
-          value={note}
-          onChange={(e) => setNote(e.target.value)}
-          placeholder="e.g. supplier short-delivered"
-        />
-
-        <div className="flex justify-end gap-s pt-s">
+    <Dialog
+      onClose={onClose}
+      title={<>{ingredient.name}</>}
+      subtitle={<>Currently {qty(ingredient.stock_qty)} {ingredient.unit}</>}
+      footer={
+        <>
           <SecondaryButton size="md" onClick={onClose}>
             Cancel
           </SecondaryButton>
@@ -535,9 +477,62 @@ function AdjustDialog({
           >
             {adjust.isPending ? "Saving…" : "Record"}
           </PrimaryButton>
-        </div>
-      </div>
-    </div>
+        </>
+      }
+    >
+      <label className="flex flex-col gap-xs">
+        <span className="text-body-medium font-semibold text-on-surface">
+          What happened?
+        </span>
+        <Select
+          value={reason}
+          onChange={(e) => setReason(e.target.value as StockReason)}
+          wrapperClassName="block w-full"
+        >
+          {REASONS.map((r) => (
+            <option key={r.value} value={r.value}>
+              {r.label}
+            </option>
+          ))}
+        </Select>
+      </label>
+
+      <TextField
+        label={
+          isCount
+            ? `Counted total (${ingredient.unit})`
+            : `Amount (${ingredient.unit})`
+        }
+        value={amount}
+        onChange={(e) => setAmount(e.target.value)}
+        inputMode="decimal"
+        autoFocus
+        placeholder="0"
+        hint={
+          valid ? (
+            <span className="tabular-nums">
+              {delta >= 0 ? "+" : "−"}
+              {qty(Math.abs(delta))} {ingredient.unit} → new level{" "}
+              {qty(ingredient.stock_qty + delta)} {ingredient.unit}
+            </span>
+          ) : undefined
+        }
+      />
+
+      <TextField
+        label={
+          <>
+            Note{" "}
+            <span className="font-normal text-on-surface-variant">
+              (optional)
+            </span>
+          </>
+        }
+        value={note}
+        onChange={(e) => setNote(e.target.value)}
+        placeholder="e.g. supplier short-delivered"
+      />
+    </Dialog>
   );
 }
 
@@ -572,50 +567,11 @@ function NewIngredientDialog({ onClose }: { onClose: () => void }) {
   };
 
   return (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center bg-scrim backdrop-blur-sm p-md">
-      <div className="w-full max-w-[440px] rounded-xl bg-surface-container-high p-l flex flex-col gap-md border border-outline-variant shadow-xl">
-        <h3 className="font-display text-title-medium font-semibold text-on-surface">
-          Add ingredient
-        </h3>
-
-        <TextField
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-          placeholder="Name — e.g. Rice"
-          aria-label="Ingredient name"
-          autoFocus
-        />
-        <div className="grid grid-cols-2 gap-s">
-          <TextField
-            value={unit}
-            onChange={(e) => setUnit(e.target.value)}
-            placeholder="Unit — kg, L, tin"
-            aria-label="Unit"
-          />
-          <TextField
-            value={stock}
-            onChange={(e) => setStock(e.target.value)}
-            placeholder="Opening stock"
-            aria-label="Opening stock"
-            inputMode="decimal"
-          />
-          <TextField
-            value={threshold}
-            onChange={(e) => setThreshold(e.target.value)}
-            placeholder="Alert below"
-            aria-label="Low stock threshold"
-            inputMode="decimal"
-          />
-          <TextField
-            value={cost}
-            onChange={(e) => setCost(e.target.value)}
-            placeholder="Cost per unit ₦"
-            aria-label="Cost per unit in naira"
-            inputMode="decimal"
-          />
-        </div>
-
-        <div className="flex justify-end gap-s pt-s">
+    <Dialog
+      onClose={onClose}
+      title="Add ingredient"
+      footer={
+        <>
           <SecondaryButton size="md" onClick={onClose}>
             Cancel
           </SecondaryButton>
@@ -626,9 +582,46 @@ function NewIngredientDialog({ onClose }: { onClose: () => void }) {
           >
             {create.isPending ? "Adding…" : "Add"}
           </PrimaryButton>
-        </div>
+        </>
+      }
+    >
+      <TextField
+        value={name}
+        onChange={(e) => setName(e.target.value)}
+        placeholder="Name — e.g. Rice"
+        aria-label="Ingredient name"
+        autoFocus
+      />
+      <div className="grid grid-cols-2 gap-s">
+        <TextField
+          value={unit}
+          onChange={(e) => setUnit(e.target.value)}
+          placeholder="Unit — kg, L, tin"
+          aria-label="Unit"
+        />
+        <TextField
+          value={stock}
+          onChange={(e) => setStock(e.target.value)}
+          placeholder="Opening stock"
+          aria-label="Opening stock"
+          inputMode="decimal"
+        />
+        <TextField
+          value={threshold}
+          onChange={(e) => setThreshold(e.target.value)}
+          placeholder="Alert below"
+          aria-label="Low stock threshold"
+          inputMode="decimal"
+        />
+        <TextField
+          value={cost}
+          onChange={(e) => setCost(e.target.value)}
+          placeholder="Cost per unit ₦"
+          aria-label="Cost per unit in naira"
+          inputMode="decimal"
+        />
       </div>
-    </div>
+    </Dialog>
   );
 }
 
@@ -691,63 +684,12 @@ function EditIngredientDialog({
   };
 
   return (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center bg-scrim backdrop-blur-sm p-md">
-      <div className="w-full max-w-[440px] rounded-xl bg-surface-container-high p-l flex flex-col gap-md border border-outline-variant shadow-xl">
-        <div className="flex flex-col gap-0.5">
-          <h3 className="font-display text-title-medium font-semibold text-on-surface">
-            Edit {ingredient.name}
-          </h3>
-          <p className="text-body-medium text-on-surface-variant">
-            Changing the level is a separate action — use Adjust, so it lands in
-            the ledger.
-          </p>
-        </div>
-
-        <TextField
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-          placeholder="Name — e.g. Rice"
-          aria-label="Ingredient name"
-          autoFocus
-        />
-
-        <div className="grid grid-cols-2 gap-s">
-          <TextField
-            label="Unit"
-            value={unit}
-            onChange={(e) => setUnit(e.target.value)}
-            placeholder="kg, L, tin"
-          />
-          <TextField
-            label="Low at"
-            value={threshold}
-            onChange={(e) => setThreshold(e.target.value)}
-            placeholder="Leave blank for none"
-            inputMode="decimal"
-          />
-        </div>
-
-        <TextField
-          label={`Cost per ${unit.trim() || "unit"} (₦)`}
-          value={cost}
-          onChange={(e) => setCost(e.target.value)}
-          placeholder="Leave blank if you don't track it"
-          inputMode="decimal"
-        />
-
-        {/* Renaming a unit does not convert anything. Someone switching kg to g
-            would otherwise multiply their own stock by a thousand without
-            noticing. */}
-        {unit.trim() !== ingredient.unit && (
-          <p className="text-label-small text-warning">
-            Changing the unit relabels {qty(ingredient.stock_qty)} — it
-            doesn&rsquo;t convert it. {qty(ingredient.stock_qty)}{" "}
-            {ingredient.unit} becomes {qty(ingredient.stock_qty)}{" "}
-            {unit.trim() || "unit"}.
-          </p>
-        )}
-
-        <div className="flex justify-end gap-s pt-s">
+    <Dialog
+      onClose={onClose}
+      title={<>Edit {ingredient.name}</>}
+      subtitle="Changing the level is a separate action — use Adjust, so it lands in the ledger."
+      footer={
+        <>
           <SecondaryButton size="md" onClick={onClose}>
             Cancel
           </SecondaryButton>
@@ -758,8 +700,52 @@ function EditIngredientDialog({
           >
             {update.isPending ? "Saving…" : "Save"}
           </PrimaryButton>
-        </div>
+        </>
+      }
+    >
+      <TextField
+        value={name}
+        onChange={(e) => setName(e.target.value)}
+        placeholder="Name — e.g. Rice"
+        aria-label="Ingredient name"
+        autoFocus
+      />
+
+      <div className="grid grid-cols-2 gap-s">
+        <TextField
+          label="Unit"
+          value={unit}
+          onChange={(e) => setUnit(e.target.value)}
+          placeholder="kg, L, tin"
+        />
+        <TextField
+          label="Low at"
+          value={threshold}
+          onChange={(e) => setThreshold(e.target.value)}
+          placeholder="Leave blank for none"
+          inputMode="decimal"
+        />
       </div>
-    </div>
+
+      <TextField
+        label={`Cost per ${unit.trim() || "unit"} (₦)`}
+        value={cost}
+        onChange={(e) => setCost(e.target.value)}
+        placeholder="Leave blank if you don't track it"
+        inputMode="decimal"
+      />
+
+      {/* Renaming a unit does not convert anything. Someone switching kg to g
+          would otherwise multiply their own stock by a thousand without
+          noticing. */}
+      {unit.trim() !== ingredient.unit && (
+        <p className="text-label-small text-warning">
+          Changing the unit relabels {qty(ingredient.stock_qty)} — it
+          doesn&rsquo;t convert it. {qty(ingredient.stock_qty)}{" "}
+          {ingredient.unit} becomes {qty(ingredient.stock_qty)}{" "}
+          {unit.trim() || "unit"}.
+        </p>
+      )}
+    </Dialog>
   );
 }

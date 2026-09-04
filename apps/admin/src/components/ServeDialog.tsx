@@ -1,7 +1,11 @@
 import { useState } from "react";
 import { errorMessage, formatCurrency, useAdminServeOrder } from "@oshap/shared";
 import type { ServeOrderRequest } from "@oshap/shared";
-import { SecondaryButton, toast } from "@oshap/shared/ui";
+import {
+  Dialog,
+  SecondaryButton,
+  toast,
+} from "@oshap/shared/ui";
 
 /**
  * Marking food delivered, and saying how it was paid for in the same tap.
@@ -62,98 +66,76 @@ export default function ServeDialog({ orderId, tableName, total, onClose }: Prop
   };
 
   return (
-    <div
-      className="fixed inset-0 z-[100] flex items-center justify-center bg-scrim backdrop-blur-sm p-md"
-      onClick={onClose}
+    <Dialog
+      onClose={onClose}
+      title="Food delivered"
+      subtitle={<>Table {tableName}</>}
     >
-      <div
-        role="dialog"
-        aria-modal="true"
-        aria-label={`Mark table ${tableName} served`}
-        className="w-full max-w-[420px] rounded-xl bg-surface-container-high p-l flex flex-col gap-md shadow-xl"
-        onClick={(e) => e.stopPropagation()}
-      >
-        <div className="flex items-start justify-between gap-md">
-          <div className="flex flex-col gap-0.5">
-            <h3 className="font-bold text-on-surface">Food delivered</h3>
-            <p className="text-body-medium text-on-surface-variant">Table {tableName}</p>
-          </div>
-          <button
-            type="button"
-            onClick={onClose}
-            aria-label="Close"
-            className="w-10 h-10 shrink-0 flex items-center justify-center rounded-full bg-surface-container text-on-surface-variant hover:bg-surface-container-highest transition-colors"
-          >
-            <i className="mgc_close_line" />
-          </button>
-        </div>
-
-        <div className="flex flex-col items-center gap-xs py-l rounded-sm bg-surface-container">
-          <span className="text-label-small font-semibold uppercase tracking-wider text-on-surface-variant">
-            Bill
-          </span>
-          <span className="font-display text-display-medium font-medium text-primary-label">
-            {formatCurrency(total)}
-          </span>
-        </div>
-
-        <span className="text-body-medium font-semibold text-on-surface">
-          How did they pay?
+      <div className="flex flex-col items-center gap-xs py-l rounded-sm bg-surface-container">
+        <span className="text-label-small font-semibold uppercase tracking-wider text-on-surface-variant">
+          Bill
         </span>
+        <span className="font-display text-display-medium font-medium text-primary-label">
+          {formatCurrency(total)}
+        </span>
+      </div>
 
-        <div className="flex flex-col gap-s">
-          {METHODS.map((m) => (
-            <button
-              key={m.value}
-              type="button"
-              disabled={serve.isPending}
-              onClick={() => {
-                setChoice(m.value);
-                confirm(m.value);
-              }}
-              className="flex items-center justify-between gap-s px-md py-s rounded-sm bg-surface-container text-on-surface text-label-medium font-semibold hover:bg-surface-container-highest active:scale-[0.99] disabled:opacity-50 focus-visible:outline-2 focus-visible:outline-primary focus-visible:outline-offset-2 transition"
-            >
-              <span className="flex items-center gap-s">
-                <i className={`${m.icon} text-xl text-primary-label`} aria-hidden />
-                {m.label}
-              </span>
-              <span className="text-body-medium text-on-surface-variant">
-                {serve.isPending && choice === m.value
-                  ? "Recording…"
-                  : `Settles ${formatCurrency(total)}`}
-              </span>
-            </button>
-          ))}
+      <span className="text-body-medium font-semibold text-on-surface">
+        How did they pay?
+      </span>
 
-          {/* Not a lesser option. A guest paying after their meal is ordinary,
-              and recording it honestly is what keeps the bill collectable. */}
+      <div className="flex flex-col gap-s">
+        {METHODS.map((m) => (
           <button
+            key={m.value}
             type="button"
             disabled={serve.isPending}
             onClick={() => {
-              setChoice("later");
-              confirm();
+              setChoice(m.value);
+              confirm(m.value);
             }}
-            className="flex items-center justify-between gap-s px-md py-s rounded-sm border border-outline-variant text-on-surface text-label-medium font-semibold hover:bg-surface-container active:scale-[0.99] disabled:opacity-50 focus-visible:outline-2 focus-visible:outline-primary focus-visible:outline-offset-2 transition"
+            className="flex items-center justify-between gap-s px-md py-s rounded-sm bg-surface-container text-on-surface text-label-medium font-semibold hover:bg-surface-container-highest active:scale-[0.99] disabled:opacity-50 focus-visible:outline-2 focus-visible:outline-primary focus-visible:outline-offset-2 transition"
           >
             <span className="flex items-center gap-s">
-              <i className="mgc_time_line text-xl text-on-surface-variant" aria-hidden />
-              Not yet
+              <i className={`${m.icon} text-xl text-primary-label`} aria-hidden />
+              {m.label}
             </span>
             <span className="text-body-medium text-on-surface-variant">
-              {serve.isPending && choice === "later"
+              {serve.isPending && choice === m.value
                 ? "Recording…"
-                : "Bill stays open"}
+                : `Settles ${formatCurrency(total)}`}
             </span>
           </button>
-        </div>
+        ))}
 
-        <div className="flex justify-end">
-          <SecondaryButton size="md" onClick={onClose} disabled={serve.isPending}>
-            Cancel
-          </SecondaryButton>
-        </div>
+        {/* Not a lesser option. A guest paying after their meal is ordinary,
+            and recording it honestly is what keeps the bill collectable. */}
+        <button
+          type="button"
+          disabled={serve.isPending}
+          onClick={() => {
+            setChoice("later");
+            confirm();
+          }}
+          className="flex items-center justify-between gap-s px-md py-s rounded-sm border border-outline-variant text-on-surface text-label-medium font-semibold hover:bg-surface-container active:scale-[0.99] disabled:opacity-50 focus-visible:outline-2 focus-visible:outline-primary focus-visible:outline-offset-2 transition"
+        >
+          <span className="flex items-center gap-s">
+            <i className="mgc_time_line text-xl text-on-surface-variant" aria-hidden />
+            Not yet
+          </span>
+          <span className="text-body-medium text-on-surface-variant">
+            {serve.isPending && choice === "later"
+              ? "Recording…"
+              : "Bill stays open"}
+          </span>
+        </button>
       </div>
-    </div>
+
+      <div className="flex justify-end">
+        <SecondaryButton size="md" onClick={onClose} disabled={serve.isPending}>
+          Cancel
+        </SecondaryButton>
+      </div>
+    </Dialog>
   );
 }

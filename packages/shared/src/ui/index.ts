@@ -15,6 +15,8 @@ export { default as SecondaryButton } from "./SecondaryButton";
 export { default as TertiaryButton } from "./TertiaryButton";
 export { default as TableBadge } from "./TableBadge";
 export { default as QueryError } from "./QueryError";
+export { default as Dialog } from "./Dialog";
+export type { DialogProps } from "./Dialog";
 export { default as Select } from "./Select";
 export type { SelectProps } from "./Select";
 export { default as TextField } from "./TextField";

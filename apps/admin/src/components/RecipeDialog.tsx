@@ -7,6 +7,7 @@ import {
 } from "@oshap/shared";
 import type { MenuItem } from "@oshap/shared";
 import {
+  Dialog,
   PrimaryButton,
   SecondaryButton,
   Select,
@@ -89,117 +90,15 @@ export default function RecipeDialog({ item, onClose }: Props) {
   };
 
   return (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center bg-scrim backdrop-blur-sm p-md">
-      <div className="w-full max-w-[520px] max-h-[85vh] rounded-xl bg-surface-container-high flex flex-col border border-outline-variant shadow-xl">
-        <header className="flex items-start justify-between gap-md p-l border-b border-outline-variant">
-          <div className="flex flex-col gap-0.5 min-w-0">
-            <h2 className="font-display text-title-medium font-semibold text-on-surface truncate">
-              Recipe · {item.name}
-            </h2>
-            <p className="text-body-medium text-on-surface-variant">
-              What one serving uses. Orders draw these down automatically.
-            </p>
-          </div>
-          <button
-            type="button"
-            onClick={onClose}
-            aria-label="Close"
-            className="w-10 h-10 shrink-0 flex items-center justify-center rounded-full bg-surface-container text-on-surface-variant hover:bg-surface-container-highest transition-colors"
-          >
-            <i className="mgc_close_line text-xl" />
-          </button>
-        </header>
-
-        <div className="flex-1 overflow-y-auto p-l flex flex-col gap-s">
-          {recipeQuery.isLoading || ingredientsQuery.isLoading ? (
-            <div className="flex justify-center py-xl">
-              <div className="oshap-spinner" />
-            </div>
-          ) : ingredients.length === 0 ? (
-            <p className="text-body-medium text-on-surface-variant text-center py-l">
-              No ingredients exist yet. Add some on the Inventory screen first.
-            </p>
-          ) : lines.length === 0 ? (
-            <p className="text-body-medium text-on-surface-variant text-center py-l">
-              No recipe yet — this dish won&rsquo;t affect ingredient stock.
-            </p>
-          ) : (
-            lines.map((line, index) => {
-              const ingredient = ingredients.find(
-                (i) => i.id === line.ingredient_id,
-              );
-              return (
-                <div key={line.ingredient_id} className="flex items-center gap-s">
-                  <Select
-                    value={line.ingredient_id}
-                    onChange={(e) =>
-                      setLines((prev) =>
-                        prev.map((l, i) =>
-                          i === index
-                            ? { ...l, ingredient_id: e.target.value }
-                            : l,
-                        ),
-                      )
-                    }
-                    aria-label="Ingredient"
-                    wrapperClassName="flex-1 min-w-0"
-                  >
-                    {/* Its own value plus anything not already used, so the
-                        same ingredient can't appear on two lines. */}
-                    {[ingredient, ...available]
-                      .filter((i): i is NonNullable<typeof i> => Boolean(i))
-                      .map((i) => (
-                        <option key={i.id} value={i.id}>
-                          {i.name}
-                        </option>
-                      ))}
-                  </Select>
-                  <TextField
-                    value={line.qty_per_serving}
-                    onChange={(e) =>
-                      setLines((prev) =>
-                        prev.map((l, i) =>
-                          i === index
-                            ? { ...l, qty_per_serving: e.target.value }
-                            : l,
-                        ),
-                      )
-                    }
-                    inputMode="decimal"
-                    aria-label={`Quantity of ${ingredient?.name ?? "ingredient"} per serving`}
-                    wrapperClassName="w-24"
-                  />
-                  <span className="text-body-medium text-on-surface-variant w-12 shrink-0">
-                    {ingredient?.unit ?? ""}
-                  </span>
-                  <button
-                    type="button"
-                    onClick={() =>
-                      setLines((prev) => prev.filter((_, i) => i !== index))
-                    }
-                    aria-label={`Remove ${ingredient?.name ?? "line"}`}
-                    className="p-xs text-on-surface-variant hover:text-error transition-colors"
-                  >
-                    <i className="mgc_delete_line text-lg" />
-                  </button>
-                </div>
-              );
-            })
-          )}
-
-          {ingredients.length > 0 && (
-            <SecondaryButton
-              size="md"
-              onClick={addLine}
-              disabled={available.length === 0}
-            >
-              <i className="mgc_add_line" />{" "}
-              {available.length === 0 ? "All ingredients used" : "Add ingredient"}
-            </SecondaryButton>
-          )}
-        </div>
-
-        <footer className="p-l border-t border-outline-variant flex justify-end gap-s">
+    <Dialog
+      onClose={onClose}
+      title={<>Recipe · {item.name}</>}
+      subtitle="What one serving uses. Orders draw these down automatically."
+      size="lg"
+      scrollable
+      bodyClassName="gap-s"
+      footer={
+        <>
           <SecondaryButton size="md" onClick={onClose}>
             Cancel
           </SecondaryButton>
@@ -210,8 +109,94 @@ export default function RecipeDialog({ item, onClose }: Props) {
           >
             {setRecipe.isPending ? "Saving…" : "Save recipe"}
           </PrimaryButton>
-        </footer>
-      </div>
-    </div>
-  );
+        </>
+      }
+    >
+      {recipeQuery.isLoading || ingredientsQuery.isLoading ? (
+        <div className="flex justify-center py-xl">
+          <div className="oshap-spinner" />
+        </div>
+      ) : ingredients.length === 0 ? (
+        <p className="text-body-medium text-on-surface-variant text-center py-l">
+          No ingredients exist yet. Add some on the Inventory screen first.
+        </p>
+      ) : lines.length === 0 ? (
+        <p className="text-body-medium text-on-surface-variant text-center py-l">
+          No recipe yet — this dish won&rsquo;t affect ingredient stock.
+        </p>
+      ) : (
+        lines.map((line, index) => {
+          const ingredient = ingredients.find(
+            (i) => i.id === line.ingredient_id,
+          );
+          return (
+            <div key={line.ingredient_id} className="flex items-center gap-s">
+              <Select
+                value={line.ingredient_id}
+                onChange={(e) =>
+                  setLines((prev) =>
+                    prev.map((l, i) =>
+                      i === index
+                        ? { ...l, ingredient_id: e.target.value }
+                        : l,
+                    ),
+                  )
+                }
+                aria-label="Ingredient"
+                wrapperClassName="flex-1 min-w-0"
+              >
+                {/* Its own value plus anything not already used, so the
+                    same ingredient can't appear on two lines. */}
+                {[ingredient, ...available]
+                  .filter((i): i is NonNullable<typeof i> => Boolean(i))
+                  .map((i) => (
+                    <option key={i.id} value={i.id}>
+                      {i.name}
+                    </option>
+                  ))}
+              </Select>
+              <TextField
+                value={line.qty_per_serving}
+                onChange={(e) =>
+                  setLines((prev) =>
+                    prev.map((l, i) =>
+                      i === index
+                        ? { ...l, qty_per_serving: e.target.value }
+                        : l,
+                    ),
+                  )
+                }
+                inputMode="decimal"
+                aria-label={`Quantity of ${ingredient?.name ?? "ingredient"} per serving`}
+                wrapperClassName="w-24"
+              />
+              <span className="text-body-medium text-on-surface-variant w-12 shrink-0">
+                {ingredient?.unit ?? ""}
+              </span>
+              <button
+                type="button"
+                onClick={() =>
+                  setLines((prev) => prev.filter((_, i) => i !== index))
+                }
+                aria-label={`Remove ${ingredient?.name ?? "line"}`}
+                className="p-xs text-on-surface-variant hover:text-error transition-colors"
+              >
+                <i className="mgc_delete_line text-lg" />
+              </button>
+            </div>
+          );
+        })
+      )}
+
+      {ingredients.length > 0 && (
+        <SecondaryButton
+          size="md"
+          onClick={addLine}
+          disabled={available.length === 0}
+        >
+          <i className="mgc_add_line" />{" "}
+          {available.length === 0 ? "All ingredients used" : "Add ingredient"}
+        </SecondaryButton>
+      )}    </Dialog>
+);
 }
