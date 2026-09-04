@@ -136,13 +136,16 @@ export default function CashPaymentDialog({
             <span className="text-body-medium font-semibold text-on-surface">
               How did they pay?
             </span>
-            <div className="flex gap-xs">
+            {/* A radiogroup, not toggle buttons: one method is always chosen
+                and picking one clears the last. */}
+            <div role="radiogroup" aria-label="Payment method" className="flex gap-xs">
               {METHODS.map((m) => (
                 <button
                   key={m.value}
                   type="button"
+                  role="radio"
                   onClick={() => setMethod(m.value)}
-                  aria-pressed={method === m.value}
+                  aria-checked={method === m.value}
                   className={`flex-1 flex items-center justify-center gap-xs px-s py-s rounded-sm text-body-medium font-semibold transition-colors ${
                     method === m.value
                       ? "bg-primary text-on-primary"

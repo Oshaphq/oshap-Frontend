@@ -1,6 +1,8 @@
 export { default as BrandMark } from "./BrandMark";
 export { default as Button } from "./Button";
 export type { ButtonProps, ButtonVariant, ButtonSize } from "./Button";
+export { default as Checkbox } from "./Checkbox";
+export type { CheckboxProps } from "./Checkbox";
 export { default as Chip } from "./Chip";
 export type { ChipProps } from "./Chip";
 export { default as DataTable } from "./DataTable";

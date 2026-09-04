@@ -403,15 +403,20 @@ export default function PayPage() {
             <span className="text-label-small font-semibold uppercase tracking-wider text-on-surface-variant">
               Trouble with this bank?
             </span>
-            <div className="flex flex-wrap gap-s">
+            {/* A radiogroup, not a row of toggle buttons. Exactly one bank is
+                always chosen and picking one clears the last, which
+                `aria-pressed` cannot say: it announced three independent
+                pressed/not-pressed buttons instead of "1 of 3". */}
+            <div role="radiogroup" aria-label="Pay into" className="flex flex-wrap gap-s">
               {bankAccounts.map((account) => {
                 const isSelected = account.id === selectedAccount?.id;
                 return (
                   <button
                     key={account.id}
                     type="button"
+                    role="radio"
                     onClick={() => setSelectedAccountId(account.id)}
-                    aria-pressed={isSelected}
+                    aria-checked={isSelected}
                     className={`px-md py-s rounded-full text-label-medium font-semibold transition-colors ${
                       isSelected
                         ? "bg-primary text-on-primary"
