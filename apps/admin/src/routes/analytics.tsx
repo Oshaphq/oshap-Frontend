@@ -286,13 +286,19 @@ export default function Analytics() {
                 Table Performance
               </h3>
               <div className="h-[300px] w-full overflow-y-auto">
-                {/* Scrolls inside its own box. Four or five columns of names and
-                    money cannot usefully collapse, and without this the whole
-                    page slides sideways on a phone. */}
+                {/* No `-mx-md` bleed. The old markup paired it with `px-md`,
+                    which cancelled it; carrying only the negative half into
+                    DataTable left this 32px wider than the box around it. That
+                    box is `overflow-y-auto`, and CSS computes the other axis to
+                    `auto` whenever one axis is not `visible` — so three short
+                    columns that fit easily still drew a horizontal scrollbar.
+
+                    The min-width is a phone floor, not a desktop one. 32rem was
+                    inherited from a four-column table; Table, Orders and Revenue
+                    need about 20. */}
                 <DataTable
                   caption="Orders and revenue by table"
-                  className="-mx-md"
-                  minWidth="min-w-[32rem]"
+                  minWidth="min-w-[20rem]"
                   rows={data.table_performance}
                   rowKey={(_, idx) => String(idx)}
                   columns={[
