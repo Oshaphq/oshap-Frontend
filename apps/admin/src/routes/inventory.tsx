@@ -86,8 +86,11 @@ export default function InventoryPage() {
 
   return (
     <Page width="wide" gap="md">
-      {/* Title block above the actions, not beside them. */}
-      <header className="flex flex-col gap-s">
+      {/* Beside the title from `sm`, stacked below it on a phone. It used to
+          stack at every width, which left the actions under a two-line
+          description and the whole right-hand half of a desktop header empty.
+          Every other admin screen puts them beside. */}
+      <header className="flex flex-col gap-s sm:flex-row sm:items-start sm:justify-between sm:gap-md">
         <div className="flex flex-col gap-0.5">
           <h1 className="font-display text-title-large font-semibold text-on-surface">
             Inventory
@@ -100,7 +103,7 @@ export default function InventoryPage() {
             <span className="block">Plate counts live on the menu screen.</span>
           </p>
         </div>
-        <div className="flex items-center gap-s flex-wrap">
+        <div className="flex items-center gap-s flex-wrap sm:shrink-0">
           <Button variant="text" size="md" onClick={() => setShowLedger((v) => !v)}>
             <i className="mgc_history_line" />{" "}
             {showLedger ? "Hide" : "Movements"}

@@ -14,10 +14,20 @@ const src = readFileSync(
 );
 const header = src.slice(src.indexOf("<header"), src.indexOf("</header>"));
 
-describe("the inventory header stacks", () => {
-  it("the title block sits above the actions", () => {
+describe("the inventory header stacks on a phone and not above it", () => {
+  /**
+   * This asserted `not.toContain("justify-between")` — a phone-frame fact from
+   * the Figma extract, applied at every width. On a desktop it left the whole
+   * right-hand half of the header empty while the actions sat under a two-line
+   * strapline. Every other admin screen puts them beside the title.
+   */
+  it("stacks below sm", () => {
     expect(header).toContain("flex flex-col");
-    expect(header).not.toContain("justify-between");
+  });
+
+  it("and sits beside the title from sm up", () => {
+    expect(header).toContain("sm:flex-row");
+    expect(header).toContain("sm:justify-between");
   });
 
   it("the strapline breaks where it was written to break", () => {
