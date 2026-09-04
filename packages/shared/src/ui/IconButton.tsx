@@ -9,8 +9,22 @@ import type { ButtonHTMLAttributes } from "react";
  * glyph: an icon is a UI component, held to WCAG's 3:1 non-text bar, and
  * #f56500 clears it at 3.11:1. A *labelled* button in the same position needs
  * a 16px semibold label to clear the same bar — see {@link Button}.
+ *
+ * `surface` is the fifth, and it is the one the product actually uses. The
+ * four M3 variants describe a control this app does not have: two dozen
+ * circular controls across thirteen files carry a RESTING neutral fill, and
+ * none of the four could express it — `standard` is transparent until hover,
+ * `tonal` is the brown secondary container. It cannot be reached with
+ * `className` either: `.bg-transparent` is emitted after `.bg-surface-container`
+ * in the sheet, so a class override loses the cascade regardless of order at
+ * the call site.
  */
-export type IconButtonVariant = "standard" | "filled" | "tonal" | "outlined";
+export type IconButtonVariant =
+  | "standard"
+  | "surface"
+  | "filled"
+  | "tonal"
+  | "outlined";
 
 export interface IconButtonProps
   extends Omit<ButtonHTMLAttributes<HTMLButtonElement>, "className"> {
@@ -33,6 +47,8 @@ export interface IconButtonProps
 
 const VARIANT: Record<IconButtonVariant, string> = {
   standard: "bg-transparent hover:bg-surface-container-high",
+  surface:
+    "bg-surface-container hover:bg-surface-container-high",
   filled: "bg-primary text-on-primary hover:brightness-95",
   tonal:
     "bg-secondary-container text-on-secondary-container hover:brightness-95",

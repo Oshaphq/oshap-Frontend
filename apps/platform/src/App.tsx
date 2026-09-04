@@ -1,6 +1,10 @@
 import { useState } from "react";
 import { NavLink, Outlet, Route, Routes, Navigate } from "react-router";
-import { PrimaryButton, ThemeToggle } from "@oshap/shared/ui";
+import {
+  IconButton,
+  PrimaryButton,
+  ThemeToggle,
+} from "@oshap/shared/ui";
 import { platformApi, setPlatformToken } from "@oshap/shared";
 import DashboardPage from "./routes/dashboard";
 import RestaurantsPage from "./routes/restaurants";
@@ -174,13 +178,15 @@ function PlatformLayout() {
           {/* Right controls — always visible */}
           <div className="flex items-center gap-s shrink-0 ml-auto md:ml-0">
             <ThemeToggle />
-            <button
+            <IconButton
+              variant="surface"
+              size="dense"
+              icon="mgc_exit_line"
               onClick={handleLogout}
-              className="w-10 h-10 flex items-center justify-center rounded-full bg-surface-container-high text-on-surface-variant border border-transparent hover:bg-error-container hover:text-on-error-container transition-colors"
+              className="hover:bg-error-container hover:text-on-error-container"
               title="Logout"
-            >
-              <i className="mgc_exit_line text-lg" />
-            </button>
+              aria-label="Log out"
+            />
           </div>
         </nav>
 
