@@ -21,6 +21,7 @@ import {
 import type { MenuItem } from "@oshap/shared";
 import {
   Button,
+  Checkbox,
   EmptyState,
   PrimaryButton,
   SecondaryButton,
@@ -520,12 +521,11 @@ function MenuItemRow({
         <div className="flex items-start justify-between gap-md">
           <div className="flex items-start gap-md flex-1 min-w-0">
             {selecting && (
-              <input
-                type="checkbox"
+              <Checkbox
                 checked={isSelected}
                 onChange={onSelect}
                 aria-label={`Select ${item.name}`}
-                className="w-4 h-4 mt-1 shrink-0 accent-primary"
+                className="shrink-0"
               />
             )}
             {item.image_url ? (
@@ -863,21 +863,20 @@ function SelectionBar({
   return (
     <div className="sticky top-0 z-20 flex flex-col gap-s p-md rounded-lg bg-surface-container-high border border-outline-variant shadow-lg">
       <div className="flex items-center justify-between gap-md flex-wrap">
-        <label className="flex items-center gap-s text-body-medium font-semibold text-on-surface cursor-pointer select-none">
-          <input
-            type="checkbox"
-            checked={allSelected}
-            onChange={() =>
-              setSelected(
-                allSelected ? new Set() : new Set(items.map((i) => i.id)),
-              )
-            }
-            className="w-4 h-4 accent-primary"
-          />
-          {chosen.length === 0
-            ? "Select dishes to remove"
-            : `${chosen.length} selected`}
-        </label>
+        <Checkbox
+          checked={allSelected}
+          onChange={() =>
+            setSelected(
+              allSelected ? new Set() : new Set(items.map((i) => i.id)),
+            )
+          }
+          label={
+            chosen.length === 0
+              ? "Select dishes to remove"
+              : `${chosen.length} selected`
+          }
+          className="items-center font-semibold"
+        />
 
         <div className="flex items-center gap-s">
           <SecondaryButton size="md" onClick={onCancel}>

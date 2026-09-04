@@ -7,7 +7,14 @@ import {
 } from "@oshap/shared";
 import type { NotificationType } from "@oshap/shared";
 import { errorMessage } from "@oshap/shared";
-import { Button, PrimaryButton, SecondaryButton, Select, toast } from "@oshap/shared/ui";
+import {
+  Button,
+  Checkbox,
+  PrimaryButton,
+  SecondaryButton,
+  Select,
+  toast,
+} from "@oshap/shared/ui";
 import QueryError from "../components/QueryError";
 import { NotificationRow, groupByTime } from "../components/NotificationBell";
 import { NOTIFICATION_META } from "../notificationCopy";
@@ -185,15 +192,12 @@ export default function Notifications() {
             </option>
           ))}
         </Select>
-        <label className="flex items-center gap-xs text-body-medium text-on-surface-variant cursor-pointer select-none">
-          <input
-            type="checkbox"
-            checked={unresolvedOnly}
-            onChange={(e) => change(setUnresolvedOnly)(e.target.checked)}
-            className="w-4 h-4 accent-primary"
-          />
-          Still needing attention
-        </label>
+        <Checkbox
+          checked={unresolvedOnly}
+          onChange={change(setUnresolvedOnly)}
+          label="Still needing attention"
+          className="items-center"
+        />
       </div>
 
       {query.isError ? (

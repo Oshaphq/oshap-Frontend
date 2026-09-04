@@ -13,6 +13,7 @@ import {
 } from "@oshap/shared";
 import type { ModifierGroup } from "@oshap/shared";
 import {
+  Checkbox,
   Dialog,
   PrimaryButton,
   SecondaryButton,
@@ -198,25 +199,22 @@ function GroupRow({
       {isOpen && (
         <div className="px-md pb-md flex flex-col gap-md border-t border-outline-variant pt-md">
           <div className="flex flex-wrap items-center gap-md">
-            <label className="flex items-center gap-s text-body-medium text-on-surface">
-              <input
-                type="checkbox"
-                checked={group.required}
-                onChange={(e) =>
-                  updateGroup.mutate({
-                    id: group.id,
-                    payload: {
-                      required: e.target.checked,
-                      // A required group that still allows zero picks can never
-                      // be satisfied, so raise the floor with it.
-                      min: e.target.checked ? Math.max(1, group.min) : 0,
-                    },
-                  })
-                }
-                className="w-4 h-4 accent-primary"
-              />
-              Guest must choose
-            </label>
+            <Checkbox
+              checked={group.required}
+              onChange={(required) =>
+                updateGroup.mutate({
+                  id: group.id,
+                  payload: {
+                    required,
+                    // A required group that still allows zero picks can never
+                    // be satisfied, so raise the floor with it.
+                    min: required ? Math.max(1, group.min) : 0,
+                  },
+                })
+              }
+              label="Guest must choose"
+              className="items-center"
+            />
             <label className="flex items-center gap-s text-body-medium text-on-surface-variant">
               Max choices
               <TextField
