@@ -18,6 +18,8 @@ export type { IconButtonProps, IconButtonVariant } from "./IconButton";
 export { default as PrimaryButton } from "./PrimaryButton";
 export { default as QueryError } from "./QueryError";
 export { default as SecondaryButton } from "./SecondaryButton";
+export { default as Card } from "./Card";
+export type { CardProps } from "./Card";
 export { default as Select } from "./Select";
 export type { SelectProps } from "./Select";
 export { default as Sheet } from "./Sheet";

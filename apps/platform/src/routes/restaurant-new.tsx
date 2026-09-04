@@ -10,6 +10,7 @@ import {
 import type { BillingPeriod, SubscriptionTier } from "@oshap/shared";
 import {
   Button,
+  Card,
   PrimaryButton,
   SecondaryButton,
   TextField,
@@ -113,7 +114,7 @@ export default function RestaurantNewPage() {
           </p>
         </header>
 
-        <div className="bg-surface-container-low rounded-lg p-md flex flex-col gap-s">
+        <Card gap="s">
           <code className="text-body-small text-on-surface break-all font-mono">
             {setupUrl}
           </code>
@@ -126,7 +127,7 @@ export default function RestaurantNewPage() {
           >
             Copy link
           </Button>
-        </div>
+        </Card>
 
         <p className="text-body-medium text-on-surface-variant">
           This is the only time it is shown. If it is lost, the owner can request
@@ -169,15 +170,15 @@ export default function RestaurantNewPage() {
 
       {step === 1 && (
         <form onSubmit={handleNext} className="flex flex-col gap-md">
-          <div className="bg-surface-container-low rounded-lg p-md flex flex-col gap-md">
+          <Card gap="md">
             <h2 className="text-title-large font-semibold text-on-surface">Restaurant Details</h2>
             <TextField aria-label="Restaurant name" placeholder="Restaurant name *" value={form.name} onChange={set("name")} />
             <TextField aria-label="Owner full name" placeholder="Owner full name *" value={form.owner_name} onChange={set("owner_name")} />
             <TextField type="tel" inputMode="tel" aria-label="Owner phone number" placeholder="Owner phone number * — 0803 123 4567" value={form.owner_phone} onChange={set("owner_phone")} />
             <TextField type="email" aria-label="Owner email" placeholder="Owner email (optional)" value={form.owner_email} onChange={set("owner_email")} />
-          </div>
+          </Card>
 
-          <div className="bg-surface-container-low rounded-lg p-md flex flex-col gap-md">
+          <Card gap="md">
             <h2 className="text-title-large font-semibold text-on-surface">Subscription Tier</h2>
             {/* Phase 1 plans only. Enterprise belongs to Phase 2, alongside
                 payment infrastructure that does not exist — offering it here
@@ -235,7 +236,7 @@ export default function RestaurantNewPage() {
                 ))}
               </div>
             </div>
-          </div>
+          </Card>
 
           <PrimaryButton type="submit">Next →</PrimaryButton>
         </form>
@@ -243,7 +244,7 @@ export default function RestaurantNewPage() {
 
       {step === 2 && (
         <form onSubmit={handleCreate} className="flex flex-col gap-md">
-          <div className="bg-surface-container-low rounded-lg p-md flex flex-col gap-md">
+          <Card gap="md">
             <h2 className="text-title-large font-semibold text-on-surface">Tables</h2>
             <TextField
               type="number"
@@ -253,14 +254,14 @@ export default function RestaurantNewPage() {
               value={form.table_count}
               onChange={set("table_count")}
             />
-          </div>
+          </Card>
 
-          <div className="bg-surface-container-low rounded-lg p-md flex flex-col gap-md">
+          <Card gap="md">
             <h2 className="text-title-large font-semibold text-on-surface">Bank Details (optional)</h2>
             <TextField aria-label="Bank name" placeholder="Bank name" value={form.bank_name} onChange={set("bank_name")} />
             <TextField aria-label="Account number" placeholder="Account number" value={form.account_number} onChange={set("account_number")} />
             <TextField aria-label="Account name" placeholder="Account name" value={form.account_name} onChange={set("account_name")} />
-          </div>
+          </Card>
 
           <div className="flex gap-s">
             <SecondaryButton onClick={() => setStep(1)} className="flex-1">

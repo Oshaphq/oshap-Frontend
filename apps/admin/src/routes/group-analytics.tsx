@@ -1,4 +1,5 @@
 import { Link } from "react-router";
+import { Card } from "@oshap/shared/ui";
 import {
   useAdminGroup,
   useAdminGroupAnalytics,
@@ -70,34 +71,34 @@ export default function GroupAnalyticsPage() {
 
       {/* Summary KPIs */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-md">
-        <div className="bg-surface-container-low rounded-lg p-md flex flex-col gap-xs">
+        <Card gap="xs">
           <span className="text-label-large font-semibold text-on-surface-variant uppercase tracking-wider">
             Total Revenue
           </span>
           <span className="font-display text-title-large font-semibold text-on-surface">
             {formatCurrency(analytics.total_revenue)}
           </span>
-        </div>
-        <div className="bg-surface-container-low rounded-lg p-md flex flex-col gap-xs">
+        </Card>
+        <Card gap="xs">
           <span className="text-label-large font-semibold text-on-surface-variant uppercase tracking-wider">
             Total Orders
           </span>
           <span className="font-display text-title-large font-semibold text-on-surface">
             {analytics.total_orders.toLocaleString()}
           </span>
-        </div>
-        <div className="bg-surface-container-low rounded-lg p-md flex flex-col gap-xs">
+        </Card>
+        <Card gap="xs">
           <span className="text-label-large font-semibold text-on-surface-variant uppercase tracking-wider">
             Branches
           </span>
           <span className="font-display text-title-large font-semibold text-on-surface">
             {group.branches.length}
           </span>
-        </div>
+        </Card>
       </div>
 
       {/* Bar chart */}
-      <div className="bg-surface-container-low rounded-lg p-md">
+      <Card>
         <h2 className="text-title-large font-semibold text-on-surface mb-md">
           Revenue by Branch
         </h2>
@@ -133,7 +134,7 @@ export default function GroupAnalyticsPage() {
             </BarChart>
           </ResponsiveContainer>
         </div>
-      </div>
+      </Card>
 
       {/* Per-branch breakdown */}
       <div className="flex flex-col gap-md">
@@ -144,10 +145,7 @@ export default function GroupAnalyticsPage() {
           const meta = group.branches.find((b) => b.id === branch.branch_id);
           const share = (branch.total_revenue / maxRevenue) * 100;
           return (
-            <div
-              key={branch.branch_id}
-              className="bg-surface-container-low rounded-lg p-md flex flex-col gap-s"
-            >
+            <Card key={branch.branch_id} gap="s">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-s">
                   <span className="font-bold text-on-surface">
@@ -193,7 +191,7 @@ export default function GroupAnalyticsPage() {
                   </span>
                 )}
               </div>
-            </div>
+            </Card>
           );
         })}
       </div>
