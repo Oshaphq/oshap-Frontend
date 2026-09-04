@@ -1,5 +1,8 @@
 import { usePlatformRestaurants, formatCurrency } from "@oshap/shared";
-import { QueryError } from "@oshap/shared/ui";
+import {
+  DataTable,
+  QueryError,
+} from "@oshap/shared/ui";
 import type { SubscriptionTier } from "@oshap/shared";
 import { Link } from "react-router";
 import {
@@ -137,40 +140,52 @@ export default function SubscriptionsPage() {
 
       {/* All restaurants in a table */}
       {restaurants.length > 0 && (
-        <div className="bg-surface-container-low rounded-lg overflow-hidden">
-          <table className="w-full text-left border-collapse">
-            <thead>
-              <tr className="bg-surface-container-high border-b border-surface-container-highest">
-                <th className="py-s px-md text-label-large font-semibold text-on-surface-variant">Restaurant</th>
-                <th className="py-s px-md text-label-large font-semibold text-on-surface-variant hidden sm:table-cell">Owner</th>
-                <th className="py-s px-md text-label-large font-semibold text-on-surface-variant">Tier</th>
-                <th className="py-s px-md text-label-large font-semibold text-on-surface-variant text-right">MRR</th>
-              </tr>
-            </thead>
-            <tbody>
-              {[...restaurants]
-                .sort((a, b) => TIER_MONTHLY_KOBO[b.subscription_tier] - TIER_MONTHLY_KOBO[a.subscription_tier])
-                .map((r) => (
-                  <tr key={r.id} className="border-b border-surface-container-highest last:border-none hover:bg-surface-container-low transition-colors">
-                    <td className="py-s px-md text-body-medium font-medium">
-                      <Link to={`/restaurants/${r.id}`} className="text-primary-label hover:underline">
-                        {r.name}
-                      </Link>
-                    </td>
-                    <td className="py-s px-md text-body-small text-on-surface-variant hidden sm:table-cell">{r.owner_email}</td>
-                    <td className="py-s px-md">
-                      <span className="text-label-small font-bold uppercase tracking-wider">
-                        {r.subscription_tier}
-                      </span>
-                    </td>
-                    <td className="py-s px-md text-body-medium text-right font-semibold text-on-surface">
-                      {r.is_active ? formatCurrency(TIER_MONTHLY_KOBO[r.subscription_tier]) : "—"}
-                    </td>
-                  </tr>
-                ))}
-            </tbody>
-          </table>
-        </div>
+        <DataTable
+          caption="All restaurants by subscription tier"
+          rows={[...restaurants].sort(
+            (a, b) =>
+              TIER_MONTHLY_KOBO[b.subscription_tier] -
+              TIER_MONTHLY_KOBO[a.subscription_tier],
+          )}
+          rowKey={(r) => r.id}
+          columns={[
+            {
+              header: "Restaurant",
+              cellClassName: "text-body-medium font-medium",
+              cell: (r) => (
+                <Link
+                  to={`/restaurants/${r.id}`}
+                  className="text-primary-label hover:underline"
+                >
+                  {r.name}
+                </Link>
+              ),
+            },
+            {
+              header: "Owner",
+              hideBelow: "sm",
+              cellClassName: "text-body-small text-on-surface-variant",
+              cell: (r) => r.owner_email,
+            },
+            {
+              header: "Tier",
+              cell: (r) => (
+                <span className="text-label-small font-bold uppercase tracking-wider">
+                  {r.subscription_tier}
+                </span>
+              ),
+            },
+            {
+              header: "MRR",
+              align: "right",
+              cellClassName: "text-body-medium font-semibold text-on-surface",
+              cell: (r) =>
+                r.is_active
+                  ? formatCurrency(TIER_MONTHLY_KOBO[r.subscription_tier])
+                  : "—",
+            },
+          ]}
+        />
       )}
     </main>
   );

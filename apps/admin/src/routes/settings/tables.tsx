@@ -8,9 +8,11 @@ import {
 import { errorMessage, getAdminRestaurantId } from "@oshap/shared";
 import {
   Button,
+  DataTable,
   Dialog,
   PrimaryButton,
   SecondaryButton,
+  StatusBadge,
   TextField,
   toast,
 } from "@oshap/shared/ui";
@@ -143,101 +145,76 @@ export default function TablesSettings() {
         </div>
       )}
 
-      <div className="bg-surface-container-low rounded-lg border border-transparent hover:border-outline-variant transition-colors overflow-hidden">
-        {/* Scrolls inside its own box. Four or five columns of names and
-                    money cannot usefully collapse, and without this the whole
-                    page slides sideways on a phone. */}
-        <div className="overflow-x-auto -mx-md px-md">
-          <table className="w-full min-w-[32rem] text-left border-collapse">
-            <thead>
-              <tr className="bg-surface-container-high border-b border-surface-container-highest">
-                <th className="py-s px-md text-label-large font-semibold text-on-surface-variant">
-                  Table ID
-                </th>
-                <th className="py-s px-md text-label-large font-semibold text-on-surface-variant">
-                  Status
-                </th>
-                <th className="py-s px-md text-label-large font-semibold text-on-surface-variant text-right">
-                  Actions
-                </th>
-              </tr>
-            </thead>
-            <tbody>
-              {tables.map((table) => {
-                const isPending = table.hasPending;
-                const isUnpaid = table.hasUnpaid;
-                const isEmpty = !isPending && !isUnpaid;
-                const isDeleting =
-                  deleteTable.isPending && deleteTable.variables === table.id;
-
-                return (
-                  <tr
-                    key={table.table_id}
-                    className="border-b border-surface-container-highest last:border-none hover:bg-surface-container-low transition-colors"
+      <DataTable
+        caption="Tables, their status and their QR codes"
+        minWidth="min-w-[32rem]"
+        rows={tables}
+        rowKey={(table) => table.table_id}
+        empty={
+          <div className="bg-surface-container-low rounded-lg p-xl text-center text-on-surface-variant">
+            No tables configured yet.
+          </div>
+        }
+        columns={[
+          {
+            header: "Table ID",
+            cellClassName:
+              "text-body-medium text-on-surface font-semibold font-display",
+            cell: (table) => table.table_id,
+          },
+          {
+            header: "Status",
+            cell: (table) =>
+              table.hasPending ? (
+                <StatusBadge tone="warning">Verification Req.</StatusBadge>
+              ) : table.hasUnpaid ? (
+                <StatusBadge tone="error">Dining</StatusBadge>
+              ) : (
+                <StatusBadge tone="neutral">Empty</StatusBadge>
+              ),
+          },
+          {
+            header: "Actions",
+            align: "right",
+            cell: (table) => {
+              const isEmpty = !table.hasPending && !table.hasUnpaid;
+              const isDeleting =
+                deleteTable.isPending && deleteTable.variables === table.id;
+              return (
+                <>
+                  <button
+                    onClick={() =>
+                      setQrTable({ uuid: table.id, name: table.table_id })
+                    }
+                    title={`Show QR code for ${table.table_id}`}
+                    aria-label={`Show QR code for ${table.table_id}`}
+                    className="p-xs text-on-surface-variant hover:text-primary-label transition-colors"
                   >
-                    <td className="py-s px-md text-body-medium text-on-surface font-semibold font-display">
-                      {table.table_id}
-                    </td>
-                    <td className="py-s px-md">
-                      {isPending ? (
-                        <span className="px-s py-xs rounded-full text-label-small font-bold uppercase tracking-wider bg-warning text-on-warning">
-                          Verification Req.
-                        </span>
-                      ) : isUnpaid ? (
-                        <span className="px-s py-xs rounded-full text-label-small font-bold uppercase tracking-wider bg-error-container text-on-error-container">
-                          Dining
-                        </span>
-                      ) : (
-                        <span className="px-s py-xs rounded-full text-label-small font-bold uppercase tracking-wider bg-surface-container-high text-outline">
-                          Empty
-                        </span>
-                      )}
-                    </td>
-                    <td className="py-s px-md text-right">
-                      <button
-                        onClick={() =>
-                          setQrTable({ uuid: table.id, name: table.table_id })
-                        }
-                        title={`Show QR code for ${table.table_id}`}
-                        aria-label={`Show QR code for ${table.table_id}`}
-                        className="p-xs text-on-surface-variant hover:text-primary-label transition-colors"
-                      >
-                        <i className="mgc_qrcode_line text-lg" />
-                      </button>
-                      <button
-                        onClick={() => handleDelete(table.id)}
-                        disabled={!isEmpty || isDeleting}
-                        title={
-                          isEmpty
-                            ? "Remove table"
-                            : "Cannot remove table with active orders"
-                        }
-                        className="p-xs text-on-surface-variant hover:text-error transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
-                      >
-                        {isDeleting ? (
-                          <i className="mgc_loading_line animate-spin text-lg" />
-                        ) : (
-                          <i className="mgc_delete_line text-lg" />
-                        )}
-                      </button>
-                    </td>
-                  </tr>
-                );
-              })}
-              {tables.length === 0 && (
-                <tr>
-                  <td
-                    colSpan={3}
-                    className="p-xl text-center text-on-surface-variant"
+                    <i className="mgc_qrcode_line text-lg" aria-hidden="true" />
+                  </button>
+                  <button
+                    onClick={() => handleDelete(table.id)}
+                    disabled={!isEmpty || isDeleting}
+                    title={
+                      isEmpty
+                        ? "Remove table"
+                        : "Cannot remove table with active orders"
+                    }
+                    aria-label={`Remove table ${table.table_id}`}
+                    className="p-xs text-on-surface-variant hover:text-error transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
                   >
-                    No tables configured yet.
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
-        </div>
-      </div>
+                    {isDeleting ? (
+                      <i className="mgc_loading_line animate-spin text-lg" aria-hidden="true" />
+                    ) : (
+                      <i className="mgc_delete_line text-lg" aria-hidden="true" />
+                    )}
+                  </button>
+                </>
+              );
+            },
+          },
+        ]}
+      />
 
       {isModalOpen && (
         <Dialog

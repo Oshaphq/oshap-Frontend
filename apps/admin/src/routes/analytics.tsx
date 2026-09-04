@@ -2,7 +2,11 @@ import { useState } from "react";
 import { Link } from "react-router";
 import { useAdminAnalytics, useAdminGroup } from "@oshap/shared/hooks";
 import { formatCurrency } from "@oshap/shared";
-import { PrimaryButton, Select } from "@oshap/shared/ui";
+import {
+  DataTable,
+  PrimaryButton,
+  Select,
+} from "@oshap/shared/ui";
 import {
   AreaChart,
   Area,
@@ -283,26 +287,32 @@ export default function Analytics() {
                 {/* Scrolls inside its own box. Four or five columns of names and
                     money cannot usefully collapse, and without this the whole
                     page slides sideways on a phone. */}
-<div className="overflow-x-auto -mx-md px-md">
-<table className="w-full min-w-[32rem] text-left border-collapse">
-                  <thead>
-                    <tr className="bg-surface-container-high border-b border-surface-container-highest">
-                      <th className="py-s px-md text-label-large font-semibold text-on-surface-variant">Table</th>
-                      <th className="py-s px-md text-label-large font-semibold text-on-surface-variant text-right">Orders</th>
-                      <th className="py-s px-md text-label-large font-semibold text-on-surface-variant text-right">Revenue</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {data.table_performance.map((row, idx) => (
-                      <tr key={idx} className="border-b border-surface-container-highest last:border-none hover:bg-surface-container-low transition-colors">
-                        <td className="py-s px-md text-body-medium text-on-surface font-medium">{row.table_id}</td>
-                        <td className="py-s px-md text-body-medium text-on-surface text-right">{row.order_count}</td>
-                        <td className="py-s px-md text-body-medium text-on-surface text-right">{formatCurrency(row.revenue)}</td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-</div>
+                <DataTable
+                  caption="Orders and revenue by table"
+                  className="-mx-md"
+                  minWidth="min-w-[32rem]"
+                  rows={data.table_performance}
+                  rowKey={(_, idx) => String(idx)}
+                  columns={[
+                    {
+                      header: "Table",
+                      cellClassName: "text-body-medium text-on-surface font-medium",
+                      cell: (row) => row.table_id,
+                    },
+                    {
+                      header: "Orders",
+                      align: "right",
+                      cellClassName: "text-body-medium text-on-surface",
+                      cell: (row) => row.order_count,
+                    },
+                    {
+                      header: "Revenue",
+                      align: "right",
+                      cellClassName: "text-body-medium text-on-surface",
+                      cell: (row) => formatCurrency(row.revenue),
+                    },
+                  ]}
+                />
               </div>
             </div>
           </div>

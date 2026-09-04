@@ -8,6 +8,7 @@ import {
 import { Role, StaffMember } from "@oshap/shared/types";
 import { errorMessage, formatPhone, tryNormalizePhone } from "@oshap/shared";
 import {
+  DataTable,
   Dialog,
   PrimaryButton,
   SecondaryButton,
@@ -142,93 +143,80 @@ export default function StaffSettings() {
         )}
       </div>
 
-      <div className="bg-surface-container-low rounded-lg border border-transparent hover:border-outline-variant transition-colors overflow-hidden">
-        {/* Scrolls inside its own box. Four or five columns of names and
-                    money cannot usefully collapse, and without this the whole
-                    page slides sideways on a phone. */}
-        <div className="overflow-x-auto -mx-md px-md">
-          <table className="w-full min-w-[32rem] text-left border-collapse">
-            <thead>
-              <tr className="bg-surface-container-high border-b border-surface-container-highest">
-                <th className="py-s px-md text-label-large font-semibold text-on-surface-variant">
-                  Name
-                </th>
-                <th className="py-s px-md text-label-large font-semibold text-on-surface-variant">
-                  Email
-                </th>
-                <th className="py-s px-md text-label-large font-semibold text-on-surface-variant">
-                  Role
-                </th>
-                {user?.role === "OWNER" && (
-                  <th className="py-s px-md text-label-large font-semibold text-on-surface-variant text-right">
-                    Actions
-                  </th>
+      <DataTable
+        caption="Staff accounts, their contact details and their roles"
+        minWidth="min-w-[32rem]"
+        rows={staffList}
+        rowKey={(staff) => staff.id}
+        empty={
+          <div className="bg-surface-container-low rounded-lg p-xl text-center text-on-surface-variant">
+            No staff members found.
+          </div>
+        }
+        columns={[
+          {
+            header: "Name",
+            cellClassName: "text-body-medium text-on-surface font-medium",
+            cell: (staff) => staff.name,
+          },
+          {
+            /* The column leads with the phone number, which is what staff sign
+               in with. Calling it "Email" named the optional half. */
+            header: "Contact",
+            cellClassName: "text-body-medium text-on-surface-variant",
+            cell: (staff) => (
+              <>
+                <span className="tabular-nums">{formatPhone(staff.phone)}</span>
+                {staff.email && (
+                  <span className="block text-body-small text-on-surface-variant">
+                    {staff.email}
+                  </span>
                 )}
-              </tr>
-            </thead>
-            <tbody>
-              {staffList.map((staff) => (
-                <tr
-                  key={staff.id}
-                  className="border-b border-surface-container-highest last:border-none hover:bg-surface-container-low transition-colors"
-                >
-                  <td className="py-s px-md text-body-medium text-on-surface font-medium">
-                    {staff.name}
-                  </td>
-                  <td className="py-s px-md text-body-medium text-on-surface-variant">
-                    <span className="tabular-nums">
-                      {formatPhone(staff.phone)}
-                    </span>
-                    {staff.email && (
-                      <span className="block text-body-small text-outline">
-                        {staff.email}
-                      </span>
-                    )}
-                  </td>
-                  <td className="py-s px-md">
-                    <span className="px-xs py-xs bg-surface-container-highest text-on-surface text-label-large rounded-lg font-mono">
-                      {staff.role}
-                    </span>
-                  </td>
-                  {user?.role === "OWNER" && (
-                    <td className="py-s px-md text-right">
+              </>
+            ),
+          },
+          {
+            header: "Role",
+            cell: (staff) => (
+              <span className="px-xs py-xs bg-surface-container-highest text-on-surface text-label-large rounded-lg font-mono">
+                {staff.role}
+              </span>
+            ),
+          },
+          ...(user?.role === "OWNER"
+            ? [
+                {
+                  header: "Actions",
+                  align: "right" as const,
+                  cell: (staff: StaffMember) => (
+                    <>
                       <button
                         onClick={() => handleOpenEdit(staff)}
                         className="p-xs text-on-surface-variant hover:text-primary-label transition-colors"
                         title="Edit"
+                        aria-label={`Edit ${staff.name}`}
                       >
-                        <i className="mgc_edit_line text-lg" />
+                        <i className="mgc_edit_line text-lg" aria-hidden="true" />
                       </button>
                       <button
                         onClick={() => handleDelete(staff.id)}
                         className="p-xs text-on-surface-variant hover:text-error transition-colors"
                         title="Remove"
+                        aria-label={`Remove ${staff.name}`}
                         disabled={
                           staff.role === "OWNER" &&
-                          staffList.filter((s) => s.role === "OWNER").length ===
-                            1
+                          staffList.filter((s) => s.role === "OWNER").length === 1
                         }
                       >
-                        <i className="mgc_delete_line text-lg" />
+                        <i className="mgc_delete_line text-lg" aria-hidden="true" />
                       </button>
-                    </td>
-                  )}
-                </tr>
-              ))}
-              {staffList.length === 0 && (
-                <tr>
-                  <td
-                    colSpan={4}
-                    className="p-xl text-center text-on-surface-variant"
-                  >
-                    No staff members found.
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
-        </div>
-      </div>
+                    </>
+                  ),
+                },
+              ]
+            : []),
+        ]}
+      />
 
       {isModalOpen && (
         <Dialog

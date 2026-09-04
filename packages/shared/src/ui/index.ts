@@ -17,6 +17,8 @@ export { default as TableBadge } from "./TableBadge";
 export { default as QueryError } from "./QueryError";
 export { default as Dialog } from "./Dialog";
 export type { DialogProps } from "./Dialog";
+export { default as DataTable } from "./DataTable";
+export type { DataTableProps, Column } from "./DataTable";
 export { default as Select } from "./Select";
 export { default as Sheet } from "./Sheet";
 export type { SheetProps } from "./Sheet";
