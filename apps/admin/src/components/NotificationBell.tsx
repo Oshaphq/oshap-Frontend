@@ -114,7 +114,7 @@ function NotificationPanel({ onClose }: { onClose: () => void }) {
               type="button"
               disabled={markRead.isPending || unreadCount === 0}
               onClick={() => markRead.mutate({ all: true })}
-              className="text-body-medium font-semibold text-primary-label bg-transparent border-none cursor-pointer p-0 hover:underline disabled:text-outline disabled:cursor-default disabled:no-underline"
+              className="text-body-medium font-semibold text-primary-label bg-transparent border-none cursor-pointer p-0 hover:underline disabled:text-on-surface-label-disabled disabled:cursor-default disabled:no-underline"
             >
               {markRead.isPending ? "Marking…" : "Mark all read"}
             </button>

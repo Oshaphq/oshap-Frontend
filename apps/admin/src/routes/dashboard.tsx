@@ -385,7 +385,7 @@ export default function DashboardPage() {
                       payment with nothing to match it. Take the rest instead.
                     </p>
                   ) : (
-                    <p className="text-label-small text-outline text-center">
+                    <p className="text-label-small text-on-surface-variant text-center">
                       Clearing as unpaid writes off{" "}
                       {formatCurrency(
                         bills.length > 0
@@ -398,7 +398,7 @@ export default function DashboardPage() {
                   <button
                     type="button"
                     onClick={() => setClearPromptTable(null)}
-                    className="py-s text-center text-body-small font-medium text-outline bg-transparent border-none cursor-pointer hover:text-on-surface transition-colors"
+                    className="py-s text-center text-body-small font-medium text-on-surface-variant bg-transparent border-none cursor-pointer hover:text-on-surface transition-colors"
                   >
                     Cancel
                   </button>

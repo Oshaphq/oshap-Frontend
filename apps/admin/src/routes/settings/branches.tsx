@@ -251,7 +251,7 @@ export default function BranchesSettings() {
                       </span>
                     )}
                     {!branch.is_active && (
-                      <span className="px-s py-xs rounded-full text-label-small font-bold uppercase tracking-wider bg-surface-container-high text-outline">
+                      <span className="px-s py-xs rounded-full text-label-small font-bold uppercase tracking-wider bg-surface-container-high text-on-surface-variant">
                         Closed
                       </span>
                     )}
@@ -261,7 +261,7 @@ export default function BranchesSettings() {
                       {branch.address}
                     </span>
                   )}
-                  <span className="text-body-small text-outline">
+                  <span className="text-body-small text-on-surface-variant">
                     {branch.table_count} table{branch.table_count === 1 ? "" : "s"}
                     {" · "}
                     {branch.staff_count} staff

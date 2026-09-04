@@ -117,7 +117,7 @@ export default function NotificationSettings() {
                           className={
                             on
                               ? "text-success font-bold"
-                              : "text-outline"
+                              : "text-on-surface-variant"
                           }
                           aria-label={
                             on ? `${role} receives this` : `${role} does not`

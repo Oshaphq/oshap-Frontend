@@ -171,7 +171,7 @@ export default function AuthGate() {
             <button
               type="button"
               onClick={() => setShowPassword(!showPassword)}
-              className="absolute right-s top-1/2 -translate-y-1/2 w-10 h-10 flex items-center justify-center text-outline hover:text-on-surface transition-colors rounded-full"
+              className="absolute right-s top-1/2 -translate-y-1/2 w-10 h-10 flex items-center justify-center text-on-surface-variant hover:text-on-surface transition-colors rounded-full"
               tabIndex={-1}
               aria-label={showPassword ? "Hide password" : "Show password"}
             >

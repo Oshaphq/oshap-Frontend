@@ -305,6 +305,27 @@ palette.** It sits at 5.04:1 light and 4.88:1 dark — quieter than
 |---|---|
 | `outline` for interactive boundaries — text field borders, outlined buttons | Use `outline-variant` on a control the user can focus |
 | `outline-variant` for decorative dividers and separators | Use `outline` for every divider — it is heavier than a divider needs |
+| `on-surface-variant` for a quiet glyph or a quiet line of text | **Use `outline` as text or as an icon tint** |
+
+**`text-outline` is the recurring mistake, and it gets worse the higher the
+surface.** It is specced against the page, where it just clears AA — but almost
+nothing sits on the page:
+
+| sits on | `outline` light | `outline` dark | `on-surface-variant` light | dark |
+|---|---|---|---|---|
+| `surface` | 4.56:1 | 4.47:1 | 6.93:1 | 7.15:1 |
+| `surface-container-low` — any card | **4.29** | **4.14** | 6.53:1 | 6.63:1 |
+| `surface-container` | **4.03** | **3.84** | 6.13:1 | 6.15:1 |
+| `surface-container-high` — every neutral chip | **3.81** | **3.39** | 5.81:1 | 5.43:1 |
+
+Bold is below 4.5:1. Twenty-five of these were found and replaced in one pass,
+and the chips were the worst of them, because a neutral status pill is
+`surface-container-high` by definition — 3.39:1 in dark mode. `on-surface-variant`
+is the role that exists for this and clears the bar on every rung of the ladder.
+
+A glyph is held to 3:1 rather than 4.5:1, so an icon tinted `outline` is not
+strictly a failure — but it is the same tone doing two jobs, and the moment
+somebody puts a word next to it at the same colour it becomes one.
 
 ### inverse-surface
 

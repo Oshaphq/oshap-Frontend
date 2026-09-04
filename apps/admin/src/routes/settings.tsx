@@ -49,7 +49,7 @@ function Row({
         <span className="text-body-medium text-on-surface-variant">{subtitle}</span>
       </span>
       <i
-        className="mgc_right_line text-lg shrink-0 text-outline group-hover:text-primary-label transition-colors"
+        className="mgc_right_line text-lg shrink-0 text-on-surface-variant group-hover:text-primary-label transition-colors"
         aria-hidden
       />
     </Link>
