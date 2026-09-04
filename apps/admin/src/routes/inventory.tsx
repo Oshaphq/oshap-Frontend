@@ -14,12 +14,14 @@ import {
 import type { StockReason, Ingredient } from "@oshap/shared";
 import {
   Button,
+  EmptyState,
   PrimaryButton,
   SecondaryButton,
   Select,
   TextField,
   toast,
-} from "@oshap/shared/ui";
+}
+from "@oshap/shared/ui";
 import QueryError from "../components/QueryError";
 
 
@@ -128,16 +130,11 @@ export default function InventoryPage() {
           <div className="oshap-spinner" />
         </div>
       ) : ingredients.length === 0 ? (
-        <div className="flex flex-col items-center gap-xs py-10 px-md text-center rounded-lg bg-surface-container-low">
-          <i className="mgc_box_3_line text-5xl text-on-surface-variant" />
-          <span className="font-display text-title-medium font-semibold text-on-surface">
-            No ingredients yet
-          </span>
-          <p className="text-body-medium text-on-surface-variant max-w-[36rem]">
-            Add what you buy — rice, chicken, oil — then attach them to dishes
-            as recipes. Orders will draw stock down automatically.
-          </p>
-        </div>
+        <EmptyState
+          icon="mgc_box_3_line"
+          title="No ingredients yet"
+          message="Add what you buy — rice, chicken, oil — then attach them to dishes as recipes. Orders will draw stock down automatically."
+        />
       ) : (
         /* One grid for the whole table, with the header and every row as
            subgrids of it. They were separate grids sharing a template, which

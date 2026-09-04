@@ -8,7 +8,7 @@ import {
   useRequestPos,
   useTable,
 } from "@oshap/shared";
-import { PrimaryButton, SecondaryButton, toast } from "@oshap/shared/ui";
+import { EmptyState, PrimaryButton, SecondaryButton, toast } from "@oshap/shared/ui";
 import { readLastOrder } from "../lastOrder";
 import BottomNav from "../components/BottomNav";
 import CustomerHeader from "../components/CustomerHeader";
@@ -224,12 +224,17 @@ export default function PayPage() {
         ) : (
           <EmptyState
             icon="mgc_checks_fill"
-            iconClassName="text-success"
+            tone="success"
             title="All Settled"
             message="You have no pending bills. Ready for more?"
-            cta="Browse Menu"
-            onCta={() => navigate(`/menu?table=${tableId}`)}
-          />
+          >
+            <PrimaryButton
+              size="md"
+              onClick={() => navigate(`/menu?table=${tableId}`)}
+            >
+              Browse Menu
+            </PrimaryButton>
+          </EmptyState>
         )}
         <BottomNav tableId={tableId} />
       </div>
@@ -258,16 +263,21 @@ export default function PayPage() {
         />
         <EmptyState
           icon={isPos ? "mgc_card_pay_line" : "mgc_time_line"}
-          iconClassName={isPos ? "text-primary-label" : "text-on-surface-variant"}
+          tone={isPos ? "brand" : "neutral"}
           title={isPos ? "POS On The Way" : "Payment Claimed"}
           message={
             isPos
               ? `A waiter is bringing the POS to your table. They'll mark the ${formatCurrency(pendingPayments.total)} as received once your card is processed.`
               : `We've notified the restaurant. They will verify your payment of ${formatCurrency(pendingPayments.total)} shortly.`
           }
-          cta="Order More"
-          onCta={() => navigate(`/menu?table=${tableId}`)}
-        />
+        >
+          <PrimaryButton
+            size="md"
+            onClick={() => navigate(`/menu?table=${tableId}`)}
+          >
+            Order More
+          </PrimaryButton>
+        </EmptyState>
         <BottomNav tableId={tableId} />
       </div>
     );
@@ -439,36 +449,6 @@ export default function PayPage() {
   );
 }
 
-function EmptyState({
-  icon,
-  iconClassName = "text-on-surface-variant",
-  title,
-  message,
-  cta,
-  onCta,
-}: {
-  icon: string;
-  iconClassName?: string;
-  title: string;
-  message: string;
-  cta: string;
-  onCta: () => void;
-}) {
-  return (
-    <div className="flex flex-col items-center gap-l py-10 px-md text-center">
-      <div className="flex flex-col items-center gap-s">
-        <i className={`${icon} text-5xl ${iconClassName}`} />
-        <span className="font-display text-title-medium font-semibold text-on-surface">
-          {title}
-        </span>
-        <p className="text-body-medium text-on-surface-variant max-w-[384px]">{message}</p>
-      </div>
-      <PrimaryButton size="md" onClick={onCta}>
-        {cta}
-      </PrimaryButton>
-    </div>
-  );
-}
 
 /**
  * The itemised bill. Deliberately shows every component rather than a single

@@ -14,7 +14,7 @@ import BottomNav from "../components/BottomNav";
 import CartBar from "../components/CartBar";
 import CartDrawer from "../components/CartDrawer";
 import { useDragToDismiss } from "../hooks/useDragToDismiss";
-import { PrimaryButton, SecondaryButton } from "@oshap/shared/ui";
+import { EmptyState, PrimaryButton, SecondaryButton } from "@oshap/shared/ui";
 import PinChip from "../components/PinChip";
 import AddButton from "../components/AddButton";
 import CustomerHeader from "../components/CustomerHeader";
@@ -273,21 +273,18 @@ function OrdersView({ tableId }: { tableId: string }) {
         <div className="h-px bg-outline-variant" />
 
         {myOrders.length === 0 ? (
-          <div className="flex flex-col items-center gap-s py-10 px-md">
-            <i className="mgc_shopping_bag_2_line text-5xl text-on-surface-variant" />
-            <span className="font-display text-title-medium font-semibold text-on-surface">
-              No orders yet
-            </span>
-            <p className="text-body-medium text-on-surface-variant text-center">
-              Add items from the menu to place your order.
-            </p>
+          <EmptyState
+            icon="mgc_shopping_bag_2_line"
+            title="No orders yet"
+            message="Add items from the menu to place your order."
+          >
             <PrimaryButton
               size="md"
               onClick={() => navigate(`/menu?table=${tableId}`)}
             >
               Browse Menu
             </PrimaryButton>
-          </div>
+          </EmptyState>
         ) : (
           <div className="flex flex-col gap-md pt-md">
             {myOrders.map((order, i) => (

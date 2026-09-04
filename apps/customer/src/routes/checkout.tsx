@@ -10,7 +10,7 @@ import { CartProvider, unitPrice, useCart } from "../context/CartContext";
 import { useSession } from "../context/SessionContext";
 import CustomerHeader from "../components/CustomerHeader";
 import BillBreakdown from "../components/BillBreakdown";
-import { PrimaryButton, toast } from "@oshap/shared/ui";
+import { EmptyState, PrimaryButton, toast } from "@oshap/shared/ui";
 
 export default function CheckoutPage() {
   const [params] = useSearchParams();
@@ -110,23 +110,18 @@ function CheckoutView({ tableId }: { tableId: string }) {
             </button>
           }
         />
-        <div className="flex flex-col items-center gap-l py-10 px-md text-center">
-          <div className="flex flex-col items-center gap-s">
-            <i className="mgc_clipboard_line text-5xl text-on-surface-variant" />
-            <span className="font-display text-title-medium font-semibold text-on-surface">
-              No items yet
-            </span>
-            <p className="text-body-medium text-on-surface-variant max-w-[384px]">
-              Add items from the menu to place your order.
-            </p>
-          </div>
+        <EmptyState
+          icon="mgc_clipboard_line"
+          title="No items yet"
+          message="Add items from the menu to place your order."
+        >
           <PrimaryButton
             size="md"
             onClick={() => navigate(`/menu?table=${tableId}`)}
           >
             Browse Menu
           </PrimaryButton>
-        </div>
+        </EmptyState>
       </div>
     );
   }

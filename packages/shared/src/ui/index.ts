@@ -6,6 +6,8 @@ export { default as Fab } from "./Fab";
 export type { FabProps } from "./Fab";
 export { default as Chip } from "./Chip";
 export type { ChipProps } from "./Chip";
+export { default as EmptyState } from "./EmptyState";
+export type { EmptyStateProps, EmptyStateTone } from "./EmptyState";
 export { default as StatusBadge } from "./StatusBadge";
 export type { StatusBadgeProps, StatusTone } from "./StatusBadge";
 export { default as PrimaryButton } from "./PrimaryButton";
