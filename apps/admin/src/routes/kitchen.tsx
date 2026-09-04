@@ -349,7 +349,7 @@ function KitchenColumn({
         {title}
       </h2>
       {orders.length === 0 ? (
-        <p className="text-center py-xl text-outline">—</p>
+        <p className="text-center py-xl text-on-surface-variant">—</p>
       ) : (
         <div className="flex flex-col gap-md">
           {orders.map((order) => {
@@ -371,7 +371,7 @@ function KitchenColumn({
                   <Link
                     to={`/orders/${order.id}`}
                     title="Open the bill"
-                    className="text-body-small text-outline font-mono hover:text-primary-label transition-colors no-underline"
+                    className="text-body-small text-on-surface-variant font-mono hover:text-primary-label transition-colors no-underline"
                   >
                     #{stripRef(order.reference)}
                   </Link>

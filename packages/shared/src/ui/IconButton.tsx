@@ -1,9 +1,15 @@
 import type { ButtonHTMLAttributes } from "react";
 
 /**
- * The four M3 icon-button variants. Each one names its colour pair, so a glyph
- * never picks its own hex — it takes the on-color of whatever it sits on, the
- * same rule text follows.
+ * The M3 icon-button variants. Each one names its colour pair, so a glyph
+ * never picks its own hex — on a filled or tonal container it takes that
+ * container's on-color, the same rule text follows.
+ *
+ * That is a rule about CONTAINERS, not about every glyph in the app. An icon
+ * on a plain surface has no container to take an on-color from, and there the
+ * choice is between `on-surface-variant` for a neutral glyph and
+ * `primary-label` for a deliberate accent — never `outline`, which is a border
+ * tone and measures 4.29:1 on a card.
  *
  * `filled` is the one place the brand fill is still allowed under a white
  * glyph: an icon is a UI component, held to WCAG's 3:1 non-text bar, and

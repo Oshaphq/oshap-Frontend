@@ -14,7 +14,7 @@ import { TIER_ORDER } from "../tiers";
 import type { SubscriptionTier } from "@oshap/shared";
 
 const TIER_COLORS: Record<SubscriptionTier, string> = {
-  LITE: "bg-surface-container-high text-outline",
+  LITE: "bg-surface-container-high text-on-surface-variant",
   STANDARD: "bg-secondary-container text-on-secondary-container",
   PRO: "bg-primary-container text-on-primary-container",
   ENTERPRISE: "bg-tertiary-container text-on-tertiary-container",
@@ -141,13 +141,13 @@ export default function RestaurantsPage() {
                   Annual
                 </span>
               )}
-              <span className={`px-s py-xs rounded-full text-label-small font-bold uppercase tracking-wider ${r.is_active ? "bg-success-container text-on-success-container" : "bg-surface-container-high text-outline"}`}>
+              <span className={`px-s py-xs rounded-full text-label-small font-bold uppercase tracking-wider ${r.is_active ? "bg-success-container text-on-success-container" : "bg-surface-container-high text-on-surface-variant"}`}>
                 {r.is_active ? "Active" : "Inactive"}
               </span>
               <span className="text-body-small text-on-surface-variant hidden sm:inline">
                 {r.monthly_orders} orders/mo
               </span>
-              <i className="mgc_right_line text-outline" />
+              <i className="mgc_right_line text-on-surface-variant" />
             </div>
           </Link>
         ))}

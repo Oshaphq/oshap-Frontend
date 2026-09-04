@@ -155,7 +155,7 @@ export default function RestaurantNewPage() {
                 className={`w-7 h-7 rounded-full flex items-center justify-center text-label-small font-bold transition-colors ${
                   step >= s
                     ? "bg-primary text-on-primary"
-                    : "bg-surface-container-high text-outline"
+                    : "bg-surface-container-high text-on-surface-variant"
                 }`}
               >
                 {s}
@@ -163,7 +163,7 @@ export default function RestaurantNewPage() {
               <span className={`text-body-small font-medium ${step >= s ? "text-on-surface" : "text-on-surface-variant"}`}>
                 {s === 1 ? "Restaurant Info" : "Banking & Tables"}
               </span>
-              {s < 2 && <i className="mgc_right_line text-outline text-sm" />}
+              {s < 2 && <i className="mgc_right_line text-on-surface-variant text-sm" />}
             </div>
           ))}
         </div>

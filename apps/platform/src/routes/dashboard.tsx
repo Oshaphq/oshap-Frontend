@@ -155,7 +155,7 @@ export default function DashboardPage() {
                       className={`px-s py-xs rounded-full text-label-small font-bold uppercase tracking-wider ${
                         r.subscription_tier === "PRO" || r.subscription_tier === "ENTERPRISE"
                           ? "bg-primary-container text-on-primary-container"
-                          : "bg-surface-container-high text-outline"
+                          : "bg-surface-container-high text-on-surface-variant"
                       }`}
                     >
                       {r.subscription_tier}

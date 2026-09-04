@@ -551,7 +551,7 @@ function MenuItemRow({
                 {item.category} · {formatCurrency(item.price)}
               </span>
               {item.description && (
-                <span className="text-body-small text-outline line-clamp-2">
+                <span className="text-body-small text-on-surface-variant line-clamp-2">
                   {item.description}
                 </span>
               )}
@@ -566,7 +566,7 @@ function MenuItemRow({
             className={`shrink-0 px-s py-0.5 rounded-full font-bold text-label-small uppercase tracking-wider whitespace-nowrap ${
               item.available
                 ? "bg-success-container text-on-success-container"
-                : "bg-surface-container-high text-outline"
+                : "bg-surface-container-high text-on-surface-variant"
             }`}
           >
             {item.available ? "Available" : "Unavailable"}
@@ -625,7 +625,7 @@ function MenuItemRow({
             <button
               type="button"
               onClick={onStockCancel}
-              className="text-body-small text-outline hover:underline pb-xs"
+              className="text-body-small text-on-surface-variant hover:underline pb-xs"
             >
               Cancel
             </button>
@@ -640,7 +640,7 @@ function MenuItemRow({
                 : isLow
                   ? "bg-warning-container text-on-warning-container"
                   : item.stock_count === null
-                    ? "bg-surface-container-high text-outline"
+                    ? "bg-surface-container-high text-on-surface-variant"
                     : "bg-success-container text-on-success-container"
             }`}
           >

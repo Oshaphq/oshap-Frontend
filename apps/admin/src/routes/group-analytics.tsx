@@ -155,7 +155,7 @@ export default function GroupAnalyticsPage() {
                     className={`px-s py-xs rounded-full text-label-small font-bold uppercase tracking-wider ${
                       meta?.is_active
                         ? "bg-success-container text-on-success-container"
-                        : "bg-surface-container-high text-outline"
+                        : "bg-surface-container-high text-on-surface-variant"
                     }`}
                   >
                     {meta?.is_active ? "Active" : "Inactive"}

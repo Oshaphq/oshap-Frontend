@@ -229,7 +229,7 @@ export default function HistoryPage() {
                 )}
 
                 <div className="flex items-center justify-between pt-s border-t border-surface-container-high">
-                  <span className="text-body-small text-outline">
+                  <span className="text-body-small text-on-surface-variant">
                     {formatDate(order.created_at)} · {formatTime(order.created_at)}
                   </span>
                   {payment && (
@@ -237,7 +237,7 @@ export default function HistoryPage() {
                       className={`text-label-small font-bold uppercase tracking-wider px-s py-xs rounded-full whitespace-nowrap ${
                         payment.status === "VERIFIED"
                           ? "bg-success-container text-on-success-container"
-                          : "bg-surface-container-high text-outline"
+                          : "bg-surface-container-high text-on-surface-variant"
                       }`}
                     >
                       {payment.status === "VERIFIED"
