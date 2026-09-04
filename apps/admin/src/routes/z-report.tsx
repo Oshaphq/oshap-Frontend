@@ -2,7 +2,13 @@ import { useState } from "react";
 import { Link } from "react-router";
 import { formatCurrency, useAdminZReport } from "@oshap/shared";
 import type { PaymentMethod } from "@oshap/shared";
-import { Button, EmptyState } from "@oshap/shared/ui";
+import {
+  Button,
+  Card,
+  EmptyState,
+  Spinner,
+  Page,
+} from "@oshap/shared/ui";
 import QueryError from "../components/QueryError";
 
 const METHOD_LABELS: Record<PaymentMethod, string> = {
@@ -43,7 +49,7 @@ export default function ZReportPage() {
   const hasTakings = (data?.order_count ?? 0) > 0;
 
   return (
-    <main className="p-md flex flex-col gap-l max-w-[42rem]">
+    <Page width="reading" gap="l">
       <header className="flex flex-wrap items-center justify-between gap-md">
         <div className="flex flex-col gap-0.5">
           <h1 className="font-display text-title-large font-semibold text-on-surface">
@@ -75,7 +81,7 @@ export default function ZReportPage() {
 
       {report.isLoading ? (
         <div className="flex justify-center py-xl">
-          <div className="oshap-spinner" />
+          <Spinner />
         </div>
       ) : !hasTakings ? (
         <EmptyState
@@ -86,7 +92,7 @@ export default function ZReportPage() {
       ) : (
         data && (
           <>
-            <section className="bg-surface-container-low rounded-lg p-l flex flex-col gap-md">
+            <Card as="section" padding="l" gap="md">
               <h2 className="text-title-large font-semibold text-on-surface">
                 Takings by method
               </h2>
@@ -115,9 +121,9 @@ export default function ZReportPage() {
                   </span>
                 </div>
               </div>
-            </section>
+            </Card>
 
-            <section className="bg-surface-container-low rounded-lg p-l flex flex-col gap-md">
+            <Card as="section" padding="l" gap="md">
               <h2 className="text-title-large font-semibold text-on-surface">
                 Included in the day
               </h2>
@@ -144,11 +150,11 @@ export default function ZReportPage() {
               >
                 Not adding up? See what changed →
               </Link>
-            </section>
+            </Card>
           </>
         )
       )}
-    </main>
+    </Page>
   );
 }
 

@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { Page, Spinner } from "@oshap/shared/ui";
 import {
   errorMessage,
   formatCurrency,
@@ -84,7 +85,7 @@ export default function InventoryPage() {
   );
 
   return (
-    <main className="p-md flex flex-col gap-md max-w-[64rem]">
+    <Page width="wide" gap="md">
       {/* Title block above the actions, not beside them. */}
       <header className="flex flex-col gap-s">
         <div className="flex flex-col gap-0.5">
@@ -128,7 +129,7 @@ export default function InventoryPage() {
 
       {ingredientsQuery.isLoading ? (
         <div className="flex justify-center py-xl">
-          <div className="oshap-spinner" />
+          <Spinner />
         </div>
       ) : ingredients.length === 0 ? (
         <EmptyState
@@ -260,7 +261,7 @@ export default function InventoryPage() {
         />
       )}
       {showNew && <NewIngredientDialog onClose={() => setShowNew(false)} />}
-    </main>
+    </Page>
   );
 }
 
@@ -342,7 +343,7 @@ function MovementsLedger() {
 
       {movements.isLoading ? (
         <div className="flex justify-center py-l">
-          <div className="oshap-spinner" />
+          <Spinner />
         </div>
       ) : rows.length === 0 ? (
         <p className="text-body-medium text-on-surface-variant py-l text-center rounded-lg bg-surface-container-low">

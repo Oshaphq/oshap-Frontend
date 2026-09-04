@@ -6,7 +6,12 @@ import {
   formatApiDate,
   formatApiTime,
 } from "@oshap/shared";
-import { Button, EmptyState } from "@oshap/shared/ui";
+import {
+  Button,
+  EmptyState,
+  Spinner,
+  Page,
+} from "@oshap/shared/ui";
 import QueryError from "../components/QueryError";
 
 /**
@@ -84,7 +89,7 @@ export default function HistoryPage() {
   };
 
   return (
-    <main className="p-md flex flex-col gap-l">
+    <Page width="wide" gap="l">
       <header className="flex items-center justify-between">
         <h1 className="font-display text-title-large font-semibold text-on-surface">
           Transaction History
@@ -144,7 +149,7 @@ export default function HistoryPage() {
 
       {historyQuery.isLoading ? (
         <div className="flex flex-col items-center justify-center min-h-[40vh] gap-md text-on-surface-variant">
-          <div className="oshap-spinner" />
+          <Spinner />
           <p>Loading history...</p>
         </div>
       ) : historyQuery.isError ? (
@@ -272,7 +277,7 @@ export default function HistoryPage() {
           </Button>
         </div>
       )}
-    </main>
+    </Page>
   );
 }
 

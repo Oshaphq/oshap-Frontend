@@ -13,6 +13,7 @@ import {
   PrimaryButton,
   SecondaryButton,
   Select,
+  Spinner,
   TextField,
   toast,
 } from "@oshap/shared/ui";
@@ -125,7 +126,7 @@ export default function StaffSettings() {
   if (isLoading) {
     return (
       <div className="flex justify-center p-xl">
-        <div className="oshap-spinner" />
+        <Spinner />
       </div>
     );
   }

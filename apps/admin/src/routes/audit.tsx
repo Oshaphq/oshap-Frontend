@@ -7,7 +7,13 @@ import {
   formatApiDateTime,
 } from "@oshap/shared";
 import type { AuditLogEntry } from "@oshap/shared";
-import { Button, EmptyState, Select } from "@oshap/shared/ui";
+import {
+  Button,
+  EmptyState,
+  Select,
+  Spinner,
+  Page,
+} from "@oshap/shared/ui";
 import QueryError from "../components/QueryError";
 
 /**
@@ -127,7 +133,7 @@ export default function AuditPage() {
     : 1;
 
   return (
-    <main className="p-md flex flex-col gap-md max-w-[52rem]">
+    <Page width="wide" gap="md">
       <header className="flex flex-col gap-s sm:flex-row sm:flex-wrap sm:items-center sm:justify-between">
         <div className="flex flex-col gap-0.5">
           <h1 className="font-display text-title-large font-semibold text-on-surface">
@@ -152,7 +158,7 @@ export default function AuditPage() {
 
       {logs.isLoading ? (
         <div className="flex justify-center py-xl">
-          <div className="oshap-spinner" />
+          <Spinner />
         </div>
       ) : entries.length === 0 ? (
         <EmptyState
@@ -275,6 +281,6 @@ export default function AuditPage() {
           </Button>
         </div>
       )}
-    </main>
+    </Page>
   );
 }

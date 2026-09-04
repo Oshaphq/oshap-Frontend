@@ -1,5 +1,11 @@
 import { useState } from "react";
-import { EmptyState, QueryError, Select } from "@oshap/shared/ui";
+import {
+  EmptyState,
+  QueryError,
+  Select,
+  Spinner,
+  Page,
+} from "@oshap/shared/ui";
 import { Link } from "react-router";
 import { formatPhone, usePlatformRestaurants } from "@oshap/shared";
 // Every tier, not just the ones on sale — an existing Enterprise restaurant
@@ -36,7 +42,7 @@ export default function RestaurantsPage() {
   });
 
   return (
-    <main className="p-md flex flex-col gap-l">
+    <Page width="wide" gap="l">
       <header className="flex items-center justify-between">
         <h1 className="font-display text-title-large font-semibold text-on-surface">
           Restaurants
@@ -83,7 +89,7 @@ export default function RestaurantsPage() {
 
       {query.isLoading && (
         <div className="flex justify-center py-xl">
-          <div className="oshap-spinner" />
+          <Spinner />
         </div>
       )}
 
@@ -146,6 +152,6 @@ export default function RestaurantsPage() {
           </Link>
         ))}
       </div>
-    </main>
+    </Page>
   );
 }

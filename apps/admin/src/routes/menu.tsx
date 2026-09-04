@@ -21,10 +21,13 @@ import {
 import type { MenuItem } from "@oshap/shared";
 import {
   Button,
+  Checkbox,
   EmptyState,
+  Page,
   PrimaryButton,
   SecondaryButton,
   Select,
+  Spinner,
   TextField,
   toast,
 } from "@oshap/shared/ui";
@@ -284,7 +287,7 @@ export default function MenuPage() {
   if (menuQuery.isLoading) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[60vh] gap-md text-on-surface-variant">
-        <div className="oshap-spinner" />
+        <Spinner />
         <p>Loading menu...</p>
       </div>
     );
@@ -304,7 +307,7 @@ export default function MenuPage() {
   const isSaving = createItem.isPending || updateItem.isPending;
 
   return (
-    <main className="p-md flex flex-col gap-md">
+    <Page width="wide" gap="md">
       {/* The title gets its own line. Beside five actions it was the thing
           that gave way — squeezed on a phone, and pinned to the far left of a
           wide screen from the buttons it belongs with. */}
@@ -463,7 +466,7 @@ export default function MenuPage() {
       {recipeFor && (
         <RecipeDialog item={recipeFor} onClose={() => setRecipeFor(null)} />
       )}
-    </main>
+    </Page>
   );
 }
 
@@ -520,12 +523,11 @@ function MenuItemRow({
         <div className="flex items-start justify-between gap-md">
           <div className="flex items-start gap-md flex-1 min-w-0">
             {selecting && (
-              <input
-                type="checkbox"
+              <Checkbox
                 checked={isSelected}
                 onChange={onSelect}
                 aria-label={`Select ${item.name}`}
-                className="w-4 h-4 mt-1 shrink-0 accent-primary"
+                className="shrink-0"
               />
             )}
             {item.image_url ? (
@@ -863,21 +865,20 @@ function SelectionBar({
   return (
     <div className="sticky top-0 z-20 flex flex-col gap-s p-md rounded-lg bg-surface-container-high border border-outline-variant shadow-lg">
       <div className="flex items-center justify-between gap-md flex-wrap">
-        <label className="flex items-center gap-s text-body-medium font-semibold text-on-surface cursor-pointer select-none">
-          <input
-            type="checkbox"
-            checked={allSelected}
-            onChange={() =>
-              setSelected(
-                allSelected ? new Set() : new Set(items.map((i) => i.id)),
-              )
-            }
-            className="w-4 h-4 accent-primary"
-          />
-          {chosen.length === 0
-            ? "Select dishes to remove"
-            : `${chosen.length} selected`}
-        </label>
+        <Checkbox
+          checked={allSelected}
+          onChange={() =>
+            setSelected(
+              allSelected ? new Set() : new Set(items.map((i) => i.id)),
+            )
+          }
+          label={
+            chosen.length === 0
+              ? "Select dishes to remove"
+              : `${chosen.length} selected`
+          }
+          className="items-center font-semibold"
+        />
 
         <div className="flex items-center gap-s">
           <SecondaryButton size="md" onClick={onCancel}>

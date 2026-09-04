@@ -3,6 +3,7 @@ import {
   Button,
   Dialog,
   PrimaryButton,
+  Spinner,
   toast,
 } from "@oshap/shared/ui";
 import {
@@ -73,7 +74,7 @@ export default function TableQrDialog({
           />
         ) : (
           <div className="py-xl">
-            <div className="oshap-spinner" />
+            <Spinner />
           </div>
         )}
       </div>

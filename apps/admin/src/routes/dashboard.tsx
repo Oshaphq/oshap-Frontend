@@ -13,7 +13,16 @@ import {
   describeError,
 } from "@oshap/shared";
 import type { AdminTableStatus, Bill } from "@oshap/shared";
-import { Button, EmptyState, PrimaryButton, SecondaryButton, toast } from "@oshap/shared/ui";
+import {
+  Button,
+  EmptyState,
+  PrimaryButton,
+  SecondaryButton,
+  StatusBadge,
+  Spinner,
+  Page,
+  toast,
+} from "@oshap/shared/ui";
 import QueryError from "../components/QueryError";
 import CashPaymentDialog from "../components/CashPaymentDialog";
 import TableBills from "../components/TableBills";
@@ -60,7 +69,7 @@ export default function DashboardPage() {
   if (tablesQuery.isLoading) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[60vh] gap-md text-on-surface-variant">
-        <div className="oshap-spinner" />
+        <Spinner />
         <p>Loading tables...</p>
       </div>
     );
@@ -163,7 +172,7 @@ export default function DashboardPage() {
   const hasLowStock = lowStockCount > 0;
 
   return (
-    <main className="p-md flex flex-col gap-l">
+    <Page width="wide" gap="l">
       {restaurantId && <SetupChecklist restaurantId={restaurantId} />}
       <header className="flex items-center justify-between">
         <h1 className="font-display text-title-large font-semibold text-on-surface">
@@ -241,17 +250,11 @@ export default function DashboardPage() {
                   {table.table_id}
                 </span>
                 {isPending ? (
-                  <span className="px-s py-xs rounded-full font-bold text-label-small uppercase tracking-wider whitespace-nowrap bg-warning text-on-warning">
-                    Verification Req.
-                  </span>
+                  <StatusBadge tone="warning">Verification Req.</StatusBadge>
                 ) : isUnpaid ? (
-                  <span className="px-s py-xs rounded-full font-bold text-label-small uppercase tracking-wider whitespace-nowrap bg-error-container text-on-error-container">
-                    Dining
-                  </span>
+                  <StatusBadge tone="error">Dining</StatusBadge>
                 ) : (
-                  <span className="px-s py-xs rounded-full font-bold text-label-small uppercase tracking-wider whitespace-nowrap bg-surface-container-high text-outline">
-                    Empty
-                  </span>
+                  <StatusBadge tone="neutral">Empty</StatusBadge>
                 )}
               </div>
 
@@ -422,7 +425,7 @@ export default function DashboardPage() {
           onClose={() => setCashTarget(null)}
         />
       )}
-    </main>
+    </Page>
   );
 }
 

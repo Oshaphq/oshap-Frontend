@@ -5,7 +5,12 @@ import {
   useAdminUploadSettingsImage,
 } from "@oshap/shared/hooks";
 import { errorMessage, validateImageFile, IMAGE_ACCEPT_ATTR } from "@oshap/shared";
-import { PrimaryButton, toast } from "@oshap/shared/ui";
+import {
+  Card,
+  PrimaryButton,
+  Spinner,
+  toast,
+} from "@oshap/shared/ui";
 import BrandColourField from "../../components/BrandColourField";
 
 /**
@@ -81,14 +86,14 @@ export default function BrandingSettings() {
   if (isLoading) {
     return (
       <div className="flex justify-center p-xl">
-        <div className="oshap-spinner" />
+        <Spinner />
       </div>
     );
   }
 
   return (
     <div className="flex flex-col gap-md pb-10">
-      <div className="bg-surface-container-low rounded-lg p-l flex flex-col gap-md">
+      <Card padding="l" gap="md">
         <div className="flex flex-col gap-0.5">
           <h3 className="font-bold text-on-surface">Logo</h3>
           <p className="text-label-small text-on-surface-variant">
@@ -103,7 +108,7 @@ export default function BrandingSettings() {
           {logoUrl ? (
             <img src={logoUrl} alt="Logo" className="w-full h-full object-cover" />
           ) : uploadImage.isPending ? (
-            <div className="oshap-spinner" />
+            <Spinner />
           ) : (
             <div className="text-center text-on-surface-variant">
               <i className="mgc_upload_line text-2xl" />
@@ -127,9 +132,9 @@ export default function BrandingSettings() {
           accept={IMAGE_ACCEPT_ATTR}
           onChange={(e) => upload(e, setLogoUrl, "Logo")}
         />
-      </div>
+      </Card>
 
-      <div className="bg-surface-container-low rounded-lg p-l flex flex-col gap-md">
+      <Card padding="l" gap="md">
         <div className="flex flex-col gap-0.5">
           <h3 className="font-bold text-on-surface">Cover photo</h3>
           <p className="text-label-small text-on-surface-variant">
@@ -177,11 +182,11 @@ export default function BrandingSettings() {
           accept={IMAGE_ACCEPT_ATTR}
           onChange={(e) => upload(e, setCoverUrl, "Cover photo")}
         />
-      </div>
+      </Card>
 
-      <div className="bg-surface-container-low rounded-lg p-l">
+      <Card padding="l">
         <BrandColourField value={colour} onChange={setColour} />
-      </div>
+      </Card>
 
       <div className="flex justify-end pt-s">
         <PrimaryButton

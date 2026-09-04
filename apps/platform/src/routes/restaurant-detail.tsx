@@ -14,7 +14,13 @@ import {
   parseApiDate,
 } from "@oshap/shared";
 import type { BillingPeriod, SubscriptionTier } from "@oshap/shared";
-import { PrimaryButton, SecondaryButton, toast } from "@oshap/shared/ui";
+import {
+  Card,
+  PrimaryButton,
+  SecondaryButton,
+  Spinner,
+  toast,
+} from "@oshap/shared/ui";
 
 
 export default function RestaurantDetailPage() {
@@ -29,7 +35,7 @@ export default function RestaurantDetailPage() {
   if (query.isLoading) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[60vh] gap-md text-on-surface-variant">
-        <div className="oshap-spinner" />
+        <Spinner />
         <p>Loading restaurant...</p>
       </div>
     );
@@ -102,21 +108,21 @@ export default function RestaurantDetailPage() {
 
       {/* Info cards */}
       <div className="grid grid-cols-2 gap-md">
-        <div className="bg-surface-container-low rounded-lg p-md flex flex-col gap-xs">
+        <Card gap="xs">
           <span className="text-label-large font-semibold text-on-surface-variant uppercase tracking-wider">
             Status
           </span>
           <span className={`font-bold text-body-large ${r.is_active ? "text-success" : "text-error"}`}>
             {r.is_active ? "Active" : "Inactive"}
           </span>
-        </div>
-        <div className="bg-surface-container-low rounded-lg p-md flex flex-col gap-xs">
+        </Card>
+        <Card gap="xs">
           <span className="text-label-large font-semibold text-on-surface-variant uppercase tracking-wider">
             Tables
           </span>
           <span className="font-bold text-body-large text-on-surface">{r.table_count}</span>
-        </div>
-        <div className="bg-surface-container-low rounded-lg p-md flex flex-col gap-xs">
+        </Card>
+        <Card gap="xs">
           <span className="text-label-large font-semibold text-on-surface-variant uppercase tracking-wider">
             Monthly Orders
           </span>
@@ -159,19 +165,19 @@ export default function RestaurantDetailPage() {
               </>
             );
           })()}
-        </div>
-        <div className="bg-surface-container-low rounded-lg p-md flex flex-col gap-xs">
+        </Card>
+        <Card gap="xs">
           <span className="text-label-large font-semibold text-on-surface-variant uppercase tracking-wider">
             Onboarded
           </span>
           <span className="font-bold text-body-large text-on-surface">
             {parseApiDate(r.created_at).toLocaleDateString()}
           </span>
-        </div>
+        </Card>
       </div>
 
       {/* Subscription tier */}
-      <div className="bg-surface-container-low rounded-lg p-md flex flex-col gap-md">
+      <Card gap="md">
         <div className="flex items-center justify-between">
           <h2 className="text-title-large font-semibold text-on-surface">Subscription</h2>
           {!editTier && (
@@ -277,7 +283,7 @@ export default function RestaurantDetailPage() {
             </span>
           </div>
         )}
-      </div>
+      </Card>
 
       {/* Bank details deliberately absent: they live in the tenant's own
           bank_accounts, not on the restaurant, and the platform portal has no

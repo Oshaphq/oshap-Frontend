@@ -1,5 +1,10 @@
 import { usePlatformHealth } from "@oshap/shared";
-import { QueryError } from "@oshap/shared/ui";
+import {
+  Card,
+  QueryError,
+  Spinner,
+  Page,
+} from "@oshap/shared/ui";
 
 function Metric({
   label,
@@ -46,7 +51,7 @@ export default function HealthPage() {
     !h ? undefined : h.avg_response_ms < 200 ? "ok" : h.avg_response_ms < 500 ? "warn" : "error";
 
   return (
-    <main className="p-md flex flex-col gap-l">
+    <Page width="wide" gap="l">
       <header className="flex items-center justify-between">
         <div>
           <h1 className="font-display text-title-large font-semibold text-on-surface">
@@ -80,7 +85,7 @@ export default function HealthPage() {
 
       {query.isLoading && (
         <div className="flex justify-center py-xl">
-          <div className="oshap-spinner" />
+          <Spinner />
         </div>
       )}
 
@@ -120,7 +125,7 @@ export default function HealthPage() {
             />
           </div>
 
-          <div className="bg-surface-container-low rounded-lg p-md flex flex-col gap-s">
+          <Card gap="s">
             <h2 className="text-title-large font-semibold text-on-surface">Thresholds</h2>
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-md text-body-small text-on-surface-variant">
               <div>
@@ -142,9 +147,9 @@ export default function HealthPage() {
                 <p><span className="text-error font-bold">≥ 3%</span> — Critical</p>
               </div>
             </div>
-          </div>
+          </Card>
         </>
       )}
-    </main>
+    </Page>
   );
 }

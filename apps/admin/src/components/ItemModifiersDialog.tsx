@@ -7,9 +7,11 @@ import {
 } from "@oshap/shared";
 import type { MenuItem } from "@oshap/shared";
 import {
+  Checkbox,
   Dialog,
   PrimaryButton,
   SecondaryButton,
+  Spinner,
   toast,
 } from "@oshap/shared/ui";
 
@@ -79,7 +81,7 @@ export default function ItemModifiersDialog({ item, onClose }: Props) {
     >
       {groupsQuery.isLoading ? (
         <div className="flex justify-center py-xl">
-          <div className="oshap-spinner" />
+          <Spinner />
         </div>
       ) : groups.length === 0 ? (
         <p className="text-body-medium text-on-surface-variant text-center py-l">
@@ -91,50 +93,39 @@ export default function ItemModifiersDialog({ item, onClose }: Props) {
         groups.map((group) => {
           const isOn = selected.includes(group.id);
           return (
-            <button
+            <Checkbox
               key={group.id}
-              type="button"
-              role="checkbox"
-              aria-checked={isOn}
-              onClick={() => toggle(group.id)}
-              className={`flex items-start gap-s p-md rounded-lg text-left border transition-colors ${
+              checked={isOn}
+              onChange={() => toggle(group.id)}
+              className={`p-md rounded-lg border transition-colors ${
                 isOn
                   ? "border-primary bg-primary-container/40"
                   : "border-outline-variant bg-surface-container hover:bg-surface-container-highest"
               }`}
-            >
-              <span
-                aria-hidden="true"
-                className={`w-5 h-5 mt-0.5 shrink-0 flex items-center justify-center rounded-xs border-2 transition-colors ${
-                  isOn
-                    ? "bg-primary border-primary text-on-primary"
-                    : "border-outline"
-                }`}
-              >
-                {isOn && <i className="mgc_check_line text-xs font-bold" />}
-              </span>
-              <span className="flex flex-col gap-0.5 min-w-0">
-                <span className="text-title-medium font-semibold text-on-surface">
-                  {group.name}
-                  {group.required && (
-                    <span className="text-label-small text-on-surface-variant font-normal ml-s">
-                      required
-                    </span>
-                  )}
+              label={
+                <span className="flex flex-col gap-0.5 min-w-0">
+                  <span className="text-title-medium font-semibold text-on-surface">
+                    {group.name}
+                    {group.required && (
+                      <span className="text-label-small text-on-surface-variant font-normal ml-s">
+                        required
+                      </span>
+                    )}
+                  </span>
+                  <span className="text-body-medium text-on-surface-variant">
+                    {group.options.length === 0
+                      ? "No options yet"
+                      : group.options
+                          .map((o) =>
+                            o.price_delta === 0
+                              ? o.name
+                              : `${o.name} +${formatCurrency(o.price_delta)}`,
+                          )
+                          .join(" · ")}
+                  </span>
                 </span>
-                <span className="text-body-medium text-on-surface-variant">
-                  {group.options.length === 0
-                    ? "No options yet"
-                    : group.options
-                        .map((o) =>
-                          o.price_delta === 0
-                            ? o.name
-                            : `${o.name} +${formatCurrency(o.price_delta)}`,
-                        )
-                        .join(" · ")}
-                </span>
-              </span>
-            </button>
+              }
+            />
           );
         })
       )}    </Dialog>

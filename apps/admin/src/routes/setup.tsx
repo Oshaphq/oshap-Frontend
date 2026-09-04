@@ -4,6 +4,7 @@ import { adminApi, errorMessage } from "@oshap/shared";
 import type { SetupVerifyResponse } from "@oshap/shared";
 import {
   PrimaryButton,
+  Spinner,
   TextField,
   ThemeToggle,
   toast,
@@ -102,7 +103,7 @@ export default function SetupPage() {
   if (status === "checking") {
     return (
       <div className="flex items-center justify-center min-h-screen bg-surface">
-        <div className="oshap-spinner" />
+        <Spinner />
       </div>
     );
   }
