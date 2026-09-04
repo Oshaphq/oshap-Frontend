@@ -28,11 +28,13 @@ const BASE =
  */
 const DENSITY = {
   md: {
-    field: "pl-md pr-10 py-s text-body-medium",
+    // `h-10` to match Button `md` and TextField `md`. A select beside a button
+    // used to be 38 against 40, which reads as a rendering fault in a toolbar.
+    field: "h-10 pl-md pr-10 text-body-medium",
     icon: "right-md",
   },
   sm: {
-    field: "pl-s pr-xl py-xs text-body-medium",
+    field: "h-8 pl-s pr-xl text-body-medium",
     icon: "right-s text-sm",
   },
 } as const;

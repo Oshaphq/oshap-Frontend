@@ -276,7 +276,6 @@ export default function AuthGate() {
             {showBranchSelector && (
               <Select
                 aria-label="Active branch"
-                density="sm"
                 value={activeBranchId}
                 onChange={(e) => setActiveBranch(e.target.value)}
                 className="font-semibold"
