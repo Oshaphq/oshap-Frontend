@@ -147,7 +147,8 @@ is the one to reach for when text needs to be quiet.
 | Element | Token |
 |---|---|
 | Page background | `surface` |
-| Top app bar | `surface-container-low` |
+| Top app bar — **admin only** | `surface-container-low` |
+| Top app bar — customer, platform | `surface` |
 | Card, sheet, drawer, rail, side panel | `surface-container-low` |
 | Nested block or quiet button inside a card | `surface-container` |
 | Dialog, modal, menu, tooltip | `surface-container-high` |
@@ -155,10 +156,17 @@ is the one to reach for when text needs to be quiet.
 | Filled text field container | `surface-container` |
 | Snackbar | `inverse-surface` + `inverse-on-surface` |
 
-The top app bar sits at `surface-container-low`, one step above the page rather than level
-with it. It is a fixed chrome band that outranks the content scrolling under it, so it
-reads as a surface in its own right and needs no bottom border to separate it. Earlier
-revisions put it on `surface`; that is now the page alone.
+**The admin bar is the exception, deliberately.** It sits at `surface-container-low`, one
+step above the page rather than level with it: it is fixed chrome carrying two rows of
+navigation over a working screen, so it reads as a surface in its own right and needs no
+bottom border to separate it — the tone change is the separation.
+
+Customer and platform keep their bars on `surface`. Neither carries that weight of
+navigation, and the customer app in particular wants the page to read as one continuous
+sheet. This is a scoping decision, not drift: do not "fix" the other two to match admin.
+Admin's bar also caps its contents at the shell measure (`SHELL_WIDTH`, exported from
+`Page.tsx`) so the bar lines up with the page column beneath it rather than running edge
+to edge over centred content.
 
 Chips are outlined at rest and take `bg-primary` / `text-on-primary` when selected. A
 border reads against any surface in the ladder, so whoever places a chip does not have to
@@ -415,8 +423,8 @@ surface and silently undoes the contrast the token was chosen for.
 
 ## Checklist for any new element
 
-1. Page → `surface`.
-2. Top app bar, card, sheet, drawer, rail → `surface-container-low`.
+1. Page, and the customer and platform top bars → `surface`.
+2. The admin top bar, card, sheet, drawer, rail → `surface-container-low`.
 3. Nested inside a card → `surface-container`.
 4. Dialog, menu, tooltip → `surface-container-high`.
 5. Hover → one step up.
