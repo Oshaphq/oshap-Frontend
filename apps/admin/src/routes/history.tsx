@@ -113,18 +113,20 @@ export default function HistoryPage() {
       </header>
 
       <div className="flex flex-col sm:flex-row gap-md">
-        <input
+        <TextField
           type="text"
+          aria-label="Filter by table"
           placeholder="Filter by table (e.g. T1)"
           value={tableFilter}
           onChange={(e) => {
             setTableFilter(e.target.value.toUpperCase());
             setPage(1);
           }}
-          className="flex-1 px-md py-md rounded-sm bg-surface-container-low border border-outline-variant text-body-medium text-on-surface placeholder:text-on-surface-placeholder outline-none focus:border-primary transition-colors"
+          wrapperClassName="flex-1"
         />
         <TextField
           type="date"
+          aria-label="Filter by date"
           value={dateFilter}
           onChange={(e) => {
             setDateFilter(e.target.value);
