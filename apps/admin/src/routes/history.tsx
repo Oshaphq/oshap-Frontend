@@ -112,6 +112,10 @@ export default function HistoryPage() {
         </Button>
       </header>
 
+      {/* Table and date filters use TextField so density, border contrast, and
+          container surface follow the Design System — raw inputs with ad-hoc
+          py-md padding cause WebKit date picker pseudos to compute a different
+          box height than text fields. */}
       <div className="flex flex-col sm:flex-row gap-md">
         <TextField
           type="text"
