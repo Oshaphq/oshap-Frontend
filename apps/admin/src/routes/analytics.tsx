@@ -123,6 +123,7 @@ export default function Analytics() {
           <div className="flex items-center gap-s flex-wrap">
             <TextField
               type="date"
+              density="sm"
               aria-label="Start date"
               value={startDate}
               onChange={(e) => setStartDate(e.target.value)}
@@ -130,6 +131,7 @@ export default function Analytics() {
             <span className="text-on-surface-variant shrink-0">to</span>
             <TextField
               type="date"
+              density="sm"
               aria-label="End date"
               value={endDate}
               onChange={(e) => setEndDate(e.target.value)}
