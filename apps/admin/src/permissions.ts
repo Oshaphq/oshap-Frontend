@@ -18,6 +18,12 @@ export interface NavTab {
   label: string;
   end?: boolean;
   count?: number;
+  /**
+   * MingCute glyph stem, without the `mgc_` prefix or the `_line` / `_fill`
+   * suffix — the bar picks the variant from the tab's state, `_line` at rest
+   * and `_fill` when active, per the Tabs spec in the design system.
+   */
+  icon: string;
 }
 
 export interface NavContext {
@@ -36,12 +42,12 @@ export function tabsForRole(role: Role, ctx: NavContext): NavTab[] {
    * screen full of bills they cannot act on.
    */
   if (["OWNER", "MANAGER", "WAITER", "CASHIER"].includes(role)) {
-    tabs.push({ to: "/", label: "Tables", end: true });
+    tabs.push({ to: "/", label: "Tables", end: true, icon: "table" });
   }
 
   if (["OWNER", "MANAGER"].includes(role)) {
-    tabs.push({ to: "/menu", label: "Menu" });
-    tabs.push({ to: "/inventory", label: "Inventory" });
+    tabs.push({ to: "/menu", label: "Menu", icon: "book_4" });
+    tabs.push({ to: "/inventory", label: "Inventory", icon: "inventory" });
   }
 
   /**
@@ -54,7 +60,7 @@ export function tabsForRole(role: Role, ctx: NavContext): NavTab[] {
    * from this board.
    */
   if (["OWNER", "MANAGER", "WAITER", "KITCHEN", "BARTENDER"].includes(role)) {
-    tabs.push({ to: "/kitchen", label: "Orders", count: ctx.waitingTickets });
+    tabs.push({ to: "/kitchen", label: "Orders", count: ctx.waitingTickets, icon: "chef_hat" });
   }
 
   if (["OWNER", "MANAGER", "CASHIER"].includes(role)) {
@@ -62,19 +68,19 @@ export function tabsForRole(role: Role, ctx: NavContext): NavTab[] {
        place — Menu, Inventory, Orders, History, Settings — so a bare verb read
        as an action, and it is the same word as the ✕ on every dialog. The page
        already calls itself Daily close in its own heading. */
-    tabs.push({ to: "/z-report", label: "Daily close" });
+    tabs.push({ to: "/z-report", label: "Daily close", icon: "bill" });
   }
 
   if (["OWNER", "MANAGER"].includes(role)) {
-    tabs.push({ to: "/history", label: "History" });
-    tabs.push({ to: "/settings", label: "Settings" });
+    tabs.push({ to: "/history", label: "History", icon: "history" });
+    tabs.push({ to: "/settings", label: "Settings", icon: "settings_3" });
   }
 
   if (role === "OWNER") {
-    tabs.push({ to: "/analytics", label: "Analytics" });
+    tabs.push({ to: "/analytics", label: "Analytics", icon: "chart_bar" });
     // Comparing venues only means anything above one.
     if (ctx.branchCount > 1) {
-      tabs.push({ to: "/analytics/group", label: "Group Analytics" });
+      tabs.push({ to: "/analytics/group", label: "Group Analytics", icon: "group" });
     }
   }
 

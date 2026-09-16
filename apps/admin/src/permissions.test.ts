@@ -100,6 +100,19 @@ describe("nobody is stranded", () => {
   );
 });
 
+describe("every destination has a glyph", () => {
+  it.each<Role>(["OWNER", "MANAGER", "WAITER", "CASHIER", "KITCHEN", "BARTENDER"])(
+    "%s sees no unlabelled icon slot",
+    (role) => {
+      // The bar builds its class name from this stem, so a missing one renders
+      // `mgc__line` — an empty box in the nav rather than a visible failure.
+      for (const tab of tabsForRole(role, { branchCount: 2, waitingTickets: 0 })) {
+        expect(tab.icon, `${tab.label} has no icon`).toBeTruthy();
+      }
+    },
+  );
+});
+
 describe("who moves a ticket through the kitchen", () => {
   it.each<Role>(["OWNER", "MANAGER", "KITCHEN", "BARTENDER"])("%s can", (role) => {
     expect(canAdvanceKitchenTickets(role)).toBe(true);

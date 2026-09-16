@@ -78,8 +78,9 @@ A focus ring is a UI component, so the 3:1 exception covers it without qualifica
 | `inverse-surface` | `grey-30` `#2E2E2E` / `grey-95` — 11.78:1 | `grey-88` `#D7D7D7` / `grey-21` |
 
 **The `secondary-container` departure.** M3 says S90, which at chroma 16 is
-byte-identical to P90 `#FFDBCC` — the nav pill and the primary tag would be the same
-fill. Dropped to S80. Revisit if the seed hue ever changes.
+byte-identical to P90 `#FFDBCC` — the tonal icon button and the tonal button would be the
+same fill, and the two tonal levels would collapse into one. Dropped to S80. Revisit if
+the seed hue ever changes.
 
 `secondary` is a muted brown at this hue: use it for weight, not for emphasis.
 `tertiary` is categorical only — menu sections, dietary marks. Never a state.
@@ -145,7 +146,9 @@ is the one to reach for when text needs to be quiet.
 
 | Element | Token |
 |---|---|
-| Page background, top app bar | `surface` |
+| Page background | `surface` |
+| Top app bar — **admin only** | `surface-container-low` |
+| Top app bar — customer, platform | `surface` |
 | Card, sheet, drawer, rail, side panel | `surface-container-low` |
 | Nested block or quiet button inside a card | `surface-container` |
 | Dialog, modal, menu, tooltip | `surface-container-high` |
@@ -153,9 +156,23 @@ is the one to reach for when text needs to be quiet.
 | Filled text field container | `surface-container` |
 | Snackbar | `inverse-surface` + `inverse-on-surface` |
 
-Chips are outlined at rest and take `secondary-container` when selected. A border reads
-against any surface in the ladder, so whoever places a chip does not have to know what it
-is sitting on.
+**The admin bar is the exception, deliberately.** It sits at `surface-container-low`, one
+step above the page rather than level with it: it is fixed chrome carrying two rows of
+navigation over a working screen, so it reads as a surface in its own right and needs no
+bottom border to separate it — the tone change is the separation.
+
+Customer and platform keep their bars on `surface`. Neither carries that weight of
+navigation, and the customer app in particular wants the page to read as one continuous
+sheet. This is a scoping decision, not drift: do not "fix" the other two to match admin.
+Admin's bar also caps its contents at the shell measure (`SHELL_WIDTH`, exported from
+`Page.tsx`) so the bar lines up with the page column beneath it rather than running edge
+to edge over centred content.
+
+Chips are outlined at rest and take `bg-primary` / `text-on-primary` when selected. A
+border reads against any surface in the ladder, so whoever places a chip does not have to
+know what it is sitting on. Selected is the system-wide selected state — the same fill the
+selection controls and the selected list row use — so a selected chip reads the same
+everywhere. (v3 moved this off `secondary-container`, which nothing in the product used.)
 
 ---
 
@@ -176,8 +193,9 @@ Five variants in one emphasis ladder. Radius 8, height 48 comfortable and 40 com
 Label is **16px semibold on filled** and 14px elsewhere. Tonal is on the *primary*
 container, not secondary — v2 had this on secondary, and v3 moves it.
 
-Icon buttons are circular at 48px. The FAB keeps the 16px card radius so it belongs to
-the same family as the cards it sits over.
+Icon buttons are circular at 48px. The FAB is full-radius at 48px with a brand fill and a
+label — it reads as the one floating action, not as another card. (An earlier revision
+pinned it to the 16px card radius; that never shipped.)
 
 ---
 
@@ -187,8 +205,8 @@ Unchanged from v2. The M3 fifteen-role scale in two families — Archivo for dis
 headline, title and label; Instrument Sans for body. Prices and table figures use
 Instrument Sans with tabular figures; monospace is for tokens and IDs only.
 
-Shape: `xs` 4 · `sm` 8 (buttons and fields) · `md` 12 · `lg` 16 (cards, FAB) · `xl` 28
-(dialogs, bottom-sheet tops) · `full` (pills, chips). Buttons stay at 8px rather than
+Shape: `xs` 4 · `sm` 8 (buttons and fields) · `md` 12 · `lg` 16 (cards) · `xl` 28
+(dialogs, bottom-sheet tops) · `full` (pills, chips, FAB). Buttons stay at 8px rather than
 M3's full-round: a pill next to a rectangular price field reads as a different generation
 of UI, and the apps are full of rectangular price fields.
 
@@ -237,7 +255,8 @@ indicator, the focus ring.
 
 ### primary-container / on-primary-container
 
-One step down in emphasis: the tonal button, a selected state, the chef's-pick tag.
+One step down in emphasis: the tonal button, the chef's-pick tag. Not the selected state —
+that is `bg-primary`.
 
 | ✅ Do | ❌ Don't |
 |---|---|
@@ -248,12 +267,14 @@ One step down in emphasis: the tonal button, a selected state, the chef's-pick t
 ### secondary / secondary-container
 
 At Oshap's seed hue `secondary` is a muted brown. **Use it for weight, not emphasis** —
-navigation that is present but not shouting, a filter chip at rest.
+a tonal icon button, a plan-tier tag, anything present but not shouting. A chip at rest is
+outlined rather than tinted, and a selected one takes `bg-primary`.
 
 | ✅ Do | ❌ Don't |
 |---|---|
-| Use `secondary-container` for the selected nav destination and selected chips | Use it as a second primary — it is deliberately quiet |
-| Remember it sits at **S80**, not M3's S90 | Change it back to S90 — S90 is byte-identical to P90 here, so the nav pill and the primary tag would collide |
+| Use `secondary-container` for the tonal icon button and the plan-tier tags | Use it as a second primary — it is deliberately quiet |
+| Reach for it when something needs weight but must not read as selected | Use it for a selected chip or nav destination — selected is `bg-primary` |
+| Remember it sits at **S80**, not M3's S90 | Change it back to S90 — S90 is byte-identical to P90 here, so the two tonal levels would collapse into one fill |
 
 ### tertiary-container
 
@@ -402,8 +423,8 @@ surface and silently undoes the contrast the token was chosen for.
 
 ## Checklist for any new element
 
-1. Page or top app bar → `surface`.
-2. Card, sheet, drawer, rail → `surface-container-low`.
+1. Page, and the customer and platform top bars → `surface`.
+2. The admin top bar, card, sheet, drawer, rail → `surface-container-low`.
 3. Nested inside a card → `surface-container`.
 4. Dialog, menu, tooltip → `surface-container-high`.
 5. Hover → one step up.

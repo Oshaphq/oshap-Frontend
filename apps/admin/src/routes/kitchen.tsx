@@ -9,6 +9,7 @@ import type { OrderWithItems } from "@oshap/shared";
 import {
   EmptyState,
   PrimaryButton,
+  SHELL_WIDTH,
   Skeleton,
   SkeletonGroup,
   toast,
@@ -161,7 +162,10 @@ export default function KitchenPage() {
   const ready = orders.filter((o) => o.status === "READY");
 
   return (
-    <main className="h-[calc(100vh-56px)] flex flex-col">
+    // `h-full` rather than a viewport calc minus the bar: the bar is two rows
+    // at `lg` and one below it, so a single subtraction was wrong at one
+    // breakpoint. The shell is full-height, so the space left is just 100%.
+    <main className={`h-full flex flex-col w-full ${SHELL_WIDTH}`}>
       {/* Stacked on a phone: the title and the three counts fought for one
           row, and the title lost — it shrank to fit beside them. Each gets a
           line of its own, and they sit back on one row from `sm` up where
