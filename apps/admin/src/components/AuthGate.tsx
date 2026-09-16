@@ -11,6 +11,7 @@ import {
 import {
   PrimaryButton,
   Select,
+  SHELL_WIDTH,
   Spinner,
   ThemeToggle,
 } from "@oshap/shared/ui";
@@ -230,110 +231,173 @@ export default function AuthGate() {
   });
 
   return (
-    <div className="min-h-screen bg-surface flex flex-col">
-      <header className="bg-surface border-b border-outline-variant">
-        <nav className="flex items-center justify-between gap-s px-s sm:px-md py-s">
-          {/* Hamburger — mobile & tablet only */}
-          <button
-            className="lg:hidden w-10 h-10 flex items-center justify-center rounded-sm text-on-surface-variant hover:bg-surface-container-high transition-colors shrink-0"
-            onClick={() => setMenuOpen((o) => !o)}
-            aria-label={menuOpen ? "Close menu" : "Open menu"}
-          >
-            <i className={menuOpen ? "mgc_close_line text-xl" : "mgc_menu_line text-xl"} aria-hidden />
-          </button>
+    // `h-screen`, not `min-h-screen`: the bar is two rows at `lg` and one
+    // below it, so any route that sized itself against a hardcoded bar height
+    // was wrong at one breakpoint or the other. The scroll already lives on
+    // the element below, so a full-height shell lets a route ask for `h-full`
+    // and get the space that is actually left.
+    <div className="h-screen bg-surface flex flex-col">
+      {/* The bar is fixed chrome that outranks the content scrolling under it,
+          so it sits one step up the ladder from the page and carries no bottom
+          border — the tone change is the separation. See docs/color-usage.md. */}
+      <header className="bg-surface-container-low">
+        {/* Both rows sit in the same column as the page content beneath them,
+            so the bar does not run edge to edge over centred content. */}
+        {/* Top padding is the bar's, bottom padding belongs to whatever ends
+            it. At `lg` that is each tab's own `pb-md`, which puts the space
+            between the label and its underline and leaves the underline flush
+            with the bottom edge it marks. Below `lg` there is no tab row, so
+            the bar keeps the padding itself — without it the name would sit
+            flush against the bottom edge. */}
+        <div className={`w-full ${SHELL_WIDTH} pt-l pb-md lg:pb-0`}>
+          {/* Row 1 — who and where on the left, controls on the right. */}
+          <nav className="flex items-center justify-between gap-s px-md">
+            <div className="flex items-center gap-s sm:gap-l min-w-0">
+              {/* Hamburger — mobile & tablet only */}
+              <button
+                className="lg:hidden w-10 h-10 flex items-center justify-center rounded-sm text-on-surface-variant hover:bg-surface-container transition-colors shrink-0"
+                onClick={() => setMenuOpen((o) => !o)}
+                aria-label={menuOpen ? "Close menu" : "Open menu"}
+              >
+                <i className={menuOpen ? "mgc_close_line text-xl" : "mgc_menu_line text-xl"} aria-hidden />
+              </button>
 
-          {/* Desktop tab bar — hidden below lg */}
-          <div className="hidden lg:flex items-center gap-0.5 shrink min-w-0">
-            {tabs.map((tab) => (
-              <NavLink
-                key={tab.to}
-                to={tab.to}
-                end={tab.end}
-                className={({ isActive }) =>
-                  `px-md py-s rounded-sm text-label-large font-semibold font-display whitespace-nowrap transition-colors no-underline shrink-0 ${isActive
-                    ? "bg-primary text-on-primary"
-                    : "text-on-surface-variant hover:bg-surface-container-high"
-                  }`
-                }
-              >
-                {tab.label}
-                {tab.count ? (
-                  <span
-                    // Inherits the tab's own colours so it reads as part of the
-                    // label rather than an alert pinned to it — this counts
-                    // work in hand, it is not a warning.
-                    className="ml-xs inline-flex items-center justify-center min-w-5 h-5 px-1 rounded-full bg-current/15 text-label-small font-bold tabular-nums"
-                  >
-                    {tab.count}
-                  </span>
-                ) : null}
-              </NavLink>
-            ))}
-          </div>
-
-          {/* Right controls — always visible */}
-          <div className="flex items-center gap-s shrink-0 ml-auto lg:ml-0">
-            {showBranchSelector && (
-              <Select
-                aria-label="Active branch"
-                value={activeBranchId}
-                onChange={(e) => setActiveBranch(e.target.value)}
-                className="font-semibold"
-                wrapperClassName="max-w-[160px]"
-              >
-                <option value="">All Branches</option>
-                {branches.map((b) => (
-                  <option key={b.id} value={b.id}>
-                    {b.name}
-                  </option>
-                ))}
-              </Select>
-            )}
-            <NotificationBell />
-            <ThemeToggle />
-            <div className="hidden md:flex flex-col items-end mr-s">
-              <span className="text-label-large font-semibold text-on-surface">{user.name}</span>
-              <span className="text-body-medium text-on-surface-variant">{user.role}</span>
-            </div>
-            {restaurantName && (
-              <span
-                className="hidden lg:inline text-body-medium font-semibold text-on-surface-variant truncate max-w-[200px]"
-                title={restaurantName}
-              >
-                {restaurantName}
+              <span className="text-title-large font-semibold font-display text-on-surface truncate">
+                {user.name}
               </span>
-            )}
-            <button
-              onClick={handleLogout}
-              className="w-10 h-10 flex items-center justify-center rounded-full bg-surface-container-high text-on-surface-variant border border-transparent hover:bg-error-container hover:text-on-error-container transition-colors"
-              title="Logout"
-            >
-              <i className="mgc_exit_line text-lg" />
-            </button>
-          </div>
-        </nav>
+              {restaurantName && (
+                <span
+                  className="hidden sm:inline text-body-large text-on-surface-variant truncate max-w-[200px]"
+                  title={restaurantName}
+                >
+                  {restaurantName}
+                </span>
+              )}
+            </div>
 
-        {/* Mobile / tablet drawer */}
-        {menuOpen && (
-          <div className="lg:hidden px-s pb-s flex flex-col gap-xs">
+            <div className="flex items-center gap-s shrink-0">
+              {showBranchSelector && (
+                <Select
+                  aria-label="Active branch"
+                  value={activeBranchId}
+                  onChange={(e) => setActiveBranch(e.target.value)}
+                  className="font-semibold"
+                  wrapperClassName="max-w-[160px]"
+                >
+                  <option value="">All Branches</option>
+                  {branches.map((b) => (
+                    <option key={b.id} value={b.id}>
+                      {b.name}
+                    </option>
+                  ))}
+                </Select>
+              )}
+              <NotificationBell />
+              <ThemeToggle />
+              <button
+                onClick={handleLogout}
+                className="w-10 h-10 flex items-center justify-center rounded-full bg-surface-container text-on-surface-variant border border-transparent hover:bg-error-container hover:text-on-error-container transition-colors"
+                title="Logout"
+              >
+                <i className="mgc_exit_line text-lg" />
+              </button>
+            </div>
+          </nav>
+
+          {/* Row 2 — desktop tab bar, hidden below lg.
+              An underline rather than a filled pill: eight filled pills in a
+              row would put eight brand fills on one surface, and the rule is
+              one filled element per view. `first:pl-0` pulls the leading
+              glyph onto the same left edge as the name above it and the page
+              column below — a tab bar that starts one padding step in reads
+              as a misaligned container. */}
+          <div className="hidden lg:flex items-stretch gap-4xl px-md lg:pt-2xl pb-0 min-w-0 overflow-x-auto">
             {tabs.map((tab) => (
               <NavLink
                 key={tab.to}
                 to={tab.to}
                 end={tab.end}
-                onClick={() => setMenuOpen(false)}
                 className={({ isActive }) =>
-                  `px-md py-s rounded-sm text-label-large font-semibold font-display transition-colors no-underline ${isActive
-                    ? "bg-primary text-on-primary"
-                    : "text-on-surface-variant hover:bg-surface-container-high"
+                  `flex items-center gap-xs px-xs first:pl-0 pt-s pb-md border-b-[3px] text-label-large font-semibold font-display whitespace-nowrap transition-colors no-underline shrink-0 ${isActive
+                    ? "border-primary text-primary-label"
+                    : "border-transparent text-on-surface-variant hover:text-on-surface"
                   }`
                 }
               >
-                {tab.label}
+                {({ isActive }) => (
+                  <>
+                    {/* `_fill` when active, `_line` at rest. A glyph takes the
+                        on-colour of what it sits on, so it needs no colour of
+                        its own — the label's colour carries it. */}
+                    <i
+                      className={`mgc_${tab.icon}_${isActive ? "fill" : "line"} text-lg`}
+                      aria-hidden
+                    />
+                    {tab.label}
+                    {tab.count ? (
+                      <span
+                        // Inactive takes the error container: orders are the one
+                        // queue here that goes stale in minutes, and the count has
+                        // to pull the eye from across a counter. On the active tab
+                        // it inherits instead — you are already looking at the
+                        // board.
+                        className={`ml-0.5 inline-flex items-center justify-center min-w-5 h-5 px-1 rounded-full text-label-small font-bold tabular-nums ${isActive
+                          ? "bg-current/15"
+                          : "bg-error-container text-on-error-container"
+                          }`}
+                      >
+                        {tab.count}
+                      </span>
+                    ) : null}
+                  </>
+                )}
               </NavLink>
             ))}
           </div>
-        )}
+
+          {/* Mobile / tablet drawer */}
+          {menuOpen && (
+            <div className="lg:hidden px-md pt-s flex flex-col gap-xs">
+              {tabs.map((tab) => (
+                <NavLink
+                  key={tab.to}
+                  to={tab.to}
+                  end={tab.end}
+                  onClick={() => setMenuOpen(false)}
+                  // The drawer keeps the filled destination: an underline is a
+                  // horizontal device, and a stack of them reads as a list of
+                  // rules rather than a set of places.
+                  className={({ isActive }) =>
+                    `flex items-center gap-s px-md py-s rounded-sm text-label-large font-semibold font-display transition-colors no-underline ${isActive
+                      ? "bg-primary text-on-primary"
+                      : "text-on-surface-variant hover:bg-surface-container"
+                    }`
+                  }
+                >
+                  {({ isActive }) => (
+                    <>
+                      <i
+                        className={`mgc_${tab.icon}_${isActive ? "fill" : "line"} text-lg`}
+                        aria-hidden
+                      />
+                      {tab.label}
+                      {tab.count ? (
+                        <span
+                          className={`ml-auto inline-flex items-center justify-center min-w-5 h-5 px-1 rounded-full text-label-small font-bold tabular-nums ${isActive
+                            ? "bg-current/15"
+                            : "bg-error-container text-on-error-container"
+                            }`}
+                        >
+                          {tab.count}
+                        </span>
+                      ) : null}
+                    </>
+                  )}
+                </NavLink>
+              ))}
+            </div>
+          )}
+        </div>
       </header>
 
       <div className="flex-1 overflow-y-auto">

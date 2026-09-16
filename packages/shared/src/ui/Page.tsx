@@ -37,6 +37,15 @@ const WIDTH = {
   full: "",
 } as const;
 
+/**
+ * The shell's measure, for chrome that has to line up with the page column
+ * under it — the admin top bar, and the routes that lay out their own grid
+ * instead of using `Page`. Exported so the bar and the column cannot drift:
+ * the bar running edge to edge over centred content reads as a broken
+ * container, which is the same fault this file was written to fix.
+ */
+export const SHELL_WIDTH = WIDTH.wide;
+
 /** Written out, not interpolated: Tailwind scans for literal class names. */
 const GAP = { md: "gap-md", l: "gap-l" } as const;
 
