@@ -13,6 +13,8 @@
     "build:admin": "npm run build --workspace @oshap/admin",
     "dev:platform": "npm run dev --workspace @oshap/platform",
     "build:platform": "npm run build --workspace @oshap/platform",
+    "dev:site": "npm run dev --workspace @oshap/site",
+    "build:site": "npm run build --workspace @oshap/site",
     "build": "npm run build --workspaces --if-present",
     "typecheck": "npm run typecheck --workspaces --if-present",
     "lint": "eslint .",

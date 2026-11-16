@@ -7,7 +7,7 @@ Style:
 
 Stack:
 
-- Vite 6 + React 19 + TypeScript (three apps: `apps/customer`, `apps/admin`, `apps/platform`)
+- Vite 6 + React 19 + TypeScript (four apps: `apps/customer`, `apps/admin`, `apps/platform`, `apps/site`)
 - React Router v7
 - Tailwind CSS v4 (CSS-first `@theme` block — no `tailwind.config.ts`)
 - TanStack Query v5 over typed `fetch` wrappers in `packages/shared`
@@ -19,6 +19,7 @@ File layout:
 - `apps/customer/src/{routes,components,context}/` — public SPA (menu, checkout, pay, orders)
 - `apps/admin/src/{routes,components}/` — merchant SPA (dashboard, kitchen, history, menu, settings, analytics; email/password login + RBAC)
 - `apps/platform/src/{routes}/` — internal operator portal (tenant onboarding, subscriptions, system health)
+- `apps/site/src/` — static marketing page for restaurant owners (pricing, FAQ); no API calls
 - `packages/shared/src/`
   - `api/` — `client.ts` (fetch + admin JWT Bearer auth w/ single-flight refresh + `x-platform-token` + active-branch), `keys.ts` (query-key factory), and per-resource modules
   - `hooks/` — TanStack Query hooks

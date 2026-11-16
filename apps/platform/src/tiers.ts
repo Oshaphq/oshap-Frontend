@@ -1,6 +1,6 @@
-import { formatCurrency } from "@oshap/shared";
 import type { SubscriptionTier } from "@oshap/shared";
 import {
+  formatCurrency,
   MONTHS_BILLED_ANNUALLY,
   PHASE_1_TIERS,
   TIER_ANNUAL_KOBO,
@@ -9,10 +9,10 @@ import {
   TIER_MONTHLY_ORDER_CAP,
   TIER_ORDER,
   USAGE_WARN_AT,
-} from "./tiers.data";
+} from "@oshap/shared";
 
 // Re-exported so every existing import site keeps working; the data itself
-// lives in tiers.data.ts, which has no runtime dependencies.
+// lives in @oshap/shared (utils/tiers.ts), which has no runtime dependencies.
 export {
   MONTHS_BILLED_ANNUALLY,
   PHASE_1_TIERS,

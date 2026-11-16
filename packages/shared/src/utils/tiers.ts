@@ -1,13 +1,15 @@
-import type { SubscriptionTier } from "@oshap/shared";
+import type { SubscriptionTier } from "../types";
 
 /**
  * Subscription pricing data — deliberately free of runtime imports.
  *
- * Split from tiers.ts so it can be read outside a Vite build: the production
- * smoke check imports this to assert the backend accepts every tier the
- * platform app offers, and pulling in @oshap/shared there fails because the
- * client reads `import.meta.env`. The type import above is erased at compile
- * time, so nothing is loaded at runtime.
+ * Shared because two apps sell from it: the platform app's tier picker and the
+ * customer app's landing page at `/`. Kept free of runtime imports so it can
+ * be read outside a Vite build: the production smoke check imports this file
+ * by path to assert the backend accepts every tier, and pulling in the
+ * @oshap/shared barrel there fails because the client reads `import.meta.env`.
+ * The type import above is erased at compile time, so nothing is loaded at
+ * runtime.
  *
  * Everything here is in **kobo**, like every other money value in the codebase.
  */

@@ -1,0 +1,22 @@
+@import "tailwindcss";
+@import "@oshap/shared/tokens.css";
+@source "../../../packages/shared/src";
+
+html {
+  scroll-behavior: smooth;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+}
+
+body {
+  margin: 0;
+  font-family: "Instrument Sans", system-ui, -apple-system, sans-serif;
+  background: var(--ds-surface);
+  color: var(--ds-on-surface);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}

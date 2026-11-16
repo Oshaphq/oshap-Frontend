@@ -1,7 +1,7 @@
 # Plans
 
 The canonical description of what each subscription plan includes. Prices live in
-[`apps/platform/src/tiers.data.ts`](../apps/platform/src/tiers.data.ts) as integer kobo;
+[`packages/shared/src/utils/tiers.ts`](../packages/shared/src/utils/tiers.ts) as integer kobo;
 this file is the record of what a merchant is *buying*.
 
 ## The decision

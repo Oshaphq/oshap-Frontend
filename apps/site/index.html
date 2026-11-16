@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#f56500" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <script>
+      // Follows the phone's setting. Set before paint, so dark mode doesn't flash.
+      (function () {
+        try {
+          if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+            document.documentElement.setAttribute('data-theme', 'dark');
+          }
+        } catch (e) {}
+      })();
+    </script>
+
+    <title>Oshap — QR ordering and payments for restaurants and bars</title>
+    <meta
+      name="description"
+      content="Guests scan the QR code on their table, order from their phone and pay by transfer or card. Every order is matched to a payment. One product, priced by the size of your restaurant."
+    />
+    <meta property="og:title" content="Oshap — QR ordering and payments for restaurants and bars" />
+    <meta property="og:description" content="Order shap shap. Every plan includes everything." />
+    <meta property="og:image" content="/oshap.png" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700&family=Instrument+Sans:wght@400;500;600&display=swap"
+      rel="stylesheet"
+    />
+    <link href="https://cdn.jsdelivr.net/npm/mingcute_icon/font/Mingcute.css" rel="stylesheet" />
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>

@@ -56,6 +56,7 @@ npm install
 npm run dev:customer   # http://localhost:5173
 npm run dev:admin      # http://localhost:5174 (login: 0803 000 0001 / password)
 npm run dev:platform   # http://localhost:5176 (operator portal; any access code in mock)
+npm run dev:site       # http://localhost:5177 (marketing page for restaurant owners)
 ```
 
 > **Cross-app mock sync:** customer (`:5173`) and admin (`:5174`) are different origins and **don't share `localStorage`**, so on the mock API a customer order won't reach the admin app on its own. Start the relay to bridge them: `npm run relay` (`ws-relay.js`, port 5175), then **refresh both tabs**. Tabs of the *same* app already sync via `localStorage` without it.
@@ -215,12 +216,13 @@ Use `toast.success(msg)`, `toast.error(msg)`, `toast.info(msg)` from `@oshap/sha
 
 ## Deploy (Vercel)
 
-Each app is its own Vercel project pointing at `apps/customer`, `apps/admin`, or `apps/platform` as the Root Directory. Each directory contains a `vercel.json` with an SPA rewrite — required so client-side routes survive page refresh and direct URL hits.
+Each app is its own Vercel project pointing at `apps/customer`, `apps/admin`, `apps/platform` or `apps/site` as the Root Directory. Each directory contains a `vercel.json` with an SPA rewrite — required so client-side routes survive page refresh and direct URL hits.
 
 Per-project env vars (set in Vercel dashboard, **not** committed):
 - `VITE_API_BASE_URL` — the FastAPI backend **origin only**, including the scheme (e.g. `https://oshap-cerebrum.useshappay.com`). Do not append `/api/v1`; the client adds it. If unset, the app runs in mock mode (great for previews, not for production).
 - Admin only: `VITE_CUSTOMER_APP_URL` — the public customer app, **with `https://`** (e.g. `https://oshap.useshappay.com`). Every table QR code is built from this. A bare domain is not a URL: a QR reader treats `oshap.useshappay.com/menu?table=…` as plain text, and whether a guest's phone opens it, offers to search for it, or does nothing depends on the handset. This has already happened once, after the codes were printed and laminated.
 - Admin only: `VITE_FCM_API_KEY`, `VITE_FCM_AUTH_DOMAIN`, `VITE_FCM_PROJECT_ID`, `VITE_FCM_STORAGE_BUCKET`, `VITE_FCM_MESSAGING_SENDER_ID`, `VITE_FCM_APP_ID`, `VITE_FCM_VAPID_KEY`.
+- Site only: `VITE_SALES_WHATSAPP` — the sales WhatsApp number in international form (e.g. `2348012345678`). Every "Book a demo" button opens a chat with it. Unset hides those buttons. The site needs no `VITE_API_BASE_URL`: it never calls the backend.
 - Platform only: **no token env var.** The operator types the access code at the login screen; it is held in sessionStorage, sent as `x-platform-token`, and validated by the backend. Never reintroduce `VITE_PLATFORM_TOKEN` — Vite inlines `VITE_`-prefixed values into the bundle, so a hosted platform app built with it publishes the secret that administers every tenant.
 
 The customer app is unauthenticated; the admin app sends `Authorization: Bearer <access_token>` on every request; the platform app requires `x-platform-token`.

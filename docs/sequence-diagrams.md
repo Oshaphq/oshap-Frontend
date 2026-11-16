@@ -305,7 +305,7 @@ sequenceDiagram
 
 **Plans differ by capacity, not capability.** Every tier gets the whole product,
 and only two axes separate them
-([`tiers.data.ts`](../apps/platform/src/tiers.data.ts)):
+([`tiers.ts`](../packages/shared/src/utils/tiers.ts)):
 
 | | Lite | Standard | Pro | Enterprise |
 |---|---|---|---|---|
