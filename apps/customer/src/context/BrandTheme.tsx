@@ -1,12 +1,17 @@
-import { useEffect, useMemo, type ReactNode } from "react";
+import { useEffect, useLayoutEffect, useMemo, type ReactNode } from "react";
 import { brandCssVars, deriveBrandPalette, type BrandPalette } from "@oshap/shared";
 
 /**
  * Paints the guest's app in the restaurant's colour.
  *
  * `bg-primary` resolves through `--color-primary` to `--ds-primary`, so setting
- * that group on one wrapper rebrands every utility at once — no rebuild, no
+ * that group on one element rebrands every utility at once — no rebuild, no
  * inline styles on components, no markup changes anywhere else.
+ *
+ * That element is `<body>`, not a wrapper around the app. Sheet, Dialog and
+ * the Toaster portal into `document.body`, outside any wrapper, so a wrapper
+ * left the dish sheet's "Add" and the cart's "Place Order" — the two buttons
+ * every order goes through — in Oshap orange for every restaurant.
  *
  * Customer app only. The admin deliberately stays Oshap orange: a group owner
  * switches branches from its top nav, and a tool that changes colour mid-shift
@@ -68,6 +73,16 @@ export function BrandTheme({
     writeCache(tableId, palette);
   }, [tableId, primaryColor, palette]);
 
+  // Layout effect, so a cached brand is on <body> before the first paint.
+  // Removed on unmount: the owners' page at `/` renders outside this provider
+  // and must stay Oshap orange.
+  const branded = palette !== null;
+  useLayoutEffect(() => {
+    if (!branded) return;
+    document.body.setAttribute("data-brand", "");
+    return () => document.body.removeAttribute("data-brand");
+  }, [branded]);
+
   /**
    * Both modes are emitted, and the theme attribute picks between them. The
    * alternative — reading the current theme in JS — would need this to
@@ -102,9 +117,7 @@ export function BrandTheme({
   return (
     <>
       {css && <style>{css}</style>}
-      <div data-brand={palette ? "" : undefined} className="contents">
-        {children}
-      </div>
+      {children}
     </>
   );
 }

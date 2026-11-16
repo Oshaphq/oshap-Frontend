@@ -56,10 +56,14 @@ neutral, because a tinted background is where readability quietly dies.
 ```
 
 So `bg-primary` resolves through `--color-primary` to `--ds-primary`. **Overriding the
-`--ds-primary*` group on a wrapper element rebrands every utility at once**, with no
+`--ds-primary*` group on one element rebrands every utility at once**, with no
 rebuild, no `style={}` on components, and no change to any existing markup.
 
 That is the whole mechanism. One element, a handful of custom properties.
+
+The element is `<body>`, not a wrapper around the app. Sheets, dialogs and toasts portal
+into `document.body`, so a wrapper misses them: the dish sheet's Add and the cart's
+Place Order stayed Oshap orange for every brand until this was fixed.
 
 ## The part that is actually hard
 
@@ -147,7 +151,7 @@ switcher, no resolution logic, no decision.
    [`openapi.yaml`](openapi.yaml)~~ — done; both are declared.
 2. Palette derivation as a pure function in `packages/shared/src/utils/`, with tests. This
    is the piece worth getting right; everything after it is wiring.
-3. Apply on a wrapper in the customer app, plus the `sessionStorage` cache.
+3. Apply on `<body>` in the customer app, plus the `sessionStorage` cache.
 4. Settings field and live preview.
 5. Cover image hero.
 

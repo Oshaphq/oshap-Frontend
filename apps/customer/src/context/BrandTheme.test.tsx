@@ -1,5 +1,8 @@
 import { describe, it, expect, beforeEach } from "vitest";
+import { act } from "react";
+import { createRoot } from "react-dom/client";
 import { renderToStaticMarkup } from "react-dom/server";
+import { Sheet } from "@oshap/shared";
 import { BrandTheme } from "./BrandTheme";
 
 /**
@@ -155,5 +158,53 @@ describe("while the table is still loading", () => {
       </BrandTheme>,
     );
     expect(other).not.toContain("--ds-primary:");
+  });
+});
+
+describe("sheets, dialogs and toasts", () => {
+  // They portal into document.body. The brand used to sit on a wrapper around
+  // the app, so the dish sheet's "Add" and the cart's "Place Order" — the two
+  // buttons every order goes through — stayed Oshap orange for every brand.
+  function mount(primaryColor: string | null) {
+    const host = document.createElement("div");
+    document.body.appendChild(host);
+    const root = createRoot(host);
+    act(() => {
+      root.render(
+        <BrandTheme tableId="T1" primaryColor={primaryColor}>
+          <Sheet title="Cart" onClose={() => {}}>
+            <button type="button">Place Order</button>
+          </Sheet>
+        </BrandTheme>,
+      );
+    });
+    const unmount = () => {
+      act(() => root.unmount());
+      host.remove();
+    };
+    return { host, unmount };
+  }
+
+  it("brands a sheet even though it renders outside the app", () => {
+    const { host, unmount } = mount("#1a237e");
+    const button = document.body.querySelector("button")!;
+    // The guard: without it, this passes even if the sheet stopped portaling.
+    expect(host.contains(button)).toBe(false);
+    expect(button.closest("[data-brand]")).not.toBeNull();
+    unmount();
+  });
+
+  it("leaves nothing branded behind once the guest app unmounts", () => {
+    // The owners' page at `/` renders outside the provider and must stay
+    // Oshap orange.
+    const { unmount } = mount("#1a237e");
+    unmount();
+    expect(document.body.hasAttribute("data-brand")).toBe(false);
+  });
+
+  it("brands nothing for a restaurant without a colour", () => {
+    const { unmount } = mount(null);
+    expect(document.body.hasAttribute("data-brand")).toBe(false);
+    unmount();
   });
 });
