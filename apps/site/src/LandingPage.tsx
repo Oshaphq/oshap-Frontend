@@ -132,7 +132,7 @@ const FAQS = [
 ];
 
 /** Side gutter 16 → 24, content capped so lines stay readable on a wide screen. */
-const CONTAINER = "mx-auto w-full max-w-[72rem] px-md md:px-l";
+const CONTAINER = "mx-auto w-full max-w-[72rem] px-l md:px-xl";
 
 function DemoLink({ className }: { className: string }) {
   if (!DEMO_URL) return null;
@@ -192,7 +192,7 @@ function Pricing() {
                 role="radio"
                 aria-checked={selected}
                 onClick={() => setAnnual(option.value)}
-                className={`h-9 rounded-full border px-md text-label-large transition-colors ${
+                className={`h-9 rounded-full border px-l text-label-large transition-colors ${
                   selected
                     ? "bg-primary text-on-primary border-transparent"
                     : "bg-surface-container-high text-on-surface-variant border-outline-variant/30 hover:bg-surface-container-highest"
@@ -204,12 +204,12 @@ function Pricing() {
           })}
         </div>
 
-        <ul className="grid gap-md md:grid-cols-3">
+        <ul className="grid gap-l md:grid-cols-3">
           {PHASE_1_TIERS.map((tier) => {
             const kobo = annual ? TIER_ANNUAL_KOBO[tier] : TIER_MONTHLY_KOBO[tier];
             return (
               <li key={tier}>
-                <Card as="article" padding="l" className="flex h-full flex-col gap-l">
+                <Card as="article" padding="xl" className="flex h-full flex-col gap-xl">
                   <div className="flex flex-col gap-xs">
                     <h3 className="font-display text-title-large text-on-surface">
                       {TIER_NAME[tier]}
@@ -236,7 +236,7 @@ function Pricing() {
                       "Every feature",
                     ].map((line) => (
                       <li key={line} className="flex items-start gap-s">
-                        <i className="mgc_check_line mt-0.5 text-primary-label" aria-hidden="true" />
+                        <i className="mgc_check_line mt-xs text-primary-label" aria-hidden="true" />
                         {line}
                       </li>
                     ))}
@@ -266,19 +266,19 @@ export default function LandingPage() {
     <div className="min-h-dvh bg-surface text-on-surface">
       <a
         href="#main"
-        className="sr-only focus:not-sr-only focus:fixed focus:left-md focus:top-md focus:z-50 focus:rounded-sm focus:bg-surface-container-high focus:px-md focus:py-s"
+        className="sr-only focus:not-sr-only focus:fixed focus:left-l focus:top-l focus:z-50 focus:rounded-sm focus:bg-surface-container-high focus:px-l focus:py-md"
       >
         Skip to content
       </a>
 
       <header className="sticky top-0 z-40 border-b border-outline-variant bg-surface">
-        <nav aria-label="Main" className={`${CONTAINER} flex h-16 items-center justify-between gap-md`}>
+        <nav aria-label="Main" className={`${CONTAINER} flex h-16 items-center justify-between gap-l`}>
           <a href="/" className="flex items-center gap-s">
             <img src="/oshap.png" alt="" className="h-8 w-8 rounded-sm" />
             <span className="font-display text-title-large text-on-surface">Oshap</span>
           </a>
-          <div className="flex items-center gap-l">
-            <ul className="hidden items-center gap-l text-label-large text-on-surface-variant md:flex">
+          <div className="flex items-center gap-xl">
+            <ul className="hidden items-center gap-xl text-label-large text-on-surface-variant md:flex">
               <li><a href="#how-it-works" className="hover:text-on-surface">How it works</a></li>
               <li><a href="#pricing" className="hover:text-on-surface">Pricing</a></li>
               <li><a href="#faq" className="hover:text-on-surface">FAQ</a></li>
@@ -288,10 +288,10 @@ export default function LandingPage() {
         </nav>
       </header>
 
-      <main id="main" className="flex flex-col gap-5xl pb-5xl md:gap-9xl md:pb-9xl">
+      <main id="main" className="flex flex-col gap-3xl pb-3xl md:gap-4xl md:pb-4xl">
         {/* Hero */}
-        <section aria-labelledby="hero-title" className={`${CONTAINER} pt-3xl md:pt-8xl`}>
-          <div className="flex max-w-[48rem] flex-col gap-l">
+        <section aria-labelledby="hero-title" className={`${CONTAINER} pt-2xl md:pt-3xl`}>
+          <div className="flex max-w-[48rem] flex-col gap-xl">
             <h1 id="hero-title" className="font-display text-display-large text-on-surface">
               Order shap shap.
             </h1>
@@ -300,7 +300,7 @@ export default function LandingPage() {
               transfer or card. Your kitchen sees every order straight away, and every order is
               matched to a payment.
             </p>
-            <div className="flex flex-wrap items-center gap-s pt-s">
+            <div className="flex flex-wrap items-center gap-s pt-md">
               <DemoLink className={buttonClassName({ variant: "filled", size: "lg" })} />
               <a
                 href="#pricing"
@@ -319,7 +319,7 @@ export default function LandingPage() {
         <section aria-labelledby="how-title" id="how-it-works" className="scroll-mt-20">
           <div className={`${CONTAINER} flex flex-col gap-xl`}>
             <SectionHeading id="how-title" title="How it works" />
-            <ol className="grid gap-xl md:grid-cols-3 md:gap-l">
+            <ol className="grid gap-xl md:grid-cols-3 md:gap-xl">
               {STEPS.map((step, i) => (
                 <li key={step.title} className="flex flex-col gap-s">
                   <span className="font-display text-title-large text-primary-label" aria-hidden="true">
@@ -337,15 +337,15 @@ export default function LandingPage() {
         <section aria-labelledby="jobs-title">
           <div className={`${CONTAINER} flex flex-col gap-xl`}>
             <SectionHeading id="jobs-title" title="Built for the whole room" />
-            <div className="grid gap-md md:grid-cols-3">
+            <div className="grid gap-l md:grid-cols-3">
               {JOBS.map((job) => (
-                <Card key={job.title} as="article" padding="l" gap="md">
+                <Card key={job.title} as="article" padding="xl" gap="l">
                   <p className="text-label-large text-primary-label">{job.who}</p>
                   <h3 className="font-display text-headline-small text-on-surface">{job.title}</h3>
                   <ul className="flex flex-col gap-s text-body-medium text-on-surface-variant">
                     {job.points.map((point) => (
                       <li key={point} className="flex items-start gap-s">
-                        <i className="mgc_check_line mt-0.5 text-primary-label" aria-hidden="true" />
+                        <i className="mgc_check_line mt-xs text-primary-label" aria-hidden="true" />
                         {point}
                       </li>
                     ))}
@@ -360,10 +360,10 @@ export default function LandingPage() {
         <section aria-labelledby="included-title">
           <div className={`${CONTAINER} flex flex-col gap-xl`}>
             <SectionHeading id="included-title" title="Everything is included on every plan" />
-            <ul className="grid gap-x-l gap-y-l sm:grid-cols-2 lg:grid-cols-3">
+            <ul className="grid gap-x-xl gap-y-xl sm:grid-cols-2 lg:grid-cols-3">
               {INCLUDED.map((item) => (
-                <li key={item.name} className="flex items-start gap-md">
-                  <i className={`${item.icon} mt-0.5 text-[24px] text-on-surface-variant`} aria-hidden="true" />
+                <li key={item.name} className="flex items-start gap-l">
+                  <i className={`${item.icon} mt-xs text-[24px] text-on-surface-variant`} aria-hidden="true" />
                   <div className="flex flex-col gap-xs">
                     <span className="font-display text-title-medium text-on-surface">{item.name}</span>
                     <span className="text-body-medium text-on-surface-variant">{item.detail}</span>
@@ -383,14 +383,14 @@ export default function LandingPage() {
             <div className="max-w-[48rem] divide-y divide-outline-variant border-y border-outline-variant">
               {FAQS.map((faq) => (
                 <details key={faq.q} className="group">
-                  <summary className="flex min-h-14 cursor-pointer list-none items-center justify-between gap-md py-md font-display text-title-medium text-on-surface [&::-webkit-details-marker]:hidden">
+                  <summary className="flex min-h-14 cursor-pointer list-none items-center justify-between gap-l py-l font-display text-title-medium text-on-surface [&::-webkit-details-marker]:hidden">
                     {faq.q}
                     <i
                       className="mgc_down_line shrink-0 text-[20px] text-on-surface-variant transition-transform duration-150 ease-out group-open:rotate-180 motion-reduce:transition-none"
                       aria-hidden="true"
                     />
                   </summary>
-                  <p className="pb-md text-body-large text-on-surface-variant">{faq.a}</p>
+                  <p className="pb-l text-body-large text-on-surface-variant">{faq.a}</p>
                 </details>
               ))}
             </div>
@@ -401,7 +401,7 @@ export default function LandingPage() {
             not carry a paragraph. */}
         {DEMO_URL && (
           <section aria-labelledby="cta-title" className={CONTAINER}>
-            <Card padding="none" className="flex flex-col items-start gap-l px-l py-2xl md:items-center md:px-3xl md:py-4xl md:text-center">
+            <Card padding="none" className="flex flex-col items-start gap-xl px-xl py-2xl md:items-center md:px-2xl md:py-2xl md:text-center">
               <h2 id="cta-title" className="font-display text-headline-large text-on-surface">
                 See Oshap in your restaurant
               </h2>

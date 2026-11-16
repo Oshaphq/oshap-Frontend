@@ -47,7 +47,7 @@ const WIDTH = {
 export const SHELL_WIDTH = WIDTH.wide;
 
 /** Written out, not interpolated: Tailwind scans for literal class names. */
-const GAP = { md: "gap-md", l: "gap-l" } as const;
+const GAP = { l: "gap-l", xl: "gap-xl" } as const;
 
 export interface PageProps {
   width?: keyof typeof WIDTH;
@@ -59,13 +59,13 @@ export interface PageProps {
 
 export default function Page({
   width = "full",
-  gap = "l",
+  gap = "xl",
   children,
   className = "",
 }: PageProps) {
   return (
     <main
-      className={`p-md flex flex-col ${GAP[gap]} w-full ${WIDTH[width]} ${className}`}
+      className={`p-l flex flex-col ${GAP[gap]} w-full ${WIDTH[width]} ${className}`}
     >
       {children}
     </main>

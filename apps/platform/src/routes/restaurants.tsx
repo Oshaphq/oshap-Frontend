@@ -43,14 +43,14 @@ export default function RestaurantsPage() {
   });
 
   return (
-    <Page width="wide" gap="l">
+    <Page width="wide" gap="xl">
       <header className="flex items-center justify-between">
         <h1 className="font-display text-title-large font-semibold text-on-surface">
           Restaurants
         </h1>
         <Link
           to="/restaurants/new"
-          className="inline-flex items-center justify-center gap-xs py-3 px-l rounded-sm bg-primary text-on-primary text-[16px] leading-6 tracking-[0.1px] font-semibold font-display no-underline transition duration-100 ease-out hover:opacity-90 active:scale-[0.97] active:brightness-95"
+          className="inline-flex items-center justify-center gap-xs py-md px-xl rounded-sm bg-primary text-on-primary text-[16px] leading-6 tracking-[0.1px] font-semibold font-display no-underline transition duration-100 ease-out hover:opacity-90 active:scale-[0.97] active:brightness-95"
         >
           <i className="mgc_add_line" />
           Onboard New
@@ -116,9 +116,9 @@ export default function RestaurantsPage() {
           <Link
             key={r.id}
             to={`/restaurants/${r.id}`}
-            className="bg-surface-container-low rounded-lg p-md flex items-center justify-between gap-md no-underline hover:bg-surface-container-high transition-colors"
+            className="bg-surface-container-low rounded-lg p-l flex items-center justify-between gap-l no-underline hover:bg-surface-container-high transition-colors"
           >
-            <div className="flex items-center gap-md min-w-0 flex-1">
+            <div className="flex items-center gap-l min-w-0 flex-1">
               <div className="w-10 h-10 rounded-sm bg-primary-container flex items-center justify-center shrink-0">
                 <i className="mgc_fork_spoon_line text-on-primary-container text-lg" />
               </div>
@@ -131,18 +131,18 @@ export default function RestaurantsPage() {
             </div>
 
             <div className="flex items-center gap-s shrink-0">
-              <span className={`px-s py-xs rounded-full text-label-small font-bold uppercase tracking-wider ${TIER_COLORS[r.subscription_tier]}`}>
+              <span className={`px-md py-xs rounded-full text-label-small font-bold uppercase tracking-wider ${TIER_COLORS[r.subscription_tier]}`}>
                 {r.subscription_tier}
               </span>
               {/* Only annual is marked. Monthly is the default and labelling
                   every row with it would bury the handful that renew yearly,
                   which is the thing an operator is actually scanning for. */}
               {r.billing_period === "ANNUAL" && (
-                <span className="px-s py-xs rounded-full text-label-small font-bold uppercase tracking-wider bg-surface-container-high text-on-surface-variant">
+                <span className="px-md py-xs rounded-full text-label-small font-bold uppercase tracking-wider bg-surface-container-high text-on-surface-variant">
                   Annual
                 </span>
               )}
-              <span className={`px-s py-xs rounded-full text-label-small font-bold uppercase tracking-wider ${r.is_active ? "bg-success-container text-on-success-container" : "bg-surface-container-high text-on-surface-variant"}`}>
+              <span className={`px-md py-xs rounded-full text-label-small font-bold uppercase tracking-wider ${r.is_active ? "bg-success-container text-on-success-container" : "bg-surface-container-high text-on-surface-variant"}`}>
                 {r.is_active ? "Active" : "Inactive"}
               </span>
               <span className="text-body-small text-on-surface-variant hidden sm:inline">

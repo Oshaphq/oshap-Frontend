@@ -104,7 +104,7 @@ export default function RestaurantNewPage() {
 
   if (setupUrl) {
     return (
-      <Page width="narrow" gap="l">
+      <Page width="narrow" gap="xl">
         <header className="flex flex-col gap-xs">
           <h1 className="font-display text-title-large font-semibold text-on-surface">
             {created} is ready
@@ -143,7 +143,7 @@ export default function RestaurantNewPage() {
   }
 
   return (
-    <Page width="narrow" gap="l">
+    <Page width="narrow" gap="xl">
       <header>
         <h1 className="font-display text-title-large font-semibold text-on-surface">
           Onboard Restaurant
@@ -170,8 +170,8 @@ export default function RestaurantNewPage() {
       </header>
 
       {step === 1 && (
-        <form onSubmit={handleNext} className="flex flex-col gap-md">
-          <Card gap="md">
+        <form onSubmit={handleNext} className="flex flex-col gap-l">
+          <Card gap="l">
             <h2 className="text-title-large font-semibold text-on-surface">Restaurant Details</h2>
             <TextField aria-label="Restaurant name" placeholder="Restaurant name *" value={form.name} onChange={set("name")} />
             <TextField aria-label="Owner full name" placeholder="Owner full name *" value={form.owner_name} onChange={set("owner_name")} />
@@ -179,7 +179,7 @@ export default function RestaurantNewPage() {
             <TextField type="email" aria-label="Owner email" placeholder="Owner email (optional)" value={form.owner_email} onChange={set("owner_email")} />
           </Card>
 
-          <Card gap="md">
+          <Card gap="l">
             <h2 className="text-title-large font-semibold text-on-surface">Subscription Tier</h2>
             {/* Phase 1 plans only. Enterprise belongs to Phase 2, alongside
                 payment infrastructure that does not exist — offering it here
@@ -190,7 +190,7 @@ export default function RestaurantNewPage() {
                   key={tier}
                   type="button"
                   onClick={() => setForm((p) => ({ ...p, subscription_tier: tier }))}
-                  className={`py-s px-md rounded-sm border-2 text-left transition-all ${
+                  className={`py-md px-l rounded-sm border-2 text-left transition-all ${
                     form.subscription_tier === tier
                       ? "border-primary bg-primary-container text-on-primary-container"
                       : "border-outline-variant bg-surface-container-low text-on-surface hover:border-outline"
@@ -216,7 +216,7 @@ export default function RestaurantNewPage() {
                     key={period}
                     type="button"
                     onClick={() => setForm((p) => ({ ...p, billing_period: period }))}
-                    className={`py-s px-md rounded-sm border-2 text-left transition-all ${
+                    className={`py-md px-l rounded-sm border-2 text-left transition-all ${
                       form.billing_period === period
                         ? "border-primary bg-primary-container text-on-primary-container"
                         : "border-outline-variant bg-surface-container-low text-on-surface hover:border-outline"
@@ -244,8 +244,8 @@ export default function RestaurantNewPage() {
       )}
 
       {step === 2 && (
-        <form onSubmit={handleCreate} className="flex flex-col gap-md">
-          <Card gap="md">
+        <form onSubmit={handleCreate} className="flex flex-col gap-l">
+          <Card gap="l">
             <h2 className="text-title-large font-semibold text-on-surface">Tables</h2>
             <TextField
               type="number"
@@ -257,7 +257,7 @@ export default function RestaurantNewPage() {
             />
           </Card>
 
-          <Card gap="md">
+          <Card gap="l">
             <h2 className="text-title-large font-semibold text-on-surface">Bank Details (optional)</h2>
             <TextField aria-label="Bank name" placeholder="Bank name" value={form.bank_name} onChange={set("bank_name")} />
             <TextField aria-label="Account number" placeholder="Account number" value={form.account_number} onChange={set("account_number")} />

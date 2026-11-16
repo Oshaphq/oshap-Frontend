@@ -36,7 +36,7 @@ const src = readFileSync(
 
 describe("an audit entry is a card on a phone", () => {
   it("has a phone layout hidden from sm up", () => {
-    expect(src).toContain("flex flex-col gap-0.5 sm:hidden");
+    expect(src).toContain("flex flex-col gap-xs sm:hidden");
   });
 
   it("keeps the wrapping row for widths that can hold it", () => {

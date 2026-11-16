@@ -118,12 +118,12 @@ export default function CashPaymentDialog({
     >
       {/* No spinner: the table is passed in, so there is nothing to wait for. */}
       {orderIds.length === 0 ? (
-        <p className="text-body-medium text-on-surface-variant py-l text-center">
+        <p className="text-body-medium text-on-surface-variant py-xl text-center">
           This table has no unpaid bill.
         </p>
       ) : (
         <>
-          <div className="flex flex-col items-center gap-xs py-l rounded-sm bg-surface-container">
+          <div className="flex flex-col items-center gap-xs py-xl rounded-sm bg-surface-container">
             <span className="text-label-small font-semibold uppercase tracking-wider text-on-surface-variant">
               Amount due
             </span>
@@ -146,10 +146,10 @@ export default function CashPaymentDialog({
                   role="radio"
                   onClick={() => setMethod(m.value)}
                   aria-checked={method === m.value}
-                  className={`flex-1 flex items-center justify-center gap-xs px-s py-s rounded-sm text-body-medium font-semibold transition-colors ${
+                  className={`flex-1 flex items-center justify-center gap-xs px-md py-md rounded-sm text-body-medium font-semibold transition-colors ${
                     method === m.value
                       ? "bg-primary text-on-primary"
-                      : "bg-surface-container text-on-surface-variant hover:bg-surface-container-highest"
+                      : "bg-surface-container-high text-on-surface-variant hover:bg-surface-container-highest"
                   }`}
                 >
                   <i className={m.icon} aria-hidden /> {m.label}
@@ -172,7 +172,7 @@ export default function CashPaymentDialog({
               value={tendered}
               onChange={(e) => setTendered(e.target.value)}
               placeholder="Amount in ₦"
-              className="w-full px-md py-s rounded-sm bg-surface-container-low border border-outline-variant text-body-medium text-on-surface placeholder:text-on-surface-placeholder outline-none focus:border-primary transition-colors"
+              className="w-full px-l py-md rounded-sm bg-surface-container-low border border-outline text-body-medium text-on-surface placeholder:text-on-surface-placeholder outline-none focus:border-primary transition-colors"
             />
             <div className="flex flex-wrap gap-xs">
               {QUICK_NOTES.map((note) => (
@@ -180,7 +180,7 @@ export default function CashPaymentDialog({
                   key={note}
                   type="button"
                   onClick={() => setTendered(String(note))}
-                  className="px-md py-xs rounded-full bg-surface-container text-on-surface-variant text-body-medium font-semibold hover:bg-surface-container-highest transition-colors"
+                  className="px-l py-xs rounded-full bg-surface-container-high text-on-surface-variant text-body-medium font-semibold hover:bg-surface-container-highest transition-colors"
                 >
                   ₦{note.toLocaleString()}
                 </button>
@@ -191,7 +191,7 @@ export default function CashPaymentDialog({
           {/* Saves the cashier doing subtraction at a busy till, which is
               where change mistakes come from. */}
           {tender.kind === "change" && (
-            <div className="flex items-center justify-between p-md rounded-sm bg-success-container text-on-success-container">
+            <div className="flex items-center justify-between p-l rounded-sm bg-success-container text-on-success-container">
               <span className="text-label-large font-semibold">Change due</span>
               <span className="font-display text-title-medium font-semibold tabular-nums">
                 {formatCurrency(tender.change)}
@@ -202,7 +202,7 @@ export default function CashPaymentDialog({
               refuse it, because the endpoint booked the full amount either
               way and the shortfall vanished. */}
           {tender.kind === "short" && (
-            <div className="flex flex-col gap-xs p-md rounded-sm bg-warning-container text-on-warning-container">
+            <div className="flex flex-col gap-xs p-l rounded-sm bg-warning-container text-on-warning-container">
               <div className="flex items-center justify-between">
                 <span className="text-label-large font-semibold">Still owing</span>
                 <span className="font-display text-title-medium font-semibold tabular-nums">
@@ -216,7 +216,7 @@ export default function CashPaymentDialog({
             </div>
           )}
 
-          <div className="flex justify-end gap-s pt-s">
+          <div className="flex justify-end gap-s pt-md">
             <SecondaryButton size="md" onClick={onClose}>
               Cancel
             </SecondaryButton>

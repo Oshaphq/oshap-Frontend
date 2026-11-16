@@ -97,13 +97,13 @@ function MenuView({ tableId }: { tableId: string }) {
           {/* The name sits over the photo, so it needs a floor to stay legible
               no matter what the picture is doing underneath it. */}
           <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
-          <p className="absolute bottom-md left-md font-display text-title-medium font-semibold text-white drop-shadow">
+          <p className="absolute bottom-l left-l font-display text-title-medium font-semibold text-white drop-shadow">
             {tableQuery.data.restaurant.name}
           </p>
         </div>
       )}
 
-      <div className="px-md bg-surface border-b border-outline-variant">
+      <div className="px-l bg-surface border-b border-outline-variant">
         <CategoryTabs
           categories={categories}
           activeCategory={activeCategory}
@@ -111,7 +111,7 @@ function MenuView({ tableId }: { tableId: string }) {
         />
       </div>
 
-      <section className="p-md flex flex-col gap-md">
+      <section className="p-l flex flex-col gap-l">
         <div className="flex justify-between items-center">
           <h2 className="font-display text-title-large font-semibold text-on-surface">
             {activeCategory === "All" ? "Full Menu" : activeCategory}
@@ -130,7 +130,7 @@ function MenuView({ tableId }: { tableId: string }) {
         </div>
 
         {searchOpen && (
-          <div className="flex items-center gap-s px-md py-s rounded-sm bg-surface-container-low border border-outline-variant">
+          <div className="flex items-center gap-s px-l py-md rounded-sm bg-surface-container-low border border-outline-variant">
             <i className="mgc_search_line text-lg text-on-surface-variant" />
             <input
               type="text"
@@ -190,8 +190,8 @@ function MenuView({ tableId }: { tableId: string }) {
  */
 function MenuSkeleton() {
   return (
-    <SkeletonGroup label="Loading the menu" className="flex flex-col gap-md">
-      <div className="flex gap-s py-md overflow-hidden">
+    <SkeletonGroup label="Loading the menu" className="flex flex-col gap-l">
+      <div className="flex gap-s py-l overflow-hidden">
         {[0, 1, 2, 3].map((i) => (
           <Skeleton
             key={i}
@@ -205,7 +205,7 @@ function MenuSkeleton() {
       {[0, 1, 2, 3, 4].map((i) => (
         <div
           key={i}
-          className="flex items-center gap-md p-md bg-surface-container-low rounded-lg"
+          className="flex items-center gap-l p-l bg-surface-container-low rounded-lg"
         >
           <Skeleton
             shape="block"

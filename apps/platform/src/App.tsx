@@ -76,10 +76,10 @@ function PlatformLogin({ onLogin }: { onLogin: () => void }) {
   };
 
   return (
-    <div className="min-h-screen bg-surface flex items-center justify-center p-md">
+    <div className="min-h-screen bg-surface flex items-center justify-center p-l">
       <form
         onSubmit={handleSubmit}
-        className="w-full max-w-[360px] bg-surface-container-low rounded-2xl p-xl flex flex-col items-center gap-md"
+        className="w-full max-w-[360px] bg-surface-container-low rounded-2xl p-xl flex flex-col items-center gap-l"
       >
         <div className="w-14 h-14 rounded-full bg-primary-container flex items-center justify-center text-2xl text-on-primary-container">
           <i className="mgc_shield_line" />
@@ -100,7 +100,7 @@ function PlatformLogin({ onLogin }: { onLogin: () => void }) {
             setToken(e.target.value);
             setError("");
           }}
-          className={`w-full px-md py-md rounded-sm bg-surface-container-low border-2 text-body-large text-on-surface placeholder:text-on-surface-placeholder outline-none transition-colors ${
+          className={`w-full px-l py-l rounded-sm bg-surface-container-low border-2 text-body-large text-on-surface placeholder:text-on-surface-placeholder outline-none transition-colors ${
             error ? "border-error" : "border-outline-variant focus:border-primary"
           }`}
         />
@@ -140,7 +140,7 @@ function PlatformLayout() {
   return (
     <div className="min-h-screen bg-surface flex flex-col">
       <header className="bg-surface border-b border-outline-variant">
-        <nav className="flex items-center justify-between gap-s px-s sm:px-md py-s">
+        <nav className="flex items-center justify-between gap-s px-md sm:px-l py-md">
           {/* Hamburger — mobile & tablet only */}
           <button
             className="md:hidden w-10 h-10 flex items-center justify-center rounded-sm text-on-surface-variant hover:bg-surface-container-high transition-colors shrink-0"
@@ -156,14 +156,14 @@ function PlatformLayout() {
           </span>
 
           {/* Desktop tab bar — hidden below md */}
-          <div className="hidden md:flex items-center gap-0.5 shrink min-w-0">
+          <div className="hidden md:flex items-center gap-xs shrink min-w-0">
             {navLinks.map((link) => (
               <NavLink
                 key={link.to}
                 to={link.to}
                 end={link.end}
                 className={({ isActive }) =>
-                  `px-md py-s rounded-sm text-label-large font-semibold font-display whitespace-nowrap transition-colors no-underline shrink-0 ${
+                  `px-l py-md rounded-sm text-label-large font-semibold font-display whitespace-nowrap transition-colors no-underline shrink-0 ${
                     isActive
                       ? "bg-primary text-on-primary"
                       : "text-on-surface-variant hover:bg-surface-container-high"
@@ -192,7 +192,7 @@ function PlatformLayout() {
 
         {/* Mobile / tablet drawer */}
         {menuOpen && (
-          <div className="md:hidden px-s pb-s flex flex-col gap-xs">
+          <div className="md:hidden px-md pb-md flex flex-col gap-xs">
             {navLinks.map((link) => (
               <NavLink
                 key={link.to}
@@ -200,7 +200,7 @@ function PlatformLayout() {
                 end={link.end}
                 onClick={() => setMenuOpen(false)}
                 className={({ isActive }) =>
-                  `px-md py-s rounded-sm text-label-large font-semibold font-display transition-colors no-underline ${
+                  `px-l py-md rounded-sm text-label-large font-semibold font-display transition-colors no-underline ${
                     isActive
                       ? "bg-primary text-on-primary"
                       : "text-on-surface-variant hover:bg-surface-container-high"

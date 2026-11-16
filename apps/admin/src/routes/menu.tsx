@@ -286,7 +286,7 @@ export default function MenuPage() {
 
   if (menuQuery.isLoading) {
     return (
-      <div className="flex flex-col items-center justify-center min-h-[60vh] gap-md text-on-surface-variant">
+      <div className="flex flex-col items-center justify-center min-h-[60vh] gap-l text-on-surface-variant">
         <Spinner />
         <p>Loading menu...</p>
       </div>
@@ -307,13 +307,13 @@ export default function MenuPage() {
   const isSaving = createItem.isPending || updateItem.isPending;
 
   return (
-    <Page width="wide" gap="md">
+    <Page width="wide" gap="l">
       {/* The title gets its own line. Beside five actions it was the thing
           that gave way — squeezed on a phone, and pinned to the far left of a
           wide screen from the buttons it belongs with. */}
       {/* Beside the title from `sm`, stacked below it on a phone — the same
           shape every other admin screen uses. */}
-      <header className="flex flex-col gap-s sm:flex-row sm:items-start sm:justify-between sm:gap-md">
+      <header className="flex flex-col gap-s sm:flex-row sm:items-start sm:justify-between sm:gap-l">
         <h1 className="font-display text-title-large font-semibold text-on-surface">
           Menu Management
         </h1>
@@ -375,7 +375,7 @@ export default function MenuPage() {
         />
       )}
 
-      <div className="flex flex-col gap-md">
+      <div className="flex flex-col gap-l">
         {showNewForm && (
           <MenuItemForm
             heading="New Menu Item"
@@ -521,9 +521,9 @@ function MenuItemRow({
         !item.available ? "opacity-55" : ""
       }`}
     >
-      <div className="p-md flex flex-col gap-s">
-        <div className="flex items-start justify-between gap-md">
-          <div className="flex items-start gap-md flex-1 min-w-0">
+      <div className="p-l flex flex-col gap-s">
+        <div className="flex items-start justify-between gap-l">
+          <div className="flex items-start gap-l flex-1 min-w-0">
             {selecting && (
               <Checkbox
                 checked={isSelected}
@@ -563,7 +563,7 @@ function MenuItemRow({
               goes neutral rather than red — it is a choice, not a fault, and
               the card already dims. */}
           <span
-            className={`shrink-0 px-s py-0.5 rounded-full font-bold text-label-small uppercase tracking-wider whitespace-nowrap ${
+            className={`shrink-0 px-md py-xs rounded-full font-bold text-label-small uppercase tracking-wider whitespace-nowrap ${
               item.available
                 ? "bg-success-container text-on-success-container"
                 : "bg-surface-container-high text-on-surface-variant"
@@ -592,7 +592,7 @@ function MenuItemRow({
                   if (e.key === "Enter") onStockSave();
                   if (e.key === "Escape") onStockCancel();
                 }}
-                className="w-28 px-s py-xs rounded-lg border border-outline-variant bg-surface-container-low text-body-medium text-on-surface outline-none focus:border-primary"
+                className="w-28 px-md py-xs rounded-lg border border-outline bg-surface-container-low text-body-medium text-on-surface outline-none focus:border-primary"
                 autoFocus
               />
             </label>
@@ -612,7 +612,7 @@ function MenuItemRow({
                   if (e.key === "Enter") onStockSave();
                   if (e.key === "Escape") onStockCancel();
                 }}
-                className="w-24 px-s py-xs rounded-lg border border-outline-variant bg-surface-container-low text-body-medium text-on-surface outline-none focus:border-primary"
+                className="w-24 px-md py-xs rounded-lg border border-outline bg-surface-container-low text-body-medium text-on-surface outline-none focus:border-primary"
               />
             </label>
             <button
@@ -634,7 +634,7 @@ function MenuItemRow({
           <button
             type="button"
             onClick={onStockEditStart}
-            className={`w-fit px-s py-0.5 rounded-full text-label-small font-bold flex items-center gap-xs transition-colors ${
+            className={`w-fit px-md py-xs rounded-full text-label-small font-bold flex items-center gap-xs transition-colors ${
               isOut
                 ? "bg-error-container text-on-error-container"
                 : isLow
@@ -662,21 +662,21 @@ function MenuItemRow({
           <button
             type="button"
             onClick={onToggle}
-            className="px-md py-s rounded-sm bg-surface-container text-on-surface-variant text-body-small font-semibold hover:bg-surface-container-high hover:text-on-surface transition-colors"
+            className="px-l py-md rounded-sm bg-surface-container-high text-on-surface-variant text-body-small font-semibold hover:bg-surface-container-highest hover:text-on-surface transition-colors"
           >
             {item.available ? "Mark Unavailable" : "Mark Available"}
           </button>
           <button
             type="button"
             onClick={onEdit}
-            className="px-md py-s rounded-sm bg-surface-container text-on-surface-variant text-body-small font-semibold hover:bg-surface-container-high hover:text-on-surface transition-colors"
+            className="px-l py-md rounded-sm bg-surface-container-high text-on-surface-variant text-body-small font-semibold hover:bg-surface-container-highest hover:text-on-surface transition-colors"
           >
             Edit
           </button>
           <button
             type="button"
             onClick={onEditOptions}
-            className="px-md py-s rounded-sm bg-surface-container text-on-surface-variant text-body-small font-semibold hover:bg-surface-container-high hover:text-on-surface transition-colors"
+            className="px-l py-md rounded-sm bg-surface-container-high text-on-surface-variant text-body-small font-semibold hover:bg-surface-container-highest hover:text-on-surface transition-colors"
           >
             Options
             {(item.modifier_groups?.length ?? 0) > 0 && (
@@ -688,14 +688,14 @@ function MenuItemRow({
           <button
             type="button"
             onClick={onEditRecipe}
-            className="px-md py-s rounded-sm bg-surface-container text-on-surface-variant text-body-small font-semibold hover:bg-surface-container-high hover:text-on-surface transition-colors"
+            className="px-l py-md rounded-sm bg-surface-container-high text-on-surface-variant text-body-small font-semibold hover:bg-surface-container-highest hover:text-on-surface transition-colors"
           >
             Recipe
           </button>
           <button
             type="button"
             onClick={onDelete}
-            className="px-md py-s rounded-sm border border-error bg-transparent text-error text-body-small font-bold hover:bg-error hover:text-on-error transition-all"
+            className="px-l py-md rounded-sm border border-error bg-transparent text-error text-body-small font-bold hover:bg-error hover:text-on-error transition-all"
           >
             Delete
           </button>
@@ -745,7 +745,7 @@ function MenuItemForm({
   };
 
   return (
-    <div className="rounded-lg bg-surface-container-low p-l flex flex-col gap-md border border-primary">
+    <div className="rounded-lg bg-surface-container-low p-xl flex flex-col gap-l border border-primary">
       <h3 className="font-bold text-on-surface">{heading}</h3>
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-s">
         <TextField
@@ -793,7 +793,7 @@ function MenuItemForm({
           type="button"
           onClick={() => fileInputRef.current?.click()}
           disabled={uploadImage.isPending}
-          className="self-start inline-flex items-center gap-s py-s px-md rounded-sm border border-dashed border-primary bg-transparent text-primary-label text-body-medium font-semibold transition-all hover:bg-primary/5 disabled:opacity-50 disabled:cursor-not-allowed"
+          className="self-start inline-flex items-center gap-s py-md px-l rounded-sm border border-dashed border-primary bg-transparent text-primary-label text-body-medium font-semibold transition-all hover:bg-primary/5 disabled:opacity-50 disabled:cursor-not-allowed"
         >
           {uploadImage.isPending ? "Uploading..." : "Upload Image"}
         </button>
@@ -865,8 +865,8 @@ function SelectionBar({
   const allSelected = items.length > 0 && chosen.length === items.length;
 
   return (
-    <div className="sticky top-0 z-20 flex flex-col gap-s p-md rounded-lg bg-surface-container-high border border-outline-variant shadow-lg">
-      <div className="flex items-center justify-between gap-md flex-wrap">
+    <div className="sticky top-0 z-20 flex flex-col gap-s p-l rounded-lg bg-surface-overlay border border-outline-variant shadow-lg">
+      <div className="flex items-center justify-between gap-l flex-wrap">
         <Checkbox
           checked={allSelected}
           onChange={() =>
@@ -897,7 +897,7 @@ function SelectionBar({
       </div>
 
       {confirming && chosen.length > 0 && (
-        <div className="flex flex-col gap-s pt-s border-t border-outline-variant">
+        <div className="flex flex-col gap-s pt-md border-t border-outline-variant">
           <p className="text-body-medium text-on-surface-variant">
             Delete{" "}
             <span className="font-semibold text-on-surface">

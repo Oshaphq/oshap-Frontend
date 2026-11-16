@@ -4,13 +4,13 @@ import type { SelectHTMLAttributes } from "react";
  * A `<select>` with a chevron we draw ourselves.
  *
  * The native chevron is painted by the UA at the inside edge of the border and
- * ignores `padding-right` entirely. So a select styled `px-md` gets 16px of
+ * ignores `padding-right` entirely. So a select styled `px-l` gets 16px of
  * inset on the left and none on the right — the arrow sits flush against the
  * border while the text does not. It reads as a rendering bug because it is
  * asymmetric, and no amount of padding fixes it.
  *
  * `appearance-none` removes it, and the icon is positioned at the same inset as
- * the text: `pl-md` pairs with `right-md`, `pl-s` with `right-s`. The `pr-*`
+ * the text: `pl-l` pairs with `right-l`, `pl-md` with `right-s`. The `pr-*`
  * value only has to be large enough that a long option label never slides
  * under the icon — it is clearance, not the visual gap.
  *
@@ -30,11 +30,11 @@ const DENSITY = {
   md: {
     // `h-10` to match Button `md` and TextField `md`. A select beside a button
     // used to be 38 against 40, which reads as a rendering fault in a toolbar.
-    field: "h-10 pl-md pr-10 text-body-medium",
-    icon: "right-md",
+    field: "h-10 pl-l pr-10 text-body-medium",
+    icon: "right-l",
   },
   sm: {
-    field: "h-8 pl-s pr-xl text-body-medium",
+    field: "h-8 pl-md pr-xl text-body-medium",
     icon: "right-s text-sm",
   },
 } as const;

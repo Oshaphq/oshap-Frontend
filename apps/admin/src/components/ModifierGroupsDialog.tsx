@@ -102,7 +102,7 @@ export default function ModifierGroupsDialog({ onClose }: { onClose: () => void 
             <Spinner />
           </div>
         ) : groups.length === 0 ? (
-          <p className="text-body-medium text-on-surface-variant text-center py-l">
+          <p className="text-body-medium text-on-surface-variant text-center py-xl">
             No option groups yet. Create one below — for example
             &ldquo;Size&rdquo; or &ldquo;Spice level&rdquo;.
           </p>
@@ -166,7 +166,7 @@ function GroupRow({
 
   return (
     <section className="rounded-lg bg-surface-container-low border border-outline-variant overflow-hidden">
-      <div className="flex items-center justify-between gap-md p-md">
+      <div className="flex items-center justify-between gap-l p-l">
         <button
           type="button"
           onClick={onToggle}
@@ -198,8 +198,8 @@ function GroupRow({
       </div>
 
       {isOpen && (
-        <div className="px-md pb-md flex flex-col gap-md border-t border-outline-variant pt-md">
-          <div className="flex flex-wrap items-center gap-md">
+        <div className="px-l pb-l flex flex-col gap-l border-t border-outline-variant pt-l">
+          <div className="flex flex-wrap items-center gap-l">
             <Checkbox
               checked={group.required}
               onChange={(required) =>
@@ -236,14 +236,14 @@ function GroupRow({
 
           <div className="flex flex-col rounded-lg bg-surface-container overflow-hidden">
             {group.options.length === 0 && (
-              <p className="text-body-medium text-on-surface-variant px-md py-s">
+              <p className="text-body-medium text-on-surface-variant px-l py-md">
                 No options yet.
               </p>
             )}
             {group.options.map((option) => (
               <div
                 key={option.id}
-                className="flex items-center gap-s px-md py-s border-b border-outline-variant/40 last:border-none"
+                className="flex items-center gap-s px-l py-md border-b border-outline-variant/40 last:border-none"
               >
                 <span className="flex-1 text-body-medium text-on-surface min-w-0 truncate">
                   {option.name}
@@ -263,7 +263,7 @@ function GroupRow({
                       payload: { available: !option.available },
                     })
                   }
-                  className={`px-s py-xs rounded-full text-label-small font-bold uppercase tracking-wider transition-colors ${
+                  className={`px-md py-xs rounded-full text-label-small font-bold uppercase tracking-wider transition-colors ${
                     option.available
                       ? "bg-surface-container-high text-on-surface-variant"
                       : "bg-error-container text-on-error-container"

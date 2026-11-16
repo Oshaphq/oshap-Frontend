@@ -57,9 +57,9 @@ export default function ModifierSheet({ item, onClose, onAdd, remaining = null }
    * jumps on the first keystroke.
    */
   const growNotes = (el: HTMLTextAreaElement) => {
-    // `py-md` against a 20px line puts the field at 54px with the single line —
+    // `py-l` against a 20px line puts the field at 54px with the single line —
     // placeholder or typed — on its centre. It is the only step on the spacing
-    // scale that clears the 48px touch minimum: `py-s` lands at 38px.
+    // scale that clears the 48px touch minimum: `py-md` lands at 38px.
     el.style.height = "auto";
     el.style.height = `${el.scrollHeight}px`;
   };
@@ -125,11 +125,11 @@ export default function ModifierSheet({ item, onClose, onAdd, remaining = null }
          naming it for the dish alone loses the purpose when there is. */
       label={groups.length > 0 ? `Choose options for ${item.name}` : item.name}
       maxHeight="max-h-[88vh]"
-      bodyClassName="flex flex-col gap-l"
+      bodyClassName="flex flex-col gap-xl"
       header={
-        <div className="flex flex-col gap-md min-w-0 flex-1">
-          <div className="flex items-start gap-md">
-            <div className="flex items-start gap-md min-w-0">
+        <div className="flex flex-col gap-l min-w-0 flex-1">
+          <div className="flex items-start gap-l">
+            <div className="flex items-start gap-l min-w-0">
               <div className="shrink-0 w-16 h-16 rounded-md overflow-hidden bg-primary-container">
                 {item.image_url ? (
                   <img
@@ -147,7 +147,7 @@ export default function ModifierSheet({ item, onClose, onAdd, remaining = null }
                   description to one; this sheet is where the guest comes to
                   read the rest, so clamping here would leave nowhere that
                   shows it. */}
-              <div className="flex flex-col gap-0.5 min-w-0">
+              <div className="flex flex-col gap-xs min-w-0">
                 <h2 className="font-display text-title-medium font-semibold text-on-surface">
                   {item.name}
                 </h2>
@@ -166,7 +166,7 @@ export default function ModifierSheet({ item, onClose, onAdd, remaining = null }
         </div>
       }
       footer={
-        <div className="flex items-center gap-md">
+        <div className="flex items-center gap-l">
           <div className="flex items-center gap-s shrink-0">
             <button
               type="button"
@@ -219,11 +219,11 @@ export default function ModifierSheet({ item, onClose, onAdd, remaining = null }
             const full = group.max > 1 && current.length >= group.max;
             return (
               <fieldset key={group.id} className="flex flex-col gap-s border-0 p-0 m-0">
-                <legend className="flex items-baseline justify-between gap-md w-full mb-xs">
+                <legend className="flex items-baseline justify-between gap-l w-full mb-xs">
                   <span className="text-title-medium font-semibold text-on-surface">
                     {group.name}
                     {group.required && (
-                      <span className="text-error ml-0.5" aria-hidden="true">
+                      <span className="text-error ml-xs" aria-hidden="true">
                         *
                       </span>
                     )}
@@ -251,7 +251,7 @@ export default function ModifierSheet({ item, onClose, onAdd, remaining = null }
                           aria-checked={isSelected}
                           disabled={blocked}
                           onClick={() => toggle(group, option.id)}
-                          className="flex items-center gap-s px-md py-s text-left border-b border-outline-variant/40 last:border-none transition-colors hover:bg-surface-container-high disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-transparent"
+                          className="flex items-center gap-s px-l py-md text-left border-b border-outline-variant/40 last:border-none transition-colors hover:bg-surface-container-high disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-transparent"
                         >
                           <span
                             aria-hidden="true"
@@ -306,7 +306,7 @@ export default function ModifierSheet({ item, onClose, onAdd, remaining = null }
               rows={1}
               maxLength={140}
               placeholder="e.g. no onions, well done"
-              className="w-full px-md py-md rounded-sm bg-surface-container border border-outline text-body-medium text-on-surface placeholder:text-on-surface-placeholder focus:border-primary transition-colors resize-none overflow-hidden"
+              className="w-full px-l py-l rounded-sm bg-surface-container border border-outline text-body-medium text-on-surface placeholder:text-on-surface-placeholder focus:border-primary transition-colors resize-none overflow-hidden"
             />
           </div>
     </Sheet>

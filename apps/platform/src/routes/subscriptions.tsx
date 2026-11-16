@@ -58,7 +58,7 @@ export default function SubscriptionsPage() {
 
   if (query.isError) {
     return (
-      <Page width="wide" gap="l">
+      <Page width="wide" gap="xl">
         <QueryError
           error={query.error}
           action="load the subscriptions"
@@ -69,7 +69,7 @@ export default function SubscriptionsPage() {
   }
 
   return (
-    <Page width="wide" gap="l">
+    <Page width="wide" gap="xl">
       <header>
         <h1 className="font-display text-title-large font-semibold text-on-surface">
           Subscriptions
@@ -78,7 +78,7 @@ export default function SubscriptionsPage() {
       </header>
 
       {/* Revenue summary */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-md">
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-l">
         <Card gap="xs">
           <span className="text-label-large font-semibold text-on-surface-variant uppercase tracking-wider">MRR (est.)</span>
           <span className="font-display text-title-medium font-semibold text-on-surface">{formatCurrency(mrr)}</span>
@@ -102,7 +102,7 @@ export default function SubscriptionsPage() {
       </div>
 
       {/* Tier breakdown */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-md">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-l">
         {TIER_ORDER.map((tier) => {
           const count = byTier[tier].length;
           const active = byTier[tier].filter((r) => r.is_active).length;
@@ -110,7 +110,7 @@ export default function SubscriptionsPage() {
           return (
             <div
               key={tier}
-              className={`rounded-lg p-md flex flex-col gap-s border-2 ${TIER_COLORS[tier]}`}
+              className={`rounded-lg p-l flex flex-col gap-s border-2 ${TIER_COLORS[tier]}`}
             >
               <div className="flex items-center justify-between">
                 <span className="font-display font-bold text-body-large">{tier}</span>

@@ -5,7 +5,7 @@ import type { HTMLAttributes } from "react";
  *
  * `bg-surface-container-low rounded-lg` appeared about fifty times across the
  * three apps, in roughly twenty different class strings. Most of the variation
- * is not a decision — it is padding written `p-md` in one file and `p-l` in
+ * is not a decision — it is padding written `p-l` in one file and `p-xl` in
  * the next for blocks doing the same job, and a `flex flex-col gap-*` tail
  * that shifted between `xs`, `s` and `md` with nothing distinguishing them.
  *
@@ -15,22 +15,26 @@ import type { HTMLAttributes } from "react";
  * `docs/color-usage.md` rather than to fifty copies — and so the next card
  * does not invent a twenty-first spelling.
  *
- * The padding and gap of every converted call site are preserved exactly.
- * Deciding that a section card should be `p-l` and a tile `p-md` is a design
- * question, and it is not settled by moving strings into a component.
+ * Padding was left open when this component landed. The golden spacing scale
+ * settles it — see PADDING below.
  */
 
+/**
+ * Two paddings, and the job decides which: `l` (17) for a tile or list item,
+ * `xl` (27) for a section card, an empty state or an auth panel. The 4pt grid
+ * offered 16, 24 and 32 with nothing choosing between them.
+ */
 const PADDING = {
   none: "",
-  md: "p-md",
   l: "p-l",
+  xl: "p-xl",
 } as const;
 
 const GAP = {
   none: "",
   xs: "flex flex-col gap-xs",
   s: "flex flex-col gap-s",
-  md: "flex flex-col gap-md",
+  l: "flex flex-col gap-l",
 } as const;
 
 export interface CardProps extends HTMLAttributes<HTMLDivElement> {
@@ -46,7 +50,7 @@ export interface CardProps extends HTMLAttributes<HTMLDivElement> {
 }
 
 export default function Card({
-  padding = "md",
+  padding = "l",
   gap = "none",
   as: Tag = "div",
   className = "",

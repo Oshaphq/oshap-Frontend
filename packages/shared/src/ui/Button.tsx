@@ -58,8 +58,8 @@ export interface ButtonProps
 
 /** Height and padding only — the label size is decided by the variant. */
 const SIZE: Record<ButtonSize, string> = {
-  md: "h-10 px-l gap-s",
-  lg: "h-12 px-7 gap-s",
+  md: "h-10 px-xl gap-s",
+  lg: "h-12 px-xl gap-s",
 };
 
 const VARIANT: Record<ButtonVariant, string> = {
@@ -98,8 +98,8 @@ const LABEL: Record<ButtonVariant, string> = {
 
 /** `text` hugs its label rather than sitting in a slab. */
 const TEXT_PADDING: Record<ButtonSize, string> = {
-  md: "px-s",
-  lg: "px-md",
+  md: "px-md",
+  lg: "px-l",
 };
 
 /**

@@ -28,10 +28,10 @@ export default function CartDrawer({ tableId }: CartDrawerProps) {
     <Sheet
       onClose={() => setIsCartOpen(false)}
       title={`Your Order (${totalItems})`}
-      bodyClassName="flex flex-col gap-md"
+      bodyClassName="flex flex-col gap-l"
       footer={
         items.length > 0 ? (
-          <div className="flex flex-col gap-md">
+          <div className="flex flex-col gap-l">
             <div className="flex justify-between items-center">
               <span className="text-label-large text-on-surface-variant">
                 Total
@@ -57,11 +57,11 @@ export default function CartDrawer({ tableId }: CartDrawerProps) {
         items.map((item) => (
           <div
             key={item.lineId}
-            className="flex items-start justify-between gap-md"
+            className="flex items-start justify-between gap-l"
           >
             <div className="flex items-start gap-s flex-1 min-w-0">
-              <i className="mgc_fork_spoon_line text-xl text-on-surface-variant mt-0.5" />
-              <div className="flex flex-col gap-0.5 min-w-0">
+              <i className="mgc_fork_spoon_line text-xl text-on-surface-variant mt-xs" />
+              <div className="flex flex-col gap-xs min-w-0">
                 <span className="text-title-medium font-semibold text-on-surface truncate">
                   {item.name}
                 </span>
@@ -89,7 +89,7 @@ export default function CartDrawer({ tableId }: CartDrawerProps) {
                   updateQuantity(item.lineId, item.quantity - 1)
                 }
                 aria-label={`Decrease ${item.name}`}
-                className="w-8 h-8 flex items-center justify-center rounded-full bg-surface-container text-on-surface-variant hover:bg-primary hover:text-on-primary transition-colors"
+                className="w-8 h-8 flex items-center justify-center rounded-full bg-surface-container-high text-on-surface-variant hover:bg-primary hover:text-on-primary transition-colors"
               >
                 <i className="mgc_minimize_line" />
               </button>
@@ -102,7 +102,7 @@ export default function CartDrawer({ tableId }: CartDrawerProps) {
                   updateQuantity(item.lineId, item.quantity + 1)
                 }
                 aria-label={`Increase ${item.name}`}
-                className="w-8 h-8 flex items-center justify-center rounded-full bg-surface-container text-on-surface-variant hover:bg-primary hover:text-on-primary transition-colors"
+                className="w-8 h-8 flex items-center justify-center rounded-full bg-surface-container-high text-on-surface-variant hover:bg-primary hover:text-on-primary transition-colors"
               >
                 <i className="mgc_add_line" />
               </button>

@@ -25,7 +25,7 @@ function Metric({
       : "bg-surface-container-low border-transparent";
 
   return (
-    <div className={`rounded-lg p-md flex flex-col gap-xs border ${statusCls}`}>
+    <div className={`rounded-lg p-l flex flex-col gap-xs border ${statusCls}`}>
       <span className="text-label-large font-semibold uppercase tracking-wider opacity-70">
         {label}
       </span>
@@ -51,7 +51,7 @@ export default function HealthPage() {
     !h ? undefined : h.avg_response_ms < 200 ? "ok" : h.avg_response_ms < 500 ? "warn" : "error";
 
   return (
-    <Page width="wide" gap="l">
+    <Page width="wide" gap="xl">
       <header className="flex items-center justify-between">
         <div>
           <h1 className="font-display text-title-large font-semibold text-on-surface">
@@ -61,14 +61,14 @@ export default function HealthPage() {
         </div>
         {h && (
           <div
-            className={`flex items-center gap-s px-md py-s rounded-2xl font-bold text-body-medium ${
+            className={`flex items-center gap-s px-l py-md rounded-2xl font-bold text-body-medium ${
               uptimeStatus === "ok" && errorStatus === "ok"
                 ? "bg-success-container text-on-success-container"
                 : "bg-warning-container text-on-warning-container"
             }`}
           >
             <span
-              className={`w-2 h-2 rounded-full ${
+              className={`w-md h-md rounded-full ${
                 uptimeStatus === "ok" && errorStatus === "ok" ? "bg-success" : "bg-warning"
               }`}
             />
@@ -91,7 +91,7 @@ export default function HealthPage() {
 
       {h && (
         <>
-          <div className="grid grid-cols-2 lg:grid-cols-3 gap-md">
+          <div className="grid grid-cols-2 lg:grid-cols-3 gap-l">
             <Metric
               label="API Uptime"
               value={`${h.api_uptime_pct}%`}
@@ -127,7 +127,7 @@ export default function HealthPage() {
 
           <Card gap="s">
             <h2 className="text-title-large font-semibold text-on-surface">Thresholds</h2>
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-md text-body-small text-on-surface-variant">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-l text-body-small text-on-surface-variant">
               <div>
                 <p className="font-semibold text-on-surface mb-xs">Uptime</p>
                 <p><span className="text-success font-bold">≥ 99.5%</span> — Healthy</p>

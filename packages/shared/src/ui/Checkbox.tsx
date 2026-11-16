@@ -64,7 +64,7 @@ export default function Checkbox({
       />
       <span
         aria-hidden="true"
-        className={`w-5 h-5 mt-0.5 shrink-0 flex items-center justify-center rounded-xs border-2 transition-colors peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-primary ${
+        className={`w-5 h-5 mt-xs shrink-0 flex items-center justify-center rounded-xs border-2 transition-colors peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-primary ${
           checked
             ? "bg-primary border-primary text-on-primary"
             : "border-outline"
@@ -73,7 +73,7 @@ export default function Checkbox({
         {checked && <i className="mgc_check_line text-xs font-bold" />}
       </span>
       {(label || description) && (
-        <span className="flex flex-col gap-0.5 min-w-0">
+        <span className="flex flex-col gap-xs min-w-0">
           {label && (
             <span className="text-body-medium text-on-surface">{label}</span>
           )}

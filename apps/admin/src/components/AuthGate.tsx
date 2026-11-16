@@ -124,8 +124,8 @@ export default function AuthGate() {
 
   if (!isAuthenticated || !user) {
     return (
-      <div className="flex items-center justify-center min-h-screen bg-surface p-md">
-        <form onSubmit={handleLogin} className="w-full max-w-[384px] bg-surface-container-low rounded-2xl p-xl flex flex-col items-center gap-md">
+      <div className="flex items-center justify-center min-h-screen bg-surface p-l">
+        <form onSubmit={handleLogin} className="w-full max-w-[384px] bg-surface-container-low rounded-2xl p-xl flex flex-col items-center gap-l">
           <div className="w-16 h-16 rounded-full bg-primary-container flex items-center justify-center text-2xl text-on-primary-container">
             <i className="mgc_lock_fill" />
           </div>
@@ -137,7 +137,7 @@ export default function AuthGate() {
           </p>
 
           <input
-            className={`w-full px-md py-md rounded-sm bg-surface-container-low border-2 text-body-large text-on-surface placeholder:text-on-surface-placeholder outline-none transition-colors ${error ? "border-error" : "border-outline-variant focus:border-primary"}`}
+            className={`w-full px-l py-l rounded-sm bg-surface-container-low border-2 text-body-large text-on-surface placeholder:text-on-surface-placeholder outline-none transition-colors ${error ? "border-error" : "border-outline-variant focus:border-primary"}`}
             // Not type="email": most staff sign in with a phone number, and
             // the browser would reject one as malformed before we ever ask.
             // No inputMode either — "email" opened a keyboard with no number
@@ -166,7 +166,7 @@ export default function AuthGate() {
                 setPassword(e.target.value);
                 setError("");
               }}
-              className={`w-full px-md py-md rounded-sm bg-surface-container-low border-2 text-body-large text-on-surface placeholder:text-on-surface-placeholder outline-none transition-colors pr-12 ${error ? "border-error" : "border-outline-variant focus:border-primary"}`}
+              className={`w-full px-l py-l rounded-sm bg-surface-container-low border-2 text-body-large text-on-surface placeholder:text-on-surface-placeholder outline-none transition-colors pr-12 ${error ? "border-error" : "border-outline-variant focus:border-primary"}`}
               required
             />
             <button
@@ -244,15 +244,15 @@ export default function AuthGate() {
         {/* Both rows sit in the same column as the page content beneath them,
             so the bar does not run edge to edge over centred content. */}
         {/* Top padding is the bar's, bottom padding belongs to whatever ends
-            it. At `lg` that is each tab's own `pb-md`, which puts the space
+            it. At `lg` that is each tab's own `pb-l`, which puts the space
             between the label and its underline and leaves the underline flush
             with the bottom edge it marks. Below `lg` there is no tab row, so
             the bar keeps the padding itself — without it the name would sit
             flush against the bottom edge. */}
-        <div className={`w-full ${SHELL_WIDTH} pt-l pb-md lg:pb-0`}>
+        <div className={`w-full ${SHELL_WIDTH} pt-xl pb-l lg:pb-0`}>
           {/* Row 1 — who and where on the left, controls on the right. */}
-          <nav className="flex items-center justify-between gap-s px-md">
-            <div className="flex items-center gap-s sm:gap-l min-w-0">
+          <nav className="flex items-center justify-between gap-s px-l">
+            <div className="flex items-center gap-s sm:gap-xl min-w-0">
               {/* Hamburger — mobile & tablet only */}
               <button
                 className="lg:hidden w-10 h-10 flex items-center justify-center rounded-sm text-on-surface-variant hover:bg-surface-container transition-colors shrink-0"
@@ -296,7 +296,7 @@ export default function AuthGate() {
               <ThemeToggle />
               <button
                 onClick={handleLogout}
-                className="w-10 h-10 flex items-center justify-center rounded-full bg-surface-container text-on-surface-variant border border-transparent hover:bg-error-container hover:text-on-error-container transition-colors"
+                className="w-10 h-10 flex items-center justify-center rounded-full bg-surface-container-high text-on-surface-variant border border-transparent hover:bg-error-container hover:text-on-error-container transition-colors"
                 title="Logout"
               >
                 <i className="mgc_exit_line text-lg" />
@@ -311,14 +311,14 @@ export default function AuthGate() {
               glyph onto the same left edge as the name above it and the page
               column below — a tab bar that starts one padding step in reads
               as a misaligned container. */}
-          <div className="hidden lg:flex items-stretch gap-4xl px-md lg:pt-2xl pb-0 min-w-0 overflow-x-auto">
+          <div className="hidden lg:flex items-stretch gap-2xl px-l lg:pt-2xl pb-0 min-w-0 overflow-x-auto">
             {tabs.map((tab) => (
               <NavLink
                 key={tab.to}
                 to={tab.to}
                 end={tab.end}
                 className={({ isActive }) =>
-                  `flex items-center gap-xs px-xs first:pl-0 pt-s pb-md border-b-[3px] text-label-large font-semibold font-display whitespace-nowrap transition-colors no-underline shrink-0 ${isActive
+                  `flex items-center gap-xs px-xs first:pl-0 pt-md pb-l border-b-[3px] text-label-large font-semibold font-display whitespace-nowrap transition-colors no-underline shrink-0 ${isActive
                     ? "border-primary text-primary-label"
                     : "border-transparent text-on-surface-variant hover:text-on-surface"
                   }`
@@ -341,7 +341,7 @@ export default function AuthGate() {
                         // to pull the eye from across a counter. On the active tab
                         // it inherits instead — you are already looking at the
                         // board.
-                        className={`ml-0.5 inline-flex items-center justify-center min-w-5 h-5 px-1 rounded-full text-label-small font-bold tabular-nums ${isActive
+                        className={`ml-xs inline-flex items-center justify-center min-w-5 h-5 px-xs rounded-full text-label-small font-bold tabular-nums ${isActive
                           ? "bg-current/15"
                           : "bg-error-container text-on-error-container"
                           }`}
@@ -357,7 +357,7 @@ export default function AuthGate() {
 
           {/* Mobile / tablet drawer */}
           {menuOpen && (
-            <div className="lg:hidden px-md pt-s flex flex-col gap-xs">
+            <div className="lg:hidden px-l pt-md flex flex-col gap-xs">
               {tabs.map((tab) => (
                 <NavLink
                   key={tab.to}
@@ -368,7 +368,7 @@ export default function AuthGate() {
                   // horizontal device, and a stack of them reads as a list of
                   // rules rather than a set of places.
                   className={({ isActive }) =>
-                    `flex items-center gap-s px-md py-s rounded-sm text-label-large font-semibold font-display transition-colors no-underline ${isActive
+                    `flex items-center gap-s px-l py-md rounded-sm text-label-large font-semibold font-display transition-colors no-underline ${isActive
                       ? "bg-primary text-on-primary"
                       : "text-on-surface-variant hover:bg-surface-container"
                     }`
@@ -383,7 +383,7 @@ export default function AuthGate() {
                       {tab.label}
                       {tab.count ? (
                         <span
-                          className={`ml-auto inline-flex items-center justify-center min-w-5 h-5 px-1 rounded-full text-label-small font-bold tabular-nums ${isActive
+                          className={`ml-auto inline-flex items-center justify-center min-w-5 h-5 px-xs rounded-full text-label-small font-bold tabular-nums ${isActive
                             ? "bg-current/15"
                             : "bg-error-container text-on-error-container"
                             }`}

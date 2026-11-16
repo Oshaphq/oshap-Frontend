@@ -182,7 +182,7 @@ function OrdersView({ tableId }: { tableId: string }) {
             type="button"
             onClick={() => navigate(`/menu?table=${tableId}`)}
             aria-label="Back"
-            className="w-12 h-12 flex items-center justify-center rounded-full bg-surface-container hover:bg-surface-container-high transition-colors"
+            className="w-12 h-12 flex items-center justify-center rounded-full bg-surface-container-high hover:bg-surface-container-highest transition-colors"
           >
             <i className="mgc_left_line text-xl" />
           </button>
@@ -190,11 +190,11 @@ function OrdersView({ tableId }: { tableId: string }) {
       />
 
       {!isHydrated ? (
-        <section className="py-l px-md">
+        <section className="py-xl px-l">
           <p className="text-body-medium text-on-surface-variant">Loading session...</p>
         </section>
       ) : session ? (
-        <section className="py-l px-md bg-surface-container-low border-b-[6px] border-surface-container flex flex-col gap-s">
+        <section className="py-xl px-l bg-surface-container-low border-b-[6px] border-surface-container flex flex-col gap-s">
           <h2 className="font-display text-title-medium font-semibold text-on-surface">
             Order together
           </h2>
@@ -204,7 +204,7 @@ function OrdersView({ tableId }: { tableId: string }) {
           <PinChip pin={session.pin} />
         </section>
       ) : (
-        <section className="py-l px-md bg-surface-container-low border-b-[6px] border-surface-container flex flex-col gap-md">
+        <section className="py-xl px-l bg-surface-container-low border-b-[6px] border-surface-container flex flex-col gap-l">
           <h2 className="font-display text-title-medium font-semibold text-on-surface">
             Order together
           </h2>
@@ -221,7 +221,7 @@ function OrdersView({ tableId }: { tableId: string }) {
               placeholder="Enter your name"
               value={customerName}
               onChange={(e) => setCustomerName(e.target.value)}
-              className="px-md py-md bg-surface-container-low border border-outline-variant rounded-sm text-title-medium text-on-surface placeholder:text-on-surface-variant outline-none focus:border-primary transition-colors"
+              className="px-l py-l bg-surface-container-low border border-outline rounded-sm text-title-medium text-on-surface placeholder:text-on-surface-variant outline-none focus:border-primary transition-colors"
             />
           </div>
 
@@ -240,7 +240,7 @@ function OrdersView({ tableId }: { tableId: string }) {
                   setPinInput(e.target.value);
                   setPinError("");
                 }}
-                className="px-md py-md bg-surface-container-low border border-outline-variant rounded-sm text-title-medium text-on-surface placeholder:text-on-surface-variant outline-none focus:border-primary transition-colors"
+                className="px-l py-l bg-surface-container-low border border-outline rounded-sm text-title-medium text-on-surface placeholder:text-on-surface-variant outline-none focus:border-primary transition-colors"
               />
               {pinError && (
                 <span className="text-body-small text-error">{pinError}</span>
@@ -268,7 +268,7 @@ function OrdersView({ tableId }: { tableId: string }) {
         </section>
       )}
 
-      <section className="pt-l pb-md px-md bg-surface-container-low flex flex-col gap-s">
+      <section className="pt-xl pb-l px-l bg-surface-container-low flex flex-col gap-s">
         <h2 className="font-display text-title-medium font-semibold text-on-surface">
           {customerName ? `${customerName}'s Order` : "Your Order"}
         </h2>
@@ -288,16 +288,16 @@ function OrdersView({ tableId }: { tableId: string }) {
             </PrimaryButton>
           </EmptyState>
         ) : (
-          <div className="flex flex-col gap-md pt-md">
+          <div className="flex flex-col gap-l pt-l">
             {myOrders.map((order, i) => (
-              <div key={order.id} className="flex flex-col gap-md">
+              <div key={order.id} className="flex flex-col gap-l">
                 <div className="flex items-center justify-between gap-s">
                   <span className="text-label-large text-on-surface-variant">
                     Order {i + 1}
                   </span>
                   <OrderStatusBadge status={order.status} />
                 </div>
-                <div className="flex flex-col gap-md">
+                <div className="flex flex-col gap-l">
                   {order.order_items.map((item) => (
                     <div
                       key={item.id}
@@ -305,7 +305,7 @@ function OrdersView({ tableId }: { tableId: string }) {
                     >
                       <div className="flex items-center gap-s">
                         <i className="mgc_fork_spoon_line text-xl text-primary-label" />
-                        <div className="flex flex-col gap-0.5">
+                        <div className="flex flex-col gap-xs">
                           <span className="text-title-medium font-semibold text-on-surface">
                             {item.name}
                           </span>
@@ -353,7 +353,7 @@ function OrdersView({ tableId }: { tableId: string }) {
             type="button"
             onClick={() => setShowOthersDetail(true)}
             aria-label="See what others are ordering"
-            className="fixed left-0 right-0 bottom-16 bg-inverse-surface px-md py-md flex items-center justify-between gap-md z-[44] hover:opacity-95 active:opacity-90 transition-opacity"
+            className="fixed left-0 right-0 bottom-16 bg-inverse-surface px-l py-l flex items-center justify-between gap-l z-[44] hover:opacity-95 active:opacity-90 transition-opacity"
           >
             <div className="flex flex-col gap-xs min-w-0 text-left">
               <span className="text-label-large font-semibold font-display text-inverse-on-surface">
@@ -363,7 +363,7 @@ function OrdersView({ tableId }: { tableId: string }) {
                 {otherItemNames.join(", ")}
               </span>
             </div>
-            <div className="flex items-center -space-x-2 shrink-0">
+            <div className="flex items-center -space-x-s shrink-0">
               {otherCustomers.slice(0, 3).map((name) => (
                 <div
                   key={name}
@@ -387,7 +387,7 @@ function OrdersView({ tableId }: { tableId: string }) {
         <Sheet
           onClose={() => setShowOthersDetail(false)}
           title="Others' Orders"
-          bodyClassName="flex flex-col gap-l"
+          bodyClassName="flex flex-col gap-xl"
           footer={
             <div className="flex items-center justify-between">
               <span className="text-label-large text-on-surface-variant">
@@ -428,7 +428,7 @@ function OrdersView({ tableId }: { tableId: string }) {
                       >
                         <div className="flex items-center gap-s">
                           <i className="mgc_fork_spoon_line text-xl text-primary-label" />
-                          <div className="flex flex-col gap-0.5">
+                          <div className="flex flex-col gap-xs">
                             <span className="text-title-medium font-semibold text-on-surface">
                               {item.name}
                             </span>
@@ -493,7 +493,7 @@ function OrderStatusBadge({ status }: { status: OrderStatus }) {
   const { label, cls } = ORDER_STATUS_META[status];
   return (
     <span
-      className={`text-label-small font-bold uppercase tracking-wider px-s py-xs rounded-full whitespace-nowrap ${cls}`}
+      className={`text-label-small font-bold uppercase tracking-wider px-md py-xs rounded-full whitespace-nowrap ${cls}`}
     >
       {label}
     </span>

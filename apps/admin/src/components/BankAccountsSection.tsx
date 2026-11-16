@@ -118,9 +118,9 @@ export default function BankAccountsSection({ canEdit }: { canEdit: boolean }) {
   };
 
   return (
-    <div className="bg-surface-container-low rounded-lg p-l flex flex-col gap-md border border-transparent hover:border-outline-variant transition-colors">
-      <div className="flex items-start justify-between gap-md">
-        <div className="flex flex-col gap-0.5">
+    <div className="bg-surface-container-low rounded-lg p-xl flex flex-col gap-l border border-transparent hover:border-outline-variant transition-colors">
+      <div className="flex items-start justify-between gap-l">
+        <div className="flex flex-col gap-xs">
           <h3 className="font-bold text-on-surface">Bank Accounts</h3>
           <p className="text-body-medium text-on-surface-variant">
             Guests are shown the default first, then the rest as fallbacks.
@@ -143,11 +143,11 @@ export default function BankAccountsSection({ canEdit }: { canEdit: boolean }) {
       </div>
 
       {isLoading ? (
-        <div className="flex justify-center py-l">
+        <div className="flex justify-center py-xl">
           <Spinner />
         </div>
       ) : list.length === 0 && !isAdding ? (
-        <div className="flex flex-col items-center gap-xs py-l px-md text-center rounded-sm bg-surface-container">
+        <div className="flex flex-col items-center gap-xs py-xl px-l text-center rounded-sm bg-surface-container">
           <i className="mgc_bank_card_line text-3xl text-on-surface-variant" />
           <p className="text-body-medium text-on-surface-variant">
             No bank account yet — guests can only pay by POS.
@@ -173,8 +173,8 @@ export default function BankAccountsSection({ canEdit }: { canEdit: boolean }) {
       )}
 
       {isAdding && (
-        <div className="flex flex-col gap-md p-md rounded-sm bg-surface-container">
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-md">
+        <div className="flex flex-col gap-l p-l rounded-sm bg-surface-container">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-l">
             <TextField
               id="bank-name"
               label="Bank Name"
@@ -261,11 +261,11 @@ function AccountRow({
 
   return (
     <div
-      className={`flex flex-wrap items-center justify-between gap-s p-md rounded-sm bg-surface-container ${
+      className={`flex flex-wrap items-center justify-between gap-s p-l rounded-sm bg-surface-container ${
         account.is_active ? "" : "opacity-60"
       }`}
     >
-      <div className="flex flex-col gap-0.5 min-w-0">
+      <div className="flex flex-col gap-xs min-w-0">
         <div className="flex items-center gap-s flex-wrap">
           <span className="text-title-medium font-semibold text-on-surface truncate">
             {account.bank_name}

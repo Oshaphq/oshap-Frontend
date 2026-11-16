@@ -104,11 +104,11 @@ export default function TablesSettings() {
   }
 
   return (
-    <div className="flex flex-col gap-md pb-10">
-      <div className="flex items-center justify-between gap-md flex-wrap">
+    <div className="flex flex-col gap-l pb-2xl">
+      <div className="flex items-center justify-between gap-l flex-wrap">
         {/* The count stays; the title does not. The section wrapper names the
             screen already. */}
-        <div className="flex flex-col gap-0.5">
+        <div className="flex flex-col gap-xs">
           <p className="text-body-medium text-on-surface-variant">
             {tables.length} table{tables.length !== 1 ? "s" : ""} configured
           </p>
@@ -141,8 +141,8 @@ export default function TablesSettings() {
       </div>
 
       {isOriginUnusable() && tables.length > 0 && (
-        <div className="flex items-start gap-s p-md rounded-sm bg-warning-container text-on-warning-container">
-          <i className="mgc_alert_line text-xl shrink-0 mt-0.5" />
+        <div className="flex items-start gap-s p-l rounded-sm bg-warning-container text-on-warning-container">
+          <i className="mgc_alert_line text-xl shrink-0 mt-xs" />
           <p className="text-body-medium">
             {isLocalOrigin() ? (
               <>

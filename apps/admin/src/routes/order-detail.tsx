@@ -109,8 +109,8 @@ export default function OrderDetailPage() {
     updateItem.isPending || voidItem.isPending || compItem.isPending;
 
   return (
-    <Page width="reading" gap="l">
-      <header className="flex items-start gap-md">
+    <Page width="reading" gap="xl">
+      <header className="flex items-start gap-l">
         <Link
           to="/"
           aria-label="Back to tables"
@@ -136,8 +136,8 @@ export default function OrderDetailPage() {
       )}
 
       {isClosed && (
-        <div className="flex items-start gap-s p-md rounded-sm bg-error-container text-on-error-container">
-          <i className="mgc_alert_line text-xl shrink-0 mt-0.5" />
+        <div className="flex items-start gap-s p-l rounded-sm bg-error-container text-on-error-container">
+          <i className="mgc_alert_line text-xl shrink-0 mt-xs" />
           <p className="text-label-medium">
             {isRefunded
               ? "This bill was refunded. It no longer counts towards the day's takings."
@@ -146,7 +146,7 @@ export default function OrderDetailPage() {
         </div>
       )}
 
-      <Card as="section" padding="l" gap="md">
+      <Card as="section" padding="xl" gap="l">
         <h2 className="text-title-large font-semibold text-on-surface">Items</h2>
         <div className="flex flex-col">
           {data.items.map((item) => {
@@ -155,16 +155,16 @@ export default function OrderDetailPage() {
             return (
               <div
                 key={item.id}
-                className="flex flex-col gap-s py-s border-b border-outline-variant last:border-none"
+                className="flex flex-col gap-s py-md border-b border-outline-variant last:border-none"
               >
-                <div className="flex items-center justify-between gap-md">
+                <div className="flex items-center justify-between gap-l">
                   <span className="text-body-medium text-on-surface min-w-0">
                     <span className="tabular-nums text-on-surface-variant">
                       {item.quantity}×{" "}
                     </span>
                     {item.name}
                     {isComped && (
-                      <span className="ml-s px-s py-0.5 rounded-full bg-success-container text-on-success-container text-label-small font-semibold uppercase tracking-wider">
+                      <span className="ml-s px-md py-xs rounded-full bg-success-container text-on-success-container text-label-small font-semibold uppercase tracking-wider">
                         Comped
                       </span>
                     )}
@@ -175,7 +175,7 @@ export default function OrderDetailPage() {
                 </div>
 
                 {!isSettled && !isClosed && (
-                  <div className="flex items-center gap-md">
+                  <div className="flex items-center gap-l">
                     {confirming ? (
                       <>
                         <span className="text-body-medium text-on-surface-variant">
@@ -274,7 +274,7 @@ export default function OrderDetailPage() {
         </div>
       </Card>
 
-      <Card as="section" padding="l" gap="md">
+      <Card as="section" padding="xl" gap="l">
         <h2 className="text-title-large font-semibold text-on-surface">Bill</h2>
         <div className="flex flex-col">
           <Line label="Subtotal" value={data.subtotal ?? data.total} />
@@ -284,7 +284,7 @@ export default function OrderDetailPage() {
           )}
           {(data.vat ?? 0) > 0 && <Line label="VAT" value={data.vat ?? 0} />}
           {(data.tip ?? 0) > 0 && <Line label="Tip" value={data.tip ?? 0} />}
-          <div className="flex items-center justify-between gap-md pt-md mt-s border-t-2 border-ink">
+          <div className="flex items-center justify-between gap-l pt-l mt-s border-t-2 border-ink">
             <span className="text-title-large font-semibold text-on-surface">Total</span>
             <span className="font-display text-title-large font-semibold text-primary-label tabular-nums">
               {formatCurrency(data.total)}
@@ -294,7 +294,7 @@ export default function OrderDetailPage() {
       </Card>
 
       {!isClosed && (
-        <Card as="section" padding="l" gap="md">
+        <Card as="section" padding="xl" gap="l">
           <h2 className="text-title-large font-semibold text-on-surface">Adjust</h2>
 
           {openAdjustment ? (
@@ -314,7 +314,7 @@ export default function OrderDetailPage() {
                 value={amount}
                 onChange={(e) => setAmount(e.target.value)}
                 placeholder="Amount in ₦"
-                className="w-full px-md py-s rounded-sm bg-surface-container border border-outline-variant text-body-medium text-on-surface placeholder:text-on-surface-placeholder outline-none focus:border-primary transition-colors"
+                className="w-full px-l py-md rounded-sm bg-surface-container border border-outline text-body-medium text-on-surface placeholder:text-on-surface-placeholder outline-none focus:border-primary transition-colors"
               />
               {openAdjustment === "refund" && (
                 <p className="text-body-medium text-on-surface-variant">
@@ -370,7 +370,7 @@ export default function OrderDetailPage() {
 function Line({ label, value }: { label: string; value: number }) {
   const isDeduction = value < 0;
   return (
-    <div className="flex items-center justify-between gap-md py-s border-b border-outline-variant last:border-none">
+    <div className="flex items-center justify-between gap-l py-md border-b border-outline-variant last:border-none">
       <span className="text-body-medium text-on-surface-variant">{label}</span>
       <span
         className={`text-title-medium font-semibold tabular-nums ${

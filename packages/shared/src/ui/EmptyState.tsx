@@ -57,7 +57,7 @@ export default function EmptyState({
 }: EmptyStateProps) {
   return (
     <div
-      className={`flex flex-col items-center gap-s py-10 px-md text-center ${
+      className={`flex flex-col items-center gap-s py-2xl px-l text-center ${
         card ? "rounded-lg bg-surface-container-low" : ""
       } ${className}`}
     >

@@ -7,7 +7,7 @@ import Select from "./Select";
  * fix was a two-part idiom nobody could see was missing.
  *
  * A native `<select>` has its chevron painted by the browser at the inside edge
- * of the border. `padding-right` does not move it. So `px-md` gives 16px of
+ * of the border. `padding-right` does not move it. So `px-l` gives 16px of
  * inset on the left and none on the right — the text is inset, the arrow is
  * flush, and it reads as broken because it is lopsided. The only fix is
  * `appearance-none` plus an icon positioned at the same inset as the text.
@@ -20,8 +20,8 @@ const render = (el: React.ReactElement) => renderToStaticMarkup(el);
 
 /** Left text inset paired with the chevron inset it has to match. */
 const densities = [
-  ["md", "pl-md", "right-md"],
-  ["sm", "pl-s", "right-s"],
+  ["md", "pl-l", "right-l"],
+  ["sm", "pl-md", "right-s"],
 ] as const;
 
 describe("Select draws its own chevron", () => {

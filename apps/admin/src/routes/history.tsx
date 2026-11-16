@@ -90,7 +90,7 @@ export default function HistoryPage() {
   };
 
   return (
-    <Page width="wide" gap="l">
+    <Page width="wide" gap="xl">
       <header className="flex items-center justify-between">
         <h1 className="font-display text-title-large font-semibold text-on-surface">
           Transaction History
@@ -114,9 +114,9 @@ export default function HistoryPage() {
 
       {/* Table and date filters use TextField so density, border contrast, and
           container surface follow the Design System — raw inputs with ad-hoc
-          py-md padding cause WebKit date picker pseudos to compute a different
+          py-l padding cause WebKit date picker pseudos to compute a different
           box height than text fields. */}
-      <div className="flex flex-col sm:flex-row gap-md">
+      <div className="flex flex-col sm:flex-row gap-l">
         <TextField
           type="text"
           aria-label="Filter by table"
@@ -155,7 +155,7 @@ export default function HistoryPage() {
       </div>
 
       {historyQuery.isLoading ? (
-        <div className="flex flex-col items-center justify-center min-h-[40vh] gap-md text-on-surface-variant">
+        <div className="flex flex-col items-center justify-center min-h-[40vh] gap-l text-on-surface-variant">
           <Spinner />
           <p>Loading history...</p>
         </div>
@@ -168,7 +168,7 @@ export default function HistoryPage() {
           message="Try a different filter or date range."
         />
       ) : (
-        <div className="flex flex-col gap-md">
+        <div className="flex flex-col gap-l">
           {orders.map((order) => {
             const isExpanded = expandedOrder === order.id;
             const payment = order.payments?.[0];
@@ -180,13 +180,13 @@ export default function HistoryPage() {
                 onClick={() =>
                   setExpandedOrder(isExpanded ? null : order.id)
                 }
-                className={`text-left rounded-lg p-md flex flex-col gap-md bg-surface-container-low border border-transparent transition-colors hover:border-outline-variant cursor-pointer ${
+                className={`text-left rounded-lg p-l flex flex-col gap-l bg-surface-container-low border border-transparent transition-colors hover:border-outline-variant cursor-pointer ${
                   order.status === "CANCELLED" || order.status === "REFUNDED"
                     ? "opacity-55"
                     : ""
                 }`}
               >
-                <div className="flex items-start justify-between gap-md">
+                <div className="flex items-start justify-between gap-l">
                   <div className="flex flex-col gap-xs min-w-0">
                     <Link
                       to={`/orders/${order.id}`}
@@ -207,7 +207,7 @@ export default function HistoryPage() {
                       {formatCurrency(order.total)}
                     </span>
                     <span
-                      className={`text-label-small font-bold uppercase tracking-wider px-s py-xs rounded-full whitespace-nowrap ${statusChip(order.status).cls}`}
+                      className={`text-label-small font-bold uppercase tracking-wider px-md py-xs rounded-full whitespace-nowrap ${statusChip(order.status).cls}`}
                     >
                       {statusChip(order.status).label}
                     </span>
@@ -215,7 +215,7 @@ export default function HistoryPage() {
                 </div>
 
                 {isExpanded && order.order_items?.length > 0 && (
-                  <div className="flex flex-col gap-s py-s border-t border-surface-container-high">
+                  <div className="flex flex-col gap-s py-md border-t border-surface-container-high">
                     {order.order_items.map((item) => (
                       <div
                         key={item.id}
@@ -235,13 +235,13 @@ export default function HistoryPage() {
                   </div>
                 )}
 
-                <div className="flex items-center justify-between pt-s border-t border-surface-container-high">
+                <div className="flex items-center justify-between pt-md border-t border-surface-container-high">
                   <span className="text-body-small text-on-surface-variant">
                     {formatDate(order.created_at)} · {formatTime(order.created_at)}
                   </span>
                   {payment && (
                     <span
-                      className={`text-label-small font-bold uppercase tracking-wider px-s py-xs rounded-full whitespace-nowrap ${
+                      className={`text-label-small font-bold uppercase tracking-wider px-md py-xs rounded-full whitespace-nowrap ${
                         payment.status === "VERIFIED"
                           ? "bg-success-container text-on-success-container"
                           : "bg-surface-container-high text-on-surface-variant"
@@ -262,7 +262,7 @@ export default function HistoryPage() {
       )}
 
       {pagination.total_pages > 1 && (
-        <div className="flex items-center justify-center gap-md">
+        <div className="flex items-center justify-center gap-l">
           <Button
             variant="outlined"
             size="md"
@@ -304,7 +304,7 @@ function SummaryCard({
   tone?: keyof typeof SUMMARY_TONE_CLS;
 }) {
   return (
-    <div className="flex-1 bg-surface-container-low rounded-lg px-s py-md flex flex-col items-center gap-xs">
+    <div className="flex-1 bg-surface-container-low rounded-lg px-md py-l flex flex-col items-center gap-xs">
       <span
         className={`font-display text-title-large font-semibold block ${SUMMARY_TONE_CLS[tone]}`}
       >

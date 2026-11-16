@@ -14,20 +14,20 @@ const VARIANT_META: Record<
 > = {
   success: {
     icon: "mgc_check_circle_line",
-    wrapperClass: "items-start p-md rounded-sm bg-success-container text-on-success-container",
+    wrapperClass: "items-start p-l rounded-sm bg-success-container text-on-success-container",
   },
   error: {
     icon: "mgc_alert_diamond_line",
-    wrapperClass: "items-start p-md rounded-sm bg-error-container text-on-error-container",
+    wrapperClass: "items-start p-l rounded-sm bg-error-container text-on-error-container",
   },
   info: {
     icon: "mgc_information_line",
-    wrapperClass: "items-start p-md rounded-sm bg-primary-container text-on-primary-container",
+    wrapperClass: "items-start p-l rounded-sm bg-primary-container text-on-primary-container",
   },
   neutral: {
     icon: "mgc_check_circle_line",
     wrapperClass:
-      "items-center self-center w-auto max-w-full px-md py-s rounded-full bg-inverse-surface text-inverse-on-surface",
+      "items-center self-center w-auto max-w-full px-l py-md rounded-full bg-inverse-surface text-inverse-on-surface",
   },
 };
 

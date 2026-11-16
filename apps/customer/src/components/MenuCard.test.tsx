@@ -209,8 +209,8 @@ describe("card geometry", () => {
     // The column is 79.31 tall against 96px of image. Stretching it and then
     // spreading the contents makes the gap a function of the image height.
     expect(card.className).toContain("items-center");
-    expect(card.className).toContain("gap-md");
-    expect(card.className).toContain("p-md");
+    expect(card.className).toContain("gap-l");
+    expect(card.className).toContain("p-l");
   });
 
   it("spaces the column with a fixed gap, never space-between", () => {
@@ -255,8 +255,8 @@ describe("the notes field in the detail sheet", () => {
     expect(notes.rows).toBe(1);
     // 16px either side of a 20px line — a 54px field, over the 48px touch
     // minimum, with the line centred whether it holds placeholder or text.
-    expect(notes.className).toContain("py-md");
-    expect(notes.className).not.toContain("py-s");
+    expect(notes.className).toContain("py-l");
+    expect(notes.className).not.toContain("py-md");
     // DS assigns `sm` to buttons and text fields; `lg` is the card radius.
     expect(notes.className).toContain("rounded-sm");
     // `outline: none` is forbidden outright — it removes the focus ring.

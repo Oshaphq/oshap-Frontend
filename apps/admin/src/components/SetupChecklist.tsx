@@ -129,7 +129,7 @@ export default function SetupChecklist({
   // who ticked the last box should see that it's done.
   if (allDone) {
     return (
-      <section className="flex items-center justify-between gap-md px-md py-s rounded-lg bg-surface-container-low">
+      <section className="flex items-center justify-between gap-l px-l py-md rounded-lg bg-surface-container-low">
         <span className="text-body-medium text-on-surface">
           <i className="mgc_check_circle_fill text-success mr-xs" />
           Setup complete — you&rsquo;re ready to open.
@@ -147,8 +147,8 @@ export default function SetupChecklist({
 
   return (
     <section className="rounded-lg bg-surface-container-low overflow-hidden">
-      <header className="flex items-center justify-between gap-md px-md py-s border-b border-outline-variant">
-        <div className="flex flex-col gap-0.5">
+      <header className="flex items-center justify-between gap-l px-l py-md border-b border-outline-variant">
+        <div className="flex flex-col gap-xs">
           <h2 className="text-title-large font-semibold text-on-surface">
             Finish setting up
           </h2>
@@ -170,11 +170,11 @@ export default function SetupChecklist({
           <li key={step.label}>
             <Link
               to={step.to}
-              className="flex items-start gap-s px-md py-s border-b border-outline-variant/40 last:border-none hover:bg-surface-container transition-colors no-underline"
+              className="flex items-start gap-s px-l py-md border-b border-outline-variant/40 last:border-none hover:bg-surface-container transition-colors no-underline"
             >
               <span
                 aria-hidden="true"
-                className={`w-5 h-5 mt-0.5 shrink-0 flex items-center justify-center rounded-full border-2 ${
+                className={`w-5 h-5 mt-xs shrink-0 flex items-center justify-center rounded-full border-2 ${
                   step.done
                     ? "bg-success border-success text-on-success"
                     : "border-outline"
@@ -184,7 +184,7 @@ export default function SetupChecklist({
                   <i className="mgc_check_line text-xs font-bold" />
                 )}
               </span>
-              <span className="flex flex-col gap-0.5 min-w-0">
+              <span className="flex flex-col gap-xs min-w-0">
                 <span
                   className={`text-body-medium font-semibold ${
                     step.done

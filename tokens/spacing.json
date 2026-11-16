@@ -5,67 +5,37 @@
     "prefix": "spacing"
   },
   "s": {
-    "value": 8,
+    "value": 6,
     "type": "number",
     "prefix": "spacing"
   },
   "m": {
-    "value": 16,
+    "value": 10,
     "type": "number",
     "prefix": "spacing"
   },
   "l": {
-    "value": 24,
+    "value": 17,
     "type": "number",
     "prefix": "spacing"
   },
   "xl": {
-    "value": 32,
+    "value": 27,
     "type": "number",
     "prefix": "spacing"
   },
   "2xl": {
-    "value": 40,
+    "value": 44,
     "type": "number",
     "prefix": "spacing"
   },
   "3xl": {
-    "value": 48,
-    "type": "number",
-    "prefix": "spacing"
-  },
-  "4xl": {
-    "value": 56,
-    "type": "number",
-    "prefix": "spacing"
-  },
-  "5xl": {
-    "value": 64,
-    "type": "number",
-    "prefix": "spacing"
-  },
-  "6xl": {
     "value": 72,
     "type": "number",
     "prefix": "spacing"
   },
-  "7xl": {
-    "value": 80,
-    "type": "number",
-    "prefix": "spacing"
-  },
-  "8xl": {
-    "value": 88,
-    "type": "number",
-    "prefix": "spacing"
-  },
-  "9xl": {
-    "value": 96,
-    "type": "number",
-    "prefix": "spacing"
-  },
-  "10xl": {
-    "value": 112,
+  "4xl": {
+    "value": 116,
     "type": "number",
     "prefix": "spacing"
   }

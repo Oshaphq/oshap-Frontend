@@ -18,7 +18,7 @@ export default function RoleGate({ allowedRoles }: RoleGateProps) {
 
   if (!user || !allowedRoles.includes(user.role)) {
     return (
-      <div className="flex flex-col items-center justify-center min-h-[60vh] gap-md text-center px-md">
+      <div className="flex flex-col items-center justify-center min-h-[60vh] gap-l text-center px-l">
         <div className="w-16 h-16 rounded-full bg-error-container text-on-error-container flex items-center justify-center text-3xl">
           <i className="mgc_close_line" />
         </div>
