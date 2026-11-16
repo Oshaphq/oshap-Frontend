@@ -102,6 +102,32 @@ const TEXT_PADDING: Record<ButtonSize, string> = {
   lg: "px-md",
 };
 
+/**
+ * The button skin as a class string, for an `<a>` that navigates but must look
+ * like a button. Nesting a `<button>` inside a link is invalid HTML, and
+ * copying these classes into a link would drift from the real thing.
+ */
+export function buttonClassName({
+  variant = "filled",
+  size = "md",
+  fullWidth = false,
+  destructive = false,
+  className = "",
+}: Pick<
+  ButtonProps,
+  "variant" | "size" | "fullWidth" | "destructive" | "className"
+> = {}): string {
+  const padding = variant === "text" ? TEXT_PADDING[size] : "";
+  // Only the unfilled variants can carry it; a filled container has already
+  // chosen its on-color, and recolouring the label would break the pair.
+  const intent =
+    destructive && (variant === "text" || variant === "outlined")
+      ? "text-error hover:bg-error/8 active:bg-error/12"
+      : "";
+
+  return `inline-flex items-center justify-center rounded-sm font-display font-semibold whitespace-nowrap transition duration-100 ease-out active:scale-[0.97] disabled:cursor-not-allowed disabled:border-transparent disabled:bg-on-surface-disabled disabled:text-on-surface-label-disabled disabled:shadow-none disabled:brightness-100 disabled:active:scale-100 ${SIZE[size]} ${padding} ${LABEL[variant]} ${VARIANT[variant]} ${intent} ${fullWidth ? "w-full" : ""} ${className}`;
+}
+
 export default function Button({
   children,
   variant = "filled",
@@ -113,19 +139,17 @@ export default function Button({
   disabled = false,
   ...rest
 }: ButtonProps) {
-  const padding = variant === "text" ? TEXT_PADDING[size] : "";
-  // Only the unfilled variants can carry it; a filled container has already
-  // chosen its on-color, and recolouring the label would break the pair.
-  const intent =
-    destructive && (variant === "text" || variant === "outlined")
-      ? "text-error hover:bg-error/8 active:bg-error/12"
-      : "";
-
   return (
     <button
       type={type}
       disabled={disabled}
-      className={`inline-flex items-center justify-center rounded-sm font-display font-semibold whitespace-nowrap transition duration-100 ease-out active:scale-[0.97] disabled:cursor-not-allowed disabled:border-transparent disabled:bg-on-surface-disabled disabled:text-on-surface-label-disabled disabled:shadow-none disabled:brightness-100 disabled:active:scale-100 ${SIZE[size]} ${padding} ${LABEL[variant]} ${VARIANT[variant]} ${intent} ${fullWidth ? "w-full" : ""} ${className}`}
+      className={buttonClassName({
+        variant,
+        size,
+        fullWidth,
+        destructive,
+        className,
+      })}
       {...rest}
     >
       {children}

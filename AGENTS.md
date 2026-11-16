@@ -1,6 +1,6 @@
 # Agent rules
 
-- Three apps in `apps/` (`customer`, `admin`, `platform`), one shared package in `packages/shared/`. Do not introduce a fourth app or move code outside this structure without asking.
+- Four apps in `apps/` (`customer`, `admin`, `platform`, `site`), one shared package in `packages/shared/`. Do not introduce another app or move code outside this structure without asking. `site` is the static marketing page: no API calls, no auth, no Firebase.
 - Tailwind v4 — there is no `tailwind.config.ts`. The `@theme` block lives in [`packages/shared/src/tokens/tokens.css`](packages/shared/src/tokens/tokens.css). Tokens are added there, not in JS config.
 - Backend is FastAPI in a separate repo. The contract is [`docs/openapi.yaml`](docs/openapi.yaml). When you change request/response shapes in `packages/shared/src/types/`, update the spec in the same change.
 - Customer app must stay unauthenticated. Admin app authenticates by email/password (`POST /auth/login`) and sends a short-lived JWT as `Authorization: Bearer`, with a refresh token handled by the shared `client.ts` (single-flight refresh on 401). The platform app sends an `x-platform-token` header, also attached by `client.ts`. There are no session cookies; the customer app carries no credentials at all.

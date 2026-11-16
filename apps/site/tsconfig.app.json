@@ -1,0 +1,27 @@
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "lib": ["ES2022", "DOM", "DOM.Iterable"],
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "jsx": "react-jsx",
+    "strict": true,
+    "noUncheckedIndexedAccess": true,
+    "noImplicitOverride": true,
+    "noFallthroughCasesInSwitch": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "noEmit": true,
+    "useDefineForClassFields": true,
+    "allowImportingTsExtensions": false,
+    "types": ["vite/client"]
+  },
+  "include": ["src/**/*.ts", "src/**/*.tsx"],
+  // Tests are compiled by Vitest, not by the app build. Vitest is a root-only
+  // devDependency, and Vercel installs each app workspace in isolation — so
+  // leaving tests in here fails the production build on `Cannot find module
+  // 'vitest'`. Typechecked separately via tsconfig.test.json.
+  "exclude": ["src/**/*.test.ts", "src/**/*.test.tsx"]
+}
