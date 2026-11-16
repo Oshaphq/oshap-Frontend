@@ -45,7 +45,7 @@ export default function MenuCard({ item }: MenuCardProps) {
   };
 
   return (
-    <article className="relative flex items-center gap-l p-l bg-surface-container-low rounded-lg border-b border-outline-variant/30 transition-shadow hover:shadow-sm">
+    <article className="relative flex items-center gap-l p-l bg-surface-container-low rounded-lg border-b border-outline-variant/30 transition-colors hover:bg-surface-container-high">
       <div className="shrink-0 w-24 h-24 rounded-sm overflow-hidden bg-primary-container">
         {item.image_url ? (
           <img

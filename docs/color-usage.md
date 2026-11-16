@@ -115,35 +115,58 @@ const grey = L => { const v = Math.round(enc((L/100)**3)*255); return [v,v,v]; }
 **Light and dark are one family.** A uniform, symmetric ramp does not need a two-family
 split — the roles simply pick different steps.
 
-**Lighter is higher, in both modes.** A card is lighter than the page; a block set into a
-card is darker than the card, so it reads as inset; a dialog is the lightest thing on
-screen. Until 2026-11 the light ladder ran the M3 way — darker as it rose, one grey-step
-apart at **1.06:1** per rung — and a block inside a card, or a neutral button on one,
-simply vanished. The audit is in `docs/design/validation/design-audit.md`.
+**Nesting steps away from the page.** In light mode the page is the lightest surface and
+each container set inside it is a step darker. In dark mode the page is the darkest and
+each container stacked on it is a step lighter. A well or field is sunken: a step darker
+than its card in both modes.
 
-The role names keep their M3 spelling, but they are assigned by **job**, not by height:
+This is the documented convention, not a house preference:
+
+- **Material 3** surface containers — light: page tone 98, containers 96 → 94 → 92 → 90;
+  dark: page tone 6, containers 10 → 12 → 17 → 22
+  ([roles](https://m3.material.io/styles/color/roles); tones in
+  [`color_spec_2021.ts`](https://github.com/material-foundation/material-color-utilities/blob/main/typescript/dynamiccolor/color_spec_2021.ts)).
+- **Apple** — `secondarySystemBackground` is "the color for content layered on top of the
+  main background": white → `#F2F2F7` in light, `#000` → `#1C1C1E` in dark
+  ([UI element colors](https://developer.apple.com/documentation/uikit/ui-element-colors)).
+- **Radix Colors** — steps 1–2 for backgrounds, 3–5 for components; darker per step in
+  light, lighter in dark ([scale](https://www.radix-ui.com/colors/docs/palette-composition/understanding-the-scale)).
+
+**Step size is what failed before, not direction.** v3 ran this direction one grey-step
+apart (1.06:1), and a button on a card vanished. #148 flipped the direction to fix it;
+this restores the convention with wider steps. The steps widen as they nest: a control
+jumps further from its card (1.20) than a card does from the page (1.12).
+
+**Tint: neutral or brand, one per product.** Surfaces are either true neutral or the brand
+hue at very low chroma (M3's neutral palette is the seed's hue at low chroma; Kuda and
+Grey ship this way). Oshap is true neutral, because every tenant brings its own brand and
+surfaces are shared.
+
+The role names keep their M3 spelling, and are assigned by **job**:
 
 | Role | Job | Light | Dark |
 |---|---|---|---|
-| `surface` | page | `grey-96` `#F2F2F2` | `grey-17` `#0F0F0F` |
-| `surface-container-low` | card, drawer, rail, admin top bar | `grey-100` `#FFFFFF` — 1.12 on page | `grey-24` `#1F1F1F` — 1.16 |
-| `surface-container` | well inside a card, filled field | `grey-96` `#F2F2F2` — the page tone, 1.12 under a card | `grey-17` `#0F0F0F` |
-| `surface-container-high` | neutral control: quiet button, round icon button, neutral badge, table header | `grey-93` `#E8E8E8` — 1.23 on a card | `grey-30` `#2E2E2E` — 1.21 |
-| `surface-container-highest` | hover on a neutral control | `grey-91` `#E1E1E1` | `grey-33` `#353535` |
-| `surface-overlay` *(not M3)* | dialog, menu, sheet, floating bar | `grey-100` + shadow | `grey-26` `#242424` + shadow |
+| `surface` | page | `grey-100` `#FFFFFF` | `grey-17` `#0F0F0F` |
+| `surface-container-low` | card, drawer, rail, admin top bar | `grey-96` `#F2F2F2` — 1.12 under the page | `grey-24` `#1F1F1F` — 1.16 over it |
+| `surface-container` | well inside a card, filled field (sunken) | `grey-93` `#E8E8E8` — 1.09 under a card | `grey-17` `#0F0F0F` — the page tone |
+| `surface-container-high` | neutral control: quiet button, round icon button, neutral badge, table header | `grey-90` `#DEDEDE` — 1.20 under a card | `grey-30` `#2E2E2E` — 1.21 over it |
+| `surface-container-highest` | hover on a neutral control | `grey-88` `#D7D7D7` | `grey-33` `#353535` |
+| `surface-overlay` *(not M3)* | dialog, menu, sheet, floating bar | `grey-96`, the card tone — darker than the page, as M3 | `grey-26` `#242424` |
 | `surface-container-lowest` | pure white when something must be | `grey-100` | `grey-12` |
-| `on-surface` | primary text | `grey-30` — 12.13:1 on page | `grey-88` — 13.32:1 |
-| `on-surface-variant` | secondary text | `grey-46` — 6.36:1 on page, 5.44 on a hovered control | `grey-70` — 7.15:1, 4.58 |
-| `on-surface-placeholder` | placeholder | `grey-52` — 4.90:1 in a field | `grey-62` — 5.26:1 |
-| `outline` | interactive border | `grey-56` — 4.67 on a card | `grey-58` — 3.84 on a card |
-| `outline-variant` | divider | `grey-88` — 1.44 on a card | `grey-32` |
+| `on-surface` | primary text | `grey-30` — 12.13:1 on a card | `grey-88` — 13.32:1 |
+| `on-surface-variant` | secondary text | `grey-46` — 6.36:1 on a card, 4.94 on a hovered control | `grey-70` — 7.15:1, 4.58 |
+| `on-surface-placeholder` | placeholder | `grey-50` — 4.90:1 in a field | `grey-62` — 5.26:1 |
+| `outline` | interactive border | `grey-56` — 4.18 on a card | `grey-58` — 3.84 on a card |
+| `outline-variant` | divider | `grey-88` — 1.29 on a card | `grey-32` |
 
-Card-to-page is 1.12:1 — about where iOS grouped lists sit, and where Square, Swiggy and
-Mercury sit. No WCAG rule asks a card edge for 3:1; a card is not a control.
+A dialog takes the card tone so that everything inside it follows the card rules — wells a
+step darker, controls two. It sits over a scrim, so it needs no step from the page.
+
+No WCAG rule asks a card edge for 3:1; a card is not a control.
 
 **The one rule for anything placed on a card:** it is outlined (`outline`), it carries
 chroma (`primary`, tonal), or its neutral fill is `surface-container-high`. Never a fill
-one step from its parent — that is the 1.06 that made the old ladder flat.
+one step from its parent — that is the 1.06 that made v3 flat.
 
 ### Assignment
 
@@ -155,9 +178,9 @@ one step from its parent — that is the 1.06 that made the old ladder flat.
 | Card, drawer, rail, side panel | `surface-container-low` |
 | Well or info block inside a card; filled text field | `surface-container` |
 | Quiet button, round icon button, neutral badge on a card | `surface-container-high`, hover `-highest` |
-| Dialog, modal, menu, sheet, floating toolbar | `surface-overlay` + shadow |
+| Dialog, modal, menu, sheet, floating toolbar | `surface-overlay` |
 | Hover on a row inside a card | `surface-container` |
-| Hover on a card itself | `shadow-sm` — it rises; a tone change would sink it into the page |
+| Hover on a card itself | `surface-container-high` — a step further from the page in both modes |
 | Snackbar | `inverse-surface` + `inverse-on-surface` |
 
 **The admin bar is the exception, deliberately.** It sits at `surface-container-low`, white
@@ -312,7 +335,7 @@ Elevation is a **tone change, not a shadow**. Shadows are for things that genuin
 | ✅ Do | ❌ Don't |
 |---|---|
 | Follow the jobs: page `surface` → card `surface-container-low` → well `surface-container` → control `surface-container-high` → dialog `surface-overlay` | Put a neutral fill one step from its parent — at 1.06:1 it disappears |
-| Hover a row inside a card with `surface-container`; hover a card with `shadow-sm` | Add a shadow to fake depth on a static block |
+| Hover a row inside a card with `surface-container`; hover a card with `surface-container-high` | Add a shadow to fake depth on a static block |
 | Use `surface-container-lowest` when something must be pure white | Use a raw palette step (`bg-grey-91`) as a surface |
 | Keep every surface on the shared ramp — it is what makes tenants comparable | Tint a surface toward the tenant's brand, or mix in a grey from outside the ramp |
 
@@ -343,9 +366,10 @@ nothing sits on the page:
 
 | sits on | `outline` light | `outline` dark | `on-surface-variant` light | dark |
 |---|---|---|---|---|
-| `surface` — the page, and every field | **4.18** | 4.47:1 | 6.36:1 | 7.15:1 |
-| `surface-container-low` — any card | 4.67:1 | **3.84** | 7.11:1 | 6.15:1 |
-| `surface-container-high` — every neutral control | **3.81** | **3.16** | 5.81:1 | 5.07:1 |
+| `surface` — the page | 4.67:1 | 4.47:1 | 7.11:1 | 7.15:1 |
+| `surface-container-low` — any card, any dialog | **4.18** | **3.84** | 6.36:1 | 6.15:1 |
+| `surface-container` — every field | **3.81** | 4.47:1 | 5.81:1 | 7.15:1 |
+| `surface-container-high` — every neutral control | **3.47** | **3.16** | 5.29:1 | 5.07:1 |
 
 Bold is below 4.5:1. Twenty-five of these were found and replaced in one pass,
 and the chips were the worst of them, because a neutral status pill is
