@@ -20,3 +20,8 @@ body {
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
 }
+
+/* Force Mingcute icons to inherit color from parent — overrides hardcoded #09244b in the icon font CSS */
+[class*="mgc_"]::before {
+  color: inherit !important;
+}
