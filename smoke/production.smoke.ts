@@ -1,5 +1,5 @@
 import { test, expect, request as pwRequest } from "@playwright/test";
-import { TIER_ORDER } from "../apps/platform/src/tiers.data";
+import { TIER_ORDER } from "../packages/shared/src/utils/tiers";
 
 /**
  * Production smoke check. See playwright.smoke.config.ts for why this exists
