@@ -376,24 +376,20 @@ export default function LandingPage() {
 
         <Pricing />
 
-        {/* FAQ — <details> so it opens before any JavaScript has loaded */}
+        {/* FAQ — every answer shown, full width. Six short answers read faster
+            open than behind six taps, and a closed one hides the catch an
+            owner came here to check. */}
         <section aria-labelledby="faq-title" id="faq" className="scroll-mt-20">
           <div className={`${CONTAINER} flex flex-col gap-xl`}>
             <SectionHeading id="faq-title" title="Questions" />
-            <div className="max-w-[48rem] divide-y divide-outline-variant border-y border-outline-variant">
+            <dl className="divide-y divide-outline-variant border-y border-outline-variant">
               {FAQS.map((faq) => (
-                <details key={faq.q} className="group">
-                  <summary className="flex min-h-14 cursor-pointer list-none items-center justify-between gap-l py-l font-display text-title-medium text-on-surface [&::-webkit-details-marker]:hidden">
-                    {faq.q}
-                    <i
-                      className="mgc_down_line shrink-0 text-[20px] text-on-surface-variant transition-transform duration-150 ease-out group-open:rotate-180 motion-reduce:transition-none"
-                      aria-hidden="true"
-                    />
-                  </summary>
-                  <p className="pb-l text-body-large text-on-surface-variant">{faq.a}</p>
-                </details>
+                <div key={faq.q} className="flex flex-col gap-s py-l">
+                  <dt className="font-display text-title-medium text-on-surface">{faq.q}</dt>
+                  <dd className="text-body-large text-on-surface-variant">{faq.a}</dd>
+                </div>
               ))}
-            </div>
+            </dl>
           </div>
         </section>
 
