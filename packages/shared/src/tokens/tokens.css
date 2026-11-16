@@ -140,6 +140,7 @@
   --color-grey-33: #353535;
   --color-grey-37: #404040;
   --color-grey-46: #585858;
+  --color-grey-50: #636363;
   --color-grey-52: #696969;
   --color-grey-56: #747474;
   --color-grey-58: #7a7a7a;
@@ -147,6 +148,7 @@
   --color-grey-70: #9e9e9e;
   --color-grey-78: #b7b7b7;
   --color-grey-88: #d7d7d7;
+  --color-grey-90: #dedede;
   --color-grey-91: #e1e1e1;
   --color-grey-93: #e8e8e8;
   --color-grey-95: #eeeeee;
@@ -259,8 +261,9 @@
   --color-surface-container: var(--ds-surface-container);
   --color-surface-container-high: var(--ds-surface-container-high);
   --color-surface-container-highest: var(--ds-surface-container-highest);
-  /* Not an M3 role. Dialogs, menus, sheets and floating bars — the lightest
-   * surface in both modes, because it is the highest. */
+  /* Not an M3 role. Dialogs, menus, sheets and floating bars. Light: the card
+   * tone, darker than the page as M3 has it, so what sits inside follows the
+   * card rules. Dark: a step lighter than a card. */
   --color-surface-overlay: var(--ds-surface-overlay);
 
   --color-outline: var(--ds-outline);
@@ -418,38 +421,45 @@
   --ds-on-warning-container: #331300;
 
   /* ---- Surfaces — light ----
-   * LIGHTER IS HIGHER, in both modes. A card is lighter than the page it sits
-   * on; a block set into a card is darker than the card, so it reads as inset;
-   * a dialog is the lightest thing on screen. v3 ran the M3 light ladder the
-   * other way, one grey-step apart at 1.06:1 per rung, and a block inside a
-   * card simply vanished.
+   * NESTING STEPS AWAY FROM THE PAGE. In light mode the page is the lightest
+   * surface and each container set inside it is a step darker; in dark mode
+   * the page is the darkest and each container stacked on it is a step
+   * lighter. This is Material 3's surface-container scale (light: page T98,
+   * containers T96→T90; dark: page T6, containers T10→T22) and Apple's
+   * systemBackground → secondarySystemBackground.
    *
-   * The role names keep their M3 spelling but are assigned by JOB:
-   *   surface                 page                         grey-96
-   *   surface-container-low   card, rail, admin top bar    white   1.12 on page
-   *   surface-container       well inside a card, field    grey-96 1.12 under card
-   *   surface-container-high  neutral control on a card    grey-93 1.23 on card
-   *   surface-overlay         dialog, menu, sheet          white + shadow */
+   * v3 already ran this direction and failed on step size, not direction: a
+   * button sat one grey-step (1.06:1) from its card and vanished. So the
+   * steps here are wider, and a control jumps further than a container does.
+   *
+   * Roles keep their M3 names and are assigned by JOB:
+   *   surface                 page                          white
+   *   surface-container-low   card, rail, admin top bar     grey-96 1.12 under the page
+   *   surface-container       well inside a card, field     grey-93 1.09 under a card
+   *   surface-container-high  neutral control on a card     grey-90 1.20 under a card
+   *   surface-overlay         dialog, menu, sheet           grey-96, as M3: darker than
+   *                                                         the page, over a scrim */
   --ds-surface-tint: #f56500;
-  --ds-surface: #f2f2f2; /* grey-96 */
-  --ds-on-surface: #2e2e2e; /* grey-30 · 12.13:1 on the page, 13.58 on a card */
+  --ds-surface: #ffffff; /* grey-100 */
+  --ds-on-surface: #2e2e2e; /* grey-30 · 13.58:1 on the page, 12.13 on a card */
   --ds-on-surface-disabled: #2e2e2e1f; /* 12% */
   --ds-on-surface-label-disabled: #2e2e2e61; /* 38% */
   --ds-surface-variant: #e8e8e8; /* grey-93 */
-  --ds-on-surface-variant: #585858; /* grey-46 · 6.36:1 on the page, 5.44 on a hovered control */
-  --ds-on-surface-placeholder: #696969; /* grey-52 · 4.90:1 in a field (the well tone) */
+  --ds-on-surface-variant: #585858; /* grey-46 · 6.36:1 on a card, 4.94 on a hovered control */
+  /* grey-50, not grey-52: a field is now grey-93, where grey-52 lands at 4.48. */
+  --ds-on-surface-placeholder: #636363; /* grey-50 · 4.90:1 in a field */
   --ds-inverse-surface: #2e2e2e; /* grey-30 */
   --ds-inverse-on-surface: #eeeeee; /* grey-95 */
   --ds-surface-dim: #d7d7d7; /* grey-88 */
   --ds-surface-bright: #ffffff; /* grey-100 */
   --ds-surface-container-lowest: #ffffff; /* grey-100 */
-  --ds-surface-container-low: #ffffff; /* grey-100 · card */
-  --ds-surface-container: #f2f2f2; /* grey-96 · well, the page tone */
-  --ds-surface-container-high: #e8e8e8; /* grey-93 · neutral control */
-  --ds-surface-container-highest: #e1e1e1; /* grey-91 · its hover */
-  --ds-surface-overlay: #ffffff; /* grey-100 · dialog, menu, sheet */
+  --ds-surface-container-low: #f2f2f2; /* grey-96 · card */
+  --ds-surface-container: #e8e8e8; /* grey-93 · well, field */
+  --ds-surface-container-high: #dedede; /* grey-90 · neutral control */
+  --ds-surface-container-highest: #d7d7d7; /* grey-88 · its hover */
+  --ds-surface-overlay: #f2f2f2; /* grey-96 · dialog, menu, sheet */
 
-  --ds-outline: #747474; /* grey-56 · 4.18:1 on the page, 4.67 on a card */
+  --ds-outline: #747474; /* grey-56 · 4.18:1 on a card, 3.47 on a control */
   --ds-outline-variant: #d7d7d7; /* grey-88 */
   --ds-shadow: #00000052;
   --ds-scrim: #00000052;

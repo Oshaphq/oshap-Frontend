@@ -100,3 +100,14 @@ Cost: it reverses the documented "page is near-white #FCFCFC" rule in `CLAUDE.md
 - **Spacing: golden ratio**, chosen over patching the 4pt grid because fewer steps leave fewer wrong choices. The scale is 4 · 6 · 10 · 17 · 27 · 44 · 72 · 116. Every call site was moved by `scripts/codemod-golden-spacing.mjs`, and `packages/shared/src/tokens/spacing.test.ts` rejects numeric padding, margin and gap.
 - **Fixed in the same change:** the inverted fills inside dialogs, the table dividers, and the five low-contrast raw field borders (now `outline`, 4.67:1).
 - **Still open:** moving the raw fields onto `TextField`; 48px hit areas for the customer steppers; icon-size tokens; radius on the golden scale (the taste notes ask for it, but this change does not touch it).
+
+### Revision (2026-11-17): light mode follows the documented convention
+
+Option A ("lighter is higher" in light mode) is reversed. The designer settled the rule against Material 3, Apple UIKit and Radix Colors: nesting steps away from the page. That means darker per level in light mode and lighter per level in dark mode. Their reference sites (Apple, Calendly, Kuda, Grey) all ship it.
+
+The 1.06 failure was step size, not direction, so the steps are wider:
+- Light: page white, card grey-96 (1.12), well and field grey-93 (1.09), control grey-90 (1.20 on a card).
+- Dialogs, menus and sheets take the card tone, which is darker than the page as in M3.
+- Placeholder text moves to grey-50 so it clears 4.5:1 in the darker field (4.90).
+- Card hover becomes a tone step (`surface-container-high`) instead of a shadow.
+- Dark mode is unchanged.

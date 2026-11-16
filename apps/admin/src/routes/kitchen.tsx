@@ -361,7 +361,7 @@ function KitchenColumn({
             return (
               <div
                 key={order.id}
-                className="rounded-lg p-l flex flex-col gap-s bg-surface-container-low transition-shadow hover:shadow-sm"
+                className="rounded-lg p-l flex flex-col gap-s bg-surface-container-low transition-colors hover:bg-surface-container-high"
               >
                 <div className="flex items-center justify-between gap-s">
                   <div className="flex items-center gap-s">
