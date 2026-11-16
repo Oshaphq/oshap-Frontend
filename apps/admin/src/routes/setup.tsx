@@ -110,8 +110,8 @@ export default function SetupPage() {
 
   if (status === "unreachable") {
     return (
-      <div className="flex items-center justify-center min-h-screen bg-surface p-md">
-        <div className="w-full max-w-[400px] bg-surface-container-low rounded-2xl p-xl flex flex-col items-center gap-md text-center">
+      <div className="flex items-center justify-center min-h-screen bg-surface p-l">
+        <div className="w-full max-w-[400px] bg-surface-container-low rounded-2xl p-xl flex flex-col items-center gap-l text-center">
           <div className="w-16 h-16 rounded-full bg-warning-container flex items-center justify-center text-2xl text-on-warning-container">
             <i className="mgc_wifi_off_line" />
           </div>
@@ -137,8 +137,8 @@ export default function SetupPage() {
   // a retry button would invite someone to sit here clicking it.
   if (status === "dead") {
     return (
-      <div className="flex items-center justify-center min-h-screen bg-surface p-md">
-        <div className="w-full max-w-[400px] bg-surface-container-low rounded-2xl p-xl flex flex-col items-center gap-md text-center">
+      <div className="flex items-center justify-center min-h-screen bg-surface p-l">
+        <div className="w-full max-w-[400px] bg-surface-container-low rounded-2xl p-xl flex flex-col items-center gap-l text-center">
           <div className="w-16 h-16 rounded-full bg-error-container flex items-center justify-center text-2xl text-on-error-container">
             <i className="mgc_link_line" />
           </div>
@@ -160,13 +160,13 @@ export default function SetupPage() {
   }
 
   return (
-    <div className="flex items-center justify-center min-h-screen bg-surface p-md">
+    <div className="flex items-center justify-center min-h-screen bg-surface p-l">
       <form
         onSubmit={handleSubmit}
-        className="w-full max-w-[400px] bg-surface-container-low rounded-2xl p-xl flex flex-col gap-md"
+        className="w-full max-w-[400px] bg-surface-container-low rounded-2xl p-xl flex flex-col gap-l"
       >
-        <div className="flex items-start justify-between gap-md">
-          <div className="flex flex-col gap-0.5 min-w-0">
+        <div className="flex items-start justify-between gap-l">
+          <div className="flex flex-col gap-xs min-w-0">
             <h1 className="font-display text-title-large font-semibold text-on-surface truncate">
               {account?.restaurant_name}
             </h1>
@@ -180,7 +180,7 @@ export default function SetupPage() {
 
         {/* Masked, not full: enough to recognise the account, not enough to
             hand a contact detail to whoever is holding the link. */}
-        <p className="text-body-small text-on-surface-variant bg-surface-container rounded-sm px-md py-s">
+        <p className="text-body-small text-on-surface-variant bg-surface-container rounded-sm px-l py-md">
           Signing in as{" "}
           <span className="font-semibold text-on-surface">
             {account?.phone_hint}

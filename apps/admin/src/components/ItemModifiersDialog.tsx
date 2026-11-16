@@ -84,7 +84,7 @@ export default function ItemModifiersDialog({ item, onClose }: Props) {
           <Spinner />
         </div>
       ) : groups.length === 0 ? (
-        <p className="text-body-medium text-on-surface-variant text-center py-l">
+        <p className="text-body-medium text-on-surface-variant text-center py-xl">
           No option groups exist yet. Create one from{" "}
           <span className="font-semibold">Options</span> on the menu screen
           first.
@@ -97,13 +97,13 @@ export default function ItemModifiersDialog({ item, onClose }: Props) {
               key={group.id}
               checked={isOn}
               onChange={() => toggle(group.id)}
-              className={`p-md rounded-lg border transition-colors ${
+              className={`p-l rounded-lg border transition-colors ${
                 isOn
                   ? "border-primary bg-primary-container/40"
                   : "border-outline-variant bg-surface-container hover:bg-surface-container-highest"
               }`}
               label={
-                <span className="flex flex-col gap-0.5 min-w-0">
+                <span className="flex flex-col gap-xs min-w-0">
                   <span className="text-title-medium font-semibold text-on-surface">
                     {group.name}
                     {group.required && (

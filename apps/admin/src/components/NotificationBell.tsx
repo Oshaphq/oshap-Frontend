@@ -56,7 +56,7 @@ export default function NotificationBell() {
           <span
             // Sits on the icon rather than beside it: staff read this at a
             // glance across a room, not by scanning the nav bar.
-            className="absolute -top-0.5 -right-0.5 min-w-[18px] h-[18px] px-1 flex items-center justify-center rounded-full bg-error text-on-error text-label-small font-bold tabular-nums"
+            className="absolute -top-0.5 -right-0.5 min-w-[18px] h-[18px] px-xs flex items-center justify-center rounded-full bg-error text-on-error text-label-small font-bold tabular-nums"
             aria-hidden
           >
             {unresolved > 9 ? "9+" : unresolved}
@@ -101,13 +101,13 @@ function NotificationPanel({ onClose }: { onClose: () => void }) {
            heading in half. Pinned to both edges instead, so its width is
            whatever the screen allows rather than a number that happens to
            fit some phones. */
-        className="fixed left-md right-md top-[3.75rem] z-[71] sm:absolute sm:left-auto sm:right-0 sm:top-[calc(100%+0.5rem)] sm:w-[23rem] max-h-[min(30rem,70vh)] flex flex-col rounded-sm bg-surface-container-low border border-outline-variant shadow-xl overflow-hidden"
+        className="fixed left-l right-l top-[3.75rem] z-[71] sm:absolute sm:left-auto sm:right-0 sm:top-[calc(100%+0.5rem)] sm:w-[23rem] max-h-[min(30rem,70vh)] flex flex-col rounded-sm bg-surface-overlay border border-outline-variant shadow-xl overflow-hidden"
       >
-        <div className="flex items-center justify-between gap-s px-md py-s border-b border-outline-variant shrink-0">
+        <div className="flex items-center justify-between gap-s px-l py-md border-b border-outline-variant shrink-0">
           <span className="text-label-large font-semibold font-display text-on-surface">
             Notifications
           </span>
-          <div className="flex items-center gap-md">
+          <div className="flex items-center gap-l">
             {/* Clearing the lot is the commonest thing to want from a glance at
                 the bell, and it used to mean opening the full page first. */}
             <button
@@ -128,19 +128,19 @@ function NotificationPanel({ onClose }: { onClose: () => void }) {
           </div>
         </div>
 
-        <div className="flex-1 overflow-y-auto p-s flex flex-col gap-s">
+        <div className="flex-1 overflow-y-auto p-md flex flex-col gap-s">
           {isLoading && (
-            <p className="text-body-medium text-on-surface-variant px-s py-l text-center">
+            <p className="text-body-medium text-on-surface-variant px-md py-xl text-center">
               Loading…
             </p>
           )}
           {isError && (
-            <p className="text-body-medium text-on-surface-variant px-s py-l text-center">
+            <p className="text-body-medium text-on-surface-variant px-md py-xl text-center">
               Couldn't load notifications.
             </p>
           )}
           {!isLoading && !isError && rows.length === 0 && (
-            <p className="text-body-medium text-on-surface-variant px-s py-l text-center">
+            <p className="text-body-medium text-on-surface-variant px-md py-xl text-center">
               Nothing yet. Calls and orders will show up here.
             </p>
           )}
@@ -189,13 +189,13 @@ export function NotificationRow({
        Whether it is finished is what the line underneath is for. */
     <div
       ref={ref}
-      className="flex items-center gap-s p-s rounded-sm bg-surface-container transition-colors"
+      className="flex items-center gap-s p-md rounded-sm bg-surface-container transition-colors"
     >
       <i
         className={`${meta?.iconClass ?? "mgc_notification_line"} ${meta?.iconColorClass ?? "text-on-surface-variant"} text-lg shrink-0`}
         aria-hidden
       />
-      <div className="flex flex-col gap-0.5 min-w-0 flex-1">
+      <div className="flex flex-col gap-xs min-w-0 flex-1">
         <span className="text-label-medium font-semibold text-on-surface">
           {/* Our own wording for a type we know; the server's for one we do
               not, so a newly added event still says something. */}
@@ -233,7 +233,7 @@ export function NotificationRow({
                 ),
             })
           }
-          className="shrink-0 px-s py-1 rounded-full bg-primary-container text-on-primary-container text-label-small font-semibold hover:opacity-90 active:scale-[0.97] disabled:opacity-50 focus-visible:outline-2 focus-visible:outline-primary focus-visible:outline-offset-2 transition"
+          className="shrink-0 px-md py-xs rounded-full bg-primary-container text-on-primary-container text-label-small font-semibold hover:opacity-90 active:scale-[0.97] disabled:opacity-50 focus-visible:outline-2 focus-visible:outline-primary focus-visible:outline-offset-2 transition"
         >
           {resolve.isPending ? "…" : "I'll go"}
         </button>

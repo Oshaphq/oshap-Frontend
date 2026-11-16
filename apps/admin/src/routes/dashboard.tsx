@@ -68,7 +68,7 @@ export default function DashboardPage() {
 
   if (tablesQuery.isLoading) {
     return (
-      <div className="flex flex-col items-center justify-center min-h-[60vh] gap-md text-on-surface-variant">
+      <div className="flex flex-col items-center justify-center min-h-[60vh] gap-l text-on-surface-variant">
         <Spinner />
         <p>Loading tables...</p>
       </div>
@@ -172,7 +172,7 @@ export default function DashboardPage() {
   const hasLowStock = lowStockCount > 0;
 
   return (
-    <Page width="wide" gap="l">
+    <Page width="wide" gap="xl">
       {restaurantId && <SetupChecklist restaurantId={restaurantId} />}
       <header className="flex items-center justify-between">
         <h1 className="font-display text-title-large font-semibold text-on-surface">
@@ -202,7 +202,7 @@ export default function DashboardPage() {
           foreground colour instead of a flat secondary grey. Together those
           keep the three cards the same height and stop the ragged wrap that
           made "PAYMENTS TO VERIFY" look broken on a phone. */}
-      <div className="flex gap-s sm:gap-md flex-wrap">
+      <div className="flex gap-s sm:gap-l flex-wrap">
         <StatCard
           value={activeTablesCount}
           label={["ACTIVE", "TABLES"]}
@@ -221,7 +221,7 @@ export default function DashboardPage() {
         />
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-md">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-l">
         {tables.map((table) => {
           const bills = groupBills(table.live_orders);
           const { busy: isUnpaid, claimed: isPending } = tableState(table);
@@ -243,7 +243,7 @@ export default function DashboardPage() {
           return (
             <div
               key={table.id}
-              className={`rounded-lg p-md flex flex-col gap-s border transition-colors min-h-[120px] ${cardCls}`}
+              className={`rounded-lg p-l flex flex-col gap-s border transition-colors min-h-[120px] ${cardCls}`}
             >
               <div className="flex items-center justify-between">
                 <span className="font-display text-title-medium font-semibold text-on-surface">
@@ -316,7 +316,7 @@ export default function DashboardPage() {
               </div>
 
               {!isEmpty && isClosing && (
-                <div className="py-s text-center text-body-medium font-semibold text-on-surface-variant">
+                <div className="py-md text-center text-body-medium font-semibold text-on-surface-variant">
                   Clearing...
                 </div>
               )}
@@ -332,7 +332,7 @@ export default function DashboardPage() {
               )}
 
               {clearPromptTable === table.id && (
-                <div className="flex flex-col gap-s pt-s border-t border-surface-container-high">
+                <div className="flex flex-col gap-s pt-md border-t border-surface-container-high">
                   <span className="text-body-small font-semibold text-on-surface-variant text-center uppercase tracking-wider">
                     Why are you clearing?
                   </span>
@@ -360,7 +360,7 @@ export default function DashboardPage() {
                           total: bills[0]?.total ?? table.unpaidTotal,
                         });
                       }}
-                      className="flex items-center justify-center gap-s py-s rounded-sm font-bold text-body-medium bg-success text-on-success transition-all hover:opacity-90 active:scale-[0.98]"
+                      className="flex items-center justify-center gap-s py-md rounded-sm font-bold text-body-medium bg-success text-on-success transition-all hover:opacity-90 active:scale-[0.98]"
                     >
                       <i className="mgc_wallet_4_line" />
                       They paid — record it
@@ -369,7 +369,7 @@ export default function DashboardPage() {
                   <button
                     type="button"
                     onClick={() => handleAbandon(table)}
-                    className="flex items-center justify-center gap-s py-s rounded-sm font-bold text-body-medium border border-error text-error bg-transparent transition-all hover:bg-error/10 active:scale-[0.98]"
+                    className="flex items-center justify-center gap-s py-md rounded-sm font-bold text-body-medium border border-error text-error bg-transparent transition-all hover:bg-error/10 active:scale-[0.98]"
                   >
                     <i className="mgc_exit_line" />
                     Left without paying
@@ -379,7 +379,7 @@ export default function DashboardPage() {
                       and the payment stays on the books with nothing to match
                       it. Two orders at Jobiz went this way. */}
                   {bills.some((b) => b.amountPaid > 0 && b.balanceDue > 0) ? (
-                    <p className="text-label-small text-on-warning-container bg-warning-container rounded-sm p-s text-center">
+                    <p className="text-label-small text-on-warning-container bg-warning-container rounded-sm p-md text-center">
                       Careful — money has already been taken on this table.
                       Clearing as unpaid cancels the order and leaves that
                       payment with nothing to match it. Take the rest instead.
@@ -398,7 +398,7 @@ export default function DashboardPage() {
                   <button
                     type="button"
                     onClick={() => setClearPromptTable(null)}
-                    className="py-s text-center text-body-small font-medium text-on-surface-variant bg-transparent border-none cursor-pointer hover:text-on-surface transition-colors"
+                    className="py-md text-center text-body-small font-medium text-on-surface-variant bg-transparent border-none cursor-pointer hover:text-on-surface transition-colors"
                   >
                     Cancel
                   </button>
@@ -484,7 +484,7 @@ function StatCard({
   );
 
   const shared =
-    "flex-1 min-w-0 sm:min-w-[120px] rounded-lg px-s py-md flex flex-col items-center gap-xs border";
+    "flex-1 min-w-0 sm:min-w-[120px] rounded-lg px-md py-l flex flex-col items-center gap-xs border";
 
   if (to) {
     return (

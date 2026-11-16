@@ -28,14 +28,14 @@ export default function BottomNav({ tableId }: BottomNavProps) {
   return (
     <nav
       aria-label="Main navigation"
-      className="fixed left-0 right-0 bottom-0 flex justify-between items-center h-16 px-l bg-surface border-t border-outline-variant z-50 pb-[env(safe-area-inset-bottom,0)]"
+      className="fixed left-0 right-0 bottom-0 flex justify-between items-center h-16 px-xl bg-surface border-t border-outline-variant z-50 pb-[env(safe-area-inset-bottom,0)]"
     >
       {NAV_ITEMS.map(({ path, label, icon }) => (
         <NavLink
           key={path}
           to={`${path}?table=${tableId}`}
           className={({ isActive }) =>
-            `relative flex flex-col items-center gap-0.5 py-xs px-md rounded-sm transition-colors ${
+            `relative flex flex-col items-center gap-xs py-xs px-l rounded-sm transition-colors ${
               isActive
                 ? "text-primary-label after:content-[''] after:absolute after:-bottom-0.5 after:left-1/2 after:-translate-x-1/2 after:w-6 after:h-[3px] after:rounded-full after:bg-primary"
                 : "text-on-surface-variant hover:text-primary-label"

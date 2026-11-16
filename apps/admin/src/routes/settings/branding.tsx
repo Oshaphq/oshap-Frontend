@@ -92,9 +92,9 @@ export default function BrandingSettings() {
   }
 
   return (
-    <div className="flex flex-col gap-md pb-10">
-      <Card padding="l" gap="md">
-        <div className="flex flex-col gap-0.5">
+    <div className="flex flex-col gap-l pb-2xl">
+      <Card padding="xl" gap="l">
+        <div className="flex flex-col gap-xs">
           <h3 className="font-bold text-on-surface">Logo</h3>
           <p className="text-label-small text-on-surface-variant">
             Shown on receipts and at the top of the guest&rsquo;s menu. A square
@@ -134,8 +134,8 @@ export default function BrandingSettings() {
         />
       </Card>
 
-      <Card padding="l" gap="md">
-        <div className="flex flex-col gap-0.5">
+      <Card padding="xl" gap="l">
+        <div className="flex flex-col gap-xs">
           <h3 className="font-bold text-on-surface">Cover photo</h3>
           <p className="text-label-small text-on-surface-variant">
             Shown across the top of your guests&rsquo; menu, with your name over
@@ -154,7 +154,7 @@ export default function BrandingSettings() {
               {/* The same scrim the guest sees, so what is previewed here is
                   what lands on their phone rather than a cleaner version. */}
               <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
-              <p className="absolute bottom-md left-md font-display text-title-medium font-semibold text-white drop-shadow">
+              <p className="absolute bottom-l left-l font-display text-title-medium font-semibold text-white drop-shadow">
                 {settings?.name || "Your restaurant"}
               </p>
             </>
@@ -184,11 +184,11 @@ export default function BrandingSettings() {
         />
       </Card>
 
-      <Card padding="l">
+      <Card padding="xl">
         <BrandColourField value={colour} onChange={setColour} />
       </Card>
 
-      <div className="flex justify-end pt-s">
+      <div className="flex justify-end pt-md">
         <PrimaryButton
           size="md"
           onClick={save}

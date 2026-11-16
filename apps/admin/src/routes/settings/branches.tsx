@@ -142,8 +142,8 @@ export default function BranchesSettings() {
   const isSaving = createBranch.isPending || updateBranch.isPending;
 
   return (
-    <div className="flex flex-col gap-l pb-10">
-      <div className="flex items-start justify-between gap-md flex-wrap">
+    <div className="flex flex-col gap-xl pb-2xl">
+      <div className="flex items-start justify-between gap-l flex-wrap">
         <div className="flex flex-col gap-xs">
           <h3 className="font-bold text-on-surface">Branches</h3>
           <p className="text-body-medium text-on-surface-variant max-w-[52ch]">
@@ -159,7 +159,7 @@ export default function BranchesSettings() {
       </div>
 
       {showForm && (
-        <div className="bg-surface-container-low rounded-lg p-l flex flex-col gap-md border border-primary">
+        <div className="bg-surface-container-low rounded-lg p-xl flex flex-col gap-l border border-primary">
           <h4 className="font-bold text-on-surface">
             {editing ? `Edit ${editing.name}` : "New branch"}
           </h4>
@@ -206,7 +206,7 @@ export default function BranchesSettings() {
             />
           )}
 
-          <div className="flex gap-s justify-end pt-s">
+          <div className="flex gap-s justify-end pt-md">
             <SecondaryButton
               size="md"
               onClick={() => {
@@ -228,13 +228,13 @@ export default function BranchesSettings() {
           No branches yet.
         </p>
       ) : (
-        <div className="flex flex-col gap-md">
+        <div className="flex flex-col gap-l">
           {branches.map((branch) => {
             const isCurrent = branch.id === activeBranchId;
             return (
               <div
                 key={branch.id}
-                className={`rounded-lg p-l flex flex-wrap items-start justify-between gap-md border transition-colors ${
+                className={`rounded-lg p-xl flex flex-wrap items-start justify-between gap-l border transition-colors ${
                   branch.is_active
                     ? "bg-surface-container-low border-outline-variant"
                     : "bg-surface-container-low border-transparent opacity-60"
@@ -246,12 +246,12 @@ export default function BranchesSettings() {
                       {branch.name}
                     </span>
                     {isCurrent && (
-                      <span className="px-s py-xs rounded-full text-label-small font-bold uppercase tracking-wider bg-primary-container text-on-primary-container">
+                      <span className="px-md py-xs rounded-full text-label-small font-bold uppercase tracking-wider bg-primary-container text-on-primary-container">
                         Viewing
                       </span>
                     )}
                     {!branch.is_active && (
-                      <span className="px-s py-xs rounded-full text-label-small font-bold uppercase tracking-wider bg-surface-container-high text-on-surface-variant">
+                      <span className="px-md py-xs rounded-full text-label-small font-bold uppercase tracking-wider bg-surface-container-high text-on-surface-variant">
                         Closed
                       </span>
                     )}
@@ -280,7 +280,7 @@ export default function BranchesSettings() {
                   <button
                     type="button"
                     onClick={() => toggleActive(branch)}
-                    className="px-md py-s rounded-sm text-body-medium font-semibold text-on-surface-variant bg-transparent border border-outline-variant hover:bg-surface-container-high transition-colors"
+                    className="px-l py-md rounded-sm text-body-medium font-semibold text-on-surface-variant bg-transparent border border-outline-variant hover:bg-surface-container-high transition-colors"
                   >
                     {branch.is_active ? "Close" : "Reopen"}
                   </button>

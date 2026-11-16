@@ -112,9 +112,9 @@ export default function Notifications() {
     };
 
   return (
-    <div className="p-md sm:p-l flex flex-col gap-md max-w-[52rem] mx-auto w-full">
-      <div className="flex items-start justify-between gap-md flex-wrap">
-        <div className="flex flex-col gap-0.5">
+    <div className="p-l sm:p-xl flex flex-col gap-l max-w-[52rem] mx-auto w-full">
+      <div className="flex items-start justify-between gap-l flex-wrap">
+        <div className="flex flex-col gap-xs">
           <h1 className="text-headline-large font-semibold font-display text-on-surface">
             Notifications
           </h1>
@@ -151,7 +151,7 @@ export default function Notifications() {
       </div>
 
       {confirmClear && (
-        <div className="flex flex-col gap-s p-md rounded-sm bg-surface-container-high border border-outline-variant">
+        <div className="flex flex-col gap-s p-l rounded-sm bg-surface-container-high border border-outline-variant">
           <p className="text-body-medium text-on-surface-variant">
             Clear{" "}
             <span className="font-semibold text-on-surface">
@@ -213,13 +213,13 @@ export default function Notifications() {
             : "Nothing yet. Calls and orders will show up here."}
         </p>
       ) : (
-        <div className="flex flex-col gap-l">
+        <div className="flex flex-col gap-xl">
           {grouped.map(([bucket, items]) => (
             <section key={bucket} className="flex flex-col gap-xs">
               <h2 className="text-label-small font-semibold uppercase tracking-widest text-on-surface-variant">
                 {bucket}
               </h2>
-              <div className="rounded-lg bg-surface-container-low p-s flex flex-col gap-s">
+              <div className="rounded-lg bg-surface-container-low p-md flex flex-col gap-s">
                 {items.map((n) => (
                   <NotificationRow key={n.id} notification={n} />
                 ))}
@@ -230,7 +230,7 @@ export default function Notifications() {
       )}
 
       {lastPage > 1 && (
-        <div className="flex items-center justify-between gap-md">
+        <div className="flex items-center justify-between gap-l">
           <Button
             variant="outlined"
             size="md"

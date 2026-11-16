@@ -40,7 +40,7 @@ export default function Fab({
     <button
       type={type}
       className={`inline-flex shrink-0 items-center justify-center gap-xs rounded-full bg-primary text-on-primary text-xl shadow-lg font-display transition duration-100 ease-out hover:opacity-90 active:scale-[0.97] active:brightness-95 disabled:opacity-50 disabled:cursor-wait disabled:active:scale-100 ${
-        label ? "h-12 px-md" : "w-12 h-12"
+        label ? "h-12 px-l" : "w-12 h-12"
       } ${className}`}
       {...rest}
     >

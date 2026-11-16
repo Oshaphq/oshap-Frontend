@@ -67,7 +67,7 @@ export default function NotificationSheet({
             type="button"
             disabled={n.read}
             onClick={() => markAsRead(n.id)}
-            className={`flex items-start gap-s p-md rounded-sm border text-left transition-colors ${
+            className={`flex items-start gap-s p-l rounded-sm border text-left transition-colors ${
               n.read
                 ? "bg-surface-container border-transparent"
                 : "bg-surface-container border-primary hover:bg-surface-container-high"
@@ -75,11 +75,11 @@ export default function NotificationSheet({
           >
             <span
               aria-hidden="true"
-              className={`mt-1.5 shrink-0 w-2 h-2 rounded-full ${
+              className={`mt-s shrink-0 w-md h-md rounded-full ${
                 n.read ? "bg-transparent" : "bg-primary"
               }`}
             />
-            <span className="flex flex-col gap-0.5 min-w-0">
+            <span className="flex flex-col gap-xs min-w-0">
               <span
                 className={`text-body-medium ${
                   n.read

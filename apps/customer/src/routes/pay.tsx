@@ -119,13 +119,13 @@ export default function PayPage() {
               type="button"
               onClick={() => navigate(`/menu?table=${tableId}`)}
               aria-label="Back"
-              className="w-12 h-12 flex items-center justify-center rounded-full bg-surface-container hover:bg-surface-container-high transition-colors"
+              className="w-12 h-12 flex items-center justify-center rounded-full bg-surface-container-high hover:bg-surface-container-highest transition-colors"
             >
               <i className="mgc_left_line text-xl" />
             </button>
           }
         />
-        <div className="flex flex-col items-center gap-s py-10 px-md">
+        <div className="flex flex-col items-center gap-s py-2xl px-l">
           <Spinner />
           <p className="text-body-medium text-on-surface-variant">Loading payment details…</p>
         </div>
@@ -190,7 +190,7 @@ export default function PayPage() {
               type="button"
               onClick={() => navigate(`/menu?table=${tableId}`)}
               aria-label="Back"
-              className="w-12 h-12 flex items-center justify-center rounded-full bg-surface-container hover:bg-surface-container-high transition-colors"
+              className="w-12 h-12 flex items-center justify-center rounded-full bg-surface-container-high hover:bg-surface-container-highest transition-colors"
             >
               <i className="mgc_left_line text-xl" />
             </button>
@@ -199,7 +199,7 @@ export default function PayPage() {
 
         {isPaid ? (
           <>
-            <section className="py-2xl px-md bg-surface-container-low border-b-[6px] border-surface-container flex flex-col items-center gap-s text-center">
+            <section className="py-2xl px-l bg-surface-container-low border-b-[6px] border-surface-container flex flex-col items-center gap-s text-center">
               <i className="mgc_check_circle_fill text-5xl text-success" />
               <span className="font-display text-title-large font-semibold text-on-surface">
                 Payment confirmed
@@ -221,7 +221,7 @@ export default function PayPage() {
               total={receipt.total}
             />
 
-            <section className="py-l px-md bg-surface-container-low flex flex-col gap-md">
+            <section className="py-xl px-l bg-surface-container-low flex flex-col gap-l">
               <SecondaryButton onClick={() => navigate(`/menu?table=${tableId}`)}>
                 Order More
               </SecondaryButton>
@@ -261,7 +261,7 @@ export default function PayPage() {
               type="button"
               onClick={() => navigate(`/menu?table=${tableId}`)}
               aria-label="Back"
-              className="w-12 h-12 flex items-center justify-center rounded-full bg-surface-container hover:bg-surface-container-high transition-colors"
+              className="w-12 h-12 flex items-center justify-center rounded-full bg-surface-container-high hover:bg-surface-container-highest transition-colors"
             >
               <i className="mgc_left_line text-xl" />
             </button>
@@ -303,7 +303,7 @@ export default function PayPage() {
             type="button"
             onClick={() => navigate(`/menu?table=${tableId}`)}
             aria-label="Back"
-            className="w-12 h-12 flex items-center justify-center rounded-full bg-surface-container hover:bg-surface-container-high transition-colors"
+            className="w-12 h-12 flex items-center justify-center rounded-full bg-surface-container-high hover:bg-surface-container-highest transition-colors"
           >
             <i className="mgc_left_line text-xl" />
           </button>
@@ -311,10 +311,10 @@ export default function PayPage() {
       />
 
       {pendingPayments && (
-        <section className="py-l px-md bg-surface-container-low border-b-[6px] border-surface-container">
-          <div className="flex items-start gap-s p-md rounded-sm bg-warning-container text-on-warning-container">
-            <i className="mgc_information_line text-xl shrink-0 mt-0.5" />
-            <div className="flex flex-col gap-0.5">
+        <section className="py-xl px-l bg-surface-container-low border-b-[6px] border-surface-container">
+          <div className="flex items-start gap-s p-l rounded-sm bg-warning-container text-on-warning-container">
+            <i className="mgc_information_line text-xl shrink-0 mt-xs" />
+            <div className="flex flex-col gap-xs">
               <span className="text-label-large font-semibold font-display">
                 Previous payment pending
               </span>
@@ -327,7 +327,7 @@ export default function PayPage() {
         </section>
       )}
 
-      <section className="py-2xl px-md bg-surface-container-low border-b-[6px] border-surface-container flex flex-col items-center gap-s">
+      <section className="py-2xl px-l bg-surface-container-low border-b-[6px] border-surface-container flex flex-col items-center gap-s">
         <span className="text-label-medium font-semibold uppercase tracking-wider text-on-surface-variant">
           Amount Due
         </span>
@@ -349,7 +349,7 @@ export default function PayPage() {
         total={total}
       />
 
-      <section className="py-l px-md bg-surface-container-low border-b-[6px] border-surface-container flex flex-col gap-md">
+      <section className="py-xl px-l bg-surface-container-low border-b-[6px] border-surface-container flex flex-col gap-l">
         <div className="flex flex-col gap-xs">
           <h2 className="font-display text-title-medium font-semibold text-on-surface">
             Bank Transfer
@@ -381,8 +381,8 @@ export default function PayPage() {
             </>
           ) : (
             <>
-              <div className="flex items-start gap-s p-md rounded-sm bg-surface-container text-on-surface-variant">
-                <i className="mgc_card_pay_line text-xl shrink-0 mt-0.5" />
+              <div className="flex items-start gap-s p-l rounded-sm bg-surface-container text-on-surface-variant">
+                <i className="mgc_card_pay_line text-xl shrink-0 mt-xs" />
                 <p className="text-label-medium">
                   Tap <span className="font-semibold">Request a POS</span> below and
                   a waiter will bring a card terminal to your table.
@@ -423,10 +423,10 @@ export default function PayPage() {
                     role="radio"
                     onClick={() => setSelectedAccountId(account.id)}
                     aria-checked={isSelected}
-                    className={`px-md py-s rounded-full text-label-medium font-semibold transition-colors ${
+                    className={`px-l py-md rounded-full text-label-medium font-semibold transition-colors ${
                       isSelected
                         ? "bg-primary text-on-primary"
-                        : "bg-surface-container text-on-surface-variant hover:bg-surface-container-high"
+                        : "bg-surface-container-high text-on-surface-variant hover:bg-surface-container-highest"
                     }`}
                   >
                     {account.bank_name}
@@ -438,7 +438,7 @@ export default function PayPage() {
         )}
       </section>
 
-      <section className="py-l px-md bg-surface-container-low flex flex-col gap-md">
+      <section className="py-xl px-l bg-surface-container-low flex flex-col gap-l">
         {selectedAccount && (
           <PrimaryButton
             onClick={handleClaimPayment}
@@ -482,7 +482,7 @@ function DetailRow({
   mono?: boolean;
 }) {
   return (
-    <div className="flex items-center justify-between gap-md py-s">
+    <div className="flex items-center justify-between gap-l py-md">
       <span className="text-label-medium text-on-surface-variant">{label}</span>
       <div className="flex items-center gap-s min-w-0">
         <span
@@ -500,7 +500,7 @@ function DetailRow({
             className={`shrink-0 w-12 h-12 flex items-center justify-center rounded-full transition-colors ${
               copied
                 ? "bg-success-container text-on-success-container"
-                : "bg-surface-container hover:bg-surface-container-high text-on-surface-variant"
+                : "bg-surface-container-high hover:bg-surface-container-highest text-on-surface-variant"
             }`}
           >
             <i className={copied ? "mgc_check_line" : "mgc_clipboard_line"} />

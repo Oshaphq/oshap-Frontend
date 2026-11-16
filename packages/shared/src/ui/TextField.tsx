@@ -52,14 +52,14 @@ const FIELD =
  * genuinely compact toolbar. A textarea is excluded: its height is its rows.
  */
 const DENSITY = {
-  md: "h-10 px-md text-body-medium",
-  sm: "h-8 px-s text-body-medium",
+  md: "h-10 px-l text-body-medium",
+  sm: "h-8 px-md text-body-medium",
 } as const;
 
 /** A textarea grows by rows, so it keeps the old padding-driven box. */
 const MULTILINE_DENSITY = {
-  md: "px-md py-s text-body-medium",
-  sm: "px-s py-xs text-body-medium",
+  md: "px-l py-md text-body-medium",
+  sm: "px-md py-xs text-body-medium",
 } as const;
 
 interface FieldOwnProps {

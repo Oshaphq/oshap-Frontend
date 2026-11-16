@@ -113,8 +113,8 @@ export default function GeneralSettings() {
   }
 
   return (
-    <div className="flex flex-col gap-md pb-10">
-      <Card padding="l" gap="md">
+    <div className="flex flex-col gap-l pb-2xl">
+      <Card padding="xl" gap="l">
         <h3 className="font-bold text-on-surface">The restaurant</h3>
 
         <TextField
@@ -165,7 +165,7 @@ export default function GeneralSettings() {
         />
       </Card>
 
-      <Card padding="l" gap="md">
+      <Card padding="xl" gap="l">
         <h3 className="font-bold text-on-surface">Opening hours</h3>
         <TextField
           id="operating_hours"
@@ -178,8 +178,8 @@ export default function GeneralSettings() {
         />
       </Card>
 
-      <Card padding="l" gap="md">
-        <div className="flex flex-col gap-0.5">
+      <Card padding="xl" gap="l">
+        <div className="flex flex-col gap-xs">
           <h3 className="font-bold text-on-surface">Charges</h3>
           {/* Until these are set a restaurant charges neither, silently — the
               totals simply come out lower than they should and nothing
@@ -190,7 +190,7 @@ export default function GeneralSettings() {
             the service charge in its base.
           </p>
         </div>
-        <div className="grid grid-cols-2 gap-md">
+        <div className="grid grid-cols-2 gap-l">
           <TextField
             id="vat_rate"
             label="VAT (%)"
@@ -214,7 +214,7 @@ export default function GeneralSettings() {
         </div>
       </Card>
 
-      <div className="flex justify-end pt-s">
+      <div className="flex justify-end pt-md">
         <PrimaryButton
           size="md"
           onClick={handleSave}

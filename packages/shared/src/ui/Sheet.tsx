@@ -102,18 +102,18 @@ export default function Sheet({
         aria-modal="true"
         aria-labelledby={label ? undefined : titleId}
         aria-label={label}
-        className={`fixed left-0 right-0 bottom-0 ${maxHeight} bg-surface-container-low rounded-t-xl z-[100] flex flex-col shadow-[0_-4px_24px_var(--ds-shadow)] animate-[slide-up-drawer_0.3s_ease] will-change-transform ${className}`}
+        className={`fixed left-0 right-0 bottom-0 ${maxHeight} bg-surface-overlay rounded-t-xl z-[100] flex flex-col shadow-[0_-4px_24px_var(--ds-shadow)] animate-[slide-up-drawer_0.3s_ease] will-change-transform ${className}`}
       >
         {/* The grab target is the handle alone, so content inside the sheet
             keeps its native scrolling. */}
         <div
           {...handleProps}
-          className="flex justify-center py-s cursor-grab active:cursor-grabbing shrink-0"
+          className="flex justify-center py-md cursor-grab active:cursor-grabbing shrink-0"
         >
           <div className="w-10 h-1 rounded-full bg-outline-variant" />
         </div>
 
-        <header className="flex items-start justify-between gap-s px-md pb-md border-b border-outline-variant shrink-0">
+        <header className="flex items-start justify-between gap-s px-l pb-l border-b border-outline-variant shrink-0">
           {header ?? (
             <h2
               id={titleId}
@@ -126,18 +126,18 @@ export default function Sheet({
             type="button"
             onClick={onClose}
             aria-label="Close"
-            className="w-12 h-12 shrink-0 flex items-center justify-center rounded-full bg-surface-container text-on-surface-variant hover:bg-surface-container-high transition-colors cursor-pointer"
+            className="w-12 h-12 shrink-0 flex items-center justify-center rounded-full bg-surface-container-high text-on-surface-variant hover:bg-surface-container-highest transition-colors cursor-pointer"
           >
             <i className="mgc_close_line text-xl" aria-hidden="true" />
           </button>
         </header>
 
-        <div className={`flex-1 overflow-y-auto p-md ${bodyClassName}`}>
+        <div className={`flex-1 overflow-y-auto p-l ${bodyClassName}`}>
           {children}
         </div>
 
         {footer && (
-          <div className="shrink-0 p-md border-t border-outline-variant pb-[calc(1rem+env(safe-area-inset-bottom,0px))]">
+          <div className="shrink-0 p-l border-t border-outline-variant pb-[calc(1rem+env(safe-area-inset-bottom,0px))]">
             {footer}
           </div>
         )}

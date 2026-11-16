@@ -22,7 +22,7 @@ export default function DashboardPage() {
   const mrr = monthlyRecurringKobo(restaurants);
 
   return (
-    <Page width="wide" gap="l">
+    <Page width="wide" gap="xl">
       <header>
         <h1 className="font-display text-title-large font-semibold text-on-surface">
           Platform Overview
@@ -42,7 +42,7 @@ export default function DashboardPage() {
       )}
 
       {/* KPI row */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-md">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-l">
         <Card gap="xs">
           <span className="text-label-large font-semibold text-on-surface-variant uppercase tracking-wider">
             Total Restaurants
@@ -68,7 +68,7 @@ export default function DashboardPage() {
           </span>
         </Card>
         <div
-          className={`rounded-lg p-md flex flex-col gap-xs border ${
+          className={`rounded-lg p-l flex flex-col gap-xs border ${
             health && health.error_rate_pct < 1
               ? "bg-success-container border-success"
               : "bg-error-container border-error"
@@ -88,10 +88,10 @@ export default function DashboardPage() {
       </div>
 
       {/* Quick links */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-md">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-l">
         <Link
           to="/restaurants/new"
-          className="bg-primary text-on-primary rounded-lg p-md flex items-center gap-md no-underline hover:opacity-90 transition-opacity"
+          className="bg-primary text-on-primary rounded-lg p-l flex items-center gap-l no-underline hover:opacity-90 transition-opacity"
         >
           <i className="mgc_add_circle_line text-2xl" />
           <div>
@@ -101,7 +101,7 @@ export default function DashboardPage() {
         </Link>
         <Link
           to="/restaurants"
-          className="bg-surface-container-low text-on-surface rounded-lg p-md flex items-center gap-md no-underline hover:bg-surface-container-high transition-colors border border-transparent hover:border-outline-variant"
+          className="bg-surface-container-low text-on-surface rounded-lg p-l flex items-center gap-l no-underline hover:bg-surface-container-high transition-colors border border-transparent hover:border-outline-variant"
         >
           <i className="mgc_fork_spoon_line text-2xl text-primary-label" />
           <div>
@@ -111,7 +111,7 @@ export default function DashboardPage() {
         </Link>
         <Link
           to="/health"
-          className="bg-surface-container-low text-on-surface rounded-lg p-md flex items-center gap-md no-underline hover:bg-surface-container-high transition-colors border border-transparent hover:border-outline-variant"
+          className="bg-surface-container-low text-on-surface rounded-lg p-l flex items-center gap-l no-underline hover:bg-surface-container-high transition-colors border border-transparent hover:border-outline-variant"
         >
           <i className="mgc_heartbeat_line text-2xl text-primary-label" />
           <div>
@@ -123,7 +123,7 @@ export default function DashboardPage() {
 
       {/* Recent restaurants */}
       {restaurants.length > 0 && (
-        <div className="flex flex-col gap-md">
+        <div className="flex flex-col gap-l">
           <h2 className="text-title-large font-semibold text-on-surface">
             Recently Onboarded
           </h2>
@@ -135,9 +135,9 @@ export default function DashboardPage() {
                 <Link
                   key={r.id}
                   to={`/restaurants/${r.id}`}
-                  className="bg-surface-container-low rounded-lg p-md flex items-center justify-between gap-md no-underline hover:bg-surface-container-high transition-colors"
+                  className="bg-surface-container-low rounded-lg p-l flex items-center justify-between gap-l no-underline hover:bg-surface-container-high transition-colors"
                 >
-                  <div className="flex items-center gap-md min-w-0">
+                  <div className="flex items-center gap-l min-w-0">
                     <div className="w-10 h-10 rounded-sm bg-primary-container flex items-center justify-center shrink-0">
                       <i className="mgc_fork_spoon_line text-on-primary-container" />
                     </div>
@@ -152,7 +152,7 @@ export default function DashboardPage() {
                   </div>
                   <div className="flex items-center gap-s shrink-0">
                     <span
-                      className={`px-s py-xs rounded-full text-label-small font-bold uppercase tracking-wider ${
+                      className={`px-md py-xs rounded-full text-label-small font-bold uppercase tracking-wider ${
                         r.subscription_tier === "PRO" || r.subscription_tier === "ENTERPRISE"
                           ? "bg-primary-container text-on-primary-container"
                           : "bg-surface-container-high text-on-surface-variant"
@@ -161,7 +161,7 @@ export default function DashboardPage() {
                       {r.subscription_tier}
                     </span>
                     <span
-                      className={`w-2 h-2 rounded-full shrink-0 ${
+                      className={`w-md h-md rounded-full shrink-0 ${
                         r.is_active ? "bg-success" : "bg-error"
                       }`}
                     />

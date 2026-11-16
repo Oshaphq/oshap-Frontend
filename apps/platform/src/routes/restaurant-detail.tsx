@@ -34,7 +34,7 @@ export default function RestaurantDetailPage() {
 
   if (query.isLoading) {
     return (
-      <div className="flex flex-col items-center justify-center min-h-[60vh] gap-md text-on-surface-variant">
+      <div className="flex flex-col items-center justify-center min-h-[60vh] gap-l text-on-surface-variant">
         <Spinner />
         <p>Loading restaurant...</p>
       </div>
@@ -43,7 +43,7 @@ export default function RestaurantDetailPage() {
 
   if (query.isError || !query.data) {
     return (
-      <main className="p-md">
+      <main className="p-l">
         <p className="text-error">Restaurant not found.</p>
         <Link to="/restaurants" className="text-primary-label">← Back</Link>
       </main>
@@ -78,8 +78,8 @@ export default function RestaurantDetailPage() {
   };
 
   return (
-    <main className="p-md flex flex-col gap-l max-w-[42rem]">
-      <header className="flex items-center gap-md">
+    <main className="p-l flex flex-col gap-xl max-w-[42rem]">
+      <header className="flex items-center gap-l">
         <Link
           to="/restaurants"
           className="w-10 h-10 flex items-center justify-center rounded-sm border border-outline-variant text-on-surface-variant hover:bg-surface-container-high transition-colors no-underline"
@@ -96,7 +96,7 @@ export default function RestaurantDetailPage() {
           type="button"
           onClick={handleToggleActive}
           disabled={update.isPending}
-          className={`px-md py-s rounded-sm font-bold text-body-medium transition-all hover:opacity-90 active:scale-[0.98] disabled:opacity-50 ${
+          className={`px-l py-md rounded-sm font-bold text-body-medium transition-all hover:opacity-90 active:scale-[0.98] disabled:opacity-50 ${
             r.is_active
               ? "bg-error-container text-on-error-container"
               : "bg-success-container text-on-success-container"
@@ -107,7 +107,7 @@ export default function RestaurantDetailPage() {
       </header>
 
       {/* Info cards */}
-      <div className="grid grid-cols-2 gap-md">
+      <div className="grid grid-cols-2 gap-l">
         <Card gap="xs">
           <span className="text-label-large font-semibold text-on-surface-variant uppercase tracking-wider">
             Status
@@ -177,7 +177,7 @@ export default function RestaurantDetailPage() {
       </div>
 
       {/* Subscription tier */}
-      <Card gap="md">
+      <Card gap="l">
         <div className="flex items-center justify-between">
           <h2 className="text-title-large font-semibold text-on-surface">Subscription</h2>
           {!editTier && (
@@ -203,7 +203,7 @@ export default function RestaurantDetailPage() {
                   key={tier}
                   type="button"
                   onClick={() => setPendingTier(tier)}
-                  className={`py-s px-md rounded-sm border-2 text-left transition-all ${
+                  className={`py-md px-l rounded-sm border-2 text-left transition-all ${
                     pendingTier === tier
                       ? "border-primary bg-primary-container text-on-primary-container"
                       : "border-outline-variant bg-surface-container-low text-on-surface hover:border-outline"
@@ -225,7 +225,7 @@ export default function RestaurantDetailPage() {
                   key={period}
                   type="button"
                   onClick={() => setPendingPeriod(period)}
-                  className={`py-s px-md rounded-sm border-2 text-left transition-all ${
+                  className={`py-md px-l rounded-sm border-2 text-left transition-all ${
                     pendingPeriod === period
                       ? "border-primary bg-primary-container text-on-primary-container"
                       : "border-outline-variant bg-surface-container-low text-on-surface hover:border-outline"
@@ -265,7 +265,7 @@ export default function RestaurantDetailPage() {
           </div>
         ) : (
           <div className="flex flex-col gap-xs">
-            <div className="flex items-center gap-md flex-wrap">
+            <div className="flex items-center gap-l flex-wrap">
               <span className="font-display text-title-medium font-semibold text-on-surface">
                 {r.subscription_tier}
               </span>
@@ -274,7 +274,7 @@ export default function RestaurantDetailPage() {
                   ? tierAnnualLabel(r.subscription_tier)
                   : tierPriceLabel(r.subscription_tier)}
               </span>
-              <span className="px-s py-xs rounded-full text-label-small font-bold uppercase tracking-wider bg-surface-container-high text-on-surface-variant">
+              <span className="px-md py-xs rounded-full text-label-small font-bold uppercase tracking-wider bg-surface-container-high text-on-surface-variant">
                 {r.billing_period === "ANNUAL" ? "Annual" : "Monthly"}
               </span>
             </div>

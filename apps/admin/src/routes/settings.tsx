@@ -41,10 +41,10 @@ function Row({
   return (
     <Link
       to={to}
-      className="flex items-center gap-md px-md py-md border-b border-outline-variant last:border-none no-underline hover:bg-surface-container transition-colors group"
+      className="flex items-center gap-l px-l py-l border-b border-outline-variant last:border-none no-underline hover:bg-surface-container transition-colors group"
     >
       <i className={`${icon} text-xl shrink-0 text-primary-label`} aria-hidden />
-      <span className="flex flex-col gap-0.5 min-w-0 flex-1">
+      <span className="flex flex-col gap-xs min-w-0 flex-1">
         <span className="text-body-medium font-semibold text-on-surface">{title}</span>
         <span className="text-body-medium text-on-surface-variant">{subtitle}</span>
       </span>
@@ -132,10 +132,10 @@ export default function SettingsLayout() {
   const atIndex = pathname === "/settings" || pathname === "/settings/";
 
   return (
-    <Page width="form" gap="md">
+    <Page width="form" gap="l">
       {atIndex ? (
         <>
-          <header className="flex flex-col gap-0.5">
+          <header className="flex flex-col gap-xs">
             <h1 className="font-display text-title-large font-semibold text-on-surface">
               Settings
             </h1>
@@ -199,7 +199,7 @@ export default function SettingsLayout() {
 /** A section's own screen: a way back, its name, then the section. */
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
   return (
-    <div className="flex flex-col gap-md">
+    <div className="flex flex-col gap-l">
       <header className="flex flex-col gap-xs">
         <Link
           to="/settings"

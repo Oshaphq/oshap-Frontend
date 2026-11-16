@@ -55,7 +55,7 @@ export default function Chip({
       aria-pressed={selected}
       onClick={onClick}
       disabled={disabled}
-      className={`inline-flex h-9 shrink-0 items-center gap-xs rounded-full border px-md text-label-large whitespace-nowrap transition-colors active:scale-[0.97] disabled:cursor-not-allowed disabled:active:scale-100 ${skin} ${className}`}
+      className={`inline-flex h-9 shrink-0 items-center gap-xs rounded-full border px-l text-label-large whitespace-nowrap transition-colors active:scale-[0.97] disabled:cursor-not-allowed disabled:active:scale-100 ${skin} ${className}`}
     >
       {icon && <i className={icon} aria-hidden="true" />}
       {children}

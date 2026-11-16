@@ -6,7 +6,7 @@ interface PinChipProps {
 export default function PinChip({ pin, className = "" }: PinChipProps) {
   return (
     <span
-      className={`inline-flex items-center py-s px-md rounded-sm border-2 border-success text-title-medium font-semibold text-success w-fit ${className}`}
+      className={`inline-flex items-center py-md px-l rounded-sm border-2 border-success text-title-medium font-semibold text-success w-fit ${className}`}
     >
       Table PIN : {pin}
     </span>

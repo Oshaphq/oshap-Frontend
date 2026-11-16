@@ -55,7 +55,7 @@ export default function BrandColourField({
           onChange={(e) => onChange(e.target.value)}
           placeholder="#F56500"
           spellCheck={false}
-          className="flex-1 px-md py-s rounded-sm bg-surface-container-low border border-outline-variant text-body-medium text-on-surface placeholder:text-on-surface-placeholder outline-none focus:border-primary transition-colors font-mono"
+          className="flex-1 px-l py-md rounded-sm bg-surface-container-low border border-outline text-body-medium text-on-surface placeholder:text-on-surface-placeholder outline-none focus:border-primary transition-colors font-mono"
         />
       </div>
 
@@ -101,13 +101,13 @@ function BrandPreview({
     <div
       data-theme={mode}
       style={vars ?? undefined}
-      className="rounded-sm border border-outline-variant bg-surface p-md flex flex-col gap-s"
+      className="rounded-sm border border-outline-variant bg-surface p-l flex flex-col gap-s"
     >
       <span className="text-label-small text-on-surface-variant capitalize">{mode}</span>
-      <div className="rounded-lg bg-primary text-on-primary px-md py-s text-center text-[16px] leading-6 font-semibold font-display">
+      <div className="rounded-lg bg-primary text-on-primary px-l py-md text-center text-[16px] leading-6 font-semibold font-display">
         Place order
       </div>
-      <div className="rounded-lg bg-primary-container text-on-primary-container px-md py-xs text-label-small">
+      <div className="rounded-lg bg-primary-container text-on-primary-container px-l py-xs text-label-small">
         Jollof rice &middot; ₦3,500
       </div>
     </div>

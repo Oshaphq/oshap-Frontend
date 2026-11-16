@@ -160,7 +160,7 @@ function CheckoutView({ tableId }: { tableId: string }) {
         total={totals.total}
       />
 
-      <section className="py-l px-md bg-surface-container-low">
+      <section className="py-xl px-l bg-surface-container-low">
         <PrimaryButton
           onClick={handleConfirmOrder}
           disabled={createOrder.isPending}

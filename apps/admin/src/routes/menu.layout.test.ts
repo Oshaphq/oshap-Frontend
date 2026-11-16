@@ -59,7 +59,7 @@ describe("row actions: one filled group, one outlined destructive", () => {
 
   it("the neutral four are filled", () => {
     // Not ``: that also matches inside `hover:bg-surface-container-high`.
-    expect(row.match(/(?<!hover:)bg-surface-container(?!-)/g)).toHaveLength(4);
+    expect(row.match(/(?<!hover:)bg-surface-container-high(?!-)/g)).toHaveLength(4);
   });
 });
 
@@ -72,7 +72,7 @@ describe("state reads as a pill", () => {
   it("unavailable is neutral, not an error", () => {
     // A dish taken off the menu is a choice, not a fault.
     const pill = src.slice(
-      src.indexOf("shrink-0 px-s py-0.5 rounded-full"),
+      src.indexOf("shrink-0 px-md py-xs rounded-full"),
       src.indexOf('{item.available ? "Available" : "Unavailable"}'),
     );
     expect(pill).toContain("bg-surface-container-high");
@@ -81,7 +81,7 @@ describe("state reads as a pill", () => {
 
   it("the stock badge is a sibling of the header row, not buried in it", () => {
     // Nested in the name column it shared width with a 64px thumbnail.
-    const body = src.indexOf('<div className="p-md flex flex-col gap-s">');
+    const body = src.indexOf('<div className="p-l flex flex-col gap-s">');
     const stock = src.indexOf("{isStockEditing ? (");
     const nameCol = src.indexOf('<div className="flex flex-col gap-xs min-w-0">');
     expect(stock).toBeGreaterThan(body);

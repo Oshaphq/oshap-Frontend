@@ -50,9 +50,9 @@ export default function ZReportPage() {
   const hasTakings = (data?.order_count ?? 0) > 0;
 
   return (
-    <Page width="reading" gap="l">
-      <header className="flex flex-wrap items-center justify-between gap-md">
-        <div className="flex flex-col gap-0.5">
+    <Page width="reading" gap="xl">
+      <header className="flex flex-wrap items-center justify-between gap-l">
+        <div className="flex flex-col gap-xs">
           <h1 className="font-display text-title-large font-semibold text-on-surface">
             Daily close
           </h1>
@@ -92,7 +92,7 @@ export default function ZReportPage() {
       ) : (
         data && (
           <>
-            <Card as="section" padding="l" gap="md">
+            <Card as="section" padding="xl" gap="l">
               <h2 className="text-title-large font-semibold text-on-surface">
                 Takings by method
               </h2>
@@ -112,7 +112,7 @@ export default function ZReportPage() {
                   />
                   <Line label={METHOD_LABELS.POS} value={data.pos_total} />
                 </div>
-                <div className="flex items-center justify-between gap-md pt-md border-t-2 border-ink">
+                <div className="flex items-center justify-between gap-l pt-l border-t-2 border-ink">
                   <span className="text-title-large font-semibold text-on-surface">
                     Total takings
                   </span>
@@ -123,7 +123,7 @@ export default function ZReportPage() {
               </div>
             </Card>
 
-            <Card as="section" padding="l" gap="md">
+            <Card as="section" padding="xl" gap="l">
               <h2 className="text-title-large font-semibold text-on-surface">
                 Included in the day
               </h2>
@@ -170,7 +170,7 @@ function Line({
 }) {
   const isDeduction = forceDeduction ? value > 0 : value < 0;
   return (
-    <div className="flex items-center justify-between gap-md py-s border-b border-outline-variant last:border-none">
+    <div className="flex items-center justify-between gap-l py-md border-b border-outline-variant last:border-none">
       <span className="text-body-medium text-on-surface-variant">{label}</span>
       <span
         className={`text-title-medium font-semibold tabular-nums ${

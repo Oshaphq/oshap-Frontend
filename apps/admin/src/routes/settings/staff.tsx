@@ -132,7 +132,7 @@ export default function StaffSettings() {
   }
 
   return (
-    <div className="flex flex-col gap-md pb-10">
+    <div className="flex flex-col gap-l pb-2xl">
       {/* No heading of its own: the section wrapper names the screen, and two
           titles in a row read as two screens. */}
       <div className="flex items-center justify-end">
@@ -246,7 +246,7 @@ export default function StaffSettings() {
             </>
           }
         >
-          <div className="flex flex-col gap-md">
+          <div className="flex flex-col gap-l">
             <TextField
               label="Name"
               type="text"

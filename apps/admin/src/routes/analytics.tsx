@@ -99,10 +99,10 @@ export default function Analytics() {
   };
 
   return (
-    <Page width="wide" gap="l">
-      <header className="flex flex-col gap-md sm:flex-row sm:items-start sm:justify-between">
+    <Page width="wide" gap="xl">
+      <header className="flex flex-col gap-l sm:flex-row sm:items-start sm:justify-between">
         {/* Title + secondary link stacked */}
-        <div className="flex flex-col gap-0.5">
+        <div className="flex flex-col gap-xs">
           <h1 className="font-display text-title-large font-semibold text-on-surface">
             Analytics Dashboard
           </h1>
@@ -119,7 +119,7 @@ export default function Analytics() {
         {/* Two rows on a phone, one from `lg`. Five controls need about 620px
             and the header gives this block roughly half the width, so `sm`
             would only have made them wrap somewhere less obvious. */}
-        <div className="flex flex-col gap-s sm:items-end lg:flex-row lg:items-center lg:gap-md">
+        <div className="flex flex-col gap-s sm:items-end lg:flex-row lg:items-center lg:gap-l">
           <div className="flex items-center gap-s flex-wrap">
             <TextField
               type="date"
@@ -178,16 +178,16 @@ export default function Analytics() {
       )}
 
       {error && (
-        <div className="bg-error-container text-on-error-container p-md rounded-lg">
+        <div className="bg-error-container text-on-error-container p-l rounded-lg">
           Failed to load analytics data.
         </div>
       )}
 
       {data && (
-        <div className="flex flex-col gap-l">
+        <div className="flex flex-col gap-xl">
           {/* Summary Cards */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-md">
-            <div className="bg-surface-container-low rounded-lg p-md border border-transparent">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-l">
+            <div className="bg-surface-container-low rounded-lg p-l border border-transparent">
               <h3 className="text-label-large font-semibold text-on-surface-variant mb-xs">
                 Total Revenue
               </h3>
@@ -195,7 +195,7 @@ export default function Analytics() {
                 {formatCurrency(data.summary.total_revenue)}
               </p>
             </div>
-            <div className="bg-surface-container-low rounded-lg p-md border border-transparent">
+            <div className="bg-surface-container-low rounded-lg p-l border border-transparent">
               <h3 className="text-label-large font-semibold text-on-surface-variant mb-xs">
                 Total Orders
               </h3>
@@ -203,7 +203,7 @@ export default function Analytics() {
                 {data.summary.total_orders.toLocaleString()}
               </p>
             </div>
-            <div className="bg-surface-container-low rounded-lg p-md border border-transparent">
+            <div className="bg-surface-container-low rounded-lg p-l border border-transparent">
               <h3 className="text-label-large font-semibold text-on-surface-variant mb-xs">
                 Avg Order Value
               </h3>
@@ -213,10 +213,10 @@ export default function Analytics() {
             </div>
           </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-md">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-l">
             {/* Revenue Over Time Chart */}
-            <div className="bg-surface-container-low rounded-lg p-md border border-transparent flex flex-col">
-              <h3 className="text-title-large font-semibold text-on-surface mb-md">
+            <div className="bg-surface-container-low rounded-lg p-l border border-transparent flex flex-col">
+              <h3 className="text-title-large font-semibold text-on-surface mb-l">
                 Revenue Over Time
               </h3>
               <div className="h-[300px] w-full">
@@ -239,8 +239,8 @@ export default function Analytics() {
             </div>
 
             {/* Popular Items Chart */}
-            <div className="bg-surface-container-low rounded-lg p-md border border-transparent flex flex-col">
-              <h3 className="text-title-large font-semibold text-on-surface mb-md">
+            <div className="bg-surface-container-low rounded-lg p-l border border-transparent flex flex-col">
+              <h3 className="text-title-large font-semibold text-on-surface mb-l">
                 Popular Items
               </h3>
               <div className="h-[300px] w-full">
@@ -266,8 +266,8 @@ export default function Analytics() {
             </div>
 
             {/* Peak Hours Chart */}
-            <div className="bg-surface-container-low rounded-lg p-md border border-transparent flex flex-col">
-              <h3 className="text-title-large font-semibold text-on-surface mb-md">
+            <div className="bg-surface-container-low rounded-lg p-l border border-transparent flex flex-col">
+              <h3 className="text-title-large font-semibold text-on-surface mb-l">
                 Peak Hours (Orders)
               </h3>
               <div className="h-[300px] w-full">
@@ -284,12 +284,12 @@ export default function Analytics() {
             </div>
 
             {/* Table Performance */}
-            <div className="bg-surface-container-low rounded-lg p-md border border-transparent flex flex-col">
-              <h3 className="text-title-large font-semibold text-on-surface mb-md">
+            <div className="bg-surface-container-low rounded-lg p-l border border-transparent flex flex-col">
+              <h3 className="text-title-large font-semibold text-on-surface mb-l">
                 Table Performance
               </h3>
               <div className="h-[300px] w-full overflow-y-auto">
-                {/* No `-mx-md` bleed. The old markup paired it with `px-md`,
+                {/* No `-mx-l` bleed. The old markup paired it with `px-l`,
                     which cancelled it; carrying only the negative half into
                     DataTable left this 32px wider than the box around it. That
                     box is `overflow-y-auto`, and CSS computes the other axis to

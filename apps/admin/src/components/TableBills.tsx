@@ -74,7 +74,7 @@ export default function TableBills({ bills, renderActions }: Props) {
         return (
           <div
             key={bill.key}
-            className="flex flex-col gap-xs p-s rounded-sm bg-surface-container"
+            className="flex flex-col gap-xs p-md rounded-sm bg-surface-container"
           >
             <div className="flex items-center justify-between gap-s">
               <div className="flex flex-col min-w-0">

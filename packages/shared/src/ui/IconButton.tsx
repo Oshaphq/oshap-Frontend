@@ -54,7 +54,7 @@ export interface IconButtonProps
 const VARIANT: Record<IconButtonVariant, string> = {
   standard: "bg-transparent hover:bg-surface-container-high",
   surface:
-    "bg-surface-container hover:bg-surface-container-high",
+    "bg-surface-container-high hover:bg-surface-container-highest",
   filled: "bg-primary text-on-primary hover:brightness-95",
   tonal:
     "bg-secondary-container text-on-secondary-container hover:brightness-95",

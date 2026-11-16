@@ -79,7 +79,7 @@ export default function MenuImportDialog({ onClose }: Props) {
       size="lg"
       scrollable
     >
-      <div className="flex flex-col gap-s p-md rounded-sm bg-surface-container">
+      <div className="flex flex-col gap-s p-l rounded-sm bg-surface-container">
         <span className="text-label-small font-semibold uppercase tracking-wider text-on-surface-variant">
           Columns
         </span>
@@ -122,7 +122,7 @@ export default function MenuImportDialog({ onClose }: Props) {
         <button
           type="button"
           onClick={() => fileInputRef.current?.click()}
-          className="w-full flex items-center gap-s p-md rounded-sm border border-dashed border-outline-variant text-left hover:border-primary transition-colors"
+          className="w-full flex items-center gap-s p-l rounded-sm border border-dashed border-outline-variant text-left hover:border-primary transition-colors"
         >
           <i className="mgc_file_upload_line text-2xl text-on-surface-variant shrink-0" />
           <span className="flex flex-col min-w-0">
@@ -158,7 +158,7 @@ export default function MenuImportDialog({ onClose }: Props) {
                 {preview.errors.map((err, i) => (
                   <div
                     key={`${err.row}-${err.field ?? ""}-${i}`}
-                    className="flex gap-s px-md py-s border-b border-outline-variant last:border-none"
+                    className="flex gap-s px-l py-md border-b border-outline-variant last:border-none"
                   >
                     <span className="text-body-medium font-semibold text-on-surface shrink-0 tabular-nums">
                       Row {err.row}
@@ -183,7 +183,7 @@ export default function MenuImportDialog({ onClose }: Props) {
         </div>
       )}
 
-      <div className="flex justify-end gap-s pt-s">
+      <div className="flex justify-end gap-s pt-md">
         <SecondaryButton size="md" onClick={onClose}>
           {committed ? "Done" : "Cancel"}
         </SecondaryButton>
@@ -224,7 +224,7 @@ function Tally({
   tone: "ok" | "muted";
 }) {
   return (
-    <div className="flex flex-col items-center gap-0.5 p-s rounded-sm bg-surface-container">
+    <div className="flex flex-col items-center gap-xs p-md rounded-sm bg-surface-container">
       <span
         className={`font-display text-title-medium font-semibold tabular-nums ${
           tone === "ok" && value > 0 ? "text-primary-label" : "text-on-surface-variant"

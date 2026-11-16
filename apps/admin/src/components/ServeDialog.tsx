@@ -71,7 +71,7 @@ export default function ServeDialog({ orderId, tableName, total, onClose }: Prop
       title="Food delivered"
       subtitle={<>Table {tableName}</>}
     >
-      <div className="flex flex-col items-center gap-xs py-l rounded-sm bg-surface-container">
+      <div className="flex flex-col items-center gap-xs py-xl rounded-sm bg-surface-container">
         <span className="text-label-small font-semibold uppercase tracking-wider text-on-surface-variant">
           Bill
         </span>
@@ -94,7 +94,7 @@ export default function ServeDialog({ orderId, tableName, total, onClose }: Prop
               setChoice(m.value);
               confirm(m.value);
             }}
-            className="flex items-center justify-between gap-s px-md py-s rounded-sm bg-surface-container text-on-surface text-label-medium font-semibold hover:bg-surface-container-highest active:scale-[0.99] disabled:opacity-50 focus-visible:outline-2 focus-visible:outline-primary focus-visible:outline-offset-2 transition"
+            className="flex items-center justify-between gap-s px-l py-md rounded-sm bg-surface-container-high text-on-surface text-label-medium font-semibold hover:bg-surface-container-highest active:scale-[0.99] disabled:opacity-50 focus-visible:outline-2 focus-visible:outline-primary focus-visible:outline-offset-2 transition"
           >
             <span className="flex items-center gap-s">
               <i className={`${m.icon} text-xl text-primary-label`} aria-hidden />
@@ -117,7 +117,7 @@ export default function ServeDialog({ orderId, tableName, total, onClose }: Prop
             setChoice("later");
             confirm();
           }}
-          className="flex items-center justify-between gap-s px-md py-s rounded-sm border border-outline-variant text-on-surface text-label-medium font-semibold hover:bg-surface-container active:scale-[0.99] disabled:opacity-50 focus-visible:outline-2 focus-visible:outline-primary focus-visible:outline-offset-2 transition"
+          className="flex items-center justify-between gap-s px-l py-md rounded-sm border border-outline-variant text-on-surface text-label-medium font-semibold hover:bg-surface-container active:scale-[0.99] disabled:opacity-50 focus-visible:outline-2 focus-visible:outline-primary focus-visible:outline-offset-2 transition"
         >
           <span className="flex items-center gap-s">
             <i className="mgc_time_line text-xl text-on-surface-variant" aria-hidden />

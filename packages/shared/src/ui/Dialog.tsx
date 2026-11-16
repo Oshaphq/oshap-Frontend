@@ -137,7 +137,7 @@ export default function Dialog({
 
   return createPortal(
     <div
-      className="fixed inset-0 z-[100] flex items-center justify-center bg-scrim backdrop-blur-sm p-md"
+      className="fixed inset-0 z-[100] flex items-center justify-center bg-scrim backdrop-blur-sm p-l"
       onClick={onClose}
     >
       <div
@@ -147,16 +147,16 @@ export default function Dialog({
         aria-labelledby={titleId}
         tabIndex={-1}
         onClick={(e) => e.stopPropagation()}
-        className={`w-full ${SIZE[size]} rounded-xl bg-surface-container-high border border-outline-variant shadow-xl flex flex-col ${
-          scrollable ? "max-h-[85vh]" : "p-l gap-md"
+        className={`w-full ${SIZE[size]} rounded-xl bg-surface-overlay border border-outline-variant shadow-xl flex flex-col ${
+          scrollable ? "max-h-[85vh]" : "p-xl gap-l"
         } ${className}`}
       >
         <header
-          className={`flex items-start justify-between gap-md ${
-            scrollable ? "p-l border-b border-outline-variant" : ""
+          className={`flex items-start justify-between gap-l ${
+            scrollable ? "p-xl border-b border-outline-variant" : ""
           }`}
         >
-          <div className="flex flex-col gap-0.5 min-w-0">
+          <div className="flex flex-col gap-xs min-w-0">
             <h2
               id={titleId}
               className="font-display text-title-medium font-semibold text-on-surface"
@@ -175,7 +175,7 @@ export default function Dialog({
               onClick={onClose}
               aria-label="Close"
               data-dialog-close
-              className="w-10 h-10 shrink-0 flex items-center justify-center rounded-full bg-surface-container text-on-surface-variant hover:bg-surface-container-highest transition-colors"
+              className="w-10 h-10 shrink-0 flex items-center justify-center rounded-full bg-surface-container-high text-on-surface-variant hover:bg-surface-container-highest transition-colors"
             >
               <i className="mgc_close_line" aria-hidden="true" />
             </button>
@@ -184,7 +184,7 @@ export default function Dialog({
 
         {scrollable ? (
           <div
-            className={`flex-1 overflow-y-auto p-l flex flex-col gap-md ${bodyClassName}`}
+            className={`flex-1 overflow-y-auto p-xl flex flex-col gap-l ${bodyClassName}`}
           >
             {children}
           </div>
@@ -195,7 +195,7 @@ export default function Dialog({
         {footer && (
           <div
             className={`flex items-center justify-end gap-s ${
-              scrollable ? "p-l border-t border-outline-variant" : "pt-s"
+              scrollable ? "p-xl border-t border-outline-variant" : "pt-md"
             }`}
           >
             {footer}

@@ -32,7 +32,7 @@ export default function TableBadge({ id, className = "" }: TableBadgeProps) {
   return (
     <span
       aria-label={id ? `Table ${id}` : "Loading table"}
-      className={`inline-flex items-center px-s py-xs rounded-full border border-primary text-primary-label text-body-medium font-semibold whitespace-nowrap ${className}`}
+      className={`inline-flex items-center px-md py-xs rounded-full border border-primary text-primary-label text-body-medium font-semibold whitespace-nowrap ${className}`}
     >
       <span aria-hidden="true">Table {id ?? "…"}</span>
     </span>

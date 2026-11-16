@@ -41,7 +41,7 @@ export default function QueryError({
   const described = describeError(error, action);
 
   return (
-    <div className="flex flex-col items-center justify-center gap-s py-10 px-md text-center">
+    <div className="flex flex-col items-center justify-center gap-s py-2xl px-l text-center">
       <i className="mgc_alert_line text-5xl text-error opacity-60" />
       <span className="font-display text-title-medium font-semibold text-on-surface">
         {described.title}

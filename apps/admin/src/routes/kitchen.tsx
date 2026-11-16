@@ -170,33 +170,33 @@ export default function KitchenPage() {
           row, and the title lost — it shrank to fit beside them. Each gets a
           line of its own, and they sit back on one row from `sm` up where
           there is room for both. */}
-      <header className="flex flex-col items-start gap-s px-md py-s sm:flex-row sm:items-center sm:justify-between sm:gap-md bg-surface border-b border-outline-variant shrink-0 sm:min-h-[56px]">
+      <header className="flex flex-col items-start gap-s px-l py-md sm:flex-row sm:items-center sm:justify-between sm:gap-l bg-surface border-b border-outline-variant shrink-0 sm:min-h-[56px]">
         <h1 className="font-display text-title-large font-semibold text-on-surface">
           {user?.role === "BARTENDER" ? "Bar Orders" : "Kitchen Display"}
         </h1>
         {/* Wraps only where three pills genuinely cannot fit, rather than
             running off the edge of the screen. */}
         <div className="flex items-center gap-s flex-wrap">
-          <span className="px-s py-xs rounded-full font-bold text-body-small bg-primary-container text-on-primary-container">
+          <span className="px-md py-xs rounded-full font-bold text-body-small bg-primary-container text-on-primary-container">
             {newOrders.length} new
           </span>
-          <span className="px-s py-xs rounded-full font-bold text-body-small bg-warning-container text-on-warning-container">
+          <span className="px-md py-xs rounded-full font-bold text-body-small bg-warning-container text-on-warning-container">
             {inProgress.length} preparing
           </span>
-          <span className="px-s py-xs rounded-full font-bold text-body-small bg-success-container text-on-success-container">
+          <span className="px-md py-xs rounded-full font-bold text-body-small bg-success-container text-on-success-container">
             {ready.length} ready
           </span>
         </div>
       </header>
 
-      <div className="flex-1 overflow-auto p-md flex flex-col gap-md">
+      <div className="flex-1 overflow-auto p-l flex flex-col gap-l">
         {/* Said out loud, because the alternative is a bartender reading a
             board that quietly includes the kitchen's tickets and wondering
             why there is suddenly rice on it. */}
         {isStationRole && !canSplit && (
           <div
             role="alert"
-            className="flex items-start gap-s p-md rounded-lg bg-warning-container text-on-warning-container"
+            className="flex items-start gap-s p-l rounded-lg bg-warning-container text-on-warning-container"
           >
             <i className="mgc_alert_line text-lg shrink-0" aria-hidden />
             <p className="text-body-small font-semibold">
@@ -222,7 +222,7 @@ export default function KitchenPage() {
             )}
           </EmptyState>
         ) : (
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-md items-start">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-l items-start">
             <KitchenColumn
               title="New"
               accent="primary"
@@ -285,8 +285,8 @@ export default function KitchenPage() {
  */
 function StationRoutingHint() {
   return (
-    <div className="flex items-start gap-s p-md mt-s max-w-[480px] rounded-sm bg-warning-container text-on-warning-container text-left">
-      <i className="mgc_alert_line text-xl shrink-0 mt-0.5" />
+    <div className="flex items-start gap-s p-l mt-s max-w-[480px] rounded-sm bg-warning-container text-on-warning-container text-left">
+      <i className="mgc_alert_line text-xl shrink-0 mt-xs" />
       <p className="text-label-medium">
         Kitchen and bar orders are split by a menu category named{" "}
         <span className="font-semibold">&ldquo;{DRINKS_CATEGORY}&rdquo;</span>,
@@ -346,22 +346,22 @@ function KitchenColumn({
   const cls = ACCENT_CLS[accent];
 
   return (
-    <div className="flex flex-col gap-md">
+    <div className="flex flex-col gap-l">
       <h2
-        className={`font-semibold uppercase tracking-wider text-body-medium pb-s border-b-2 flex items-center gap-s text-on-surface ${cls.headerBorder}`}
+        className={`font-semibold uppercase tracking-wider text-body-medium pb-md border-b-2 flex items-center gap-s text-on-surface ${cls.headerBorder}`}
       >
         {title}
       </h2>
       {orders.length === 0 ? (
         <p className="text-center py-xl text-on-surface-variant">—</p>
       ) : (
-        <div className="flex flex-col gap-md">
+        <div className="flex flex-col gap-l">
           {orders.map((order) => {
             const isUpdating = isUpdatingId === order.id;
             return (
               <div
                 key={order.id}
-                className="rounded-lg p-md flex flex-col gap-s bg-surface-container-low transition-colors hover:bg-surface-container"
+                className="rounded-lg p-l flex flex-col gap-s bg-surface-container-low transition-shadow hover:shadow-sm"
               >
                 <div className="flex items-center justify-between gap-s">
                   <div className="flex items-center gap-s">
@@ -383,7 +383,7 @@ function KitchenColumn({
                 <ul className="flex flex-col gap-xs">
                   {order.order_items.map((item) => (
                     <li key={item.id} className="flex items-start gap-s">
-                      <span className={`font-bold min-w-l ${cls.qty}`}>
+                      <span className={`font-bold min-w-xl ${cls.qty}`}>
                         {item.quantity}x
                       </span>
                       <div className="flex flex-col min-w-0">
@@ -409,7 +409,7 @@ function KitchenColumn({
                     </li>
                   ))}
                 </ul>
-                <div className="flex flex-col gap-xl pt-s border-t border-surface-container-high">
+                <div className="flex flex-col gap-xl pt-md border-t border-surface-container-high">
                   <span className="text-body-medium font-bold text-on-surface-variant">
                     {formatCurrency(order.total)}
                   </span>
@@ -443,12 +443,12 @@ function KitchenSkeleton() {
   return (
     <SkeletonGroup
       label="Loading orders"
-      className="grid grid-cols-1 lg:grid-cols-3 gap-md items-start p-md"
+      className="grid grid-cols-1 lg:grid-cols-3 gap-l items-start p-l"
     >
       {["New", "Preparing", "Ready"].map((title) => (
         <div
           key={title}
-          className="flex flex-col gap-s rounded-lg bg-surface-container-low p-md"
+          className="flex flex-col gap-s rounded-lg bg-surface-container-low p-l"
         >
           <span className="text-title-medium font-semibold font-display text-on-surface-variant">
             {title}
@@ -456,7 +456,7 @@ function KitchenSkeleton() {
           {[0, 1].map((i) => (
             <div
               key={i}
-              className="flex flex-col gap-s rounded-sm bg-surface-container p-md"
+              className="flex flex-col gap-s rounded-sm bg-surface-container p-l"
             >
               <Skeleton width="w-1/3" height="h-5" />
               <Skeleton width="w-full" height="h-3" />

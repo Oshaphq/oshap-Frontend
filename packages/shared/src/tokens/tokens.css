@@ -7,7 +7,7 @@
  * Token tiers:
  *   1. Key palettes (primary-40, neutral-98, …) — HCT tones from one seed.
  *   2. Semantic roles (surface-container-low, on-primary-container, …).
- *   3. Type, shape, spacing — unchanged from v2.
+ *   3. Type and shape — unchanged from v2. Spacing — the golden scale.
  *
  * WHAT CHANGED FROM v2, in one place:
  *
@@ -133,9 +133,11 @@
   --color-grey-17: #0f0f0f;
   --color-grey-21: #181818;
   --color-grey-24: #1f1f1f;
+  --color-grey-26: #242424;
   --color-grey-28: #292929;
   --color-grey-30: #2e2e2e;
   --color-grey-32: #333333;
+  --color-grey-33: #353535;
   --color-grey-37: #404040;
   --color-grey-46: #585858;
   --color-grey-52: #696969;
@@ -148,6 +150,7 @@
   --color-grey-91: #e1e1e1;
   --color-grey-93: #e8e8e8;
   --color-grey-95: #eeeeee;
+  --color-grey-96: #f2f2f2;
   --color-grey-97: #f5f5f5;
   --color-grey-99: #fcfcfc;
   --color-grey-100: #ffffff;
@@ -256,30 +259,32 @@
   --color-surface-container: var(--ds-surface-container);
   --color-surface-container-high: var(--ds-surface-container-high);
   --color-surface-container-highest: var(--ds-surface-container-highest);
+  /* Not an M3 role. Dialogs, menus, sheets and floating bars — the lightest
+   * surface in both modes, because it is the highest. */
+  --color-surface-overlay: var(--ds-surface-overlay);
 
   --color-outline: var(--ds-outline);
   --color-outline-variant: var(--ds-outline-variant);
   --color-shadow: var(--ds-shadow);
   --color-scrim: var(--ds-scrim);
 
-  /* ---------- Spacing — unchanged from v2 (the 4pt grid) ---------- */
+  /* ---------- Spacing — the golden scale, 4 × 1.618ⁿ ----------
+   * Eight steps, each 1.618× the last, rounded to the pixel. The 4pt grid had
+   * fifteen, and the trouble was the choice: 16, 24 and 32 all looked right
+   * for a card, so cards shipped at all three. Here neighbours differ enough
+   * that only one of them ever fits.
+   *
+   * Numeric utilities (`p-4`, `gap-2`) still compile — Tailwind derives them,
+   * and h-/w- sizes need them — so `spacing.test.ts` keeps padding, margin and
+   * gap on these names. */
   --spacing-xs: 4px;
-  --spacing-s: 8px;
-  --spacing-md: 16px;
-  --spacing-l: 24px;
-  --spacing-xl: 32px;
-  --spacing-2xl: 40px;
-  --spacing-3xl: 48px;
-  --spacing-4xl: 56px;
-  --spacing-5xl: 64px;
-  --spacing-6xl: 72px;
-  --spacing-7xl: 80px;
-  --spacing-8xl: 88px;
-  --spacing-9xl: 96px;
-  --spacing-10xl: 112px;
-  --spacing-11xl: 128px;
-  --spacing-button-py: 10px;
-  --spacing-button-px: 20px;
+  --spacing-s: 6px;
+  --spacing-md: 10px;
+  --spacing-l: 17px;
+  --spacing-xl: 27px;
+  --spacing-2xl: 44px;
+  --spacing-3xl: 72px;
+  --spacing-4xl: 116px;
 
   /* ---------- Shape — unchanged from v2 ----------
    * Buttons stay at `sm` 8px rather than M3's full-round: a pill next to a
@@ -413,29 +418,38 @@
   --ds-on-warning-container: #331300;
 
   /* ---- Surfaces — light ----
-   * Five container levels plus dim and bright, all neutral. Elevation is a
-   * tone change, not a shadow; shadows are for things that actually float.
-   * The ladder steps in twos because the eye cannot separate 98 from 96 at a
-   * glance — it should read as one warm sheet with structure in it. */
+   * LIGHTER IS HIGHER, in both modes. A card is lighter than the page it sits
+   * on; a block set into a card is darker than the card, so it reads as inset;
+   * a dialog is the lightest thing on screen. v3 ran the M3 light ladder the
+   * other way, one grey-step apart at 1.06:1 per rung, and a block inside a
+   * card simply vanished.
+   *
+   * The role names keep their M3 spelling but are assigned by JOB:
+   *   surface                 page                         grey-96
+   *   surface-container-low   card, rail, admin top bar    white   1.12 on page
+   *   surface-container       well inside a card, field    grey-96 1.12 under card
+   *   surface-container-high  neutral control on a card    grey-93 1.23 on card
+   *   surface-overlay         dialog, menu, sheet          white + shadow */
   --ds-surface-tint: #f56500;
-  --ds-surface: #fcfcfc; /* grey-99 */
-  --ds-on-surface: #2e2e2e; /* grey-30 · 13.25:1 */
+  --ds-surface: #f2f2f2; /* grey-96 */
+  --ds-on-surface: #2e2e2e; /* grey-30 · 12.13:1 on the page, 13.58 on a card */
   --ds-on-surface-disabled: #2e2e2e1f; /* 12% */
   --ds-on-surface-label-disabled: #2e2e2e61; /* 38% */
   --ds-surface-variant: #e8e8e8; /* grey-93 */
-  --ds-on-surface-variant: #585858; /* grey-46 · 6.92:1 */
-  --ds-on-surface-placeholder: #696969; /* grey-52 · 5.04:1 on a card */
+  --ds-on-surface-variant: #585858; /* grey-46 · 6.36:1 on the page, 5.44 on a hovered control */
+  --ds-on-surface-placeholder: #696969; /* grey-52 · 4.90:1 in a field (the well tone) */
   --ds-inverse-surface: #2e2e2e; /* grey-30 */
   --ds-inverse-on-surface: #eeeeee; /* grey-95 */
   --ds-surface-dim: #d7d7d7; /* grey-88 */
-  --ds-surface-bright: #fcfcfc; /* grey-99 */
+  --ds-surface-bright: #ffffff; /* grey-100 */
   --ds-surface-container-lowest: #ffffff; /* grey-100 */
-  --ds-surface-container-low: #f5f5f5; /* grey-97 */
-  --ds-surface-container: #eeeeee; /* grey-95 */
-  --ds-surface-container-high: #e8e8e8; /* grey-93 */
-  --ds-surface-container-highest: #e1e1e1; /* grey-91 */
+  --ds-surface-container-low: #ffffff; /* grey-100 · card */
+  --ds-surface-container: #f2f2f2; /* grey-96 · well, the page tone */
+  --ds-surface-container-high: #e8e8e8; /* grey-93 · neutral control */
+  --ds-surface-container-highest: #e1e1e1; /* grey-91 · its hover */
+  --ds-surface-overlay: #ffffff; /* grey-100 · dialog, menu, sheet */
 
-  --ds-outline: #747474; /* grey-56 · 4.52:1 */
+  --ds-outline: #747474; /* grey-56 · 4.18:1 on the page, 4.67 on a card */
   --ds-outline-variant: #d7d7d7; /* grey-88 */
   --ds-shadow: #00000052;
   --ds-scrim: #00000052;
@@ -493,23 +507,24 @@
   /* ---- Surfaces — dark ---- */
   --ds-surface-tint: #f56500;
   --ds-surface: #0f0f0f; /* grey-17 */
-  --ds-on-surface: #d7d7d7; /* grey-88 · 13.32:1 */
+  --ds-on-surface: #d7d7d7; /* grey-88 · 13.32:1 on the page */
   --ds-on-surface-disabled: #d7d7d71f; /* 12% */
   --ds-on-surface-label-disabled: #d7d7d761; /* 38% */
   --ds-surface-variant: #292929; /* grey-28 */
-  --ds-on-surface-variant: #9e9e9e; /* grey-70 · 7.16:1 */
-  --ds-on-surface-placeholder: #868686; /* grey-62 · 4.88:1 on a card */
+  --ds-on-surface-variant: #9e9e9e; /* grey-70 · 7.15:1 on the page, 4.58 on a hovered control */
+  --ds-on-surface-placeholder: #868686; /* grey-62 · 5.26:1 in a field (the well tone) */
   --ds-inverse-surface: #d7d7d7; /* grey-88 */
   --ds-inverse-on-surface: #181818; /* grey-21 */
   --ds-surface-dim: #060606; /* grey-12 */
   --ds-surface-bright: #404040; /* grey-37 */
   --ds-surface-container-lowest: #060606; /* grey-12 */
-  --ds-surface-container-low: #181818; /* grey-21 */
-  --ds-surface-container: #1f1f1f; /* grey-24 */
-  --ds-surface-container-high: #292929; /* grey-28 */
-  --ds-surface-container-highest: #333333; /* grey-32 */
+  --ds-surface-container-low: #1f1f1f; /* grey-24 · card, 1.16 on page */
+  --ds-surface-container: #0f0f0f; /* grey-17 · well, the page tone */
+  --ds-surface-container-high: #2e2e2e; /* grey-30 · neutral control, 1.21 on card */
+  --ds-surface-container-highest: #353535; /* grey-33 · its hover; on-surface-variant 4.58 */
+  --ds-surface-overlay: #242424; /* grey-26 · dialog, menu, sheet */
 
-  --ds-outline: #7a7a7a; /* grey-58 · 4.46:1 */
+  --ds-outline: #7a7a7a; /* grey-58 · 4.47:1 on the page, 3.16 on a control */
   --ds-outline-variant: #333333; /* grey-32 */
   --ds-shadow: #00000052;
   --ds-scrim: #00000052;

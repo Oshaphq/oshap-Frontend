@@ -118,11 +118,11 @@ export default function RecipeDialog({ item, onClose }: Props) {
           <Spinner />
         </div>
       ) : ingredients.length === 0 ? (
-        <p className="text-body-medium text-on-surface-variant text-center py-l">
+        <p className="text-body-medium text-on-surface-variant text-center py-xl">
           No ingredients exist yet. Add some on the Inventory screen first.
         </p>
       ) : lines.length === 0 ? (
-        <p className="text-body-medium text-on-surface-variant text-center py-l">
+        <p className="text-body-medium text-on-surface-variant text-center py-xl">
           No recipe yet — this dish won&rsquo;t affect ingredient stock.
         </p>
       ) : (

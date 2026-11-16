@@ -81,7 +81,7 @@ describe("row actions", () => {
 
   it("Adjust is filled and Edit is outlined", () => {
     const actions = src.slice(src.indexOf("function RowActions"));
-    expect(actions).toContain("bg-surface-container text-on-surface-variant");
+    expect(actions).toContain("bg-surface-container-high text-on-surface-variant");
     expect(actions).toContain("border border-outline-variant");
   });
 

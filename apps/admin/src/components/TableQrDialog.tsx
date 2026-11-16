@@ -63,7 +63,7 @@ export default function TableQrDialog({
       size="sm"
     >
       {/* White plate regardless of theme — a QR code on a dark surface won't scan. */}
-      <div className="flex items-center justify-center p-md rounded-sm bg-white">
+      <div className="flex items-center justify-center p-l rounded-sm bg-white">
         {failed ? (
           <p className="text-body-medium text-error py-xl">Could not generate the QR code.</p>
         ) : pngDataUrl ? (
@@ -87,8 +87,8 @@ export default function TableQrDialog({
       </div>
 
       {isOriginUnusable() && (
-        <div className="flex items-start gap-s p-md rounded-sm bg-warning-container text-on-warning-container">
-          <i className="mgc_alert_line text-lg shrink-0 mt-0.5" />
+        <div className="flex items-start gap-s p-l rounded-sm bg-warning-container text-on-warning-container">
+          <i className="mgc_alert_line text-lg shrink-0 mt-xs" />
           <p className="text-body-medium">
             {isLocalOrigin() ? (
               <>
@@ -108,7 +108,7 @@ export default function TableQrDialog({
         </div>
       )}
 
-      <div className="flex justify-end gap-s pt-s">
+      <div className="flex justify-end gap-s pt-md">
         <Button variant="text" size="md" onClick={handleDownload} disabled={!pngDataUrl}>
           <i className="mgc_download_2_line" /> PNG
         </Button>

@@ -26,7 +26,7 @@ export default function GroupAnalyticsPage() {
 
   if (isLoading) {
     return (
-      <div className="flex flex-col items-center justify-center min-h-[60vh] gap-md text-on-surface-variant">
+      <div className="flex flex-col items-center justify-center min-h-[60vh] gap-l text-on-surface-variant">
         <Spinner />
         <p>Loading group analytics...</p>
       </div>
@@ -53,7 +53,7 @@ export default function GroupAnalyticsPage() {
   const maxRevenue = Math.max(...analytics.branches.map((b) => b.total_revenue), 1);
 
   return (
-    <Page width="wide" gap="l">
+    <Page width="wide" gap="xl">
       <header className="flex items-center justify-between">
         <div>
           <h1 className="font-display text-title-large font-semibold text-on-surface">
@@ -70,7 +70,7 @@ export default function GroupAnalyticsPage() {
       </header>
 
       {/* Summary KPIs */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-md">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-l">
         <Card gap="xs">
           <span className="text-label-large font-semibold text-on-surface-variant uppercase tracking-wider">
             Total Revenue
@@ -99,7 +99,7 @@ export default function GroupAnalyticsPage() {
 
       {/* Bar chart */}
       <Card>
-        <h2 className="text-title-large font-semibold text-on-surface mb-md">
+        <h2 className="text-title-large font-semibold text-on-surface mb-l">
           Revenue by Branch
         </h2>
         <div className="h-[280px] w-full">
@@ -137,7 +137,7 @@ export default function GroupAnalyticsPage() {
       </Card>
 
       {/* Per-branch breakdown */}
-      <div className="flex flex-col gap-md">
+      <div className="flex flex-col gap-l">
         <h2 className="text-title-large font-semibold text-on-surface">
           Branch Breakdown
         </h2>
@@ -152,7 +152,7 @@ export default function GroupAnalyticsPage() {
                     {branch.branch_name}
                   </span>
                   <span
-                    className={`px-s py-xs rounded-full text-label-small font-bold uppercase tracking-wider ${
+                    className={`px-md py-xs rounded-full text-label-small font-bold uppercase tracking-wider ${
                       meta?.is_active
                         ? "bg-success-container text-on-success-container"
                         : "bg-surface-container-high text-on-surface-variant"
@@ -166,8 +166,8 @@ export default function GroupAnalyticsPage() {
                 </span>
               </div>
 
-              <div className="flex items-center gap-md">
-                <div className="flex-1 h-2 rounded-full bg-surface-container-high overflow-hidden">
+              <div className="flex items-center gap-l">
+                <div className="flex-1 h-md rounded-full bg-surface-container-high overflow-hidden">
                   <div
                     className="h-full rounded-full bg-primary transition-all duration-500"
                     style={{ width: `${share}%` }}
@@ -178,7 +178,7 @@ export default function GroupAnalyticsPage() {
                 </span>
               </div>
 
-              <div className="flex flex-wrap items-center gap-l text-body-small text-on-surface-variant">
+              <div className="flex flex-wrap items-center gap-xl text-body-small text-on-surface-variant">
                 <span>
                   Avg order:{" "}
                   <strong className="text-on-surface">

@@ -6,8 +6,8 @@ import type { ReactNode } from "react";
  * Five of these were hand-rolled and they drifted on every axis that does not
  * show up in a screenshot: the header row was `surface-container-high` four
  * times and a bare bottom rule once; `<th>` was `text-label-large` four times
- * and `text-body-medium` once; padding was written `py-s px-md` in some cells
- * and `px-md py-s` in others; two body rows had a hover tint and a
+ * and `text-body-medium` once; padding was written `py-md px-l` in some cells
+ * and `px-l py-md` in others; two body rows had a hover tint and a
  * `last:border-none`, the rest had neither. Three different scroll wrappers.
  *
  * The semantics were worse:
@@ -95,19 +95,19 @@ export default function DataTable<T>({
         <caption
           className={
             showCaption
-              ? "px-md py-s text-left text-body-medium text-on-surface-variant"
+              ? "px-l py-md text-left text-body-medium text-on-surface-variant"
               : "sr-only"
           }
         >
           {caption}
         </caption>
         <thead>
-          <tr className="bg-surface-container-high border-b border-surface-container-highest">
+          <tr className="bg-surface-container-high border-b border-outline-variant">
             {columns.map((c, i) => (
               <th
                 key={i}
                 scope="col"
-                className={`py-s px-md text-label-large font-semibold text-on-surface-variant ${
+                className={`py-md px-l text-label-large font-semibold text-on-surface-variant ${
                   ALIGN[c.align ?? "left"]
                 } ${c.hideBelow ? HIDE_BELOW[c.hideBelow] : ""}`}
               >
@@ -120,12 +120,12 @@ export default function DataTable<T>({
           {rows.map((row, index) => (
             <tr
               key={rowKey(row, index)}
-              className="border-b border-surface-container-highest last:border-none hover:bg-surface-container transition-colors"
+              className="border-b border-outline-variant last:border-none hover:bg-surface-container transition-colors"
             >
               {columns.map((c, i) => (
                 <td
                   key={i}
-                  className={`py-s px-md ${ALIGN[c.align ?? "left"]} ${
+                  className={`py-md px-l ${ALIGN[c.align ?? "left"]} ${
                     c.hideBelow ? HIDE_BELOW[c.hideBelow] : ""
                   } ${c.cellClassName ?? ""}`}
                 >

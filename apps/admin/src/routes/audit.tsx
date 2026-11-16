@@ -133,9 +133,9 @@ export default function AuditPage() {
     : 1;
 
   return (
-    <Page width="wide" gap="md">
+    <Page width="wide" gap="l">
       <header className="flex flex-col gap-s sm:flex-row sm:flex-wrap sm:items-center sm:justify-between">
-        <div className="flex flex-col gap-0.5">
+        <div className="flex flex-col gap-xs">
           <h1 className="font-display text-title-large font-semibold text-on-surface">
             Audit trail
           </h1>
@@ -185,7 +185,7 @@ export default function AuditPage() {
             return (
               <div
                 key={entry.id}
-                className="px-md py-s border-b border-outline-variant last:border-none"
+                className="px-l py-md border-b border-outline-variant last:border-none"
               >
                 {/* Five things on one wrapping row is fine at width and chaos
                     on a phone: the description was squeezed to two lines, the
@@ -193,7 +193,7 @@ export default function AuditPage() {
                     amount fell to a line of its own. Two deliberate lines
                     instead · what happened and how much, then when, who and
                     which bill. */}
-                <div className="flex flex-col gap-0.5 sm:hidden">
+                <div className="flex flex-col gap-xs sm:hidden">
                   <div className="flex items-baseline justify-between gap-s">
                     <span className="text-body-medium text-on-surface min-w-0">
                       {describe(entry)}
@@ -223,7 +223,7 @@ export default function AuditPage() {
                   </div>
                 </div>
 
-                <div className="hidden sm:flex flex-wrap items-baseline gap-x-md gap-y-xs">
+                <div className="hidden sm:flex flex-wrap items-baseline gap-x-l gap-y-xs">
                   <span className="text-body-medium text-on-surface-variant tabular-nums shrink-0">
                     {formatApiDateTime(entry.created_at)}
                   </span>
@@ -259,7 +259,7 @@ export default function AuditPage() {
       )}
 
       {totalPages > 1 && (
-        <div className="flex items-center justify-between gap-md">
+        <div className="flex items-center justify-between gap-l">
           <Button
             variant="outlined"
             size="md"

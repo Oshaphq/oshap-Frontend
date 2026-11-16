@@ -59,7 +59,7 @@ const TYPE_LABELS: Record<string, string> = {
 
 export default function NotificationSettings() {
   return (
-    <div className="flex flex-col gap-md">
+    <div className="flex flex-col gap-l">
       <p className="text-body-medium text-on-surface-variant">
         Alerts are routed by role, and the routing is fixed. A kitchen account
         never receives payment alerts — hiding them in the app would still have
@@ -71,7 +71,7 @@ export default function NotificationSettings() {
         <table className="w-full border-collapse text-left">
           <thead>
             <tr className="border-b border-outline-variant">
-              <th className="px-md py-s text-body-medium font-semibold text-on-surface-variant">
+              <th className="px-l py-md text-body-medium font-semibold text-on-surface-variant">
                 Alert
               </th>
               {ROLES.map((role) => (
@@ -79,7 +79,7 @@ export default function NotificationSettings() {
                   key={role}
                   scope="col"
                   title={role}
-                  className="px-s py-s text-label-small font-semibold text-on-surface-variant text-center whitespace-nowrap"
+                  className="px-md py-md text-label-small font-semibold text-on-surface-variant text-center whitespace-nowrap"
                 >
                   {ROLE_SHORT[role]}
                 </th>
@@ -97,7 +97,7 @@ export default function NotificationSettings() {
                 >
                   <th
                     scope="row"
-                    className="px-md py-s font-normal text-body-medium text-on-surface whitespace-nowrap"
+                    className="px-l py-md font-normal text-body-medium text-on-surface whitespace-nowrap"
                   >
                     <span className="flex items-center gap-s">
                       <i
@@ -110,7 +110,7 @@ export default function NotificationSettings() {
                   {ROLES.map((role) => {
                     const on = goes.includes(role);
                     return (
-                      <td key={role} className="px-s py-s text-center">
+                      <td key={role} className="px-md py-md text-center">
                         {/* A dash, not an empty cell: an empty one reads as
                             missing data rather than as "no, on purpose". */}
                         <span

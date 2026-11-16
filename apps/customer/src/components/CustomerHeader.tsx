@@ -53,7 +53,7 @@ export default function CustomerHeader({
   const tableName = tableQuery.data?.table_id;
 
   return (
-    <header className="sticky top-0 z-40 flex items-center justify-between gap-s p-md bg-surface border-b border-outline-variant">
+    <header className="sticky top-0 z-40 flex items-center justify-between gap-s p-l bg-surface border-b border-outline-variant">
       <div className="flex items-center gap-s min-w-0">
         {leftSlot}
 

@@ -85,13 +85,13 @@ export default function InventoryPage() {
   );
 
   return (
-    <Page width="wide" gap="md">
+    <Page width="wide" gap="l">
       {/* Beside the title from `sm`, stacked below it on a phone. It used to
           stack at every width, which left the actions under a two-line
           description and the whole right-hand half of a desktop header empty.
           Every other admin screen puts them beside. */}
-      <header className="flex flex-col gap-s sm:flex-row sm:items-start sm:justify-between sm:gap-md">
-        <div className="flex flex-col gap-0.5">
+      <header className="flex flex-col gap-s sm:flex-row sm:items-start sm:justify-between sm:gap-l">
+        <div className="flex flex-col gap-xs">
           <h1 className="font-display text-title-large font-semibold text-on-surface">
             Inventory
           </h1>
@@ -117,7 +117,7 @@ export default function InventoryPage() {
       {low.length > 0 && (
         <div
           role="alert"
-          className="flex items-start gap-s p-md rounded-lg bg-warning-container text-on-warning-container"
+          className="flex items-start gap-s p-l rounded-lg bg-warning-container text-on-warning-container"
         >
           <i className="mgc_alert_line text-lg shrink-0" />
           {/* One sentence naming them, rather than a heading with a list under
@@ -148,8 +148,8 @@ export default function InventoryPage() {
            and every `1fr` column drifted out of step with its own heading.
            Sharing the tracks makes the alignment structural rather than a
            coincidence that has to be maintained. */
-        <div className="bg-surface-container-low rounded-lg overflow-hidden sm:grid sm:grid-cols-[2fr_1fr_1fr_1fr_auto] sm:gap-x-md">
-          <div className="hidden sm:grid sm:grid-cols-subgrid sm:col-span-5 gap-md px-md py-s bg-surface-container-high text-label-large font-semibold text-on-surface-variant">
+        <div className="bg-surface-container-low rounded-lg overflow-hidden sm:grid sm:grid-cols-[2fr_1fr_1fr_1fr_auto] sm:gap-x-l">
+          <div className="hidden sm:grid sm:grid-cols-subgrid sm:col-span-5 gap-l px-l py-md bg-surface-container-high text-label-large font-semibold text-on-surface-variant">
             <span>Ingredient</span>
             <span className="text-right">In stock</span>
             <span className="text-right">Alert at</span>
@@ -175,11 +175,11 @@ export default function InventoryPage() {
                    nothing saying whether it was the count or the alert level
                    — on the one screen where confusing those two means
                    ordering the wrong thing. */
-                className="px-md py-md sm:py-s border-b border-outline-variant last:border-none sm:grid sm:grid-cols-subgrid sm:col-span-5 sm:gap-x-md sm:items-center"
+                className="px-l py-l sm:py-md border-b border-outline-variant last:border-none sm:grid sm:grid-cols-subgrid sm:col-span-5 sm:gap-x-l sm:items-center"
               >
                 <div className="flex flex-col gap-s sm:hidden">
                   <div className="flex items-start justify-between gap-s">
-                    <div className="flex flex-col gap-0.5 min-w-0">
+                    <div className="flex flex-col gap-xs min-w-0">
                       <span className="text-body-medium font-semibold text-on-surface truncate">
                         {ingredient.name}
                       </span>
@@ -193,7 +193,7 @@ export default function InventoryPage() {
                         </span>
                       )}
                     </div>
-                    <div className="flex flex-col gap-0.5 items-end shrink-0">
+                    <div className="flex flex-col gap-xs items-end shrink-0">
                       <span
                         className={`text-body-medium font-semibold tabular-nums ${stockCls}`}
                       >
@@ -290,7 +290,7 @@ function RowActions({
       <button
         type="button"
         onClick={onAdjust}
-        className="px-md py-s rounded-sm bg-surface-container text-on-surface-variant text-body-small font-semibold hover:bg-surface-container-high hover:text-on-surface transition-colors"
+        className="px-l py-md rounded-sm bg-surface-container-high text-on-surface-variant text-body-small font-semibold hover:bg-surface-container-highest hover:text-on-surface transition-colors"
       >
         Adjust
       </button>
@@ -299,7 +299,7 @@ function RowActions({
         onClick={onEdit}
         title="Edit name, unit, threshold or cost"
         aria-label={`Edit ${ingredient.name}`}
-        className="px-md py-s rounded-sm border border-outline-variant bg-transparent text-on-surface-variant text-body-small font-semibold hover:border-on-surface hover:text-on-surface transition-colors"
+        className="px-l py-md rounded-sm border border-outline-variant bg-transparent text-on-surface-variant text-body-small font-semibold hover:border-on-surface hover:text-on-surface transition-colors"
       >
         Edit
       </button>
@@ -322,8 +322,8 @@ function MovementsLedger() {
     : 1;
 
   return (
-    <section className="flex flex-col gap-md">
-      <div className="flex flex-wrap items-center justify-between gap-md">
+    <section className="flex flex-col gap-l">
+      <div className="flex flex-wrap items-center justify-between gap-l">
         <h2 className="text-title-large font-semibold text-on-surface">
           Stock movements
         </h2>
@@ -345,11 +345,11 @@ function MovementsLedger() {
       </div>
 
       {movements.isLoading ? (
-        <div className="flex justify-center py-l">
+        <div className="flex justify-center py-xl">
           <Spinner />
         </div>
       ) : rows.length === 0 ? (
-        <p className="text-body-medium text-on-surface-variant py-l text-center rounded-lg bg-surface-container-low">
+        <p className="text-body-medium text-on-surface-variant py-xl text-center rounded-lg bg-surface-container-low">
           Nothing recorded yet.
         </p>
       ) : (
@@ -357,7 +357,7 @@ function MovementsLedger() {
           {rows.map((movement) => (
             <div
               key={movement.id}
-              className="flex flex-wrap items-baseline gap-x-md gap-y-xs px-md py-s border-b border-outline-variant last:border-none"
+              className="flex flex-wrap items-baseline gap-x-l gap-y-xs px-l py-md border-b border-outline-variant last:border-none"
             >
               <span className="text-body-medium text-on-surface-variant tabular-nums shrink-0">
                 {formatApiDateTime(movement.created_at)}
@@ -390,7 +390,7 @@ function MovementsLedger() {
       )}
 
       {totalPages > 1 && (
-        <div className="flex items-center justify-between gap-md">
+        <div className="flex items-center justify-between gap-l">
           <Button
             variant="outlined"
             size="md"
