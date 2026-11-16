@@ -199,7 +199,8 @@ are unlimited on all of them.
 
 ### 6. FAQ
 
-Single-column accordion, all closed. Six questions:
+Full width, every answer shown, no accordion. Six short answers read faster open than
+behind six taps, and a closed one hides the catch an owner came to check. Six questions:
 
 | Question | Answer |
 |---|---|
@@ -248,15 +249,13 @@ Everything comes from DS v3. Nothing new goes into `tokens.css`.
 **Reuse:** `BrandMark`, `PrimaryButton`, `SecondaryButton`, `TertiaryButton`, `Chip`, `Card`,
 `Sheet`, `IconButton`.
 
-**New, local to the site:** `Accordion` (FAQ) and `DeviceFrame` (screenshot in a phone or
-tablet outline). Promote `Accordion` to `packages/shared` only if a second app needs it.
+**New, local to the site:** `DeviceFrame` (screenshot in a phone or tablet outline), once
+there are screenshots.
 
 ## Motion
 
-Two places only. Build them with the `animate` skill.
+One place only. Build it with the `animate` skill.
 
-- **FAQ accordion.** Height and opacity on open and close. It shows where the answer came
-  from.
 - **Price change on the Monthly/Annual toggle.** A short crossfade on the figures, so it
   is clear they changed.
 
@@ -273,7 +272,7 @@ would explain something. It belongs in a later product video, not on the first b
 - Screenshots as AVIF with WebP fallback, sized by `srcset`. Lazy-load everything below the hero.
 - Preload the two webfonts already in use. No third.
 - One `h1`. Every section is a `section` with a heading. A skip link to main content.
-- Build the accordion on `<details>`/`<summary>`, so it works before JavaScript loads. The
+- The FAQ is a `<dl>`: questions in `<dt>`, answers in `<dd>`. The
   plan toggle is a radio group, and the new price is announced.
 - Every "Book a demo" link gets the accessible name "Book a demo on WhatsApp" and opens in
   a new tab.
@@ -306,7 +305,7 @@ The pricing toggle is built on `Chip`, so that change has to land first.
 4. Choose the domain and create the Vercel project.
 5. Capture screenshots from the apps in mock mode, light and dark.
 6. ~~Build sections top to bottom.~~ Done, without screenshots.
-7. Motion for the price change on the toggle. The accordion chevron already turns.
+7. Motion for the price change on the toggle.
 8. Design review, then a test on a real low-end Android phone on mobile data.
 
 ## References
