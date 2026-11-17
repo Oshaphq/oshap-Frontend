@@ -5,13 +5,13 @@
  * Palette output:     `m3-tokens.json` — the source of every hex below.
  *
  * Token tiers:
- *   1. Key palettes (primary-40, neutral-98, …) — HCT tones from one seed.
+ *   1. Key palettes (primary-40, grey-96, …) — primary in HCT from one seed.
  *   2. Semantic roles (surface-container-low, on-primary-container, …).
  *   3. Type and shape — unchanged from v2. Spacing — the golden scale.
  *
  * WHAT CHANGED FROM v2, in one place:
  *
- * Every value is solved, not chosen. Five key palettes come out of the seed
+ * Every value is solved, not chosen. The primary palette comes out of the seed
  * #F56500 in HCT (H 43.54 · C 75.92 · T 60.53) via the M3 reference solver,
  * plus fixed-hue error/success/warning run through the same solver. v2 walked a
  * candidate list until something passed WCAG, which produced right answers by a
@@ -77,37 +77,12 @@
   --color-primary-98: #fff8f5;
   --color-primary-100: #ffffff;
 
-  /* secondary — same hue, chroma 16. A muted brown: use it for weight, not
-   * for emphasis. Note S90/S95/S98 are byte-identical to primary's at this
-   * chroma, which is what forces the secondary-container departure below. */
-  --color-secondary-0: #000000;
-  --color-secondary-10: #2c160b;
-  --color-secondary-20: #442a1f;
-  --color-secondary-30: #5c4033;
-  --color-secondary-40: #76574a;
-  --color-secondary-50: #917061;
-  --color-secondary-60: #ad8979;
-  --color-secondary-70: #c9a393;
-  --color-secondary-80: #e6bead;
-  --color-secondary-90: #ffdbcc;
-  --color-secondary-95: #ffede6;
-  --color-secondary-98: #fff8f5;
-  --color-secondary-100: #ffffff;
-
-  /* tertiary — H +60 (103.54) · C 24. Categorical tags only. */
-  --color-tertiary-0: #000000;
-  --color-tertiary-10: #201c00;
-  --color-tertiary-20: #363107;
-  --color-tertiary-30: #4d471b;
-  --color-tertiary-40: #665f31;
-  --color-tertiary-50: #7f7847;
-  --color-tertiary-60: #9a925e;
-  --color-tertiary-70: #b5ac76;
-  --color-tertiary-80: #d1c88f;
-  --color-tertiary-90: #eee4a9;
-  --color-tertiary-95: #fcf2b6;
-  --color-tertiary-98: #fff9e5;
-  --color-tertiary-100: #ffffff;
+  /* No secondary or tertiary palette. M3 derives both from the seed; at
+   * Oshap's seed secondary was a muted brown whose 90 tone was byte-identical
+   * to primary's, and tertiary an olive. Nothing in the product chose them on
+   * purpose — four plan tags and two chart series — so they were removed
+   * rather than given jobs. Accents are primary only; status has its own
+   * fixed hues. */
 
   /* neutral — TRUE NEUTRAL. Built from black and white in OKLCH at zero chroma.
    *
@@ -218,15 +193,7 @@
    * 6.16:1. This is the only brand colour allowed to carry a sentence. */
   --color-primary-label: var(--ds-primary-label);
 
-  --color-secondary: var(--ds-secondary);
-  --color-on-secondary: var(--ds-on-secondary);
-  --color-secondary-container: var(--ds-secondary-container);
-  --color-on-secondary-container: var(--ds-on-secondary-container);
 
-  --color-tertiary: var(--ds-tertiary);
-  --color-on-tertiary: var(--ds-on-tertiary);
-  --color-tertiary-container: var(--ds-tertiary-container);
-  --color-on-tertiary-container: var(--ds-on-tertiary-container);
 
   --color-error: var(--ds-error);
   --color-on-error: var(--ds-on-error);
@@ -394,18 +361,7 @@
   --ds-inverse-primary: #ffb593; /* P80 */
   --ds-primary-label: #a63b00; /* P40 · 6.16:1 on surface */
 
-  --ds-secondary: #76574a; /* S40 / S100 · 6.50:1 */
-  --ds-on-secondary: #ffffff;
-  /* DEPARTURE from the M3 map. M3 says S90, which at chroma 16 is
-   * byte-identical to P90 #ffdbcc — the nav pill and the primary tag would be
-   * the same fill. Dropped to S80. Revisit if the seed hue ever changes. */
-  --ds-secondary-container: #e6bead; /* S80 / S10 · 10.05:1 */
-  --ds-on-secondary-container: #2c160b;
 
-  --ds-tertiary: #665f31; /* T40 / T100 */
-  --ds-on-tertiary: #ffffff;
-  --ds-tertiary-container: #eee4a9; /* T90 / T10 · 13.28:1 */
-  --ds-on-tertiary-container: #201c00;
 
   --ds-error: #ba1a1a; /* E40 / E100 */
   --ds-on-error: #ffffff;
@@ -489,15 +445,7 @@
   --ds-inverse-primary: #a63b00; /* P40 */
   --ds-primary-label: #ffb593; /* P80 */
 
-  --ds-secondary: #e6bead; /* S80 / S20 · 10.05:1 */
-  --ds-on-secondary: #442a1f;
-  --ds-secondary-container: #5c4033; /* S30 / S90 · 7.27:1 */
-  --ds-on-secondary-container: #ffdbcc;
 
-  --ds-tertiary: #d1c88f; /* T80 / T20 */
-  --ds-on-tertiary: #363107;
-  --ds-tertiary-container: #4d471b; /* T30 / T90 · 7.30:1 */
-  --ds-on-tertiary-container: #eee4a9;
 
   --ds-error: #ffb3aa; /* E80 / E20 */
   --ds-on-error: #6d0000;
