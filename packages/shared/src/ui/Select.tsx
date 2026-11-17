@@ -16,10 +16,14 @@ import type { SelectHTMLAttributes } from "react";
  *
  * This existed correctly in two files and natively in four others. It is here
  * so there is one of it.
+ *
+ * The fill is `surface-container`, the same as TextField: both are fields, and
+ * a field sits a step darker than the card it is on. On the card tone a select
+ * showed only its outline and read as a different kind of control.
  */
 
 const BASE =
-  "appearance-none w-full rounded-sm bg-surface-container-low border border-outline text-on-surface outline-none focus:border-primary transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed";
+  "appearance-none w-full rounded-sm bg-surface-container border border-outline text-on-surface outline-none focus:border-primary transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed";
 
 /**
  * Left inset and chevron inset are the same value in every density — that
