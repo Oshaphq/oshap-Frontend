@@ -16,11 +16,6 @@ import type { ReactNode } from "react";
  * The `icon` prop is gone. None of the shipping pills carried one, the word is
  * what does the work, and a 14px glyph beside an 11px label fought it.
  *
- * `tertiary` is the olive at H 103.54 — 60° off the seed, and far enough from
- * `success-container` that SPLIT and PAID never read as the same pale chip in
- * the payments column. Use it for what a thing *is*, never for what state it
- * is in.
- *
  * `neutral` takes `on-surface-variant`, not `outline`. A border tone used as
  * text is a documented don't, and `outline` fails AA on a raised surface.
  */
@@ -29,7 +24,6 @@ export type StatusTone =
   | "warning"
   | "error"
   | "primary"
-  | "tertiary"
   | "neutral";
 
 export interface StatusBadgeProps {
@@ -43,7 +37,6 @@ const TONE: Record<StatusTone, string> = {
   warning: "bg-warning-container text-on-warning-container",
   error: "bg-error-container text-on-error-container",
   primary: "bg-primary-container text-on-primary-container",
-  tertiary: "bg-tertiary-container text-on-tertiary-container",
   neutral: "bg-surface-container-high text-on-surface-variant",
 };
 

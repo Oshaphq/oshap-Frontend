@@ -13,8 +13,8 @@ Never hardcode a hex. Never use a raw palette step as a surface. Tokens swap on
 
 ## Method
 
-Three accent palettes come out of the seed `#F56500` in HCT (H 43.54 · C 75.92 · T 60.53)
-through the M3 reference solver, plus fixed-hue error, success and warning run through
+One accent palette, primary, comes out of the seed `#F56500` in HCT (H 43.54 · C 75.92 ·
+T 60.53) through the M3 reference solver, plus fixed-hue error, success and warning run through
 the same solver. A role names a palette and a tone. **Ratios are measured after the
 fact, not searched for** — v2 walked a candidate list until something passed, which
 produced right answers by a route nobody could re-derive.
@@ -69,21 +69,16 @@ A focus ring is a UI component, so the 3:1 exception covers it without qualifica
 | `primary` / `on-primary` | `#F56500` / `#FFFFFF` — 3.11:1 ≥3 | same |
 | `primary-container` | P90 `#FFDBCC` / P10 — 12.97:1 | P30 `#832700` / P90 — 7.21:1 |
 | `primary-label` | P40 `#A63B00` — 6.16:1 | P80 `#FFB593` |
-| `secondary` / `on-secondary` | S40 `#76574A` / S100 — 6.50:1 | S80 `#E6BEAD` / S20 — 10.05:1 |
-| `secondary-container` **· departure** | S80 `#E6BEAD` / S10 — 10.05:1 | S30 `#5C4033` / S90 — 7.27:1 |
-| `tertiary-container` | T90 `#EEE4A9` / T10 — 13.28:1 | T30 `#4D471B` / T90 — 7.30:1 |
 | `error-container` | E90 `#FFDAD5` / E10 — 12.96:1 | E30 `#960004` / E90 — 7.07:1 |
 | `success-container` | Su90 `#78FBB6` / Su10 — 13.06:1 | Su20 `#003A1E` / Su90 — 10.02:1 |
 | `warning-container` | Wa90 `#FFDDAF` / Wa10 — 13.14:1 | Wa30 `#653E00` / Wa90 — 7.23:1 |
 | `inverse-surface` | `grey-30` `#2E2E2E` / `grey-95` — 11.78:1 | `grey-88` `#D7D7D7` / `grey-21` |
 
-**The `secondary-container` departure.** M3 says S90, which at chroma 16 is
-byte-identical to P90 `#FFDBCC` — the tonal icon button and the tonal button would be the
-same fill, and the two tonal levels would collapse into one. Dropped to S80. Revisit if
-the seed hue ever changes.
-
-`secondary` is a muted brown at this hue: use it for weight, not for emphasis.
-`tertiary` is categorical only — menu sections, dietary marks. Never a state.
+**No secondary or tertiary.** M3 derives both from the seed. At Oshap's seed, secondary
+was a muted brown whose tone 90 was byte-identical to primary's, and tertiary an olive.
+Nothing in the product chose either on purpose — four platform plan tags and two chart
+series — so both were removed (2026-11) rather than given jobs. Accents are primary only;
+status has its own fixed hues; everything else is neutral.
 
 **Status roles sit outside the scheme.** Error, success and warning are fixed hues, not
 seed-derived and not tenant-derived. That is the only way a green "paid" chip stays green
@@ -199,7 +194,8 @@ Chips are outlined at rest and take `bg-primary` / `text-on-primary` when select
 border reads against any surface in the ladder, so whoever places a chip does not have to
 know what it is sitting on. Selected is the system-wide selected state — the same fill the
 selection controls and the selected list row use — so a selected chip reads the same
-everywhere. (v3 moved this off `secondary-container`, which nothing in the product used.)
+everywhere. (v3 moved this off the secondary container, which nothing used and which has since been
+removed.)
 
 ---
 
@@ -266,8 +262,7 @@ layer carries the feedback; it never disappears entirely.
 ## Color role usage — do's and don'ts
 
 M3 assigns every role a job. These rules are the M3 ones, with Oshap's two documented
-departures (`primary` at 3:1, `secondary-container` at S80) folded in where they change
-the advice.
+departure (`primary` at 3:1) folded in where it changes the advice.
 
 The pairing rule underneath all of them: **a role and its `on-` role are a pair.** Text
 or an icon on `X` takes `on-X`. Never take an on-color from a different family, and never
@@ -296,26 +291,16 @@ that is `bg-primary`.
 | Pair it strictly with `on-primary-container` | Use `on-primary` on it |
 | Use it for the tonal button (v3 moved tonal here from secondary) | Use it to signal status — status has its own families |
 
-### secondary / secondary-container
+### Categorical labels (plan tiers, kinds of thing)
 
-At Oshap's seed hue `secondary` is a muted brown. **Use it for weight, not emphasis** —
-a tonal icon button, a plan-tier tag, anything present but not shouting. A chip at rest is
-outlined rather than tinted, and a selected one takes `bg-primary`.
-
-| ✅ Do | ❌ Don't |
-|---|---|
-| Use `secondary-container` for the tonal icon button and the plan-tier tags | Use it as a second primary — it is deliberately quiet |
-| Reach for it when something needs weight but must not read as selected | Use it for a selected chip or nav destination — selected is `bg-primary` |
-| Remember it sits at **S80**, not M3's S90 | Change it back to S90 — S90 is byte-identical to P90 here, so the two tonal levels would collapse into one fill |
-
-### tertiary-container
-
-Categorical only — menu sections, dietary marks.
+There is no categorical palette. Label *what a thing is* with neutral, outlined or
+primary-container treatments and a word — the platform plan tags are neutral (Lite),
+outlined (Standard), primary container (Pro) and brand-outlined (Enterprise).
 
 | ✅ Do | ❌ Don't |
 |---|---|
-| Use it to label *what a thing is* | Use it for *what state a thing is in* — never a status |
-| Keep it to one meaning per screen | Mix it into the payments column, where it reads as another status chip |
+| Separate categories by treatment — fill, outline, brand — and always by word | Borrow a status hue for a category — it will read as a state |
+| Keep to the roles that exist | Reintroduce a secondary or tertiary palette for one tag |
 
 ### error / success / warning
 
@@ -443,9 +428,10 @@ surface and silently undoes the contrast the token was chosen for.
 
 ## Known gaps
 
-- **Charts have no categorical scale.** primary, secondary, tertiary and warning all sit
-  within 60° of the seed, so a multi-series chart cannot separate by hue. The palette in
-  `apps/admin/src/routes/analytics.tsx` separates by tone instead. A chart needing more
+- **Charts have no categorical scale.** Primary and warning sit within 30° of each other,
+  so a multi-series chart cannot separate by hue alone. The palette in
+  `apps/admin/src/routes/analytics.tsx` mixes orange, green, grey, amber and deep brick,
+  separating by tone where hue runs out. A chart needing more
   series than that needs its own scale, not more design-system roles.
 - **Tenant seeds near red.** A tenant seeded close to H 25 gets a primary near the fixed
   error hue, and a red "Place Order" beside a red "Void" is a genuine confusion. Nothing

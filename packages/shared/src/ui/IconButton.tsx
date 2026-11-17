@@ -2,7 +2,7 @@ import type { ButtonHTMLAttributes } from "react";
 
 /**
  * The M3 icon-button variants. Each one names its colour pair, so a glyph
- * never picks its own hex — on a filled or tonal container it takes that
+ * never picks its own hex — on a filled container it takes that
  * container's on-color, the same rule text follows.
  *
  * That is a rule about CONTAINERS, not about every glyph in the app. An icon
@@ -19,8 +19,9 @@ import type { ButtonHTMLAttributes } from "react";
  * `surface` is the fifth, and it is the one the product actually uses. The
  * four M3 variants describe a control this app does not have: two dozen
  * circular controls across thirteen files carry a RESTING neutral fill, and
- * none of the four could express it — `standard` is transparent until hover,
- * `tonal` is the brown secondary container. It cannot be reached with
+ * none of the four could express it — `standard` is transparent until hover.
+ * (M3's `tonal`, on the secondary container, is gone with that palette.) It
+ * cannot be reached with
  * `className` either: `.bg-transparent` is emitted after `.bg-surface-container`
  * in the sheet, so a class override loses the cascade regardless of order at
  * the call site.
@@ -29,7 +30,6 @@ export type IconButtonVariant =
   | "standard"
   | "surface"
   | "filled"
-  | "tonal"
   | "outlined";
 
 export interface IconButtonProps
@@ -56,8 +56,6 @@ const VARIANT: Record<IconButtonVariant, string> = {
   surface:
     "bg-surface-container-high hover:bg-surface-container-highest",
   filled: "bg-primary text-on-primary hover:brightness-95",
-  tonal:
-    "bg-secondary-container text-on-secondary-container hover:brightness-95",
   outlined: "border border-outline bg-transparent hover:bg-on-surface/8",
 };
 
@@ -71,10 +69,10 @@ export default function IconButton({
   ...rest
 }: IconButtonProps) {
   const box = size === "touch" ? "w-12 h-12 text-2xl" : "w-10 h-10 text-xl";
-  // Only the unfilled variants carry intent in the glyph; on a filled or tonal
-  // container the on-color already won, and overriding it would break the pair.
+  // Only the unfilled variants carry intent in the glyph; on a filled container
+  // the on-color already won, and overriding it would break the pair.
   const tint =
-    variant === "filled" || variant === "tonal"
+    variant === "filled"
       ? ""
       : destructive
         ? "text-error"

@@ -32,9 +32,9 @@ function tierCapacityLines(tier: SubscriptionTier): string[] {
 
 const TIER_COLORS: Record<SubscriptionTier, string> = {
   LITE: "bg-surface-container-high text-on-surface-variant border-outline-variant",
-  STANDARD: "bg-secondary-container text-on-secondary-container border-secondary",
+  STANDARD: "bg-surface-container-low text-on-surface border-outline",
   PRO: "bg-primary-container text-on-primary-container border-primary",
-  ENTERPRISE: "bg-tertiary-container text-on-tertiary-container border-tertiary",
+  ENTERPRISE: "bg-surface-container-low text-on-surface border-primary",
 };
 
 export default function SubscriptionsPage() {

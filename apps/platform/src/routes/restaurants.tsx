@@ -16,9 +16,9 @@ import type { SubscriptionTier } from "@oshap/shared";
 
 const TIER_COLORS: Record<SubscriptionTier, string> = {
   LITE: "bg-surface-container-high text-on-surface-variant",
-  STANDARD: "bg-secondary-container text-on-secondary-container",
+  STANDARD: "border border-outline text-on-surface",
   PRO: "bg-primary-container text-on-primary-container",
-  ENTERPRISE: "bg-tertiary-container text-on-tertiary-container",
+  ENTERPRISE: "border border-primary text-primary-label",
 };
 
 export default function RestaurantsPage() {
