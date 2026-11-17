@@ -148,7 +148,13 @@ export default function TextField({
         field
       )}
       {error && (
-        <p id={errorId} className="mt-xs text-body-small text-error">
+        // The glyph says "error" without the red, for anyone who cannot tell
+        // the red apart. The words still carry the message on their own.
+        <p
+          id={errorId}
+          className="mt-xs flex items-start gap-xs text-body-small text-error"
+        >
+          <i className="mgc_alert_line text-base leading-4" aria-hidden />
           {error}
         </p>
       )}

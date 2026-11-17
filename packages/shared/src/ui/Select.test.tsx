@@ -74,3 +74,17 @@ describe("Select draws its own chevron", () => {
     expect(html).toMatch(/<div class="[^"]*max-w-\[160px\][^"]*"/);
   });
 });
+
+describe("a select is filled like every other field", () => {
+  it("uses the field tone, not the card tone", () => {
+    // On the card tone a select showed only its outline beside a TextField
+    // that was visibly a field. Both sit a step darker than their card.
+    const html = render(
+      <Select aria-label="Category">
+        <option>Meals</option>
+      </Select>,
+    );
+    expect(html).toMatch(/\bbg-surface-container\b(?!-)/);
+    expect(html).not.toContain("bg-surface-container-low");
+  });
+});

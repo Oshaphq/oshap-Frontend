@@ -173,7 +173,7 @@ one step from its parent — that is the 1.06 that made v3 flat.
 | Top app bar — **admin only** | `surface-container-low` |
 | Top app bar — customer, platform | `surface` |
 | Card, drawer, rail, side panel | `surface-container-low` |
-| Well or info block inside a card; filled text field | `surface-container` |
+| Well or info block inside a card; any field — text field or select | `surface-container` |
 | Quiet button, round icon button, neutral badge on a card | `surface-container-high`, hover `-highest` |
 | Dialog, modal, menu, sheet, floating toolbar | `surface-overlay` |
 | Hover on a row inside a card | `surface-container` |
