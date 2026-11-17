@@ -168,6 +168,7 @@ export default function DashboardPage() {
   };
 
   const hasPending = pendingCount > 0;
+  const firstPendingId = tables.find((t) => tableState(t).claimed)?.id;
   const lowStockCount = alertsQuery.data?.alerts.length ?? 0;
   const hasLowStock = lowStockCount > 0;
 
@@ -195,29 +196,42 @@ export default function DashboardPage() {
         </Button>
       </header>
 
-      {/* Stat cards, per the Figma extract of this screen.
-          Three things it specifies that the code did not do:
-          the label carries a **designed** line break rather than wrapping
-          wherever it lands, it is centred, and it takes the card's own
-          foreground colour instead of a flat secondary grey. Together those
-          keep the three cards the same height and stop the ragged wrap that
-          made "PAYMENTS TO VERIFY" look broken on a phone. */}
+      {/* Stat cards. Neutral by default: colour appears only when a count
+          needs action, as an alert glyph by the label and a tinted action
+          row that goes to the fix. At zero there is no colour at all. */}
       <div className="flex gap-s sm:gap-l flex-wrap">
         <StatCard
+          label="Active tables"
           value={activeTablesCount}
-          label={["ACTIVE", "TABLES"]}
-          tone="plain"
+          note={`of ${tables.length} ${tables.length === 1 ? "table" : "tables"}`}
         />
         <StatCard
+          label="Payments to verify"
           value={pendingCount}
-          label={["PAYMENTS TO", "VERIFY"]}
-          tone={hasPending ? "warning" : "plain"}
+          note="Nothing to verify"
+          attention={
+            hasPending
+              ? {
+                  tone: "warning",
+                  action: "Review payments",
+                  href: firstPendingId ? `#table-${firstPendingId}` : undefined,
+                }
+              : undefined
+          }
         />
         <StatCard
+          label="Low stock"
           value={lowStockCount}
-          label={["LOW STOCK", "ITEMS"]}
-          tone={hasLowStock ? "error" : "plain"}
-          to="/menu"
+          note="Everything in stock"
+          attention={
+            hasLowStock
+              ? {
+                  tone: "error",
+                  action: `Restock ${lowStockCount} ${lowStockCount === 1 ? "item" : "items"}`,
+                  to: "/menu",
+                }
+              : undefined
+          }
         />
       </div>
 
@@ -243,7 +257,8 @@ export default function DashboardPage() {
           return (
             <div
               key={table.id}
-              className={`rounded-lg p-l flex flex-col gap-s border transition-colors min-h-[120px] ${cardCls}`}
+              id={`table-${table.id}`}
+              className={`scroll-mt-xl rounded-lg p-l flex flex-col gap-s border transition-colors min-h-[120px] ${cardCls}`}
             >
               <div className="flex items-center justify-between">
                 <span className="font-display text-title-medium font-semibold text-on-surface">
@@ -430,73 +445,76 @@ export default function DashboardPage() {
 }
 
 /**
- * One figure on the dashboard, at a glance.
+ * A dashboard stat. The card is always neutral and the number is never
+ * coloured: a tile that turns amber or red reads as one block of colour, gives
+ * the urgent number no more weight than its label, and stays lit at zero.
  *
- * `label` arrives as one string per line, because the break is a design
- * decision rather than a consequence of the width — all three cards stay the
- * same height and the wrap never lands mid-phrase. Passing the lines beats a
- * `
-` in a string: it survives formatting, and it reads as the intent.
- *
- * The label takes the card's foreground rather than a flat grey, so a lit card
- * reads as one block of colour instead of a bright number over dim text.
+ * When the count needs action, two things appear — an alert glyph beside the
+ * label, and a tinted row at the foot that names the job and goes to it. That
+ * row is the only coloured thing on the card, and the words carry the state on
+ * their own, so nothing depends on colour. At zero the card shows `note`.
  */
 function StatCard({
-  value,
   label,
-  tone,
-  to,
+  value,
+  note,
+  attention,
 }: {
+  label: string;
   value: number;
-  /** One entry per line. The break is designed, not a consequence of width. */
-  label: readonly string[];
-  tone: "plain" | "warning" | "error";
-  to?: string;
+  /** The quiet line under the number when nothing needs doing. */
+  note: string;
+  attention?: {
+    tone: "warning" | "error";
+    action: string;
+    /** In-app route. */
+    to?: string;
+    /** Same-page anchor, for work that lives further down this screen. */
+    href?: string;
+  };
 }) {
-  const surface =
-    tone === "warning"
-      ? "bg-warning-container border-warning"
-      : tone === "error"
-        ? "bg-error-container border-error"
-        : "bg-surface-container-low border-transparent";
-  const ink =
-    tone === "warning"
-      ? "text-on-warning-container"
-      : tone === "error"
-        ? "text-on-error-container"
-        : "text-primary-label";
-
-  const inner = (
+  const glyph =
+    attention?.tone === "error"
+      ? "mgc_alert_diamond_line text-error"
+      : "mgc_alert_line text-warning";
+  const row =
+    attention?.tone === "error"
+      ? "bg-error-container text-on-error-container"
+      : "bg-warning-container text-on-warning-container";
+  const rowCls = `mt-auto flex items-center justify-between gap-xs rounded-sm pl-md pr-s py-s text-label-large font-semibold no-underline transition-[filter] hover:brightness-95 ${row}`;
+  const rowInner = (
     <>
-      <span className={`font-display text-headline-small font-semibold ${ink}`}>
-        {value}
-      </span>
-      <span
-        className={`text-label-small font-semibold uppercase tracking-wider text-center ${ink}`}
-      >
-        {label.map((line) => (
-          <span key={line} className="block">
-            {line}
-          </span>
-        ))}
-      </span>
+      {attention?.action}
+      <i className="mgc_right_line text-lg" aria-hidden />
     </>
   );
 
-  const shared =
-    "flex-1 min-w-0 sm:min-w-[120px] rounded-lg px-md py-l flex flex-col items-center gap-xs border";
-
-  if (to) {
-    return (
-      <Link
-        to={to}
-        className={`${shared} no-underline transition-colors hover:opacity-90 ${surface}`}
-      >
-        {inner}
-      </Link>
-    );
-  }
-  return <div className={`${shared} ${surface}`}>{inner}</div>;
+  return (
+    <div className="flex-1 min-w-0 sm:min-w-[160px] rounded-lg p-l flex flex-col gap-s bg-surface-container-low">
+      <span className="flex items-center gap-xs text-body-medium text-on-surface-variant">
+        {attention && <i className={`${glyph} text-lg`} aria-hidden />}
+        {label}
+      </span>
+      <span className="font-display text-headline-medium font-semibold tabular-nums text-on-surface">
+        {value}
+      </span>
+      {!attention ? (
+        <span className="mt-auto text-body-small text-on-surface-variant">
+          {note}
+        </span>
+      ) : attention.to ? (
+        <Link to={attention.to} className={rowCls}>
+          {rowInner}
+        </Link>
+      ) : attention.href ? (
+        <a href={attention.href} className={rowCls}>
+          {rowInner}
+        </a>
+      ) : (
+        <span className={rowCls}>{rowInner}</span>
+      )}
+    </div>
+  );
 }
 
 /**
