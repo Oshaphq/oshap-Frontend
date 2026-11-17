@@ -2,8 +2,10 @@ import type { ReactNode } from "react";
 import Button from "./Button";
 
 /**
- * Secondary but still consequential. Tonal rather than outlined: two bordered
- * buttons side by side read as one control split in half.
+ * Secondary but still consequential. Neutral — Container High with an
+ * on-surface label — rather than outlined (two bordered buttons side by side
+ * read as one control split in half) and never brand-tinted (the old tonal
+ * fill was the same pink as an error chip).
  *
  * Kept as a named wrapper over {@link Button} so the ~100 existing call sites
  * do not all move in the DS v2 migration. New code should reach for `Button`
@@ -37,7 +39,7 @@ export default function SecondaryButton({
 }: SecondaryButtonProps) {
   return (
     <Button
-      variant="tonal"
+      variant="neutral"
       size={size}
       fullWidth={size === "lg"}
       onClick={onClick}

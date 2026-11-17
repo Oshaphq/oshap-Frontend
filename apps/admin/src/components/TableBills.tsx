@@ -62,62 +62,67 @@ export default function TableBills({ bills, renderActions }: Props) {
           {bills.length} bills open
         </span>
       )}
-      {bills.map((bill) => {
-        const meta = STATE_META[bill.state];
-        const detail =
-          bill.state === "part"
-            ? `${formatCurrency(bill.amountPaid)} of ${formatCurrency(bill.total)} paid`
-            : bill.orders.length > 1
-              ? `${bill.orders.length} orders`
-              : null;
-        const method = methodLabel(bill.paymentMethod);
-        return (
-          <div
-            key={bill.key}
-            className="flex flex-col gap-xs p-md rounded-sm bg-surface-container"
-          >
-            <div className="flex items-center justify-between gap-s">
-              <div className="flex flex-col min-w-0">
-                <span className="text-label-medium font-semibold text-on-surface truncate">
-                  {bill.guestName ?? "Guest"}
-                </span>
-                {detail && (
-                  <span className="text-label-small text-on-surface-variant">
-                    {detail}
+      {/* No well. Bills sit on the card and a hairline divides two of them:
+          a well under the actions put a neutral button 1.10:1 from its own
+          background, so it vanished. See docs/color-usage.md#buttons. */}
+      <div className="flex flex-col divide-y divide-outline-variant">
+        {bills.map((bill) => {
+          const meta = STATE_META[bill.state];
+          const detail =
+            bill.state === "part"
+              ? `${formatCurrency(bill.amountPaid)} of ${formatCurrency(bill.total)} paid`
+              : bill.orders.length > 1
+                ? `${bill.orders.length} orders`
+                : null;
+          const method = methodLabel(bill.paymentMethod);
+          return (
+            <div
+              key={bill.key}
+              className="flex flex-col gap-xs py-md first:pt-0 last:pb-0"
+            >
+              <div className="flex items-center justify-between gap-s">
+                <div className="flex flex-col min-w-0">
+                  <span className="text-label-medium font-semibold text-on-surface truncate">
+                    {bill.guestName ?? "Guest"}
                   </span>
-                )}
-                {method && (
-                  <span className="text-label-small text-on-surface-variant">
-                    {method}
-                  </span>
-                )}
-              </div>
-              <div className="flex items-center gap-s shrink-0">
-                <span className="text-label-medium font-semibold tabular-nums text-on-surface">
-                  {/* The balance, not the total. A waiter collecting on a part
-                      paid bill needs the number they are about to ask for. */}
-                  {formatCurrency(
-                    bill.state === "settled" ? bill.total : bill.balanceDue,
+                  {detail && (
+                    <span className="text-label-small text-on-surface-variant">
+                      {detail}
+                    </span>
                   )}
-                </span>
-                <StatusBadge tone={meta.tone}>{meta.label}</StatusBadge>
+                  {method && (
+                    <span className="text-label-small text-on-surface-variant">
+                      {method}
+                    </span>
+                  )}
+                </div>
+                <div className="flex items-center gap-s shrink-0">
+                  <span className="text-label-medium font-semibold tabular-nums text-on-surface">
+                    {/* The balance, not the total. A waiter collecting on a part
+                      paid bill needs the number they are about to ask for. */}
+                    {formatCurrency(
+                      bill.state === "settled" ? bill.total : bill.balanceDue,
+                    )}
+                  </span>
+                  <StatusBadge tone={meta.tone}>{meta.label}</StatusBadge>
+                </div>
               </div>
-            </div>
 
-            {bill.state === "unknown" && (
-              /* Deliberately no money button. `payment_state` is an untyped
+              {bill.state === "unknown" && (
+                /* Deliberately no money button. `payment_state` is an untyped
                  string, so a value we cannot read might mean already paid —
                  and offering Take Cash there charges a guest twice. */
-              <p className="text-label-small text-on-surface-variant">
-                We can't tell whether this is paid. Check the order before
-                taking money.
-              </p>
-            )}
+                <p className="text-label-small text-on-surface-variant">
+                  We can't tell whether this is paid. Check the order before
+                  taking money.
+                </p>
+              )}
 
-            {renderActions?.(bill)}
-          </div>
-        );
-      })}
+              {renderActions?.(bill)}
+            </div>
+          );
+        })}
+      </div>
     </div>
   );
 }

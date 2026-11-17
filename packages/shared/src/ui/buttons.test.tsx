@@ -37,7 +37,13 @@ describe("every shared button reacts to being pressed", () => {
     // an outline.
     const html = render(el);
     const expected =
-      name === "TertiaryButton" ? "active:bg-primary/12" : "active:brightness-90";
+      name === "TertiaryButton"
+        ? "active:bg-primary/12"
+        : // Neutral steps one tone up instead of dimming: on a dark-mode card,
+          // brightness would pull the grey toward the page it sits on.
+          name === "SecondaryButton"
+          ? "active:bg-surface-container-highest"
+          : "active:brightness-90";
     expect(html).toContain(expected);
   });
 
@@ -93,12 +99,20 @@ describe("a filled button keeps its label at large-text size", () => {
     expect(html).not.toContain("text-[16px]");
   });
 
-  it("puts tonal on the primary container, not secondary", () => {
-    // v2 used secondary-container here. In v3 secondary is a muted brown for
-    // weight, and the tonal button is P90/P10.
-    const html = renderToStaticMarkup(<Button variant="tonal">Add to order</Button>);
-    expect(html).toContain("bg-primary-container");
-    expect(html).not.toContain("bg-secondary-container");
+  it("keeps the secondary rung neutral, never brand-tinted", () => {
+    // The secondary button is Container High with an on-surface label. The old
+    // tonal fill (P90) sat ΔE 1.3 from error container, so a secondary action
+    // and an error chip were the same pink.
+    const html = renderToStaticMarkup(<Button variant="neutral">Take payment</Button>);
+    expect(html).toContain("bg-surface-container-high");
+    expect(html).toContain("text-on-surface");
+    expect(html).not.toMatch(/primary-container|secondary-container/);
+  });
+
+  it("SecondaryButton renders the neutral rung", () => {
+    const html = renderToStaticMarkup(<SecondaryButton>Take payment</SecondaryButton>);
+    expect(html).toContain("bg-surface-container-high");
+    expect(html).not.toContain("bg-primary-container");
   });
 });
 

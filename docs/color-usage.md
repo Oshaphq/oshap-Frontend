@@ -74,7 +74,7 @@ A focus ring is a UI component, so the 3:1 exception covers it without qualifica
 | `tertiary-container` | T90 `#EEE4A9` / T10 — 13.28:1 | T30 `#4D471B` / T90 — 7.30:1 |
 | `error-container` | E90 `#FFDAD5` / E10 — 12.96:1 | E30 `#960004` / E90 — 7.07:1 |
 | `success-container` | Su90 `#78FBB6` / Su10 — 13.06:1 | Su20 `#003A1E` / Su90 — 10.02:1 |
-| `warning-container` | Wa90 `#FFDDAF` / Wa10 — 13.14:1 | Wa30 `#653E00` / Wa90 — 7.23:1 |
+| `warning-container` | Wa90 `#FFDDB5` / Wa10 — 13.23:1 | Wa30 `#643F00` / Wa90 — 7.22:1 |
 | `inverse-surface` | `grey-30` `#2E2E2E` / `grey-95` — 11.78:1 | `grey-88` `#D7D7D7` / `grey-21` |
 
 **The `secondary-container` departure.** M3 says S90, which at chroma 16 is
@@ -86,8 +86,10 @@ the seed hue ever changes.
 `tertiary` is categorical only — menu sections, dietary marks. Never a state.
 
 **Status roles sit outside the scheme.** Error, success and warning are fixed hues, not
-seed-derived and not tenant-derived. That is the only way a green "paid" chip stays green
-in a restaurant whose brand is red. Status is never carried by colour alone — always pair
+seed-derived and not tenant-derived. That is the only way a green "paid" chip stays
+green in a restaurant whose brand is red. Warning is solved from its own seed,
+`oklch(0.7819 0.1585 72.3301)` = `#F5A524` (HCT H 72.64 · C 54.9), through the same
+solver. Status is never carried by colour alone — always pair
 it with a label or an icon.
 
 ---
@@ -205,20 +207,32 @@ everywhere. (v3 moved this off `secondary-container`, which nothing in the produ
 
 ## Buttons
 
-Five variants in one emphasis ladder. Radius 8, height 48 comfortable and 40 compact.
-**One filled button per view** — if a screen needs two, one of them is tonal.
+Six variants in one emphasis ladder. Radius 8, height 48 comfortable and 40 compact.
+**One filled button per view** — if a screen needs two, one of them is neutral.
 
-| Variant | Light | Dark |
-|---|---|---|
-| filled | seed / white | seed / white |
-| tonal | P90 / P10 | P30 / P90 |
-| outlined | NV50 border / P40 label | NV60 / P80 |
-| elevated | N100 + level 1 | N12 + level 1 |
-| text | P40 | P80 |
-| disabled | on-surface 12% fill / 38% label | same |
+| Variant | Job | Light | Dark |
+|---|---|---|---|
+| filled | the one main action | seed / white | seed / white |
+| neutral | every secondary action | Container High / on-surface | same roles |
+| outlined | an alternative at lower emphasis | outline border / P40 label | outline / P80 |
+| text | tertiary, inline | P40 | P80 |
+| elevated | a button that floats | Container Low + level 1 | same roles |
+| destructive | the loudest destructive action | error / on-error | same roles |
+| disabled | | on-surface 12% fill / 38% label | same |
 
-Label is **16px semibold on filled** and 14px elsewhere. Tonal is on the *primary*
-container, not secondary — v2 had this on secondary, and v3 moves it.
+**Secondary actions never carry the brand.** The neutral button is the secondary rung,
+and `SecondaryButton` renders it. Until 2026-11 the secondary rung was `tonal` on
+primary container (P90), a workaround for M3's secondary-container collision at this
+seed. It made routine actions brand-tinted, and P90 `#FFDBCC` sits ΔE 1.3 from
+error container `#FFDAD5` — below what the eye separates — so an "Owes" chip and a
+"Take payment" button were the same pink. `tonal` is kept for back-compat and should
+not be used for actions.
+
+Neutral is Container High, so it follows the rule for anything on a card: two steps
+from the card. A neutral button inside a well (Container) is only 1.10:1 from it — put
+actions on the card, not in a well.
+
+Label is **16px semibold on filled** and 14px elsewhere.
 
 Icon buttons are circular at 48px. The FAB is full-radius at 48px with a brand fill and a
 label — it reads as the one floating action, not as another card. (An earlier revision
@@ -287,14 +301,14 @@ indicator, the focus ring.
 
 ### primary-container / on-primary-container
 
-One step down in emphasis: the tonal button, the chef's-pick tag. Not the selected state —
+A brand highlight that is not an action: the chef's-pick tag. Not the selected state —
 that is `bg-primary`.
 
 | ✅ Do | ❌ Don't |
 |---|---|
-| Use it where an action matters but is not *the* action | Place `primary` on `primary-container` — near-identical lightness, no separation |
+| Use it for a non-action brand highlight, like the chef's-pick tag | Use it for a button — secondary actions are neutral, never brand-tinted |
 | Pair it strictly with `on-primary-container` | Use `on-primary` on it |
-| Use it for the tonal button (v3 moved tonal here from secondary) | Use it to signal status — status has its own families |
+| Keep it away from status chips — it is ΔE 1.3 from error container | Use it to signal status — status has its own families |
 
 ### secondary / secondary-container
 
