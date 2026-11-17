@@ -188,19 +188,21 @@
   --color-success-98: #e7ffec;
   --color-success-100: #ffffff;
 
-  /* warning — H 76.41 · C 48.4. Fixed hue. */
+  /* warning — from the seed oklch(0.7819 0.1585 72.3301) = #F5A524, which is
+   * HCT H 72.64 · C 54.9. That hue and chroma go through the same M3 solver as
+   * the other palettes; the tones below are its output. Fixed: not tenant-derived. */
   --color-warning-0: #000000;
-  --color-warning-10: #331300;
-  --color-warning-20: #4c2800;
-  --color-warning-30: #653e00;
-  --color-warning-40: #835500;
-  --color-warning-50: #a36c00;
-  --color-warning-60: #c18513;
-  --color-warning-70: #df9f30;
-  --color-warning-80: #feba4a;
-  --color-warning-90: #ffddaf;
-  --color-warning-95: #ffeeda;
-  --color-warning-98: #fff8f2;
+  --color-warning-10: #2a1800;
+  --color-warning-20: #462b00;
+  --color-warning-30: #643f00;
+  --color-warning-40: #835400;
+  --color-warning-50: #a56b00;
+  --color-warning-60: #c78200;
+  --color-warning-70: #e99b17;
+  --color-warning-80: #ffb957;
+  --color-warning-90: #ffddb5;
+  --color-warning-95: #ffeedd;
+  --color-warning-98: #fff8f4;
   --color-warning-100: #ffffff;
 
   /* ---------- Semantic roles (light/dark via --ds-* indirection) ---------- */
@@ -415,10 +417,10 @@
   --ds-success-container: #78fbb6; /* Su90 / Su10 · 13.06:1 */
   --ds-on-success-container: #00230c;
 
-  --ds-warning: #835500; /* Wa40 / Wa100 */
+  --ds-warning: #835400; /* Wa40 / Wa100 · 6.50:1 */
   --ds-on-warning: #ffffff;
-  --ds-warning-container: #ffddaf; /* Wa90 / Wa10 · 13.14:1 */
-  --ds-on-warning-container: #331300;
+  --ds-warning-container: #ffddb5; /* Wa90 / Wa10 · 13.23:1 */
+  --ds-on-warning-container: #2a1800;
 
   /* ---- Surfaces — light ----
    * NESTING STEPS AWAY FROM THE PAGE. In light mode the page is the lightest
@@ -509,10 +511,10 @@
   --ds-success-container: #003a1e; /* Su20 / Su90 · 10.02:1 */
   --ds-on-success-container: #78fbb6;
 
-  --ds-warning: #feba4a; /* Wa80 / Wa20 */
-  --ds-on-warning: #4c2800;
-  --ds-warning-container: #653e00; /* Wa30 / Wa90 · 7.23:1 */
-  --ds-on-warning-container: #ffddaf;
+  --ds-warning: #ffb957; /* Wa80 / Wa20 · 7.68:1 */
+  --ds-on-warning: #462b00;
+  --ds-warning-container: #643f00; /* Wa30 / Wa90 · 7.22:1 */
+  --ds-on-warning-container: #ffddb5;
 
   /* ---- Surfaces — dark ---- */
   --ds-surface-tint: #f56500;

@@ -19,6 +19,7 @@ import type { ButtonHTMLAttributes, ReactNode } from "react";
  */
 export type ButtonVariant =
   | "filled"
+  | "neutral"
   | "tonal"
   | "outlined"
   | "elevated"
@@ -65,7 +66,13 @@ const SIZE: Record<ButtonSize, string> = {
 const VARIANT: Record<ButtonVariant, string> = {
   // Seed / white. The 3:1 exception, which is why the label is pinned at 16px.
   filled: "bg-primary text-on-primary hover:brightness-95 active:brightness-90",
-  // P90 / P10 — v3 moves tonal onto the primary container, not secondary.
+  // The secondary rung: Container High, the fill for any control on a card,
+  // with an on-surface label. Colourless on purpose — a brand-tinted secondary
+  // collided with the status containers (P90 is ΔE 1.3 from error container)
+  // and spent the brand on routine actions. See docs/color-usage.md#buttons.
+  neutral:
+    "bg-surface-container-high text-on-surface hover:bg-surface-container-highest active:bg-surface-container-highest",
+  // Deprecated for actions — use `neutral`. P90 / P10, kept for back-compat.
   tonal:
     "bg-primary-container text-on-primary-container hover:brightness-95 active:brightness-90",
   // NV50 border, P40 label.
@@ -89,6 +96,7 @@ const VARIANT: Record<ButtonVariant, string> = {
  */
 const LABEL: Record<ButtonVariant, string> = {
   filled: "text-[16px] tracking-[0.1px]",
+  neutral: "text-label-large",
   tonal: "text-label-large",
   outlined: "text-label-large",
   elevated: "text-label-large",
