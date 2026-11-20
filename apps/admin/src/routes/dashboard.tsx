@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Link } from "react-router";
 import {
   useAdminTables,
@@ -47,6 +47,12 @@ function settledElsewhere(err: unknown): boolean {
 export default function DashboardPage() {
   const restaurantId = getAdminRestaurantId();
   const tablesQuery = useAdminTables();
+  // Re-renders the "Updated …" note as time passes between polls.
+  const [now, setNow] = useState(() => Date.now());
+  useEffect(() => {
+    const id = window.setInterval(() => setNow(Date.now()), 30_000);
+    return () => window.clearInterval(id);
+  }, []);
   const verifyPayment = useAdminVerifyPayment();
   const rejectPayment = useAdminRejectPayment();
   const closeTable = useAdminCloseTable();
@@ -183,21 +189,32 @@ export default function DashboardPage() {
         <h1 className="font-display text-title-large font-semibold text-on-surface">
           Waiter Dashboard
         </h1>
-        <Button
-          variant="text"
-          size="md"
-          onClick={() => tablesQuery.refetch()}
-          disabled={tablesQuery.isRefetching}
-        >
-          <i
-            className={
-              tablesQuery.isRefetching
-                ? "mgc_loading_line animate-spin"
-                : "mgc_refresh_3_line"
-            }
-          />{" "}
-          {tablesQuery.isRefetching ? "Refreshing…" : "Refresh"}
-        </Button>
+        {/* A utility, not the task: neutral and outlined, so it never competes
+            with Verify. The board already polls every 20s, so the note beside
+            it says how fresh the data is and Refresh is rarely needed. */}
+        <div className="flex items-center gap-md">
+          {tablesQuery.dataUpdatedAt > 0 && (
+            <span className="text-body-small text-on-surface-variant">
+              {updatedLabel(tablesQuery.dataUpdatedAt, now)}
+            </span>
+          )}
+          <Button
+            variant="outlined"
+            muted
+            size="md"
+            onClick={() => tablesQuery.refetch()}
+            disabled={tablesQuery.isRefetching}
+          >
+            <i
+              className={
+                tablesQuery.isRefetching
+                  ? "mgc_loading_line animate-spin"
+                  : "mgc_refresh_3_line"
+              }
+            />{" "}
+            {tablesQuery.isRefetching ? "Refreshing…" : "Refresh"}
+          </Button>
+        </div>
       </header>
 
       {/* Stat cards. Neutral by default: colour appears only when a count
@@ -710,4 +727,12 @@ function BillActions({
       </SecondaryButton>
     </div>
   );
+}
+
+/** "Updated just now", "Updated 4 min ago", then the clock time. */
+function updatedLabel(updatedAt: number, now: number): string {
+  const minutes = Math.floor((now - updatedAt) / 60_000);
+  if (minutes < 1) return "Updated just now";
+  if (minutes < 60) return `Updated ${minutes} min ago`;
+  return `Updated ${new Date(updatedAt).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}`;
 }

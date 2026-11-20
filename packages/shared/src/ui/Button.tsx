@@ -54,6 +54,14 @@ export interface ButtonProps
    * by the order they are written at the call site.
    */
   destructive?: boolean;
+  /**
+   * Takes the brand out of `outlined` and `text`: the label goes
+   * `on-surface-variant` and the state layer `on-surface`. For utility actions
+   * that should not compete with the screen's task — Refresh on a dashboard.
+   * Swaps the variant's colour classes rather than appending, so it does not
+   * depend on the order Tailwind emits two text colours in.
+   */
+  muted?: boolean;
   className?: string;
 }
 
@@ -104,6 +112,13 @@ const LABEL: Record<ButtonVariant, string> = {
   destructive: "text-label-large",
 };
 
+/** `outlined` and `text` without the brand. See `muted`. */
+const MUTED: Partial<Record<ButtonVariant, string>> = {
+  outlined:
+    "border border-outline text-on-surface-variant hover:bg-on-surface/8 active:bg-on-surface/12",
+  text: "text-on-surface-variant hover:bg-on-surface/8 active:bg-on-surface/12",
+};
+
 /** `text` hugs its label rather than sitting in a slab. */
 const TEXT_PADDING: Record<ButtonSize, string> = {
   md: "px-md",
@@ -120,10 +135,11 @@ export function buttonClassName({
   size = "md",
   fullWidth = false,
   destructive = false,
+  muted = false,
   className = "",
 }: Pick<
   ButtonProps,
-  "variant" | "size" | "fullWidth" | "destructive" | "className"
+  "variant" | "size" | "fullWidth" | "destructive" | "muted" | "className"
 > = {}): string {
   const padding = variant === "text" ? TEXT_PADDING[size] : "";
   // Only the unfilled variants can carry it; a filled container has already
@@ -133,7 +149,7 @@ export function buttonClassName({
       ? "text-error hover:bg-error/8 active:bg-error/12"
       : "";
 
-  return `inline-flex items-center justify-center rounded-sm font-display font-semibold whitespace-nowrap transition duration-100 ease-out active:scale-[0.97] disabled:cursor-not-allowed disabled:border-transparent disabled:bg-on-surface-disabled disabled:text-on-surface-label-disabled disabled:shadow-none disabled:brightness-100 disabled:active:scale-100 ${SIZE[size]} ${padding} ${LABEL[variant]} ${VARIANT[variant]} ${intent} ${fullWidth ? "w-full" : ""} ${className}`;
+  return `inline-flex items-center justify-center rounded-sm font-display font-semibold whitespace-nowrap transition duration-100 ease-out active:scale-[0.97] disabled:cursor-not-allowed disabled:border-transparent disabled:bg-on-surface-disabled disabled:text-on-surface-label-disabled disabled:shadow-none disabled:brightness-100 disabled:active:scale-100 ${SIZE[size]} ${padding} ${LABEL[variant]} ${(muted && MUTED[variant]) || VARIANT[variant]} ${intent} ${fullWidth ? "w-full" : ""} ${className}`;
 }
 
 export default function Button({
@@ -142,6 +158,7 @@ export default function Button({
   size = "md",
   fullWidth = false,
   destructive = false,
+  muted = false,
   className = "",
   type = "button",
   disabled = false,
@@ -156,6 +173,7 @@ export default function Button({
         size,
         fullWidth,
         destructive,
+        muted,
         className,
       })}
       {...rest}

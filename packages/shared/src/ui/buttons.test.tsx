@@ -131,3 +131,22 @@ describe("the emphasis ladder keeps its heights", () => {
     expect(html).not.toContain("rounded-full");
   });
 });
+
+describe("muted takes the brand out of a utility action", () => {
+  it("outlined + muted uses on-surface-variant, not the brand label", () => {
+    const html = renderToStaticMarkup(
+      <Button variant="outlined" muted>
+        Refresh
+      </Button>,
+    );
+    expect(html).toContain("text-on-surface-variant");
+    expect(html).toContain("border-outline");
+    expect(html).not.toContain("text-primary-label");
+    expect(html).not.toContain("bg-primary/8");
+  });
+
+  it("leaves outlined on the brand without it", () => {
+    const html = renderToStaticMarkup(<Button variant="outlined">Edit</Button>);
+    expect(html).toContain("text-primary-label");
+  });
+});
