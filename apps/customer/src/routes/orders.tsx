@@ -248,22 +248,48 @@ function OrdersView({ tableId }: { tableId: string }) {
             </div>
           )}
 
+          {/* Joining is the common path — one guest starts a session, everyone
+              else at the table joins it — so joining is the filled button.
+              One filled button per view: whichever action is primary in this
+              mode is filled, the other is neutral. */}
           <div className="flex gap-s">
-            <SecondaryButton
-              size="md"
-              className="flex-1"
-              onClick={() => setShowPinInput((v) => !v)}
-            >
-              Join with PIN
-            </SecondaryButton>
-            <PrimaryButton
-              size="md"
-              className="flex-1"
-              onClick={showPinInput ? handleJoinSession : handleStartSession}
-              disabled={!customerName.trim()}
-            >
-              {showPinInput ? "Join" : "Start Session"}
-            </PrimaryButton>
+            {showPinInput ? (
+              <>
+                <SecondaryButton
+                  size="md"
+                  className="flex-1"
+                  onClick={() => setShowPinInput(false)}
+                >
+                  Cancel
+                </SecondaryButton>
+                <PrimaryButton
+                  size="md"
+                  className="flex-1"
+                  onClick={handleJoinSession}
+                  disabled={!customerName.trim()}
+                >
+                  Join
+                </PrimaryButton>
+              </>
+            ) : (
+              <>
+                <SecondaryButton
+                  size="md"
+                  className="flex-1"
+                  onClick={handleStartSession}
+                  disabled={!customerName.trim()}
+                >
+                  Start Session
+                </SecondaryButton>
+                <PrimaryButton
+                  size="md"
+                  className="flex-1"
+                  onClick={() => setShowPinInput(true)}
+                >
+                  Join with PIN
+                </PrimaryButton>
+              </>
+            )}
           </div>
         </section>
       )}
