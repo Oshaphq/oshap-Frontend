@@ -276,7 +276,8 @@ layer carries the feedback; it never disappears entirely.
 ## Color role usage — do's and don'ts
 
 M3 assigns every role a job. These rules are the M3 ones, with Oshap's two documented
-departure (`primary` at 3:1) folded in where it changes the advice.
+departure (`primary` at 3:1) folded in where it changes the advice. Every other place Oshap
+parts from M3 is listed, with its reason, in [Departures from Material 3](#departures-from-material-3).
 
 The pairing rule underneath all of them: **a role and its `on-` role are a pair.** Text
 or an icon on `X` takes `on-X`. Never take an on-color from a different family, and never
@@ -439,6 +440,32 @@ surface and silently undoes the contrast the token was chosen for.
 32px empty states.
 
 ---
+
+## Departures from Material 3
+
+Checked on 2026-11-20 against Google's component tokens (`material-web`
+`tokens/versions/v0_192/_md-comp-*.scss`) and the Compose `ColorScheme` reference.
+Where Oshap matches M3 it is not listed: cards (`surface-container-low`), bottom sheets and
+the modal drawer (`surface-container-low`), the snackbar (`inverse-surface` with an
+`inverse-primary` action), filled buttons (`primary` / `on-primary`) and every
+`on-` pairing.
+
+M3 itself sets no nesting rule — it orders the container tiers by emphasis and lets each
+component pick one. "Nesting steps away from the page" is Oshap's rule, built on that
+scale.
+
+| Component | M3 container | Oshap | Why |
+|---|---|---|---|
+| Dialog | `surface-container-high` | `surface-overlay` (the card tone) | On M3's darker dialog, a neutral control inside it (`-high`) would match the dialog and vanish. At the card tone, everything in a dialog follows the card rules. |
+| Menu | `surface-container` | `surface-overlay` (the card tone) | Same reason as the dialog: one floating tone, so its contents step the same way. |
+| Filled text field | `surface-container-highest` | `surface-container` | Two steps lighter, but with a full `outline` border, which M3's filled field lacks — the border carries the field. `-highest` is Oshap's hover tone for controls. |
+| Selected chip, nav indicator, selected row | `secondary-container` | `primary` / `on-primary` | There is no secondary palette. At this seed M3's S90 was byte-identical to P90, so the role could not do its job; it was removed. Selected is the brand fill everywhere. |
+| Secondary button (M3: filled tonal) | `secondary-container` | neutral — `surface-container-high` / `on-surface` | No secondary palette, and the brand-tinted stand-in (P90) sat ΔE 1.3 from error container. See [Buttons](#buttons). |
+| FAB | `primary-container` | `primary` | The one floating action is the loudest thing on screen, so it takes the seed. A pale primary-container FAB would also sit beside the error container. A choice, not forced. |
+
+Sources:
+- [Component tokens, v0_192](https://github.com/material-components/material-web/tree/main/tokens/versions/v0_192)
+- [Compose `ColorScheme`](https://developer.android.com/reference/kotlin/androidx/compose/material3/ColorScheme)
 
 ## Known gaps
 
