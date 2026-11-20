@@ -87,6 +87,10 @@ export default function DashboardPage() {
 
   const tables = tablesQuery.data?.tables ?? [];
   const activeTablesCount = tables.filter((t) => tableState(t).busy).length;
+  // A free table has nothing to act on, so it is a chip under the grid, not a
+  // card in it — a page of "No active orders" cards pushed the work down.
+  const seatedTables = tables.filter((t) => tableState(t).busy);
+  const freeTables = tables.filter((t) => !tableState(t).busy);
   const pendingCount = tables.filter((t) => tableState(t).claimed).length;
 
   /**
@@ -235,194 +239,205 @@ export default function DashboardPage() {
         />
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-l">
-        {tables.map((table) => {
-          const bills = groupBills(table.live_orders);
-          const { busy: isUnpaid, claimed: isPending } = tableState(table);
-          const isEmpty = !isUnpaid;
-          const isClosing =
-            closeTable.isPending &&
-            closeTable.variables?.table_id === table.table_id;
+      {seatedTables.length > 0 && (
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-l items-start">
+          {seatedTables.map((table) => {
+            const bills = groupBills(table.live_orders);
+            const { busy: isUnpaid, claimed: isPending } = tableState(table);
+            const isClosing =
+              closeTable.isPending &&
+              closeTable.variables?.table_id === table.table_id;
 
-          const cardCls = isPending
-            ? "bg-warning-container border-warning"
-            : !isEmpty
-              ? "bg-surface-container-low border-outline-variant"
-              : /* A faint border rather than none. A transparent one made an
-                   empty table a floating block with no edge, so a row of them
-                   ran together — the extract draws the outline either way and
-                   only changes its weight. */
-                "bg-surface-container-low border-surface-container";
+            return (
+              <div
+                key={table.id}
+                id={`table-${table.id}`}
+                // Always the card tone. A whole card in warning-container hid
+                // its own amber chips and put grey buttons on amber; the badge
+                // and the Verify button already say what needs doing.
+                className="scroll-mt-xl rounded-lg p-l flex flex-col gap-s bg-surface-container-low"
+              >
+                <div className="flex items-center justify-between">
+                  <span className="font-display text-title-medium font-semibold text-on-surface">
+                    {table.table_id}
+                  </span>
+                  {isPending ? (
+                    <StatusBadge tone="warning">Verification Req.</StatusBadge>
+                  ) : (
+                    // Neutral: dining is the normal state. Red is for money owed.
+                    <StatusBadge tone="neutral">Dining</StatusBadge>
+                  )}
+                </div>
 
-          return (
-            <div
-              key={table.id}
-              id={`table-${table.id}`}
-              className={`scroll-mt-xl rounded-lg p-l flex flex-col gap-s border transition-colors min-h-[120px] ${cardCls}`}
-            >
-              <div className="flex items-center justify-between">
-                <span className="font-display text-title-medium font-semibold text-on-surface">
-                  {table.table_id}
-                </span>
-                {isPending ? (
-                  <StatusBadge tone="warning">Verification Req.</StatusBadge>
-                ) : isUnpaid ? (
-                  <StatusBadge tone="error">Dining</StatusBadge>
-                ) : (
-                  <StatusBadge tone="neutral">Empty</StatusBadge>
-                )}
-              </div>
-
-              <div className="flex flex-col gap-xs flex-1">
-                {isEmpty ? (
-                  <p className="text-body-medium text-on-surface-variant">
-                    No active orders
-                  </p>
-                ) : bills.length > 0 ? (
-                  <TableBills
-                    bills={bills}
-                    renderActions={(bill) => (
-                      <BillActions
-                        bill={bill}
-                        table={table}
-                        rejectingBill={rejectingBill}
-                        verifyingBill={verifyingBill}
-                        setRejectingBill={setRejectingBill}
-                        setVerifyingBill={setVerifyingBill}
-                        onTakePayment={() =>
-                          setCashTarget({
-                            tableName: table.table_id,
-                            orderIds: bill.unpaidOrderIds,
-                            // The balance, so a part paid bill asks for what is
-                            // left rather than for the whole thing again.
-                            total: bill.balanceDue,
-                          })
-                        }
-                        onVerify={() => handleVerify(table, bill)}
-                        onReject={() => handleReject(bill)}
-                        verifyPending={verifyPayment.isPending}
-                        rejectPending={rejectPayment.isPending}
-                      />
-                    )}
-                  />
-                ) : (
-                  /* No `live_orders` — an older deployment. Fall back to the
+                <div className="flex flex-col gap-xs flex-1">
+                  {bills.length > 0 ? (
+                    <TableBills
+                      bills={bills}
+                      renderActions={(bill) => (
+                        <BillActions
+                          bill={bill}
+                          table={table}
+                          rejectingBill={rejectingBill}
+                          verifyingBill={verifyingBill}
+                          setRejectingBill={setRejectingBill}
+                          setVerifyingBill={setVerifyingBill}
+                          onTakePayment={() =>
+                            setCashTarget({
+                              tableName: table.table_id,
+                              orderIds: bill.unpaidOrderIds,
+                              // The balance, so a part paid bill asks for what is
+                              // left rather than for the whole thing again.
+                              total: bill.balanceDue,
+                            })
+                          }
+                          onVerify={() => handleVerify(table, bill)}
+                          onReject={() => handleReject(bill)}
+                          verifyPending={verifyPayment.isPending}
+                          rejectPending={rejectPayment.isPending}
+                        />
+                      )}
+                    />
+                  ) : (
+                    /* No `live_orders` — an older deployment. Fall back to the
                      table totals, which cannot tell two guests apart but is
                      better than an empty card. */
-                  <>
-                    {isUnpaid && (
-                      <p className="text-body-medium text-on-surface-variant">
-                        Current Bill:{" "}
-                        <span className="font-bold text-on-surface">
-                          {formatCurrency(table.unpaidTotal)}
-                        </span>
-                      </p>
-                    )}
-                    {isPending && (
-                      <p className="text-body-medium text-on-warning-container">
-                        Claimed:{" "}
-                        <span className="font-bold">
-                          {formatCurrency(table.pendingTotal)}
-                        </span>
-                      </p>
-                    )}
-                  </>
-                )}
-              </div>
-
-              {!isEmpty && isClosing && (
-                <div className="py-md text-center text-body-medium font-semibold text-on-surface-variant">
-                  Clearing...
+                    <>
+                      {isUnpaid && (
+                        <p className="text-body-medium text-on-surface-variant">
+                          Current Bill:{" "}
+                          <span className="font-bold text-on-surface">
+                            {formatCurrency(table.unpaidTotal)}
+                          </span>
+                        </p>
+                      )}
+                      {isPending && (
+                        <p className="text-body-medium text-on-surface-variant">
+                          Claimed:{" "}
+                          <span className="font-bold text-on-surface">
+                            {formatCurrency(table.pendingTotal)}
+                          </span>
+                        </p>
+                      )}
+                    </>
+                  )}
                 </div>
-              )}
 
-              {!isEmpty && !isClosing && clearPromptTable !== table.id && (
-                <SecondaryButton
-                  size="md"
-                  onClick={() => setClearPromptTable(table.id)}
-                  className="w-full"
-                >
-                  Clear Table
-                </SecondaryButton>
-              )}
+                {isClosing && (
+                  <div className="py-md text-center text-body-medium font-semibold text-on-surface-variant">
+                    Clearing...
+                  </div>
+                )}
 
-              {clearPromptTable === table.id && (
-                <div className="flex flex-col gap-s pt-md border-t border-surface-container-high">
-                  <span className="text-body-small font-semibold text-on-surface-variant text-center uppercase tracking-wider">
-                    Why are you clearing?
-                  </span>
-                  {/* "Paid" settled the bill but recorded no method and no
+                {!isClosing && clearPromptTable !== table.id && (
+                  <SecondaryButton
+                    size="md"
+                    onClick={() => setClearPromptTable(table.id)}
+                    className="w-full"
+                  >
+                    Clear Table
+                  </SecondaryButton>
+                )}
+
+                {clearPromptTable === table.id && (
+                  <div className="flex flex-col gap-s pt-md border-t border-surface-container-high">
+                    <span className="text-body-small font-semibold text-on-surface-variant text-center uppercase tracking-wider">
+                      Why are you clearing?
+                    </span>
+                    {/* "Paid" settled the bill but recorded no method and no
                       tendered amount, so a manager could not reconcile it.
                       Taking money now goes through the cash dialog. */}
-                  {bills.length > 1 ? (
-                    /* Two bills open, so "they paid" names nothing. Sending the
+                    {bills.length > 1 ? (
+                      /* Two bills open, so "they paid" names nothing. Sending the
                        waiter back to the row is the point of this screen. */
-                    <p className="text-label-small text-on-surface-variant text-center">
-                      Taking money? Use the bill above — this table has{" "}
-                      {bills.length} open.
-                    </p>
-                  ) : (
+                      <p className="text-label-small text-on-surface-variant text-center">
+                        Taking money? Use the bill above — this table has{" "}
+                        {bills.length} open.
+                      </p>
+                    ) : (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setClearPromptTable(null);
+                          setCashTarget({
+                            tableName: table.table_id,
+                            orderIds:
+                              bills[0]?.unpaidOrderIds ??
+                              table.unpaid_order_ids ??
+                              [],
+                            total: bills[0]?.total ?? table.unpaidTotal,
+                          });
+                        }}
+                        className="flex items-center justify-center gap-s py-md rounded-sm font-bold text-body-medium bg-success text-on-success transition-all hover:opacity-90 active:scale-[0.98]"
+                      >
+                        <i className="mgc_wallet_4_line" />
+                        They paid — record it
+                      </button>
+                    )}
                     <button
                       type="button"
-                      onClick={() => {
-                        setClearPromptTable(null);
-                        setCashTarget({
-                          tableName: table.table_id,
-                          orderIds:
-                            bills[0]?.unpaidOrderIds ??
-                            table.unpaid_order_ids ??
-                            [],
-                          total: bills[0]?.total ?? table.unpaidTotal,
-                        });
-                      }}
-                      className="flex items-center justify-center gap-s py-md rounded-sm font-bold text-body-medium bg-success text-on-success transition-all hover:opacity-90 active:scale-[0.98]"
+                      onClick={() => handleAbandon(table)}
+                      className="flex items-center justify-center gap-s py-md rounded-sm font-bold text-body-medium border border-error text-error bg-transparent transition-all hover:bg-error/10 active:scale-[0.98]"
                     >
-                      <i className="mgc_wallet_4_line" />
-                      They paid — record it
+                      <i className="mgc_exit_line" />
+                      Left without paying
                     </button>
-                  )}
-                  <button
-                    type="button"
-                    onClick={() => handleAbandon(table)}
-                    className="flex items-center justify-center gap-s py-md rounded-sm font-bold text-body-medium border border-error text-error bg-transparent transition-all hover:bg-error/10 active:scale-[0.98]"
-                  >
-                    <i className="mgc_exit_line" />
-                    Left without paying
-                  </button>
-                  {/* Money already taken against an open bill is the case
+                    {/* Money already taken against an open bill is the case
                       that bites: writing it off as abandoned cancels the order
                       and the payment stays on the books with nothing to match
                       it. Two orders at Jobiz went this way. */}
-                  {bills.some((b) => b.amountPaid > 0 && b.balanceDue > 0) ? (
-                    <p className="text-label-small text-on-warning-container bg-warning-container rounded-sm p-md text-center">
-                      Careful — money has already been taken on this table.
-                      Clearing as unpaid cancels the order and leaves that
-                      payment with nothing to match it. Take the rest instead.
-                    </p>
-                  ) : (
-                    <p className="text-label-small text-on-surface-variant text-center">
-                      Clearing as unpaid writes off{" "}
-                      {formatCurrency(
-                        bills.length > 0
-                          ? bills.reduce((sum, b) => sum + b.balanceDue, 0)
-                          : (table.outstanding_total ?? table.unpaidTotal),
-                      )}
-                      .
-                    </p>
-                  )}
-                  <button
-                    type="button"
-                    onClick={() => setClearPromptTable(null)}
-                    className="py-md text-center text-body-small font-medium text-on-surface-variant bg-transparent border-none cursor-pointer hover:text-on-surface transition-colors"
-                  >
-                    Cancel
-                  </button>
-                </div>
-              )}
-            </div>
-          );
-        })}
-      </div>
+                    {bills.some((b) => b.amountPaid > 0 && b.balanceDue > 0) ? (
+                      <p className="text-label-small text-on-warning-container bg-warning-container rounded-sm p-md text-center">
+                        Careful — money has already been taken on this table.
+                        Clearing as unpaid cancels the order and leaves that
+                        payment with nothing to match it. Take the rest instead.
+                      </p>
+                    ) : (
+                      <p className="text-label-small text-on-surface-variant text-center">
+                        Clearing as unpaid writes off{" "}
+                        {formatCurrency(
+                          bills.length > 0
+                            ? bills.reduce((sum, b) => sum + b.balanceDue, 0)
+                            : (table.outstanding_total ?? table.unpaidTotal),
+                        )}
+                        .
+                      </p>
+                    )}
+                    <button
+                      type="button"
+                      onClick={() => setClearPromptTable(null)}
+                      className="py-md text-center text-body-small font-medium text-on-surface-variant bg-transparent border-none cursor-pointer hover:text-on-surface transition-colors"
+                    >
+                      Cancel
+                    </button>
+                  </div>
+                )}
+              </div>
+            );
+          })}
+        </div>
+      )}
+
+      {freeTables.length > 0 && (
+        <section aria-label="Free tables" className="flex flex-col gap-s">
+          <h2 className="font-display text-title-small font-semibold text-on-surface-variant">
+            Free tables · {freeTables.length}
+          </h2>
+          <ul className="flex flex-wrap gap-s">
+            {freeTables.map((table) => (
+              <li
+                key={table.id}
+                className="inline-flex items-center gap-s h-10 px-l rounded-full bg-surface-container-low font-display text-label-large font-semibold text-on-surface"
+              >
+                <i
+                  className="mgc_table_line text-lg text-on-surface-variant"
+                  aria-hidden
+                />
+                {table.table_id}
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
 
       {tables.length === 0 && (
         <EmptyState
